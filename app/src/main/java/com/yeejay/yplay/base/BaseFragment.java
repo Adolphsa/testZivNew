@@ -21,12 +21,13 @@ public abstract class BaseFragment extends Fragment{
     public abstract int getContentViewId();
     protected Context context;
     protected View mRootView;
+    Unbinder unbinder;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mRootView =inflater.inflate(getContentViewId(),container,false);
-        ButterKnife.bind(this,mRootView);//绑定framgent
+        unbinder = ButterKnife.bind(this,mRootView);//绑定framgent
         this.context = getActivity();
         initAllMembersView(savedInstanceState);
         return mRootView;
@@ -37,7 +38,7 @@ public abstract class BaseFragment extends Fragment{
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Unbinder.EMPTY.unbind();
+        unbinder.unbind();
     }
 
 }

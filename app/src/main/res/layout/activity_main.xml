@@ -5,32 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.yeejay.yplay.MainActivity">
-    <RelativeLayout
-        android:id="@+id/main_rl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        >
-        <ImageButton
-            android:id="@+id/main_user_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/userinfo_small"
-            android:background="@android:color/transparent"
-            />
-        <TextView
-            android:id="@+id/main_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="大实话"
-            android:layout_centerInParent="true"
-            />
-    </RelativeLayout>
+
     <android.support.v4.view.ViewPager
         android:id="@+id/main_view_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/main_rl"
         >
     </android.support.v4.view.ViewPager>
     <com.luseen.spacenavigation.SpaceNavigationView

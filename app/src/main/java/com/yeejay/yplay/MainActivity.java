@@ -38,15 +38,15 @@ public class MainActivity extends AppCompatActivity {
         initSpaceNavigationView(savedInstanceState);
         addFragment();
         viewPager.setAdapter(frgAdapter);
-        viewPager.setCurrentItem(2);
+        viewPager.setCurrentItem(1);
     }
 
     private void addFragment() {
         //构造适配器
         List<Fragment> fragments = new ArrayList<Fragment>();
         fragments.add(new FragmentFriend());
-        fragments.add(new FragmentMessage());
         fragments.add(new FragmentAnswer());
+        fragments.add(new FragmentMessage());
         frgAdapter = new FragmentAdapter(getSupportFragmentManager(), fragments);
     }
 
@@ -59,17 +59,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCentreButtonClick() {
                 System.out.println("中间按钮被点击了");
+                viewPager.setCurrentItem(1);
             }
 
             @Override
             public void onItemClick(int itemIndex, String itemName) {
                 System.out.println("itemIndex---" + itemIndex + ",itemName" + itemName);
-                viewPager.setCurrentItem(itemIndex);
+                if (itemIndex == 0) {
+                    viewPager.setCurrentItem(0);
+                } else if (itemIndex == 1) {
+                    viewPager.setCurrentItem(2);
+                }
             }
 
             @Override
             public void onItemReselected(int itemIndex, String itemName) {
-
+                System.out.println("onItemReselected---" + itemIndex);
+                if (itemIndex == 0) {
+                    viewPager.setCurrentItem(0);
+                } else if (itemIndex == 1) {
+                    viewPager.setCurrentItem(2);
+                }
             }
         });
     }
