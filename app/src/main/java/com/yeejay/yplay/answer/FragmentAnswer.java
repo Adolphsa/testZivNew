@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.base.BaseFragment;
+import com.yeejay.yplay.userinfo.ActivityMyInfo;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -52,6 +54,8 @@ public class FragmentAnswer extends BaseFragment {
     TextView frgansTvRelieve;
     @BindView(R.id.frgans_btn_invite)
     Button frgansBtnInvite;
+    @BindView(R.id.frg_user_info)
+    ImageButton frgUserInfo;
 
     @Override
     public int getContentViewId() {
@@ -60,7 +64,13 @@ public class FragmentAnswer extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
-
+        frgUserInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("跳转到我的资料");
+                startActivity(new Intent(getContext(), ActivityMyInfo.class));
+            }
+        });
     }
 
     @OnClick(R.id.frgans_btn1)

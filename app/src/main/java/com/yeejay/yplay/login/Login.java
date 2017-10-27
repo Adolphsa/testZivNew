@@ -56,9 +56,7 @@ public class Login extends AppCompatActivity {
         //监听手机号输入栏的变化
         mEdtPhoneNumber.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {

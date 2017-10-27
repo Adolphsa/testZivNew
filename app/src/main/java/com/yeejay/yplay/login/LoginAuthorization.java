@@ -51,15 +51,24 @@ public class LoginAuthorization extends AppCompatActivity {
             switch (requestCode){
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     getLonLat();
+                    System.out.println("地理位置权限申请成功");
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     getContacts();
+                    System.out.println("地理位置权限申请成功");
                     break;
             }
 
-            if ((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
+//            if(AndPermission.hasPermission(LoginAuthorization.this,grantPermissions)) {
+//                System.out.println("两个权限都获取成功，跳转页面");
+//                //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
+//            } else {
+//                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
+//                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+//            }
+
+            if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
                     (numberBookAuthoritySuccess && addressAuthoritySuccess)){
-                System.out.println("两个权限都获取成功，跳转页面");
                 startActivity(new Intent(LoginAuthorization.this,ClassList.class));
             }
 
@@ -69,14 +78,40 @@ public class LoginAuthorization extends AppCompatActivity {
         public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
             switch (requestCode){
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
-                    System.out.println("地理位置权限申请失败");
+                    System.out.println("回调失败的地理位置权限申请失败");
+                    getLonLat();
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
-                    System.out.println("通讯录权限申请失败");
+                    System.out.println("回调失败的通讯录权限申请失败");
+                    getContacts();
                     break;
+            }
+//            if(AndPermission.hasPermission(LoginAuthorization.this,deniedPermissions)) {
+//                System.out.println("在失败的回调方法中，两个权限都获取成功，跳转页面");
+//                //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
+//            } else {
+//                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
+//                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+//            }
+
+            if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
+                    (numberBookAuthoritySuccess && addressAuthoritySuccess)){
+                startActivity(new Intent(LoginAuthorization.this,ClassList.class));
             }
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 400: { // 这个400就是上面defineSettingDialog()的第二个参数。
+                // 你可以在这里检查你需要的权限是否被允许，并做相应的操作。
+                System.out.println("回调了");
+                startActivity(new Intent(LoginAuthorization.this,ClassList.class));
+                break;
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +139,7 @@ public class LoginAuthorization extends AppCompatActivity {
 
     //获取地址位置权限
     private void getAddressAuthority(){
+
         AndPermission.with(LoginAuthorization.this)
                 .requestCode(REQUEST_CODE_PERMISSION_SINGLE_LOCATION)
                 .permission(Permission.LOCATION)

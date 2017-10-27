@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    >
+
+    <TextView
+        android:id="@+id/af_foot_tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查看更多"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
+        android:id="@+id/af_foot_tv2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="23"
+        android:layout_toRightOf="@+id/af_foot_tv1"
+        android:layout_marginLeft="10dp"
+        />
+</RelativeLayout>

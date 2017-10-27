@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/item_background"
+    android:layout_marginTop="6dp"
+    android:layout_marginLeft="3dp"
+    android:layout_marginRight="3dp"
+
+    >
+    <ImageView
+        android:id="@+id/msg_item_header_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_launcher"
+        android:layout_centerVertical="true"
+        android:padding="3dp"
+        />
+    <TextView
+        android:id="@+id/msg_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="韩梅梅"
+        android:layout_toRightOf="@+id/msg_item_header_img"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:padding="3dp"
+        android:layout_marginTop="8dp"
+        />
+    <TextView
+        android:id="@+id/msg_item_tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="45分钟前"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:padding="3dp"
+        android:layout_marginTop="8dp"
+        />
+    <TextView
+        android:id="@+id/msg_item_tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="对啊  哈哈哈哈哈"
+        android:layout_toRightOf="@+id/msg_item_header_img"
+        android:layout_below="@+id/msg_item_name"
+        android:padding="3dp"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>

@@ -178,7 +178,7 @@ public class ClassList extends AppCompatActivity {
         startActivity(new Intent(ClassList.this,SchoolList.class));
     }
 
-    static class ViewHolder {
+    private static class ViewHolder {
         TextView itemText;
     }
 }

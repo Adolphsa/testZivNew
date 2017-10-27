@@ -4,7 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/layouot_frag_title_bar"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        >
+        <ImageButton
+            android:id="@+id/ff_user_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/userinfo_small"
+            android:background="@android:color/transparent"
+            />
+        <TextView
+            android:id="@+id/ff_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="好友"
+            android:layout_centerInParent="true"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            />
+        <ImageButton
+            android:id="@+id/ff_imgbtn_add_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_input_add"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/transparent"
+            />
+    </RelativeLayout>
 
     <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
         android:id="@+id/ff_swipe_recycler_view"

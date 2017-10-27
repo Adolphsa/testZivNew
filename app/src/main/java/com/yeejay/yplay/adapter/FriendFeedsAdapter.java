@@ -20,20 +20,16 @@ import butterknife.ButterKnife;
 
 public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.FeedsViewHolder> {
 
-
     Context mContext;
 
     public FriendFeedsAdapter(Context context) {
         mContext = context;
     }
 
-
     @Override
     public FeedsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        FeedsViewHolder holder = new FeedsViewHolder(LayoutInflater.from(mContext)
+        return new FeedsViewHolder(LayoutInflater.from(mContext)
                 .inflate(R.layout.item_feeds, parent, false));
-
-        return holder;
     }
 
     @Override

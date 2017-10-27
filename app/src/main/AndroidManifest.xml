@@ -30,7 +30,15 @@
         <activity android:name=".login.ChoiceSex" />
         <activity android:name=".login.UserInfo" />
         <activity android:name=".answer.ActivityInviteFriend" />
-        <activity android:name=".answer.ActivityInvite"/>
+        <activity android:name=".answer.ActivityInvite" />
+        <activity android:name=".friend.ActivityFriendsInfo" />
+        <activity android:name=".friend.AddFriends" />
+        <activity android:name=".friend.ActivityAddFiendsDetail" />
+        <activity android:name=".message.ActivityChatWindow" />
+        <activity android:name=".userinfo.ActivityMyInfo" />
+        <activity android:name=".userinfo.ActivityAllDiamond" />
+        <activity android:name=".userinfo.ActivityAboutOur" />
+        <activity android:name=".userinfo.ActivitySetting"/>
         <activity android:name=".MainActivity"/>
     </application>
 
