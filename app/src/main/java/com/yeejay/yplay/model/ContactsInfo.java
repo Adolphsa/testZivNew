@@ -7,15 +7,11 @@ package com.yeejay.yplay.model;
 
 public class ContactsInfo {
     private String name;
-    private String number;
-    private String sortKey;
-    private int id;
+    private String phone;
 
-    public ContactsInfo(String name, String number, String sortKey, int id){
+    public ContactsInfo(String name, String phone){
         setName(name);
-        setNumber(number);
-        setSortKey(sortKey);
-        setId(id);
+        setNumber(phone);
     }
 
     public String getName() {
@@ -27,27 +23,11 @@ public class ContactsInfo {
     }
 
     public String getNumber() {
-        return number;
+        return phone;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public String getSortKey() {
-        return sortKey;
-    }
-
-    public void setSortKey(String sortKey) {
-        this.sortKey = sortKey;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public void setNumber(String phone) {
+        this.phone = phone;
     }
 
 

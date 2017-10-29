@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
 
@@ -24,11 +25,19 @@ public class ClassList extends AppCompatActivity {
     ArrayList<String> highList;
     ArrayList<String> collegeList;
 
+    double mLatitude;
+    double mLongitude;
+    int schoolType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_list);
+
+        Bundle bundle = getIntent().getExtras();
+        mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
+        mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
+
 
         mPrimaryListView = (ListView) findViewById(R.id.cl_primary_list);
         mHighListView = (ListView) findViewById(R.id.cl_high_list);
@@ -152,30 +161,37 @@ public class ClassList extends AppCompatActivity {
         mPrimaryListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("初中---第" + position + "行被点击");
+                schoolType = 1;
                 jumpToSchoolList();
+                System.out.println("初中---第" + position + "行被点击" + "schoolType---" + schoolType);
             }
         });
 
         mHighListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("高中---第" + position + "行被点击");
+                schoolType = 2;
                 jumpToSchoolList();
+                System.out.println("高中---第" + position + "行被点击" + "schoolType---" + schoolType);
             }
         });
 
         mCollegeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("大学---第" + position + "行被点击");
+                schoolType = 3;
+                System.out.println("大学---第" + position + "行被点击"+ ",schoolType---" + schoolType);
                 jumpToSchoolList();
             }
         });
     }
 
     private void jumpToSchoolList(){
-        startActivity(new Intent(ClassList.this,SchoolList.class));
+        Intent intent = new Intent(ClassList.this,SchoolList.class);
+        intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLatitude);
+        intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLongitude);
+        intent.putExtra(YPlayConstant.YPLAY_SCHOOL_TYPE,schoolType);
+        startActivity(intent);
     }
 
     private static class ViewHolder {

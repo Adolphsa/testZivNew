@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yeejay.yplay">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -10,6 +16,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".YplayApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -40,6 +47,27 @@
         <activity android:name=".userinfo.ActivityAboutOur" />
         <activity android:name=".userinfo.ActivitySetting"/>
         <activity android:name=".MainActivity"/>
+
+        <!-- service -->
+        <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名-->
+        <service
+            android:name="com.tencent.wns.service.WnsMain"
+            android:exported="false"
+            android:process=":wns">
+            <intent-filter>
+                <action android:name="com.tencent.wns.service.WnsMain"/>
+            </intent-filter>
+        </service>
+        <!-- 注册WNS 心跳接收器-->
+        <receiver
+            android:name="com.tencent.base.os.clock.AlarmClockReceiver"
+            android:exported="false"
+            android:process=":wns">
+            <intent-filter>
+                <action android:name="wns.heartbeat"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

@@ -33,6 +33,7 @@
             android:layout_marginRight="40dp"
             android:layout_marginLeft="20dp"
             android:inputType="number"
+            android:maxLength="11"
             />
     </LinearLayout>
     <LinearLayout

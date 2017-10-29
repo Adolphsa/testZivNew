@@ -11,8 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +23,7 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.model.ContactsInfo;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +66,8 @@ public class LoginAuthorization extends AppCompatActivity {
 //                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
 //            }
 
-            if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
-                    (numberBookAuthoritySuccess && addressAuthoritySuccess)){
-                startActivity(new Intent(LoginAuthorization.this,ClassList.class));
-            }
+            //授权成功跳转
+            authorizationSuccess();
 
         }
 
@@ -93,11 +90,7 @@ public class LoginAuthorization extends AppCompatActivity {
 //                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
 //                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
 //            }
-
-            if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
-                    (numberBookAuthoritySuccess && addressAuthoritySuccess)){
-                startActivity(new Intent(LoginAuthorization.this,ClassList.class));
-            }
+            authorizationSuccess();
         }
     };
 
@@ -173,8 +166,8 @@ public class LoginAuthorization extends AppCompatActivity {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
         mProvider = judgeProvider(mLocationManager);
         if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(LoginAuthorization.this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(LoginAuthorization.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return  ;
         }
         mLocation = mLocationManager.getLastKnownLocation(mProvider);
@@ -201,10 +194,13 @@ public class LoginAuthorization extends AppCompatActivity {
     //获取通讯录联系人
     private void getContacts(){
          mContactsList = new ArrayList<ContactsInfo>();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= 23
+                && LoginAuthorization.this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                && LoginAuthorization.this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             System.out.println("无读取联系人权限");
             return;
         }
+
         try {
             Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
             Cursor cursor = getContentResolver().query(contactUri,
@@ -212,14 +208,14 @@ public class LoginAuthorization extends AppCompatActivity {
                     null, null, "sort_key");
             String contactName;
             String contactNumber;
-            String contactSortKey;
-            int contactId;
+            //String contactSortKey;
+            //int contactId;
             while (cursor!= null && cursor.moveToNext()) {
                 contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-                contactSortKey =getSortkey(cursor.getString(1));
-                ContactsInfo contactsInfo = new ContactsInfo(contactName,contactNumber,contactSortKey,contactId);
+                //contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+                //contactSortKey =getSortkey(cursor.getString(1));
+                ContactsInfo contactsInfo = new ContactsInfo(contactName,contactNumber);
                 if (contactName!=null)
                     mContactsList.add(contactsInfo);
             }
@@ -227,6 +223,7 @@ public class LoginAuthorization extends AppCompatActivity {
             if (mContactsList.size() > 0){
                 numberBookAuthoritySuccess = true;
                 System.out.println("通讯录权限申请成功");
+                System.out.println("通讯录长度---" + mContactsList.size());
                 ContactsInfo testContactInfo = mContactsList.get(0);
                 System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
             }
@@ -245,5 +242,20 @@ public class LoginAuthorization extends AppCompatActivity {
             return key;
         }else
             return "#";   //获取sort key的首个字符，如果是英文字母就直接返回，否则返回#。
+    }
+
+    //授权成功
+    private void authorizationSuccess(){
+        if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
+                (numberBookAuthoritySuccess && addressAuthoritySuccess)){
+
+            Intent intent = new Intent(LoginAuthorization.this,ClassList.class);
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLocation.getLatitude());
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLocation.getLongitude());
+            //上传通讯录（后续）
+
+            startActivity(intent);
+        }
+
     }
 }

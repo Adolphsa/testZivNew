@@ -48,7 +48,6 @@
         android:layout_alignBottom="@+id/sl_school_address"
         android:layout_alignParentRight="true"
         android:layout_marginRight="37dp"
-
         android:layout_marginTop="5dp"
         />
     <ImageView
