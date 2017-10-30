@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -22,11 +23,22 @@ import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ContactsInfo;
+import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginAuthorization extends AppCompatActivity {
 
@@ -43,6 +55,7 @@ public class LoginAuthorization extends AppCompatActivity {
     Location mLocation;
 
     List<ContactsInfo> mContactsList;
+    boolean isUpLoadingOk = false;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -90,7 +103,7 @@ public class LoginAuthorization extends AppCompatActivity {
 //                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
 //                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
 //            }
-            authorizationSuccess();
+
         }
     };
 
@@ -165,7 +178,7 @@ public class LoginAuthorization extends AppCompatActivity {
     private void getLonLat(){
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
         mProvider = judgeProvider(mLocationManager);
-        if ( Build.VERSION.SDK_INT >= 23 &&
+        if (Build.VERSION.SDK_INT >= 23 &&
                 LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return  ;
@@ -252,10 +265,55 @@ public class LoginAuthorization extends AppCompatActivity {
             Intent intent = new Intent(LoginAuthorization.this,ClassList.class);
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLocation.getLatitude());
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLocation.getLongitude());
-            //上传通讯录（后续）
-
+            //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
+            upLoadingContacts();
             startActivity(intent);
         }
 
     }
+
+    //上传通讯录
+    private void upLoadingContacts(){
+
+        Map<String,Object> contactsMap = new HashMap<>();
+        String contactString = GsonUtil.GsonString(mContactsList);
+        String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
+        contactsMap.put("data",encodedString);
+        contactsMap.put("uin", SharePreferenceUtil.get(LoginAuthorization.this,YPlayConstant.YPLAY_UIN,0));
+        contactsMap.put("token",SharePreferenceUtil.get(LoginAuthorization.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        contactsMap.put("ver",SharePreferenceUtil.get(LoginAuthorization.this,YPlayConstant.YPLAY_VER,0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .updateContacts(contactsMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+
+                        if (baseRespond.getCode() == 0){
+                            System.out.println("上传通讯录成功---" + baseRespond.toString());
+                        }else {
+                            System.out.println("上传通讯录失败---" + baseRespond.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        System.out.println("上传通讯录失败---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
 }

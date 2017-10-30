@@ -28,6 +28,7 @@ public class ClassList extends AppCompatActivity {
     double mLatitude;
     double mLongitude;
     int schoolType;
+    int grade;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,8 +163,13 @@ public class ClassList extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 schoolType = 1;
+                if (position == 3){
+                    grade = 100;
+                }else {
+                    grade = position + 1;
+                }
                 jumpToSchoolList();
-                System.out.println("初中---第" + position + "行被点击" + "schoolType---" + schoolType);
+                System.out.println("初中---第" + grade + "schoolType---" + schoolType);
             }
         });
 
@@ -171,8 +177,13 @@ public class ClassList extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 schoolType = 2;
+                if (position == 3){
+                    grade = 100;
+                }else {
+                    grade = position + 1;
+                }
                 jumpToSchoolList();
-                System.out.println("高中---第" + position + "行被点击" + "schoolType---" + schoolType);
+                System.out.println("高中---第" + grade + "schoolType---" + schoolType);
             }
         });
 
@@ -180,17 +191,25 @@ public class ClassList extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 schoolType = 3;
-                System.out.println("大学---第" + position + "行被点击"+ ",schoolType---" + schoolType);
+                if (position == 5){
+                    grade = 100;
+                }else {
+                    grade = position + 1;
+                }
+                System.out.println("大学年级---第" + grade + ",schoolType---" + schoolType);
                 jumpToSchoolList();
             }
         });
     }
+
+
 
     private void jumpToSchoolList(){
         Intent intent = new Intent(ClassList.this,SchoolList.class);
         intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLatitude);
         intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLongitude);
         intent.putExtra(YPlayConstant.YPLAY_SCHOOL_TYPE,schoolType);
+        intent.putExtra(YPlayConstant.YPLAY_SCHOOL_GRADE,grade);
         startActivity(intent);
     }
 

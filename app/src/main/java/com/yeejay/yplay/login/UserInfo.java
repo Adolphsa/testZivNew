@@ -1,22 +1,22 @@
 package com.yeejay.yplay.login;
 
 import android.Manifest;
-import android.content.ContentUris;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -29,29 +29,53 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.ImageUploadBody;
+import com.yeejay.yplay.model.ImageUploadRespond;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 public class UserInfo extends AppCompatActivity {
 
-    private static final int RESULT_IMAGE = 100;
+    private static final int REQ_CODE_SEL_IMG = 10;
+    private static final int CROP_IMAGE = 11;
+    private static final String IMAGE_UPLOAD_URL = "http://sh.file.myqcloud.com/files/v2/1253229355/";
+    private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
+
+    private File tempFile;
+    private Uri tempUri;
+
+    ImageButton userHeadImage;
+    String imageName;
+    EditText userName;
+
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 200;
-    private static final int CROP_PICTURE = 2;//裁剪后图片返回码
-    //裁剪图片存放地址的Uri
-    private Uri cropImageUri;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
         public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
             System.out.println("相册权限申请成功");
-            if (ContextCompat.checkSelfPermission(UserInfo.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+            if (Build.VERSION.SDK_INT >= 23 && UserInfo.this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                     PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(UserInfo.this, new String[]{
+                UserInfo.this.requestPermissions(new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             } else {
-                openAlbum();
+                selectImage();
             }
         }
 
@@ -77,8 +101,8 @@ public class UserInfo extends AppCompatActivity {
         });
         title.setText("基础资料");
 
-        ImageButton userHeadImage = (ImageButton) findViewById(R.id.uif_imgBtn);
-        EditText userName = (EditText) findViewById(R.id.uif_edt_name);
+        userHeadImage = (ImageButton) findViewById(R.id.uif_imgBtn);
+        userName = (EditText) findViewById(R.id.uif_edt_name);
         Button nextStep = (Button) findViewById(R.id.uif_btn_next);
 
         userHeadImage.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +110,7 @@ public class UserInfo extends AppCompatActivity {
             public void onClick(View v) {
                 //跳转到系统相册
                 System.out.println("跳转到系统相册");
-                //applyForAlbumAuthority();
+                applyForAlbumAuthority();
                 //openAlbum();
             }
         });
@@ -95,9 +119,60 @@ public class UserInfo extends AppCompatActivity {
             public void onClick(View v) {
                 //跳转到答题页面
                 System.out.println("跳转到答题页面");
-                startActivity(new Intent(UserInfo.this, MainActivity.class));
+                settingName(userName.getText().toString());
             }
         });
+
+        initData();
+    }
+
+    private void initData() {
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String dirStr = root + File.separator + "yplay" + File.separator + "image";
+        File dir = new File(dirStr);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        imageName = System.currentTimeMillis() + ".jpg";
+        tempFile = new File(dirStr + File.separator + imageName);
+
+        tempUri = Uri.fromFile(tempFile);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK){
+            switch(requestCode){
+                case REQ_CODE_SEL_IMG:
+                    //获取选择的图片的URI
+                    Uri uri = data.getData();
+                    cropImage(uri);
+                    break;
+                case CROP_IMAGE:
+                    //图片裁剪完，已经保存到文件中
+                    Bitmap bm = BitmapFactory.decodeFile(tempFile.getAbsolutePath());
+                    System.out.println("图片位置---" + tempFile.getAbsolutePath());
+                    uploadImage();
+                    userHeadImage.setImageBitmap(bm);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        //点击空白处隐藏键盘
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (UserInfo.this.getCurrentFocus() != null) {
+                if (UserInfo.this.getCurrentFocus().getWindowToken() != null) {
+                    imm.hideSoftInputFromWindow(UserInfo.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+            }
+        }
+        return super.onTouchEvent(event);
     }
 
     //跳转到系统相册
@@ -115,105 +190,116 @@ public class UserInfo extends AppCompatActivity {
                 .start();
     }
 
-    private void openAlbum() {
-        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+    /**
+     * 选择图片文件
+     */
+    private void selectImage(){
+        Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, RESULT_IMAGE);//打开相册
-        System.out.println("打开相册");
+        startActivityForResult(intent, REQ_CODE_SEL_IMG);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && data != null) {
-            //判断手机系统版本号
-            if (Build.VERSION.SDK_INT >= 19) {
-                //4.4及以上系统使用这个方法处理图片
-                handlerImageOnKitKat(data);
-            } else {
-                //4.4以下系统使用这个方法处理图片
-                handlerImageBeforeKitKat(data);
-            }
-        }
-
-
-    }
-
-    //4.4以上版本的图片处理
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void handlerImageOnKitKat(Intent data){
-        String imagePath=null;
-        Uri uri=data.getData();
-        if(DocumentsContract.isDocumentUri(this,uri)){
-            //如果是document类型的Uri,则通过document id处理
-            String docId=DocumentsContract.getDocumentId(uri);
-            if("com.android.providers.media.documents".equals(uri.getAuthority())){
-                String id=docId.split(":")[1];//解析出数字格式的id
-                String selection= MediaStore.Images.Media._ID+"="+id;
-                imagePath=getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);
-            }else if("com.android.providers.downloads.documents".equals(uri.getAuthority())){
-                Uri contentUri= ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),Long.valueOf(docId));
-                imagePath=getImagePath(contentUri,null);
-            }
-        }else if("content".equalsIgnoreCase(uri.getScheme())){
-            //如果是content类型的URI，则使用普通方式处理
-            imagePath=getImagePath(uri,null);
-        }else if("file".equalsIgnoreCase(uri.getScheme())){
-            //如果是file类型的Uri,直接获取图片路径即可
-            imagePath=uri.getPath();
-        }
-        startPhotoZoom(uri);
-    }
-
-    private void handlerImageBeforeKitKat(Intent data){
-        Uri cropUri=data.getData();
-        startPhotoZoom(cropUri);
-    }
-
-    private String getImagePath(Uri uri, String selection) {
-        String path = null;
-        //通过Uri和selection来获取真实的图片路径
-        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            }
-            cursor.close();
-        }
-        return path;
-    }
-
-    public void startPhotoZoom(Uri uri) {
-        File CropPhoto=new File(getExternalCacheDir(),"crop_image.jpg");
-        try{
-            if(CropPhoto.exists()){
-                CropPhoto.delete();
-            }
-            CropPhoto.createNewFile();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        cropImageUri=Uri.fromFile(CropPhoto);
+    /**
+     * 裁剪图片
+     * @param uri
+     */
+    private void cropImage(Uri uri){
         Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); //添加这一句表示对目标应用临时授权该Uri所代表的文件
-        }
-        // 下面这个crop=true是设置在开启的Intent中设置显示的VIEW可裁剪
         intent.putExtra("crop", "true");
-        intent.putExtra("scale", true);
-
+        intent.setDataAndType(uri, "image/*");
         intent.putExtra("aspectX", 1);
         intent.putExtra("aspectY", 1);
-
         intent.putExtra("outputX", 300);
         intent.putExtra("outputY", 300);
-
-        intent.putExtra("return-data", false);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, cropImageUri);
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
-        intent.putExtra("noFaceDetection", true); // no face detection
-        startActivityForResult(intent, CROP_PICTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
+        intent.putExtra("return-data", false); //裁剪后的数据不以bitmap的形式返回
+        startActivityForResult(intent, CROP_IMAGE);
     }
+
+    //上传图片
+    private void uploadImage(){
+
+        System.out.println("imageName---" + imageName.toString());
+
+        Bitmap bitmap = BitmapFactory.decodeFile(tempFile.getAbsolutePath());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] datas = baos.toByteArray();
+        RequestBody upload = RequestBody.create(MediaType.parse("text/plain"), "upload");
+        RequestBody requestFile =
+                RequestBody.create(
+                        MediaType.parse("image/*"),
+                        tempFile
+                );
+        MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent", imageName.toString().trim(), requestFile);
+
+        ImageUploadBody body = new ImageUploadBody();
+        body.setOp("upload");
+        body.setFilecontent(datas);
+
+        YPlayApiManger.getInstance().getZivApiService("http://sh.file.myqcloud.com/")
+                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ImageUploadRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
+                        System.out.println("图片上传返回---" + imageUploadRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        System.out.println("图片上传错误---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private void settingName(String name){
+
+        Map<String,Object> nameMap = new HashMap<>();
+        nameMap.put("nickname",name);
+        nameMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN,0));
+        nameMap.put("token",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        nameMap.put("ver",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_VER,0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .settingName(nameMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+                        System.out.println("设置名字---" + baseRespond.toString());
+                        if (baseRespond.getCode() == 0){
+                            startActivity(new Intent(UserInfo.this, MainActivity.class));
+                        }
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        System.out.println("设置名字异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
 }

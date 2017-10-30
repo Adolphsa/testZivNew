@@ -40,4 +40,13 @@ public class ContactsRespond {
     public void setPayload(Object payload) {
         this.payload = payload;
     }
+
+    @Override
+    public String toString() {
+        return "ContactsRespond{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", payload=" + payload +
+                '}';
+    }
 }

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <include layout="@layout/layouot_frag_title_bar" />
@@ -39,30 +40,49 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         >
-        <Button
+        <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn1"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:text="faker"
-            android:layout_marginLeft="60dp"
+            android:layout_marginLeft="40dp"
+            app:progressColor="#c3762d"
+            app:progressBgColor="#ff80d0"
+            app:buttonNormalColor="#ff80d0"
+            app:buttonPressedColor="#a083d2"
+            app:buttonCornerRadius="30dp"
+            app:showProgressNum="true"
             />
-        <Button
+        <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn2"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:text="孙亚龙"
             android:layout_alignParentRight="true"
             android:layout_marginRight="60dp"
+            app:progressColor="#c3762d"
+            app:progressBgColor="#ff80d0"
+            app:buttonNormalColor="#ff80d0"
+            app:buttonPressedColor="#a083d2"
+            app:buttonCornerRadius="30dp"
+            app:showProgressNum="true"
             />
-        <Button
+        <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn3"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:text="笑笑"
             android:layout_below="@+id/frgans_btn1"
-            android:layout_marginLeft="60dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="10dp"
+            app:progressColor="#c3762d"
+            app:progressBgColor="#ff80d0"
+            app:buttonNormalColor="#ff80d0"
+            app:buttonPressedColor="#a083d2"
+            app:buttonCornerRadius="30dp"
+            app:showProgressNum="true"
             />
-        <Button
+        <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn4"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
@@ -70,6 +90,13 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/frgans_btn2"
             android:layout_marginRight="60dp"
+            android:layout_marginTop="10dp"
+            app:progressColor="#c3762d"
+            app:progressBgColor="#ff80d0"
+            app:buttonNormalColor="#ff80d0"
+            app:buttonPressedColor="#a083d2"
+            app:buttonCornerRadius="30dp"
+            app:showProgressNum="true"
             />
         <TextView
             android:id="@+id/frgans_tv_or"

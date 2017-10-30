@@ -23,7 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".login.LoginAge">
+        <activity android:name=".login.UserInfo" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,7 +35,7 @@
         <activity android:name=".login.ClassList" />
         <activity android:name=".login.SchoolList" />
         <activity android:name=".login.ChoiceSex" />
-        <activity android:name=".login.UserInfo" />
+        <!--<activity android:name=".login.UserInfo" />-->
         <activity android:name=".answer.ActivityInviteFriend" />
         <activity android:name=".answer.ActivityInvite" />
         <activity android:name=".friend.ActivityFriendsInfo" />

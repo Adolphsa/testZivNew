@@ -1,5 +1,7 @@
 package com.yeejay.yplay.api;
 
+import android.util.Log;
+
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -11,6 +13,7 @@ import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -46,6 +49,15 @@ public class YPlayApiManger {
         }
     };
 
+    HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+        @Override
+        public void log(String message) {
+            //打印retrofit日志
+            Log.i("RetrofitLog","retrofitBack = "+message);
+        }
+    });
+
+
     public static YPlayApiManger mYplayManger;
 
     //缓存相关
@@ -55,6 +67,7 @@ public class YPlayApiManger {
     private OkHttpClient client = new OkHttpClient.Builder()
             .addNetworkInterceptor(REWRITE_CACHE_CONTROL_INTERCEPTOR)
             .addInterceptor(REWRITE_CACHE_CONTROL_INTERCEPTOR)
+            .addInterceptor(loggingInterceptor)
             .cache(cache)
             .build();
 
@@ -78,6 +91,22 @@ public class YPlayApiManger {
                 if (yplayApi == null){
                     yplayApi = new Retrofit.Builder()
                             .baseUrl(BASE_URL)
+                            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                            .client(client)
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build().create(YPlayApi.class);
+                }
+            }
+        }
+        return yplayApi;
+    }
+
+    public YPlayApi getZivApiService(String baseUrl){
+        if (yplayApi == null){
+            synchronized (yplayMonitor){
+                if (yplayApi == null){
+                    yplayApi = new Retrofit.Builder()
+                            .baseUrl(baseUrl)
                             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                             .client(client)
                             .addConverterFactory(GsonConverterFactory.create())

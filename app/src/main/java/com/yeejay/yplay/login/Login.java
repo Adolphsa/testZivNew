@@ -16,8 +16,8 @@ import android.widget.Toast;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.customview.CountDownTimer;
+import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.LoginRespond;
-import com.yeejay.yplay.model.SendSmsRespond;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -69,8 +69,7 @@ public class Login extends AppCompatActivity {
         //监听手机号输入栏的变化
         mEdtPhoneNumber.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -82,8 +81,7 @@ public class Login extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
         });
         //监听验证码输入栏的变化
         mEdtAuthCode.addTextChangedListener(new TextWatcher() {
@@ -112,7 +110,7 @@ public class Login extends AppCompatActivity {
                 if (NetWorkUtil.isNetWorkAvailable(Login.this)){
                     countDownTimer.start();
                     mBtnAuthCode.setEnabled(false);
-                    rxSendSms(mEdtPhoneNumber.getText().toString());
+                    sendSms(mEdtPhoneNumber.getText().toString());
                 }else {
                     Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
@@ -148,21 +146,21 @@ public class Login extends AppCompatActivity {
     }
 
     //获取验证码
-    private void rxSendSms(String phoneNumber) {
+    private void sendSms(String phoneNumber) {
 
         YPlayApiManger.getInstance().getZivApiService()
                 .sendMessage(phoneNumber)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<SendSmsRespond>() {
+                .subscribe(new Observer<BaseRespond>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull SendSmsRespond sendSmsRespond) {
-                        System.out.println("发送短信返回---" + sendSmsRespond.toString());
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("发送短信返回---" + baseRespond.toString());
                     }
 
                     @Override
@@ -178,6 +176,7 @@ public class Login extends AppCompatActivity {
 
     }
 
+    //登录
     private void login(String phoneNumber, String code) {
 
         YPlayApiManger.getInstance().getZivApiService()

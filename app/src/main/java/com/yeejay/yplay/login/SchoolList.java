@@ -10,10 +10,13 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -32,6 +35,7 @@ public class SchoolList extends AppCompatActivity {
     double mLatitude;
     double mLongitude;
     int schoolType;
+    int grade;
 
     ListView mSchoolListView;
 
@@ -46,6 +50,7 @@ public class SchoolList extends AppCompatActivity {
         mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
         mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
         schoolType = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_TYPE);
+        grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
 
         Button btnBack = (Button) findViewById(R.id.layout_title_back);
         TextView title = (TextView) findViewById(R.id.layout_title);
@@ -59,12 +64,23 @@ public class SchoolList extends AppCompatActivity {
         });
         title.setText("选择你的学校");
 
-        getSchoolList();
+        if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)){
+            getSchoolList(1,10);
+        }else {
+            Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+        }
+
 
         mSchoolListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)){
+                    NearestSchoolsRespond.PayloadBean.SchoolsBean  schoolInfo = mSchoolInfoBeanList.get(position);
+                    System.out.println("shcoolID---" + schoolInfo.getSchoolId() + ",年级---" + grade);
+                    choiceSchool(schoolInfo.getSchoolId(),grade);
+                }else {
+                    Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -118,14 +134,14 @@ public class SchoolList extends AppCompatActivity {
     }
 
     //获取学校列表
-    private void getSchoolList(){
+    private void getSchoolList(int pageNum,int pageSize){
         Map<String,Object> schoolMap = new HashMap<>();
 
         schoolMap.put("schoolType",schoolType);
         schoolMap.put("latitude",mLatitude);
         schoolMap.put("longitude",mLongitude);
-        schoolMap.put("pageNum",1);
-        schoolMap.put("pageSize",10);
+        schoolMap.put("pageNum",pageNum);
+        schoolMap.put("pageSize",pageSize);
         schoolMap.put("uin", SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_UIN,0));
         schoolMap.put("token",SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
         schoolMap.put("ver",SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_VER,0));
@@ -162,6 +178,7 @@ public class SchoolList extends AppCompatActivity {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
+                        System.out.println("获取学校异常---" + e.getMessage());
                     }
 
                     @Override
@@ -178,5 +195,46 @@ public class SchoolList extends AppCompatActivity {
             SchoolAdapter schoolAdapter = new SchoolAdapter();
             mSchoolListView.setAdapter(schoolAdapter);
         }
+    }
+
+    //选择学校
+    private void choiceSchool(int schoolId,int grade){
+
+        Map<String,Object> schoolMap = new HashMap<>();
+        schoolMap.put("schoolId",schoolId);
+        schoolMap.put("grade",grade);
+        schoolMap.put("uin", SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_UIN,0));
+        schoolMap.put("token",SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        schoolMap.put("ver",SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_VER,0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .choiceSchool(schoolMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("选择学校返回---" + baseRespond.toString());
+                        if (baseRespond.getCode() == 0){
+                            startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("选择学校返回错误---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }

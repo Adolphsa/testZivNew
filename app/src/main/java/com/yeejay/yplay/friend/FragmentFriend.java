@@ -36,7 +36,7 @@ public class FragmentFriend extends BaseFragment {
 
     @OnClick(R.id.ff_imgbtn_add_friends)
     public void ffAddFriends(View view){
-        startActivity(new Intent(getContext(),AddFriends.class));
+        startActivity(new Intent(getActivity(),AddFriends.class));
     }
 
     @Override
@@ -49,15 +49,15 @@ public class FragmentFriend extends BaseFragment {
         //跳转到我的资料
         jumpToUserInfo();
 
-        feedsAdapter = new FriendFeedsAdapter(getContext());
-        ffSwipeRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        feedsAdapter = new FriendFeedsAdapter(getActivity());
+        ffSwipeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ffSwipeRecyclerView.addItemDecoration(new DefaultItemDecoration(Color.GRAY));
 
         ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 System.out.println("搞事情---" + position);
-                startActivity(new Intent(getContext(),ActivityFriendsInfo.class));
+                startActivity(new Intent(getActivity(),ActivityFriendsInfo.class));
             }
         });
         ffSwipeRecyclerView.setAdapter(feedsAdapter);
@@ -68,7 +68,7 @@ public class FragmentFriend extends BaseFragment {
         ffUserInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getContext(), ActivityMyInfo.class));
+                startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
     }

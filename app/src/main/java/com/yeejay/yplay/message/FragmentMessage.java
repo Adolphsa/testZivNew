@@ -34,7 +34,7 @@ public class FragmentMessage extends BaseFragment{
     @OnClick(R.id.frg_user_info)
     public void userInfo(View view){
         System.out.println("跳转到我的资料");
-        startActivity(new Intent(getContext(), ActivityMyInfo.class));
+        startActivity(new Intent(getActivity(), ActivityMyInfo.class));
     }
 
     MessageAdapter messageAdapter;
@@ -51,15 +51,15 @@ public class FragmentMessage extends BaseFragment{
     }
 
     private void initMessageView(){
-        messageAdapter = new MessageAdapter(getContext());
-        messageRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        messageAdapter = new MessageAdapter(getActivity());
+        messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         messageRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 //跳转到聊天页面
                 System.out.println("啦啦啦" + position);
-                startActivity(new Intent(getContext(),ActivityChatWindow.class));
+                startActivity(new Intent(getActivity(),ActivityChatWindow.class));
             }
         });
         messageRecyclerView.setAdapter(messageAdapter);
