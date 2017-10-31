@@ -26,4 +26,12 @@ public class BaseUtils {
             return false;
     }
 
+    //获取时间戳
+    public static long getCurrentDayTimeMillis(){
+        return System.currentTimeMillis();
+    }
+
+
+
+
 }

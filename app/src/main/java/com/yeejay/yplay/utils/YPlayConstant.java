@@ -14,5 +14,6 @@ public class YPlayConstant {
     public static final String YPLAY_FIRST_LONGITUDE = "yplay_first_longitude";
     public static final String YPLAY_SCHOOL_TYPE = "yplay_school_type";
     public static final String YPLAY_SCHOOL_GRADE = "yplay_school_grade";
+    public static final String YPLAY_HEADER_IMG = "yplay_header_img";
     
 }

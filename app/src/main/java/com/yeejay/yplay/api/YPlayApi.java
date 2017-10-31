@@ -1,6 +1,8 @@
 package com.yeejay.yplay.api;
 
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
+import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
@@ -77,6 +79,11 @@ public interface YPlayApi {
                                                    @Part("op") RequestBody upload,
                                                    @Part MultipartBody.Part file);
 
+    //拉取图片
+    @FormUrlEncoded
+    @POST("/api/user/updateuserprofile")
+    Observable<BaseRespond> updateHeaderImg(@FieldMap Map<String,Object> filemap);
+
     //拉取问题列表
     @FormUrlEncoded
     @POST("/api/vote/getrandomquestions")
@@ -91,5 +98,15 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/vote/dovote")
     Observable<VoteRespond> vote(@FieldMap Map<String,Object> filemap);
+
+    //获取好友动态
+    @FormUrlEncoded
+    @POST("/api/feed/getfeeds")
+    Observable<FriendFeedsRespond> getFriendFeeds(@FieldMap Map<String,Object> filemap);
+
+    //确认feeds收到
+    @FormUrlEncoded
+    @POST("/api/feed/ackfeeds")
+    Observable<FriendFeedsMakesureRespond> MakeSureFeeds(@FieldMap Map<String,Object> filemap);
 
 }

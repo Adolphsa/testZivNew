@@ -63,7 +63,7 @@ public class FragmentAnswer extends BaseFragment {
     @BindView(R.id.frgans_btn_next_question)
     Button frgansBtnNextQuestion;
 
-    int questionNum = 1;
+    int questionNum = 0;
     int nextPersonCount = 1;
 
     @BindView(R.id.frgans_tv_or)
@@ -90,7 +90,6 @@ public class FragmentAnswer extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
-        getQuestionsList();
         frgUserInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,6 +97,13 @@ public class FragmentAnswer extends BaseFragment {
                 startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
+    }
+
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getQuestionsList();
     }
 
     @OnClick(R.id.frgans_btn1)
@@ -160,15 +166,16 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     private void nextQuestionUpdate() {
-
-        System.out.println("questionNum---" + questionNum);
         questionsBean = questionsList.get(questionNum);
+        questionNum++;
+        System.out.println("quesionNum---" + questionNum);
         frgansTvNumber.setText(questionNum + "/15");
-        Picasso.with(getActivity()).load(questionsBean.getQiconUrl()).into(frgansImg);
+        Picasso.with(getActivity()).load(questionsBean.getQiconUrl()).resize(200,150).into(frgansImg);
         frgansQuestion.setText(questionsBean.getQtext());
         getQuestionsCandidate(questionsBean.getQid());
-        questionNum++;
-        if (questionNum > 15)
+
+
+        if (questionNum >= 15)
             questionOut15();
     }
 
@@ -232,7 +239,10 @@ public class FragmentAnswer extends BaseFragment {
                         System.out.println("问题列表---" + questionListRespond.toString());
                         if (questionListRespond.getCode() == 0){
                             questionsList = questionListRespond.getPayload().getQuestions();
-                            nextQuestionUpdate();
+                            if (questionsList.size() > 0){
+                                nextQuestionUpdate();
+                            }
+
                         }
                     }
 

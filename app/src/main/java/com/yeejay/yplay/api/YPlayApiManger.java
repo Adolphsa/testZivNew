@@ -26,6 +26,9 @@ public class YPlayApiManger {
 
     public static final String BASE_URL = "http://yplay.vivacampus.com";
 
+    //URL u = YplayApplication.getWnsInstance().getWnsHttpUrl(BASE_URL);
+
+
     //缓存策略  有网时获取网络数据   没网时获取缓存
     private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
         @Override
@@ -71,7 +74,8 @@ public class YPlayApiManger {
             .cache(cache)
             .build();
 
-    public YPlayApi yplayApi;
+    private YPlayApi yplayApi;
+    private  YPlayApi yPlayParametersApi;
     private Object yplayMonitor = new Object();
 
     public static YPlayApiManger getInstance(){
@@ -86,6 +90,8 @@ public class YPlayApiManger {
     }
 
     public YPlayApi getZivApiService(){
+        System.out.println("无参服务");
+
         if (yplayApi == null){
             synchronized (yplayMonitor){
                 if (yplayApi == null){
@@ -101,12 +107,14 @@ public class YPlayApiManger {
         return yplayApi;
     }
 
-    public YPlayApi getZivApiService(String baseUrl){
-        if (yplayApi == null){
+    public YPlayApi getZivApiServiceParameters(String baseUrl){
+        System.out.println("有参服务");
+        System.out.println("baeUrl---" + baseUrl);
+        if (yPlayParametersApi == null){
             synchronized (yplayMonitor){
-                if (yplayApi == null){
-                    yplayApi = new Retrofit.Builder()
-                            .baseUrl(baseUrl)
+                if (yPlayParametersApi == null){
+                    yPlayParametersApi = new Retrofit.Builder()
+                            .baseUrl("http://sh.file.myqcloud.com")
                             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                             .client(client)
                             .addConverterFactory(GsonConverterFactory.create())
@@ -114,6 +122,6 @@ public class YPlayApiManger {
                 }
             }
         }
-        return yplayApi;
+        return yPlayParametersApi;
     }
 }

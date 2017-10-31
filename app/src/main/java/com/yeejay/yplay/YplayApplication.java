@@ -1,10 +1,13 @@
 package com.yeejay.yplay;
 
 import android.app.Application;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.tencent.wns.client.inte.WnsAppInfo;
 import com.tencent.wns.client.inte.WnsClientFactory;
 import com.tencent.wns.client.inte.WnsService;
+import com.yeejay.yplay.greendao.DaoMaster;
+import com.yeejay.yplay.greendao.DaoSession;
 
 /**
  *
@@ -14,6 +17,12 @@ import com.tencent.wns.client.inte.WnsService;
 public class YplayApplication extends Application {
 
     private static YplayApplication instance;
+
+    private DaoMaster.DevOpenHelper mHelper;
+    private SQLiteDatabase db;
+    private DaoMaster mDaoMaster;
+    private DaoSession mDaoSession;
+
 
     private static WnsService wns = WnsClientFactory.getThirdPartyWnsService ();
 
@@ -31,7 +40,7 @@ public class YplayApplication extends Application {
                 .setChannelId("yyb");
         wns.initAndStartWns(this, info);
 
-
+        setDatabase();
     }
 
     public static YplayApplication getInstance() {
@@ -44,4 +53,21 @@ public class YplayApplication extends Application {
         }
         return wns;
     }
+
+    private void setDatabase() {
+
+        mHelper = new DaoMaster.DevOpenHelper(this,"yplay-db", null);
+        db =mHelper.getWritableDatabase();
+        mDaoMaster = new DaoMaster(db);
+        mDaoSession = mDaoMaster.newSession();
+    }
+
+    public DaoSession getDaoSession() {
+        return mDaoSession;
+    }
+
+    public SQLiteDatabase getDb() {
+        return db;
+    }
+
 }

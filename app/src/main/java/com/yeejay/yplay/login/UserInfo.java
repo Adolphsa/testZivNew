@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
@@ -54,7 +55,7 @@ public class UserInfo extends AppCompatActivity {
 
     private static final int REQ_CODE_SEL_IMG = 10;
     private static final int CROP_IMAGE = 11;
-    private static final String IMAGE_UPLOAD_URL = "http://sh.file.myqcloud.com/files/v2/1253229355/";
+    private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
 
     private File tempFile;
@@ -111,7 +112,7 @@ public class UserInfo extends AppCompatActivity {
                 //跳转到系统相册
                 System.out.println("跳转到系统相册");
                 applyForAlbumAuthority();
-                //openAlbum();
+
             }
         });
         nextStep.setOnClickListener(new View.OnClickListener() {
@@ -216,10 +217,10 @@ public class UserInfo extends AppCompatActivity {
         startActivityForResult(intent, CROP_IMAGE);
     }
 
-    //上传图片
+    //上传图头像
     private void uploadImage(){
 
-        System.out.println("imageName---" + imageName.toString());
+        System.out.println("imageName---" + imageName);
 
         Bitmap bitmap = BitmapFactory.decodeFile(tempFile.getAbsolutePath());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -231,13 +232,13 @@ public class UserInfo extends AppCompatActivity {
                         MediaType.parse("image/*"),
                         tempFile
                 );
-        MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent", imageName.toString().trim(), requestFile);
+        MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent", imageName, requestFile);
 
         ImageUploadBody body = new ImageUploadBody();
         body.setOp("upload");
         body.setFilecontent(datas);
 
-        YPlayApiManger.getInstance().getZivApiService("http://sh.file.myqcloud.com/")
+        YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
                 .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -250,6 +251,11 @@ public class UserInfo extends AppCompatActivity {
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
                         System.out.println("图片上传返回---" + imageUploadRespond.toString());
+                        if (imageUploadRespond.getCode() == 0){
+                            //保存图片id
+                            SharePreferenceUtil.put(UserInfo.this,YPlayConstant.YPLAY_HEADER_IMG,imageName);
+                            updateHeaderImg(imageName);
+                        }
                     }
 
                     @Override
@@ -264,7 +270,52 @@ public class UserInfo extends AppCompatActivity {
                 });
     }
 
+    //修改头像
+    private void updateHeaderImg(String headImgId){
+
+        Map<String,Object> imgMap = new HashMap<>();
+        imgMap.put("headImgId",headImgId);
+        imgMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN,0));
+        imgMap.put("token",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        imgMap.put("ver",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_VER,0));
+
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .updateHeaderImg(imgMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+                        if (baseRespond.getCode() == 0){
+                            System.out.println("修改图像成功---" + baseRespond.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                   }
+                });
+    }
+
+    //设置姓名
     private void settingName(String name){
+
+        if (name.length() <= 0){
+            Toast.makeText(UserInfo.this,"请设置姓名", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Map<String,Object> nameMap = new HashMap<>();
         nameMap.put("nickname",name);

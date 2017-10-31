@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp"
     android:background="@drawable/item_background"
+    android:id="@+id/ff_item_rl"
     >
-    <ImageView
+    <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/ff_item_header_img"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@mipmap/ic_launcher"
         android:layout_centerVertical="true"
         android:padding="3dp"
+        android:scaleType="centerCrop"
+        app:shape="circle"
         />
     <TextView
         android:id="@+id/ff_item_name"
@@ -54,12 +58,13 @@
         />
     <ImageView
         android:id="@+id/ff_item_small_img"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:src="@drawable/userinfo_small"
         android:layout_toRightOf="@+id/ff_item_header_img"
         android:layout_below="@+id/ff_item_question_content"
         android:padding="3dp"
+        android:scaleType="fitXY"
         />
     <TextView
         android:id="@+id/ff_item_tv_where"

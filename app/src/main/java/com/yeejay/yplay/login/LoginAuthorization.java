@@ -103,7 +103,8 @@ public class LoginAuthorization extends AppCompatActivity {
 //                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
 //                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
 //            }
-
+            //授权成功跳转
+            authorizationSuccess();
         }
     };
 

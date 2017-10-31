@@ -23,19 +23,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".login.UserInfo" android:launchMode="singleTop">
+        <activity android:name=".MainActivity" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".login.LoginAge"/>
         <activity android:name=".login.Login" />
         <activity android:name=".login.LoginAuthorization" />
         <activity android:name=".login.ClassList" />
         <activity android:name=".login.SchoolList" />
         <activity android:name=".login.ChoiceSex" />
-        <!--<activity android:name=".login.UserInfo" />-->
+        <activity android:name=".login.UserInfo" />
         <activity android:name=".answer.ActivityInviteFriend" />
         <activity android:name=".answer.ActivityInvite" />
         <activity android:name=".friend.ActivityFriendsInfo" />
@@ -46,7 +47,7 @@
         <activity android:name=".userinfo.ActivityAllDiamond" />
         <activity android:name=".userinfo.ActivityAboutOur" />
         <activity android:name=".userinfo.ActivitySetting"/>
-        <activity android:name=".MainActivity"/>
+        <!--<activity android:name=".MainActivity"/>-->
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名-->

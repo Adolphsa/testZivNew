@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 
 import butterknife.BindView;
@@ -50,7 +51,21 @@ public class ActivityFriendsInfo extends AppCompatActivity {
         setContentView(R.layout.activity_friends_info);
         ButterKnife.bind(this);
 
+        Bundle bundle = getIntent().getExtras();
+        String headerImg =  bundle.getString("yplay_friend_header_img");
+        String schoolName =  bundle.getString("yplay_friend_school_name");
+        String friendName =  bundle.getString("yplay_friend_name");
+        String friendSchoolGrade=  bundle.getString("yplay_friend_school_grade");
+
+        Picasso.with(this).load(headerImg).into(afiItemHeaderImg);
+        afiTvSchoolName.setText(schoolName);
+        afiTvName.setText(friendName);
+        afiTvIsGraduate.setText(friendSchoolGrade);
         initTitle();
+    }
+
+    private void initView(){
+
     }
 
     private void initTitle(){
