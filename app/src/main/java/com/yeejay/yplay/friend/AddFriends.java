@@ -12,13 +12,24 @@ import android.widget.TextView;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.AddFriendsAdapter;
+import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class AddFriends extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
@@ -44,7 +55,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         finish();
     }
 
-    List<String> friendsList;
+    List<GetAddFriendMsgs.PayloadBean.MsgsBean> friendsList;
     List<String> bookFriendsList;
     AddFriendsAdapter addFriendsAdapter;
     AddFriendsAdapter bookFriendsAdapter;
@@ -57,24 +68,33 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
         layoutTitle.setText("加好友");
 
-
-
-        initAddFriendsListView();
-        initbooKFriendsList();
+        getAddFriendmsgs();
+        //initbooKFriendsList();
     }
 
     //加好友请求列表
-    private void initAddFriendsListView(){
+    private void initAddFriendsListView(List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList){
         friendsList = new ArrayList<>();
-        friendsList.add("张飞");
-        friendsList.add("关羽");
-        friendsList.add("赵云");
-        friendsList.add("吕布");
+
+        if (tempList.size() == 1){
+            friendsList.add(tempList.get(0));
+        }
+        if (tempList.size() == 2){
+            friendsList.add(tempList.get(0));
+            friendsList.add(tempList.get(1));
+        }
+        if (tempList.size() == 3){
+            friendsList.add(tempList.get(0));
+            friendsList.add(tempList.get(1));
+            friendsList.add(tempList.get(2));
+        }
 
         final  TextView AddFriendsHeaderView = (TextView) View.inflate(AddFriends.this,R.layout.item_af_listview_header,null);
         final View AddFriendsFootView = View.inflate(AddFriends.this,R.layout.item_af_listview_foot,null);
         afLvAddFriends.addHeaderView(AddFriendsHeaderView);
-        afLvAddFriends.addFooterView(AddFriendsFootView);
+        if (tempList.size() > 3){
+            afLvAddFriends.addFooterView(AddFriendsFootView);
+        }
         addFriendsAdapter = new AddFriendsAdapter(AddFriends.this, new AddFriendsAdapter.hideCallback() {
             @Override
             public void hideClick(View v) {
@@ -104,47 +124,46 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         afLvAddFriends.setOnItemClickListener(this);
     }
 
-    //通讯录好友
-    private void initbooKFriendsList(){
-        bookFriendsList = new ArrayList<>();
-        bookFriendsList.add("鲁班");
-        bookFriendsList.add("哪吒");
-        final  TextView booKFriendsHeaderView = (TextView) View.inflate(AddFriends.this,R.layout.item_af_listview_header,null);
-        final View booKFriendsFootView = View.inflate(AddFriends.this,R.layout.item_af_listview_foot,null);
-        booKFriendsHeaderView.setText("通讯录好友");
-        afLvBookFriendsList.addHeaderView(booKFriendsHeaderView);
-        if (bookFriendsList.size() > 3){
-            afLvBookFriendsList.addFooterView(booKFriendsFootView);
-        }
-        bookFriendsAdapter = new AddFriendsAdapter(AddFriends.this, new AddFriendsAdapter.hideCallback() {
-            @Override
-            public void hideClick(View v) {
-                System.out.println("隐藏按钮被点击");
-                Button button = (Button) v;
-                button.setVisibility(View.INVISIBLE);
-                if (bookFriendsList.size() > 0) {
-                    bookFriendsList.remove((int) v.getTag());
-                    bookFriendsAdapter.notifyDataSetChanged();
-                }
-                if (bookFriendsList.size() < 3 ){
-                    afLvBookFriendsList.removeFooterView(booKFriendsFootView);
-                }
-                if (bookFriendsList.size() <= 0){
+    //拉取添加好友消息
+    private void getAddFriendmsgs(){
+        Map<String, Object> getAddFriendmsgsMap = new HashMap<>();
+        getAddFriendmsgsMap.put("updateLastReadMsgId",1);
+        getAddFriendmsgsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        getAddFriendmsgsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        getAddFriendmsgsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getAddFriendMsg(getAddFriendmsgsMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<GetAddFriendMsgs>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-                    afLvBookFriendsList.removeHeaderView(booKFriendsHeaderView);
-                }
+                    }
 
-            }
-        }, new AddFriendsAdapter.acceptCallback() {
-            @Override
-            public void acceptClick(View v) {
-                System.out.println("接受按钮被点击");
-                Button button = (Button)v;
-                button.setText("接受");
-            }
-        }, bookFriendsList);
-        afLvBookFriendsList.setAdapter(bookFriendsAdapter);
+                    @Override
+                    public void onNext(@NonNull GetAddFriendMsgs getAddFriendMsgs) {
+                        System.out.println("拉取添加好友消息---" + getAddFriendMsgs.toString());
+                        if (getAddFriendMsgs.getCode() == 0){
+                            List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
+                                    = getAddFriendMsgs.getPayload().getMsgs();
+                            initAddFriendsListView(tempList);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("拉取添加好友消息异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
+
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -154,5 +173,56 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             startActivity(new Intent(AddFriends.this,ActivityAddFiendsDetail.class));
         }
     }
+
+//    //通讯录好友
+//    private void initbooKFriendsList(){
+//        bookFriendsList = new ArrayList<>();
+//        bookFriendsList.add("鲁班");
+//        bookFriendsList.add("哪吒");
+//        final  TextView booKFriendsHeaderView = (TextView) View.inflate(AddFriends.this,R.layout.item_af_listview_header,null);
+//        final View booKFriendsFootView = View.inflate(AddFriends.this,R.layout.item_af_listview_foot,null);
+//        booKFriendsHeaderView.setText("通讯录好友");
+//        afLvBookFriendsList.addHeaderView(booKFriendsHeaderView);
+//        if (bookFriendsList.size() > 3){
+//            afLvBookFriendsList.addFooterView(booKFriendsFootView);
+//        }
+//        bookFriendsAdapter = new AddFriendsAdapter(AddFriends.this, new AddFriendsAdapter.hideCallback() {
+//            @Override
+//            public void hideClick(View v) {
+//                System.out.println("隐藏按钮被点击");
+//                Button button = (Button) v;
+//                button.setVisibility(View.INVISIBLE);
+//                if (bookFriendsList.size() > 0) {
+//                    bookFriendsList.remove((int) v.getTag());
+//                    bookFriendsAdapter.notifyDataSetChanged();
+//                }
+//                if (bookFriendsList.size() < 3 ){
+//                    afLvBookFriendsList.removeFooterView(booKFriendsFootView);
+//                }
+//                if (bookFriendsList.size() <= 0){
+//
+//                    afLvBookFriendsList.removeHeaderView(booKFriendsHeaderView);
+//                }
+//
+//            }
+//        }, new AddFriendsAdapter.acceptCallback() {
+//            @Override
+//            public void acceptClick(View v) {
+//                System.out.println("接受按钮被点击");
+//                Button button = (Button)v;
+//                button.setText("接受");
+//            }
+//        }, bookFriendsList);
+//        afLvBookFriendsList.setAdapter(bookFriendsAdapter);
+//    }
+//
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        System.out.println("position---" + position);
+//        if (position == 4){
+//            System.out.println("啦啦啦");
+//            startActivity(new Intent(AddFriends.this,ActivityAddFiendsDetail.class));
+//        }
+//    }
 
 }

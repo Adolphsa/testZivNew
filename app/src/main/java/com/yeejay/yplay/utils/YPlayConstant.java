@@ -7,6 +7,7 @@ package com.yeejay.yplay.utils;
 
 public class YPlayConstant {
 
+    public static final String YPLAY_UUID = "yplay_uuid";
     public static final String YPLAY_UIN = "yplay_uin";
     public static final String YPLAY_TOKEN = "yplay_token";
     public static final String YPLAY_VER = "yplay_ver";

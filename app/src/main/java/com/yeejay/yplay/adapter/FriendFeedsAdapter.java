@@ -14,7 +14,6 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
-import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.utils.YplayTimeUtils;
 
 import java.util.List;
@@ -34,11 +33,6 @@ import static com.yeejay.yplay.utils.FriendFeedsUtil.schoolType;
 public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.FeedsViewHolder> {
 
     private Context mContext;
-//    private List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList;
-//    private FriendFeedsRespond.PayloadBean.FeedsBean feedsBean;
-
-
-
     private DaoFriendFeedsDao mDaoFriendFeedsDao;
     private List<DaoFriendFeeds> daoFriendFeedsList;
     private DaoFriendFeeds daoFriendFeeds;
@@ -49,6 +43,11 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         this.mContext = context;
         this.daoFriendFeedsList = daoFriendFeedsList;
         this.mDaoFriendFeedsDao = mDaoFriendFeedsDao;
+    }
+
+    public void notifyDataSetChanged(List<DaoFriendFeeds> daoFriendFeedsList) {
+        this.daoFriendFeedsList = daoFriendFeedsList;
+        super.notifyDataSetChanged();
     }
 
     @Override
@@ -62,13 +61,8 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
 
         daoFriendFeeds = daoFriendFeedsList.get(position);
 
-        //判断是否已读
-//        DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
-//                                        .where(DaoFriendFeedsDao.Properties.Ts.eq(feedsBean.getTs()))
-//                                        .build()
-//                                        .unique();
         if (daoFriendFeeds != null && daoFriendFeeds.getIsReaded()){
-//            System.out.println("修改背景");
+            System.out.println("修改背景");
             holder.ffItemRl.setBackgroundColor(Color.parseColor("#FF4081"));
         }
 
@@ -82,44 +76,12 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         builder.append("的");
         builder.append(boyOrGirl(daoFriendFeeds.getVoteFromGender()));
         holder.ffItemTvWhere.setText(builder);
-//        insertFeedsToDataBase(daoFriendFeeds);
     }
 
     @Override
     public int getItemCount() {
-        return daoFriendFeedsList.size();
+        return daoFriendFeedsList == null ? 0 : daoFriendFeedsList.size();
     }
-
-    //插入数据到数据库
-    private void insertFeedsToDataBase(FriendFeedsRespond.PayloadBean.FeedsBean feedsBean){
-
-        DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
-                .where(DaoFriendFeedsDao.Properties.Ts.eq(feedsBean.getTs()))
-                .build().unique();
-        if (daoFriendFeeds == null){
-            System.out.println("插入数据库");
-            DaoFriendFeeds insert = new DaoFriendFeeds(null,
-                    feedsBean.getTs(),
-                    feedsBean.getVoteRecordId(),
-                    feedsBean.getFriendUin(),
-                    feedsBean.getFriendNickName(),
-                    feedsBean.getFriendGender(),
-                    feedsBean.getFriendHeadImgUrl(),
-                    feedsBean.getQid(),
-                    feedsBean.getQtext(),
-                    feedsBean.getQiconUrl(),
-                    feedsBean.getVoteFromUin(),
-                    feedsBean.getVoteFromGender(),
-                    feedsBean.getVoteFromSchoolId(),
-                    feedsBean.getVoteFromSchoolType(),
-                    feedsBean.getVoteFromSchoolName(),
-                    feedsBean.getVoteFromGrade(),
-                    false
-                    );
-            mDaoFriendFeedsDao.insert(insert);
-        }
-    }
-
 
     class FeedsViewHolder extends RecyclerView.ViewHolder {
 

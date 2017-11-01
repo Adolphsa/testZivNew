@@ -60,6 +60,12 @@ public class Login extends AppCompatActivity {
         mBtnNext = (Button) findViewById(R.id.login_btn_next);
         mBtnBack = (Button) findViewById(R.id.layout_title_back);
 
+        if ((long)SharePreferenceUtil.get(Login.this,YPlayConstant.YPLAY_UUID,(long)0) == 0){
+            System.out.println("第一次为零");
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UUID,System.currentTimeMillis());
+        }
+
+
         mBtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,7 +129,9 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (NetWorkUtil.isNetWorkAvailable(Login.this)){
-                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString());
+                    long uuid = (long)SharePreferenceUtil.get(Login.this,YPlayConstant.YPLAY_UUID,(long)0);
+                    System.out.println("uuid---" + uuid);
+                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(),uuid);
                 }else {
                     Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
@@ -177,10 +185,10 @@ public class Login extends AppCompatActivity {
     }
 
     //登录
-    private void login(String phoneNumber, String code) {
+    private void login(String phoneNumber, String code, long uuid) {
 
         YPlayApiManger.getInstance().getZivApiService()
-                .login(phoneNumber, code)
+                .login(phoneNumber, code, uuid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<LoginRespond>() {

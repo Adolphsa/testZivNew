@@ -64,6 +64,7 @@ public class UserInfo extends AppCompatActivity {
     ImageButton userHeadImage;
     String imageName;
     EditText userName;
+    String dirStr;
 
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 200;
 
@@ -129,15 +130,12 @@ public class UserInfo extends AppCompatActivity {
 
     private void initData() {
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String dirStr = root + File.separator + "yplay" + File.separator + "image";
+        dirStr = root + File.separator + "yplay" + File.separator + "image";
         File dir = new File(dirStr);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        imageName = System.currentTimeMillis() + ".jpg";
-        tempFile = new File(dirStr + File.separator + imageName);
 
-        tempUri = Uri.fromFile(tempFile);
     }
 
     @Override
@@ -212,6 +210,9 @@ public class UserInfo extends AppCompatActivity {
         intent.putExtra("aspectY", 1);
         intent.putExtra("outputX", 300);
         intent.putExtra("outputY", 300);
+        imageName = System.currentTimeMillis() + ".jpg";
+        tempFile = new File(dirStr + File.separator + imageName);
+        tempUri = Uri.fromFile(tempFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
         intent.putExtra("return-data", false); //裁剪后的数据不以bitmap的形式返回
         startActivityForResult(intent, CROP_IMAGE);
@@ -260,7 +261,7 @@ public class UserInfo extends AppCompatActivity {
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("图片上传错误---" + e.getMessage());
+                        System.out.println("图片上传异常---" + e.getMessage());
                     }
 
                     @Override
@@ -299,7 +300,7 @@ public class UserInfo extends AppCompatActivity {
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
+                        System.out.println("修改图像异常---" + e.getMessage());
                     }
 
                     @Override

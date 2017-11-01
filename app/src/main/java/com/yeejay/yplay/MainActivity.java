@@ -28,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
     SpaceNavigationView spaceNavigationView;
 
     FragmentAdapter frgAdapter;
+    FragmentFriend fragmentFriend;
+    FragmentAnswer fragmentAnswer;
+    FragmentMessage fragmentMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +47,12 @@ public class MainActivity extends AppCompatActivity {
     private void addFragment() {
         //构造适配器
         List<Fragment> fragments = new ArrayList<Fragment>();
-        fragments.add(new FragmentFriend());
-        fragments.add(new FragmentAnswer());
-        fragments.add(new FragmentMessage());
+        fragmentFriend = new FragmentFriend();
+        fragmentAnswer = new FragmentAnswer();
+        fragmentMessage = new FragmentMessage();
+        fragments.add(fragmentFriend);
+        fragments.add(fragmentAnswer);
+        fragments.add(fragmentMessage);
         frgAdapter = new FragmentAdapter(getSupportFragmentManager(), fragments);
     }
 
@@ -67,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("itemIndex---" + itemIndex + ",itemName" + itemName);
                 if (itemIndex == 0) {
                     viewPager.setCurrentItem(0);
+                    //拉取数据
+                    //fragmentFriend.getFriendFeeds(BaseUtils.getCurrentDayTimeMillis(), 10);
                 } else if (itemIndex == 1) {
                     viewPager.setCurrentItem(2);
                 }

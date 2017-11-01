@@ -8,7 +8,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.model.GetAddFriendMsgs;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
-    List<String> contentList;
+    List<GetAddFriendMsgs.PayloadBean.MsgsBean> contentList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -48,7 +50,7 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
         void acceptClick(View v);
     }
 
-    public AddFriendsAdapter(Context context, hideCallback hideCallback, acceptCallback acceptCallback,List<String> list) {
+    public AddFriendsAdapter(Context context, hideCallback hideCallback, acceptCallback acceptCallback,List<GetAddFriendMsgs.PayloadBean.MsgsBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -62,12 +64,12 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
 
     @Override
     public int getCount() {
-        return contentList.size() > 3 ? 3 : contentList.size();
+        return contentList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return contentList.get(position);
     }
 
     @Override
@@ -85,11 +87,17 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.afItemName.setText(contentList.get(position));
+        Picasso.with(context).load(contentList.get(position).getFromHeadImgUrl()).into(holder.afItemHeaderImg);
+        holder.afItemName.setText(contentList.get(position).getFromNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
-        holder.afBtnAccept.setOnClickListener(acceptListener);
+        if (contentList.get(position).getStatus() == 0){
+            holder.afBtnAccept.setOnClickListener(acceptListener);
+        }else if (contentList.get(position).getStatus() == 1){
+            holder.afBtnAccept.setText("已添加");
+            holder.afBtnAccept.setEnabled(false);
+        }
         holder.afBtnAccept.setTag(position);
         return convertView;
     }

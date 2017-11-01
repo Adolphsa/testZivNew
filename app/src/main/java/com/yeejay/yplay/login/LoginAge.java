@@ -38,7 +38,6 @@ public class LoginAge extends AppCompatActivity {
         mAgeView = (TextView) findViewById(R.id.la_tv_age);
         mQuickStartBtn = (Button) findViewById(R.id.la_btn_quick_start);
 
-
         ageList = new ArrayList<String>();
         //添加年龄数据
         for (int i = 0; i < 112; i++){

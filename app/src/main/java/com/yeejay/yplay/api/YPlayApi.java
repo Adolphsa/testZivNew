@@ -1,13 +1,16 @@
 package com.yeejay.yplay.api;
 
+import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
+import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
+import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.VoteRespond;
 
 import java.util.Map;
@@ -39,7 +42,9 @@ public interface YPlayApi {
     //登录
     @FormUrlEncoded
     @POST("/api/account/login")
-    Observable<LoginRespond> login(@Field("phone") String phone, @Field("code") String code);
+    Observable<LoginRespond> login(@Field("phone") String phone,
+                                   @Field("code") String code,
+                                   @Field("uuid") long uuid);
 
     //通讯录上传或更新
     @FormUrlEncoded
@@ -107,6 +112,45 @@ public interface YPlayApi {
     //确认feeds收到
     @FormUrlEncoded
     @POST("/api/feed/ackfeeds")
-    Observable<FriendFeedsMakesureRespond> MakeSureFeeds(@FieldMap Map<String,Object> filemap);
+    Observable<FriendFeedsMakesureRespond> makeSureFeeds(@FieldMap Map<String,Object> filemap);
+
+    //未读的添加好友请求消息数
+    @FormUrlEncoded
+    @POST("/api/sns/getaddfriendnewmsgcnt")
+    Observable<UnReadMsgCountRespond> getUnreadMessageCount(@FieldMap Map<String,Object> filemap);
+
+    //拉取添加好友消息
+    @FormUrlEncoded
+    @POST("/api/sns/getaddfriendmsgs")
+    Observable<GetAddFriendMsgs> getAddFriendMsg(@FieldMap Map<String,Object> filemap);
+
+    //接受加好友请求
+    @FormUrlEncoded
+    @POST("/api/sns/acceptaddfriend")
+    Observable<BaseRespond> acceptAddFriend(@FieldMap Map<String,Object> filemap);
+
+    //发送加好友请求
+    @FormUrlEncoded
+    @POST("/api/sns/addfriend")
+    Observable<AddFriendRespond> addFriend(@FieldMap Map<String,Object> filemap);
+
+    //删除好友
+    @FormUrlEncoded
+    @POST("/api/sns/removefriend")
+    Observable<BaseRespond> removeFriend(@FieldMap Map<String,Object> filemap);
+
+    //通过短信邀请好友
+    @FormUrlEncoded
+    @POST("/api/sns/invitefriendsbysms")
+    Observable<BaseRespond> smsInviteFriends(@FieldMap Map<String,Object> filemap);
+
+    //拉取同校好友列表
+    @FormUrlEncoded
+    @POST("/api/sns/getrecommends")
+    Observable<BaseRespond> getSchoolmates(@FieldMap Map<String,Object> filemap);
+
+    //通过username搜索好友
+
+    //获取用户与我当前的关系状态
 
 }

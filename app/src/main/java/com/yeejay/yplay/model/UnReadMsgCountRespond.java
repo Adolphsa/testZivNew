@@ -1,11 +1,11 @@
 package com.yeejay.yplay.model;
 
 /**
- *确认收到好友动态返回
- * Created by Administrator on 2017/10/31.
+ * 未读消息返回
+ * Created by Administrator on 2017/11/1.
  */
 
-public class FriendFeedsMakesureRespond {
+public class UnReadMsgCountRespond {
 
 
     /**
@@ -44,7 +44,7 @@ public class FriendFeedsMakesureRespond {
 
     @Override
     public String toString() {
-        return "FriendFeedsMakesureRespond{" +
+        return "UnReadMsgCountRespond{" +
                 "code=" + code +
                 ", msg='" + msg + '\'' +
                 ", payload=" + payload +

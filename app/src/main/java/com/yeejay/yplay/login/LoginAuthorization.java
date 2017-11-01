@@ -63,11 +63,13 @@ public class LoginAuthorization extends AppCompatActivity {
             switch (requestCode){
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     getLonLat();
+                    addressAuthoritySuccess = true;
                     System.out.println("地理位置权限申请成功");
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     getContacts();
-                    System.out.println("地理位置权限申请成功");
+//                    numberBookAuthoritySuccess = true;
+                    System.out.println("通讯库权限申请成功");
                     break;
             }
 
@@ -186,7 +188,7 @@ public class LoginAuthorization extends AppCompatActivity {
         }
         mLocation = mLocationManager.getLastKnownLocation(mProvider);
         if (mLocation != null){
-            System.out.println("地理位置权限申请成功");
+            System.out.println("地理位置权限申请成功2");
             addressAuthoritySuccess = true;
             System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
         }
@@ -264,8 +266,8 @@ public class LoginAuthorization extends AppCompatActivity {
                 (numberBookAuthoritySuccess && addressAuthoritySuccess)){
 
             Intent intent = new Intent(LoginAuthorization.this,ClassList.class);
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLocation.getLatitude());
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLocation.getLongitude());
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,22.525909);
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,113.936285);
             //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
             upLoadingContacts();
             startActivity(intent);

@@ -1,17 +1,17 @@
 package com.yeejay.yplay.model;
 
 /**
- *确认收到好友动态返回
- * Created by Administrator on 2017/10/31.
+ * 发送加好友的返回
+ * Created by Administrator on 2017/11/1.
  */
 
-public class FriendFeedsMakesureRespond {
+public class AddFriendRespond {
 
 
     /**
      * code : 0
      * msg : succ
-     * payload : {"cnt":1}
+     * payload : {"msgId":8}
      */
 
     private int code;
@@ -44,7 +44,7 @@ public class FriendFeedsMakesureRespond {
 
     @Override
     public String toString() {
-        return "FriendFeedsMakesureRespond{" +
+        return "AddFriendRespond{" +
                 "code=" + code +
                 ", msg='" + msg + '\'' +
                 ", payload=" + payload +
@@ -53,23 +53,23 @@ public class FriendFeedsMakesureRespond {
 
     public static class PayloadBean {
         /**
-         * cnt : 1
+         * msgId : 8
          */
 
-        private int cnt;
+        private int msgId;
 
-        public int getCnt() {
-            return cnt;
+        public int getMsgId() {
+            return msgId;
         }
 
-        public void setCnt(int cnt) {
-            this.cnt = cnt;
+        public void setMsgId(int msgId) {
+            this.msgId = msgId;
         }
 
         @Override
         public String toString() {
             return "PayloadBean{" +
-                    "cnt=" + cnt +
+                    "msgId=" + msgId +
                     '}';
         }
     }
