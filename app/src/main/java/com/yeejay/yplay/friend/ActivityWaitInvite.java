@@ -2,6 +2,7 @@ package com.yeejay.yplay.friend;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -9,10 +10,11 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.adapter.FriendsDetailAdapter;
+import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
-import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -29,7 +31,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityAddFiendsDetail extends AppCompatActivity {
+public class ActivityWaitInvite extends AppCompatActivity {
 
     @BindView(R.id.layout_title_back)
     Button layoutTitleBack;
@@ -45,8 +47,7 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
         finish();
     }
 
-    //List<GetAddFriendMsgs.PayloadBean.MsgsBean> dataList;
-    FriendsDetailAdapter friendsDetailAdapter;
+    WaitInviteAdapter waitInviteAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +55,14 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
         setContentView(R.layout.activity_activty_add_fiends_detail);
         ButterKnife.bind(this);
 
-        layoutTitle.setText("加好友请求");
+        layoutTitle.setText("通讯录好友");
         //initFriendsDetailListView();
-        getAddFriendmsgs();
+        getRecommends(2);
     }
 
-    private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList){
-        friendsDetailAdapter = new FriendsDetailAdapter(ActivityAddFiendsDetail.this,
-                new FriendsDetailAdapter.hideCallback() {
+    private void initWaiteInviteListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList){
+        waitInviteAdapter = new WaitInviteAdapter(ActivityWaitInvite.this,
+                new WaitInviteAdapter.hideCallback() {
             @Override
             public void hideClick(View v) {
                 System.out.println("隐藏按钮被点击");
@@ -71,54 +72,54 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
                 if (tempList.size() > 0) {
                     System.out.println("tempList---" + tempList.size() + "----" +(int) v.getTag());
                     tempList.remove((int) v.getTag());
-                    friendsDetailAdapter.notifyDataSetChanged();
+                    waitInviteAdapter.notifyDataSetChanged();
                 }
 
             }
-        }, new FriendsDetailAdapter.acceptCallback() {
+        }, new WaitInviteAdapter.acceptCallback() {
             @Override
             public void acceptClick(View v) {
-                System.out.println("接受按钮被点击");
+                System.out.println("邀请按钮被点击");
                 Button button = (Button)v;
-                button.setText("已添加");
+                button.setText("已邀请");
                 button.setEnabled(false);
-                //接受加好友的请求
-                accepeAddFreind(tempList.get((int) button.getTag()).getMsgId());
+                //邀请好友的请求
+                String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
+                String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
+                invitefriendsbysms(base64phone);
             }
         },tempList);
-        aafdListView.setAdapter(friendsDetailAdapter);
+        aafdListView.setAdapter(waitInviteAdapter);
     }
 
-    //拉取添加好友消息
-    private void getAddFriendmsgs() {
+    //拉取等待邀请
+    private void getRecommends(final int type) {
 
-        Map<String, Object> getAddFriendmsgsMap = new HashMap<>();
-        getAddFriendmsgsMap.put("updateLastReadMsgId", 0);
-        getAddFriendmsgsMap.put("uin", 100008);
-        getAddFriendmsgsMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        getAddFriendmsgsMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
+        Map<String, Object> recommendsMap = new HashMap<>();
+        recommendsMap.put("type", type);
+        recommendsMap.put("uin", 100008);
+        recommendsMap.put("token", "Mb8ydHGuW/tlJdXBA4jVqUwhYPBjkowtXvuEg9mzrllmwZ1qzdzESWpT+5NoCvzkNzTY52hRImN9TEBkcoc9UitaHHgHnjOcTAuLr89Y+wVrJB9aV9YTHI4RCdjrmFPCXE6ybJbpyK3AHGoPZGH224wxU4WWtJ1OI0qd");
+        recommendsMap.put("ver", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
-                .getAddFriendMsg(getAddFriendmsgsMap)
+                .getSchoolmates(recommendsMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetAddFriendMsgs>() {
+                .subscribe(new Observer<GetRecommendsRespond>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                     }
 
                     @Override
-                    public void onNext(@NonNull GetAddFriendMsgs getAddFriendMsgs) {
-                        System.out.println("拉取添加好友消息---" + getAddFriendMsgs.toString());
-                        if (getAddFriendMsgs.getCode() == 0) {
-                            List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
-                                    = getAddFriendMsgs.getPayload().getMsgs();
-                            initFriendsDetailListView(tempList);
+                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
+                        System.out.println("通讯录好友---" + getRecommendsRespond.toString());
+                        if (getRecommendsRespond.getCode() == 0) {
+                            initWaiteInviteListView(getRecommendsRespond.getPayload().getFriends());
                         }
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        System.out.println("拉取添加好友消息异常---" + e.getMessage());
+                        System.out.println("拉取通讯录好友异常---" + e.getMessage());
                     }
 
                     @Override
@@ -128,15 +129,15 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
                 });
     }
 
-    //接受好友请求
-    private void accepeAddFreind(int msgId) {
-        Map<String, Object> accepeAddFreindMap = new HashMap<>();
-        accepeAddFreindMap.put("msgId", msgId);
-        accepeAddFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
-        accepeAddFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        accepeAddFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
+    //通过短信邀请好友
+    private void invitefriendsbysms(String friends){
+        Map<String, Object> removeFreindMap = new HashMap<>();
+        removeFreindMap.put("friends", friends);
+        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_UIN, 0));
+        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
-                .acceptAddFriend(accepeAddFreindMap)
+                .removeFriend(removeFreindMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<BaseRespond>() {
@@ -147,12 +148,12 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
 
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("接受好友请求---" + baseRespond.toString());
+                        System.out.println("短信邀请好友---" + baseRespond.toString());
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        System.out.println("接受好友请求异常---" + e.getMessage());
+                        System.out.println("短信邀请好友异常---" + e.getMessage());
                     }
 
                     @Override
@@ -167,9 +168,9 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
 
         Map<String, Object> removeFreindMap = new HashMap<>();
         removeFreindMap.put("toUin", toUin);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
+        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_UIN, 0));
+        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
                 .removeFriend(removeFreindMap)
                 .subscribeOn(Schedulers.io())

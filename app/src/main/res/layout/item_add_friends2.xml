@@ -36,9 +36,10 @@
         android:id="@+id/af_btn_accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="接受"
+        android:text="加好友"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        />
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:id="@+id/af_btn_hide"

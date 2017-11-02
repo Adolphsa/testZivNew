@@ -57,20 +57,10 @@ public class FragmentFriend extends BaseFragment {
     PullToRefreshLayout ffPtfRefreshLayout;
 
     FriendFeedsAdapter feedsAdapter;
-
-    List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList;
-    FriendFeedsRespond.PayloadBean.FeedsBean mFeedsBean;
-
     DaoFriendFeedsDao mDaoFriendFeedsDao;
-    DaoFriendFeeds mDaoFriendFeeds;
-    //List<DaoFriendFeeds> dataBasefeedsList;
     List<DaoFriendFeeds> mDataList;
-    boolean isRefresh = false;
-    boolean isAddMore = false;
-    boolean isFirst = true;
 
-    int refreshOffser = 0;
-    int addMoreOffset = 0;
+    int refreshOffset = 0;
 
     //加好友
     @OnClick(R.id.ff_imgbtn_add_friends)
@@ -97,24 +87,22 @@ public class FragmentFriend extends BaseFragment {
         ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                System.out.println("搞事情---" + position);
-                mFeedsBean = feedsBeanList.get(position);
+                System.out.println("被点击的item---" + position);
+                DaoFriendFeeds tempFeeds = mDataList.get(position);
                 Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
-                intent.putExtra("yplay_friend_header_img", mFeedsBean.getFriendHeadImgUrl());
-                intent.putExtra("yplay_friend_school_name", mFeedsBean.getVoteFromSchoolName());
-                intent.putExtra("yplay_friend_name", mFeedsBean.getFriendNickName());
+                intent.putExtra("yplay_friend_header_img", tempFeeds.getFriendHeadImgUrl());
+                intent.putExtra("yplay_friend_school_name", tempFeeds.getVoteFromSchoolName());
+                intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
                 intent.putExtra("yplay_friend_school_grade",
-                        FriendFeedsUtil.schoolType(mFeedsBean.getVoteFromSchoolType(),
-                                mFeedsBean.getVoteFromGrade()));
+                        FriendFeedsUtil.schoolType(tempFeeds.getVoteFromSchoolType(),
+                                tempFeeds.getVoteFromGrade()));
 
                 //将被点击的item设置为已读
-                mDaoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
-                        .where(DaoFriendFeedsDao.Properties.Ts.eq(mFeedsBean.getTs()))
+                DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
+                        .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
                         .build().unique();
-                if (!mDaoFriendFeeds.getIsReaded())
-                    mDaoFriendFeeds.setIsReaded(true);
-                mDaoFriendFeedsDao.update(mDaoFriendFeeds);
-
+                daoFriendFeeds.setIsReaded(true);
+                mDaoFriendFeedsDao.update(daoFriendFeeds);
                 startActivity(intent);
             }
         });
@@ -123,41 +111,44 @@ public class FragmentFriend extends BaseFragment {
                 mDataList,
                 mDaoFriendFeedsDao);
         ffSwipeRecyclerView.setAdapter(feedsAdapter);
-        long aa = System.currentTimeMillis();
-        System.out.println("aa---" + aa);
-        getFriendFeeds(aa, 10);
+
         ffPtfRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
                 long ts = System.currentTimeMillis();
                 System.out.println("顶部刷新--" + ts);
 
-                refreshOffser = 0;
+                refreshOffset = 0;
                 getFriendFeeds(ts, 10);
             }
 
             @Override
             public void loadMore() {
-                refreshOffser++;
-                long ts = mDataList.get(mDataList.size()-1).getTs();
-                System.out.println("向下翻页----" + refreshOffser + ts);
-                getFriendFeeds(ts, 10);
+                if (mDataList.size() > 0) {
+                    refreshOffset++;
+                    long ts = mDataList.get(mDataList.size() - 1).getTs();
+                    System.out.println("向下翻页----" + refreshOffset + ts);
+                    getFriendFeeds(ts, 10);
+                } else {
+                    System.out.println("无数据");
+                    ffPtfRefreshLayout.finishLoadMore();
+                }
+
             }
         });
 
     }
 
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            // 相当于onResume()方法
-            System.out.println("feeds可见");
-
-        } else {
-            // 相当于onpause()方法
-            System.out.println("feeds不可见");
+    public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
+        super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
+        if (isVisibleToUser){
+            System.out.println("FragmentFriend---可见");
+            long ts = System.currentTimeMillis();
+            System.out.println("ts---" + ts);
+            getFriendFeeds(ts, 10);
         }
+
     }
 
     private void jumpToUserInfo() {
@@ -193,7 +184,7 @@ public class FragmentFriend extends BaseFragment {
                     public void onNext(@NonNull FriendFeedsRespond friendFeedsRespond) {
                         System.out.println("获取好友动态---" + friendFeedsRespond.toString());
                         if (friendFeedsRespond.getCode() == 0) {
-                            feedsBeanList = friendFeedsRespond.getPayload().getFeeds();
+                            List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList = friendFeedsRespond.getPayload().getFeeds();
                             if (feedsBeanList != null && feedsBeanList.size() > 0) {
 
                                 for (int i = 0; i < feedsBeanList.size(); i++) {
@@ -205,17 +196,8 @@ public class FragmentFriend extends BaseFragment {
                                         feedsBeanList.get(0).getTs());
                             }
                         }
-
-                        if (0 == refreshOffser) {
-                            mDataList.clear();
-                        }
-
-                        List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffser);
-                        System.out.println("刷新----refreshOffser---" + refreshOffser);
-                        System.out.println("刷新----refreshList---" + refreshList.size());
-
-                        mDataList.addAll(refreshList);
-                        feedsAdapter.notifyDataSetChanged();
+                        //从数据库取数据更新到UI
+                        updateUiData();
                     }
 
                     @Override
@@ -223,10 +205,13 @@ public class FragmentFriend extends BaseFragment {
                         System.out.println("获取好友动态异常---" + e.getMessage());
                         ffPtfRefreshLayout.finishRefresh();
                         ffPtfRefreshLayout.finishLoadMore();
+                        //从数据库取数据更新到UI
+                        updateUiData();
                     }
 
                     @Override
                     public void onComplete() {
+                        System.out.println("获取好友动态完成---onComplete");
                         ffPtfRefreshLayout.finishRefresh();
                         ffPtfRefreshLayout.finishLoadMore();
                     }
@@ -234,39 +219,29 @@ public class FragmentFriend extends BaseFragment {
     }
 
 
-    //第一次加载
-    private List<DaoFriendFeeds> firstQuery() {
-//        System.out.println("addMoreOffset---" + addMoreOffset);
-        List<DaoFriendFeeds> tempDataBasefeedsList = mDaoFriendFeedsDao.queryBuilder()
-                .orderDesc(DaoFriendFeedsDao.Properties.Ts)
-                .limit(10)
-                .list();
-        System.out.println("第一次查询到加载的个数---" + tempDataBasefeedsList.size());
-        return tempDataBasefeedsList;
+    //更新UI数据
+    private void updateUiData() {
+
+        if (0 == refreshOffset) {
+            mDataList.clear();
+        }
+        List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset);
+        System.out.println("刷新----refreshOffser---" + refreshOffset);
+        System.out.println("刷新----refreshList---" + refreshList.size());
+
+        mDataList.addAll(refreshList);
+        feedsAdapter.notifyDataSetChanged();
     }
 
-    //刷新查询
-    private List<DaoFriendFeeds> refreshQuery(int refreshOffser) {
+    //数据查询
+    private List<DaoFriendFeeds> refreshQuery(int refreshOffset) {
 
         List<DaoFriendFeeds> tempDataBasefeedsList = mDaoFriendFeedsDao.queryBuilder()
                 .orderDesc(DaoFriendFeedsDao.Properties.Ts)
-                .offset(refreshOffser * 10)
+                .offset(refreshOffset * 10)
                 .limit(10)
                 .list();
-        System.out.println("刷新的个数---" + tempDataBasefeedsList.size());
-        return tempDataBasefeedsList;
-    }
-
-    //加载更多
-    private List<DaoFriendFeeds> addMoreQuery(int addMoreOffset) {
-        System.out.println("addMoreOffset---" + addMoreOffset);
-        List<DaoFriendFeeds> tempDataBasefeedsList = mDaoFriendFeedsDao.queryBuilder()
-//                .where(DaoFriendFeedsDao.Properties.Ts.lt(mDataList.get(mDataList.size() - 1).getTs()))
-                .orderDesc(DaoFriendFeedsDao.Properties.Ts)
-                .offset(addMoreOffset * 10)
-                .limit(10)
-                .list();
-        System.out.println("加载更多的个数---" + tempDataBasefeedsList.size());
+        System.out.println("查询到到的个数---" + tempDataBasefeedsList.size());
         return tempDataBasefeedsList;
     }
 

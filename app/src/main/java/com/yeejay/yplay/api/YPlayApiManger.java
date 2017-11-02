@@ -28,7 +28,6 @@ public class YPlayApiManger {
 
     //URL u = YplayApplication.getWnsInstance().getWnsHttpUrl(BASE_URL);
 
-
     //缓存策略  有网时获取网络数据   没网时获取缓存
     private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
         @Override
@@ -90,8 +89,6 @@ public class YPlayApiManger {
     }
 
     public YPlayApi getZivApiService(){
-        System.out.println("无参服务");
-
         if (yplayApi == null){
             synchronized (yplayMonitor){
                 if (yplayApi == null){
@@ -108,7 +105,7 @@ public class YPlayApiManger {
     }
 
     public YPlayApi getZivApiServiceParameters(String baseUrl){
-        System.out.println("有参服务");
+
         System.out.println("baeUrl---" + baseUrl);
         if (yPlayParametersApi == null){
             synchronized (yplayMonitor){

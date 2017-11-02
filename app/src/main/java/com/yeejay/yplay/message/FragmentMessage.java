@@ -64,4 +64,12 @@ public class FragmentMessage extends BaseFragment{
         });
         messageRecyclerView.setAdapter(messageAdapter);
     }
+
+    @Override
+    public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
+        super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
+        if (isVisibleToUser){
+            System.out.println("FragmentMessage---消息可见");
+        }
+    }
 }

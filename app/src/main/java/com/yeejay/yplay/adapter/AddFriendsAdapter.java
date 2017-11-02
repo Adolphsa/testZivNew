@@ -1,6 +1,7 @@
 package com.yeejay.yplay.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -50,7 +51,10 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
         void acceptClick(View v);
     }
 
-    public AddFriendsAdapter(Context context, hideCallback hideCallback, acceptCallback acceptCallback,List<GetAddFriendMsgs.PayloadBean.MsgsBean> list) {
+    public AddFriendsAdapter(Context context,
+                             hideCallback hideCallback,
+                             acceptCallback acceptCallback,
+                             List<GetAddFriendMsgs.PayloadBean.MsgsBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -87,7 +91,10 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        Picasso.with(context).load(contentList.get(position).getFromHeadImgUrl()).into(holder.afItemHeaderImg);
+        String url = contentList.get(position).getFromHeadImgUrl();
+        if (!TextUtils.isEmpty(url)){
+            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+        }
         holder.afItemName.setText(contentList.get(position).getFromNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);

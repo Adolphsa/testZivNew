@@ -3,17 +3,15 @@ package com.yeejay.yplay.model;
 import java.util.List;
 
 /**
- * 同校好友列表返回
- * Created by Administrator on 2017/11/1.
+ * 拉取好友列表
+ * Created by Administrator on 2017/11/2.
  */
 
-public class SchoolmateRespond {
-
-
+public class GetRecommendsRespond {
     /**
      * code : 0
      * msg : succ
-     * payload : {"total":4,"friends":[{"uin":100000,"nickName":"+frankshi+","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/13145710821.png","gender":1,"grade":2,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":1},{"uin":100002,"nickName":"胡小说","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png","gender":1,"grade":3,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":1},{"uin":100007,"nickName":"蒙大顺","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509192590102.png","gender":2,"grade":1,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":2}]}
+     * payload : {"total":273,"friends":[{"uin":0,"nickName":"秦波","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13001000165","status":4},{"uin":0,"nickName":"腾飞","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13011842435","status":4},{"uin":0,"nickName":"朱三哥温州","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13017800370","status":4},{"uin":0,"nickName":"刘郁强","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13156090909","status":4},{"uin":0,"nickName":"面试者孙宾","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13168771430","status":4},{"uin":0,"nickName":"王葳","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13186095680","status":4},{"uin":0,"nickName":"杨朋涛","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13201619105","status":4},{"uin":0,"nickName":"老爸","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13237291629","status":4},{"uin":0,"nickName":"唐孟松","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13249068253","status":4},{"uin":0,"nickName":"合租李志勇","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13260289660","status":4}]}
      */
 
     private int code;
@@ -46,7 +44,7 @@ public class SchoolmateRespond {
 
     @Override
     public String toString() {
-        return "SchoolmateRespond{" +
+        return "GetRecommendsRespond{" +
                 "code=" + code +
                 ", msg='" + msg + '\'' +
                 ", payload=" + payload +
@@ -55,8 +53,8 @@ public class SchoolmateRespond {
 
     public static class PayloadBean {
         /**
-         * total : 4
-         * friends : [{"uin":100000,"nickName":"+frankshi+","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/13145710821.png","gender":1,"grade":2,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":1},{"uin":100002,"nickName":"胡小说","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png","gender":1,"grade":3,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":1},{"uin":100007,"nickName":"蒙大顺","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509192590102.png","gender":2,"grade":1,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校","status":2}]
+         * total : 273
+         * friends : [{"uin":0,"nickName":"秦波","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13001000165","status":4},{"uin":0,"nickName":"腾飞","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13011842435","status":4},{"uin":0,"nickName":"朱三哥温州","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13017800370","status":4},{"uin":0,"nickName":"刘郁强","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13156090909","status":4},{"uin":0,"nickName":"面试者孙宾","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13168771430","status":4},{"uin":0,"nickName":"王葳","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13186095680","status":4},{"uin":0,"nickName":"杨朋涛","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13201619105","status":4},{"uin":0,"nickName":"老爸","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13237291629","status":4},{"uin":0,"nickName":"唐孟松","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13249068253","status":4},{"uin":0,"nickName":"合租李志勇","headImgUrl":"","gender":0,"grade":0,"schoolId":0,"schoolType":0,"schoolName":"","phone":"13260289660","status":4}]
          */
 
         private int total;
@@ -88,15 +86,16 @@ public class SchoolmateRespond {
 
         public static class FriendsBean {
             /**
-             * uin : 100000
-             * nickName : +frankshi+
-             * headImgUrl : http://yplay-1253229355.image.myqcloud.com/headimgs/13145710821.png
-             * gender : 1
-             * grade : 2
-             * schoolId : 1
-             * schoolType : 1
-             * schoolName : 南山第二外国语学校
-             * status : 1
+             * uin : 0
+             * nickName : 秦波
+             * headImgUrl :
+             * gender : 0
+             * grade : 0
+             * schoolId : 0
+             * schoolType : 0
+             * schoolName :
+             * phone : 13001000165
+             * status : 4
              */
 
             private int uin;
@@ -107,6 +106,7 @@ public class SchoolmateRespond {
             private int schoolId;
             private int schoolType;
             private String schoolName;
+            private String phone;
             private int status;
 
             public int getUin() {
@@ -173,6 +173,14 @@ public class SchoolmateRespond {
                 this.schoolName = schoolName;
             }
 
+            public String getPhone() {
+                return phone;
+            }
+
+            public void setPhone(String phone) {
+                this.phone = phone;
+            }
+
             public int getStatus() {
                 return status;
             }
@@ -192,6 +200,7 @@ public class SchoolmateRespond {
                         ", schoolId=" + schoolId +
                         ", schoolType=" + schoolType +
                         ", schoolName='" + schoolName + '\'' +
+                        ", phone='" + phone + '\'' +
                         ", status=" + status +
                         '}';
             }

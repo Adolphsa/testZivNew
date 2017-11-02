@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.GetRecommendsRespond;
 
 import java.util.List;
 
@@ -19,16 +19,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 加好友请求适配器
+ * 添加朋友列表适配器
  * Created by Administrator on 2017/10/27.
  */
 
-public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickListener {
+public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListener {
 
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
-    List<GetAddFriendMsgs.PayloadBean.MsgsBean> contentList;
+    private int type;
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -51,14 +52,16 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         void acceptClick(View v);
     }
 
-    public FriendsDetailAdapter(Context context,
-                                hideCallback hideCallback,
-                                acceptCallback acceptCallback,
-                                List<GetAddFriendMsgs.PayloadBean.MsgsBean> list) {
+    public ScoolmateAdapter(Context context,
+                            hideCallback hideCallback,
+                            acceptCallback acceptCallback,
+                            List<GetRecommendsRespond.PayloadBean.FriendsBean> list,
+                            int type) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
+        this.type = type;
     }
 
     @Override
@@ -73,7 +76,7 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return contentList.get(position);
     }
 
     @Override
@@ -85,26 +88,38 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = View.inflate(context, R.layout.item_add_friends, null);
+            convertView = View.inflate(context, R.layout.item_add_friends2, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
-        }else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        String url = contentList.get(position).getFromHeadImgUrl();
-        if (!TextUtils.isEmpty(url)){
+        String url = contentList.get(position).getHeadImgUrl();
+        if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
         }
-        holder.afItemName.setText(contentList.get(position).getFromNickName());
+        holder.afItemName.setText(contentList.get(position).getNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
+        holder.afBtnAccept.setOnClickListener(acceptListener); //1---通讯录 2---等待邀请 3--同校好友
         int status = contentList.get(position).getStatus();
-        if (status == 1){
-            holder.afBtnAccept.setText("已添加");
-            holder.afBtnAccept.setEnabled(false);
-        }else {
-            holder.afBtnAccept.setOnClickListener(acceptListener);
+        if (type == 1 ){     //通讯录好友
+            if (status == 2){
+                holder.afBtnAccept.setText("已申请");
+                holder.afBtnAccept.setEnabled(false);
+            }
+        }else if (type == 2) {   //等待邀请
+            holder.afBtnAccept.setText("邀请");
+            if (status == 5){
+                holder.afBtnAccept.setText("已邀请");
+                holder.afBtnAccept.setEnabled(false);
+            }
+        }else if (type == 3){   //同校好友
+            if (status == 2){
+                holder.afBtnAccept.setText("已申请");
+                holder.afBtnAccept.setEnabled(false);
+            }
         }
         holder.afBtnAccept.setTag(position);
         return convertView;

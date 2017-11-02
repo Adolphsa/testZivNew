@@ -5,6 +5,7 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
@@ -147,7 +148,7 @@ public interface YPlayApi {
     //拉取同校好友列表
     @FormUrlEncoded
     @POST("/api/sns/getrecommends")
-    Observable<BaseRespond> getSchoolmates(@FieldMap Map<String,Object> filemap);
+    Observable<GetRecommendsRespond> getSchoolmates(@FieldMap Map<String,Object> filemap);
 
     //通过username搜索好友
 

@@ -83,29 +83,6 @@ public class FragmentAnswer extends BaseFragment {
 
     List<VoteOptionsBean> voteOptionsBeanList;
 
-    @Override
-    public int getContentViewId() {
-        return R.layout.fragment_answer;
-    }
-
-    @Override
-    protected void initAllMembersView(Bundle savedInstanceState) {
-        frgUserInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("跳转到我的资料");
-                startActivity(new Intent(getActivity(), ActivityMyInfo.class));
-            }
-        });
-    }
-
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getQuestionsList();
-    }
-
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
         vote(questionsBean.getQid(),optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
@@ -165,18 +142,46 @@ public class FragmentAnswer extends BaseFragment {
         startActivity(new Intent(getActivity(),ActivityInviteFriend.class));
     }
 
+    @Override
+    public int getContentViewId() {
+        return R.layout.fragment_answer;
+    }
+
+    @Override
+    protected void initAllMembersView(Bundle savedInstanceState) {
+        frgUserInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("跳转到我的资料");
+                startActivity(new Intent(getActivity(), ActivityMyInfo.class));
+            }
+        });
+    }
+
+    @Override
+    public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
+        super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
+        if (isVisibleToUser){
+            System.out.println("FragmentAnswer---答题可见");
+            getQuestionsList();
+        }
+    }
+
     private void nextQuestionUpdate() {
-        questionsBean = questionsList.get(questionNum);
-        questionNum++;
-        System.out.println("quesionNum---" + questionNum);
-        frgansTvNumber.setText(questionNum + "/15");
-        Picasso.with(getActivity()).load(questionsBean.getQiconUrl()).resize(200,150).into(frgansImg);
-        frgansQuestion.setText(questionsBean.getQtext());
-        getQuestionsCandidate(questionsBean.getQid());
 
+        if (questionsList.size() > 0){
+            questionsBean = questionsList.get(questionNum);
+            questionNum++;
+            System.out.println("quesionNum---" + questionNum);
+            frgansTvNumber.setText(questionNum + "/15");
+            Picasso.with(getActivity()).load(questionsBean.getQiconUrl()).resize(200,150).into(frgansImg);
+            frgansQuestion.setText(questionsBean.getQtext());
+            getQuestionsCandidate(questionsBean.getQid());
 
-        if (questionNum >= 15)
-            questionOut15();
+            if (questionNum >= 15)
+                questionOut15();
+        }
+
     }
 
     private void changeName(String btn1, String btn2, String btn3, String btn4) {
@@ -248,7 +253,7 @@ public class FragmentAnswer extends BaseFragment {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        System.out.println("问题列表异常---" + e.getMessage());
                     }
 
                     @Override

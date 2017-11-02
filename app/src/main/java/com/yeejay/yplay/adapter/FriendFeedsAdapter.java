@@ -45,11 +45,6 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         this.mDaoFriendFeedsDao = mDaoFriendFeedsDao;
     }
 
-    public void notifyDataSetChanged(List<DaoFriendFeeds> daoFriendFeedsList) {
-        this.daoFriendFeedsList = daoFriendFeedsList;
-        super.notifyDataSetChanged();
-    }
-
     @Override
     public FeedsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new FeedsViewHolder(LayoutInflater.from(mContext)
@@ -59,6 +54,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     @Override
     public void onBindViewHolder(FeedsViewHolder holder, int position) {
 
+        System.out.println("position---" + position);
         daoFriendFeeds = daoFriendFeedsList.get(position);
 
         if (daoFriendFeeds != null && daoFriendFeeds.getIsReaded()){
@@ -102,7 +98,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         @BindView(R.id.ff_item_tv_where)
         TextView ffItemTvWhere;
 
-        public FeedsViewHolder(View itemView) {
+        private FeedsViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
         }

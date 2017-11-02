@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.GetRecommendsRespond;
 
 import java.util.List;
 
@@ -19,16 +19,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 加好友请求适配器
+ * 同校好友适配器
  * Created by Administrator on 2017/10/27.
  */
 
-public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickListener {
+public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListener {
 
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
-    List<GetAddFriendMsgs.PayloadBean.MsgsBean> contentList;
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -51,10 +51,10 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         void acceptClick(View v);
     }
 
-    public FriendsDetailAdapter(Context context,
-                                hideCallback hideCallback,
-                                acceptCallback acceptCallback,
-                                List<GetAddFriendMsgs.PayloadBean.MsgsBean> list) {
+    public SchoolmateAdapter(Context context,
+                           hideCallback hideCallback,
+                           acceptCallback acceptCallback,
+                           List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -91,17 +91,17 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        String url = contentList.get(position).getFromHeadImgUrl();
+        String url = contentList.get(position).getHeadImgUrl();
         if (!TextUtils.isEmpty(url)){
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
         }
-        holder.afItemName.setText(contentList.get(position).getFromNickName());
+        holder.afItemName.setText(contentList.get(position).getNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
-        if (status == 1){
-            holder.afBtnAccept.setText("已添加");
+        if (status == 2){
+            holder.afBtnAccept.setText("已申请");
             holder.afBtnAccept.setEnabled(false);
         }else {
             holder.afBtnAccept.setOnClickListener(acceptListener);

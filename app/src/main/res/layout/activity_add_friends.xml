@@ -16,37 +16,37 @@
         android:focusable="false"
         android:iconifiedByDefault="false"
         android:queryHint="搜索用户名" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <ListView
-            android:id="@+id/af_lv_add_friends_list_view"
+        
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/af_lv_book_friends_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <com.yeejay.yplay.customview.MesureListView
+                    android:id="@+id/af_lv_add_friends_list_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <ListView
-            android:id="@+id/af_lv_friends_friends"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <com.yeejay.yplay.customview.MesureListView
+                    android:id="@+id/af_lv_book_friends_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <ListView
-            android:id="@+id/af_lv_school_classmate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <com.yeejay.yplay.customview.MesureListView
+                    android:id="@+id/af_lv_school_classmate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <ListView
-            android:id="@+id/af_lv_wait_invite"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <com.yeejay.yplay.customview.MesureListView
+                    android:id="@+id/af_lv_wait_invite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-    </LinearLayout>
+            </LinearLayout>
+
+        </ScrollView>
 
 </LinearLayout>

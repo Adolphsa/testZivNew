@@ -55,7 +55,6 @@ public class LoginAuthorization extends AppCompatActivity {
     Location mLocation;
 
     List<ContactsInfo> mContactsList;
-    boolean isUpLoadingOk = false;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -72,18 +71,8 @@ public class LoginAuthorization extends AppCompatActivity {
                     System.out.println("通讯库权限申请成功");
                     break;
             }
-
-//            if(AndPermission.hasPermission(LoginAuthorization.this,grantPermissions)) {
-//                System.out.println("两个权限都获取成功，跳转页面");
-//                //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
-//            } else {
-//                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
-//                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-//            }
-
             //授权成功跳转
             authorizationSuccess();
-
         }
 
         @Override
@@ -98,13 +87,6 @@ public class LoginAuthorization extends AppCompatActivity {
                     getContacts();
                     break;
             }
-//            if(AndPermission.hasPermission(LoginAuthorization.this,deniedPermissions)) {
-//                System.out.println("在失败的回调方法中，两个权限都获取成功，跳转页面");
-//                //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
-//            } else {
-//                // 使用AndPermission提供的默认设置dialog，用户点击确定后会打开App的设置页面让用户授权。
-//                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-//            }
             //授权成功跳转
             authorizationSuccess();
         }
@@ -251,23 +233,14 @@ public class LoginAuthorization extends AppCompatActivity {
         }
     }
 
-    //排序
-    private String getSortkey(String sortKeyString){
-        String key =sortKeyString.substring(0,1).toUpperCase();
-        if (key.matches("[A-Z]")){
-            return key;
-        }else
-            return "#";   //获取sort key的首个字符，如果是英文字母就直接返回，否则返回#。
-    }
-
     //授权成功
     private void authorizationSuccess(){
         if((addressAuthoritySuccess && numberBookAuthoritySuccess) ||
                 (numberBookAuthoritySuccess && addressAuthoritySuccess)){
 
             Intent intent = new Intent(LoginAuthorization.this,ClassList.class);
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,22.525909);
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,113.936285);
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLocation.getLatitude());
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLocation.getLongitude());
             //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
             upLoadingContacts();
             startActivity(intent);
