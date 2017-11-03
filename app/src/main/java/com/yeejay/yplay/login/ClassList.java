@@ -3,6 +3,7 @@ package com.yeejay.yplay.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -29,6 +30,7 @@ public class ClassList extends AppCompatActivity {
     double mLongitude;
     int schoolType;
     int grade;
+    int isActivitySetting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,8 @@ public class ClassList extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
         mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
-
+        isActivitySetting = bundle.getInt("activity_setting_school");
+        System.out.println("activity_setting_school" + isActivitySetting);
 
         mPrimaryListView = (ListView) findViewById(R.id.cl_primary_list);
         mHighListView = (ListView) findViewById(R.id.cl_high_list);
@@ -210,10 +213,20 @@ public class ClassList extends AppCompatActivity {
         intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLongitude);
         intent.putExtra(YPlayConstant.YPLAY_SCHOOL_TYPE,schoolType);
         intent.putExtra(YPlayConstant.YPLAY_SCHOOL_GRADE,grade);
+        intent.putExtra("activity_setting_class_school",isActivitySetting);
         startActivity(intent);
     }
 
     private static class ViewHolder {
         TextView itemText;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode,KeyEvent event){
+        if (isActivitySetting == 10)
+            return super.onKeyDown(keyCode, event);
+        if(keyCode==KeyEvent.KEYCODE_BACK)
+            return true;//不执行父类点击事件
+        return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
 }

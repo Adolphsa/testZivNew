@@ -4,6 +4,7 @@ import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
+import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
@@ -12,6 +13,8 @@ import com.yeejay.yplay.model.NearestSchoolsRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.model.VoteRespond;
 
 import java.util.Map;
@@ -154,4 +157,29 @@ public interface YPlayApi {
 
     //获取用户与我当前的关系状态
 
+
+    //获取用户的资料
+    @FormUrlEncoded
+    @POST("/api/user/getuserprofile")
+    Observable<UserInfoResponde> getUserInfo(@FieldMap Map<String,Object> filemap);
+
+    //获取自己的资料
+    @FormUrlEncoded
+    @POST("/api/user/getmyprofile")
+    Observable<UserInfoResponde> getMyInfo(@FieldMap Map<String,Object> filemap);
+
+    //获取我的好友列表
+    @FormUrlEncoded
+    @POST("/api/user/getmyfriends")
+    Observable<FriendsListRespond> getMyFriendsList(@FieldMap Map<String,Object> filemap);
+
+    //获取用户的钻石排行榜（可以查看自己的）
+    @FormUrlEncoded
+    @POST("/api/user/getusergemstatinfo")
+    Observable<UsersDiamondInfoRespond> getUsersDamonInfo(@FieldMap Map<String,Object> filemap);
+
+    //根据手机号查询用户信息
+    @FormUrlEncoded
+    @POST("/api/user/getusersbyphone")
+    Observable<UserInfoResponde> getUserInfoByPhone(@FieldMap Map<String,Object> filemap);
 }

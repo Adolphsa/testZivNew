@@ -27,6 +27,7 @@ import io.reactivex.schedulers.Schedulers;
 public class ChoiceSex extends AppCompatActivity {
 
     int gender;
+    int isActivitySetting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,10 @@ public class ChoiceSex extends AppCompatActivity {
 
         Button btnBack = (Button) findViewById(R.id.layout_title_back);
         TextView title = (TextView) findViewById(R.id.layout_title);
+
+        Bundle bundle = getIntent().getExtras();
+        isActivitySetting = bundle.getInt("activity_setting");
+        System.out.println("isActivitySetting---" + isActivitySetting);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +78,7 @@ public class ChoiceSex extends AppCompatActivity {
     }
 
     //选择性别
-    private void choiceSex(int gender){
+    private void choiceSex(final int gender){
 
         Map<String,Object> sexMap = new HashMap<>();
         System.out.println("性别---" + gender);
@@ -96,7 +101,16 @@ public class ChoiceSex extends AppCompatActivity {
                     public void onNext(@NonNull BaseRespond baseRespond) {
                         if (baseRespond.getCode() == 0){
                             System.out.println("选择性别成功---" + baseRespond.toString());
-                            startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                            if (isActivitySetting == 1){
+                                Intent intent = new Intent();
+                                String str = gender == 1 ? "男" : "女";
+                                intent.putExtra("activity_setting_gender",str);
+                                ChoiceSex.this.setResult(201,intent);
+                                ChoiceSex.this.finish();
+                            }else {
+                                startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                            }
+
                         }else {
                             System.out.println("选择性别失败---" + baseRespond.toString());
                         }
@@ -105,6 +119,7 @@ public class ChoiceSex extends AppCompatActivity {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("选择性别异常---" + e.getMessage());
+
                     }
 
                     @Override

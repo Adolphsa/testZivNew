@@ -2,6 +2,7 @@ package com.yeejay.yplay.answer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -85,26 +86,36 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
-        vote(questionsBean.getQid(),optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
-        hideNextQuestion();
+        if (questionsBean != null){
+            vote(questionsBean.getQid(),optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+            hideNextQuestion();
+        }
+
     }
 
     @OnClick(R.id.frgans_btn2)
     public void btn2(View view) {
-        vote(questionsBean.getQid(),optionsList.get(1).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
-        hideNextQuestion();
+        if (questionsBean != null){
+            vote(questionsBean.getQid(),optionsList.get(1).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+            hideNextQuestion();
+        }
     }
 
     @OnClick(R.id.frgans_btn3)
     public void btn3(View view) {
-        vote(questionsBean.getQid(),optionsList.get(2).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
-        hideNextQuestion();
+        if (questionsBean != null){
+            vote(questionsBean.getQid(),optionsList.get(2).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+            hideNextQuestion();
+        }
+
     }
 
     @OnClick(R.id.frgans_btn4)
     public void btn4(View view) {
-        vote(questionsBean.getQid(),optionsList.get(3).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
-        hideNextQuestion();
+        if (questionsBean != null){
+            vote(questionsBean.getQid(),optionsList.get(3).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+            hideNextQuestion();
+        }
     }
 
     @OnClick(R.id.frgans_tn_next_person)
@@ -114,14 +125,22 @@ public class FragmentAnswer extends BaseFragment {
 //            return;
 //        }
         //换批人
-        getQuestionsCandidate(questionsBean.getQid());
-        nextPersonCount++;
+        if (questionsBean != null){
+            getQuestionsCandidate(questionsBean.getQid());
+            nextPersonCount++;
+        }
+
     }
 
     @OnClick(R.id.frgans_btn_keep)
     public void btnKeep(View view) {
         //点击继续
         hideKeep();
+        questionNum++;
+        if (questionNum >= 15){
+            questionOut15();
+            return;
+        }
         nextQuestionUpdate();
         frgansBtn1.setEnabled(true);
         frgansBtn2.setEnabled(true);
@@ -132,6 +151,11 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn_next_question)
     public void nextQuestion(View view) {
         //过
+        questionNum++;
+        if (questionNum >= 15){
+            questionOut15();
+            return;
+        }
         nextQuestionUpdate();
         System.out.println("过");
     }
@@ -156,6 +180,7 @@ public class FragmentAnswer extends BaseFragment {
                 startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
+        getQuestionsList();
     }
 
     @Override
@@ -163,23 +188,24 @@ public class FragmentAnswer extends BaseFragment {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser){
             System.out.println("FragmentAnswer---答题可见");
-            getQuestionsList();
         }
     }
 
     private void nextQuestionUpdate() {
 
-        if (questionsList.size() > 0){
+        if (questionsList != null && questionsList.size() > 0){
             questionsBean = questionsList.get(questionNum);
-            questionNum++;
-            System.out.println("quesionNum---" + questionNum);
-            frgansTvNumber.setText(questionNum + "/15");
-            Picasso.with(getActivity()).load(questionsBean.getQiconUrl()).resize(200,150).into(frgansImg);
-            frgansQuestion.setText(questionsBean.getQtext());
-            getQuestionsCandidate(questionsBean.getQid());
+            if (questionsBean != null){
+                System.out.println("quesionNum---" + questionNum);
+                frgansTvNumber.setText((questionNum + 1) + "/15");
+                String url = questionsBean.getQiconUrl();
+                if (!TextUtils.isEmpty(url)){
+                    Picasso.with(getActivity()).load(url).resize(200,150).into(frgansImg);
+                }
+                frgansQuestion.setText(questionsBean.getQtext());
+                getQuestionsCandidate(questionsBean.getQid());
+            }
 
-            if (questionNum >= 15)
-                questionOut15();
         }
 
     }

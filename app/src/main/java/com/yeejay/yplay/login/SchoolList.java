@@ -12,14 +12,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
+import com.yeejay.yplay.userinfo.ActivitySetting;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +40,15 @@ public class SchoolList extends AppCompatActivity {
     double mLongitude;
     int schoolType;
     int grade;
+    int isActivitySetting;
+    int mPageNum = 1;
+
 
     ListView mSchoolListView;
+    PullToRefreshLayout mptfRefresh;
 
-    List<NearestSchoolsRespond.PayloadBean.SchoolsBean> mSchoolInfoBeanList;
+    //
+    List<NearestSchoolsRespond.PayloadBean.SchoolsBean> mDataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +60,14 @@ public class SchoolList extends AppCompatActivity {
         mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
         schoolType = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_TYPE);
         grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
+        isActivitySetting = bundle.getInt("activity_setting_class_school");
 
         Button btnBack = (Button) findViewById(R.id.layout_title_back);
         TextView title = (TextView) findViewById(R.id.layout_title);
         mSchoolListView = (ListView) findViewById(R.id.sl_school_list);
+        mptfRefresh = (PullToRefreshLayout) findViewById(R.id.sl_ptf_refresh);
+
+        mDataList = new ArrayList<>();
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,7 +78,7 @@ public class SchoolList extends AppCompatActivity {
         title.setText("选择你的学校");
 
         if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)){
-            getSchoolList(1,10);
+            getSchoolList(mPageNum,10);
         }else {
             Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
         }
@@ -75,12 +88,26 @@ public class SchoolList extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)){
-                    NearestSchoolsRespond.PayloadBean.SchoolsBean  schoolInfo = mSchoolInfoBeanList.get(position);
+                    NearestSchoolsRespond.PayloadBean.SchoolsBean  schoolInfo = mDataList.get(position);
                     System.out.println("shcoolID---" + schoolInfo.getSchoolId() + ",年级---" + grade);
-                    choiceSchool(schoolInfo.getSchoolId(),grade);
+                    choiceSchool(schoolInfo.getSchoolId(),grade,schoolInfo.getSchool());
                 }else {
                     Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        mptfRefresh.setCanRefresh(false);
+        mptfRefresh.setRefreshListener(new BaseRefreshListener() {
+            @Override
+            public void refresh() {
+
+            }
+
+            @Override
+            public void loadMore() {
+                mPageNum++;
+                getSchoolList(mPageNum,10);
             }
         });
     }
@@ -90,12 +117,12 @@ public class SchoolList extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return mSchoolInfoBeanList.size();
+            return mDataList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mSchoolInfoBeanList.get(position);
+            return mDataList.get(position);
         }
 
         @Override
@@ -118,7 +145,7 @@ public class SchoolList extends AppCompatActivity {
             }else {
                 holder = (ViewHolder) convertView.getTag();
             }
-                schoolInfoBean = mSchoolInfoBeanList.get(position);
+                schoolInfoBean = mDataList.get(position);
                 holder.slItemName.setText(schoolInfoBean.getSchool());
                 holder.slItemNumber.setText(String.valueOf(schoolInfoBean.getMemberCnt()));
                 holder.slItemAddress.setText(schoolInfoBean.getCity());
@@ -173,12 +200,13 @@ public class SchoolList extends AppCompatActivity {
                         }else {
                             System.out.println("获取学校失败");
                         }
-
+                        mptfRefresh.finishLoadMore();
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("获取学校异常---" + e.getMessage());
+                        mptfRefresh.finishLoadMore();
                     }
 
                     @Override
@@ -190,15 +218,16 @@ public class SchoolList extends AppCompatActivity {
 
     //显示学校数据
     private void showSchoolData(NearestSchoolsRespond nearestSchoolsRespond){
-        mSchoolInfoBeanList = nearestSchoolsRespond.getPayload().getSchools();
-        if (mSchoolInfoBeanList.size() > 0){
+        List<NearestSchoolsRespond.PayloadBean.SchoolsBean> mSchoolInfoBeanList = nearestSchoolsRespond.getPayload().getSchools();
+        mDataList.addAll(mSchoolInfoBeanList);
+        if (mDataList != null && mSchoolInfoBeanList.size() > 0){
             SchoolAdapter schoolAdapter = new SchoolAdapter();
             mSchoolListView.setAdapter(schoolAdapter);
         }
     }
 
     //选择学校
-    private void choiceSchool(int schoolId,int grade){
+    private void choiceSchool(int schoolId, final int grade, final String schooolName){
 
         Map<String,Object> schoolMap = new HashMap<>();
         schoolMap.put("schoolId",schoolId);
@@ -221,7 +250,18 @@ public class SchoolList extends AppCompatActivity {
                     public void onNext(@NonNull BaseRespond baseRespond) {
                         System.out.println("选择学校返回---" + baseRespond.toString());
                         if (baseRespond.getCode() == 0){
-                            startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                            if (isActivitySetting == 10){
+                                System.out.println("啦啦啦啦啦啦---");
+                                Intent intent = new Intent(SchoolList.this, ActivitySetting.class);
+                                intent.putExtra("as_school_type",schoolType);
+                                intent.putExtra("as_grade",grade);
+                                intent.putExtra("as_school_name",schooolName);
+                                SchoolList.this.setResult(202,intent);
+                                SchoolList.this.startActivity(intent);
+                            }else {
+                                startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                            }
+
                         }
 
                     }

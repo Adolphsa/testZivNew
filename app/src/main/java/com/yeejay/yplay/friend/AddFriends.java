@@ -75,6 +75,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         getRecommends(1);
         getRecommends(3);
         getRecommends(2);
+
     }
 
     //加好友请求列表
@@ -211,7 +212,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                     String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                     invitefriendsbysms(base64phone);
                     invitefriendsbysms("");
-                }else {
+                } else {
                     button.setText("已申请");
                     //加好友
                     addFriend(bookFriendsList.get((int) button.getTag()).getUin());
@@ -225,20 +226,18 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 4) {
                     System.out.println("啦啦啦");
-                    if (type == 1){
+                    if (type == 1) {
                         //跳转到通讯录好友
                         startActivity(new Intent(AddFriends.this, ActivityContacts.class));
-                    }else if (type == 2){
+                    } else if (type == 2) {
                         //跳转到等待邀请
                         startActivity(new Intent(AddFriends.this, ActivityWaitInvite.class));
-                    }else if (type == 3){
+                    } else if (type == 3) {
                         //跳转到同校好友
                         startActivity(new Intent(AddFriends.this, ActivitySchoolmate.class));
                     }
 
                 }
-
-
             }
         });
     }
@@ -388,7 +387,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     //通过短信邀请好友
-    private void invitefriendsbysms(String friends){
+    private void invitefriendsbysms(String friends) {
         Map<String, Object> removeFreindMap = new HashMap<>();
         removeFreindMap.put("friends", friends);
         removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
@@ -424,7 +423,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
     //拉取同校/通讯录好友
     private void getRecommends(final int type) {
-
+        System.out.println("type---" + type);
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
         recommendsMap.put("uin", 100008);
@@ -443,25 +442,24 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         if (getRecommendsRespond.getCode() == 0) {
                             if (type == 1) {
-                                System.out.println("拉取好友1---" + getRecommendsRespond.toString());
+                                System.out.println("通讯录好友---" + getRecommendsRespond.toString());
                                 initbooKFriendsList(type,
                                         getRecommendsRespond.getPayload().getTotal(),
                                         afLvBookFriendsList,
                                         getRecommendsRespond.getPayload().getFriends());
-                            } else if (type == 2) {
-                                System.out.println("拉取好友2---" + getRecommendsRespond.toString());
-                                initbooKFriendsList(type,
-                                        getRecommendsRespond.getPayload().getTotal(),
-                                        afLvSchoolClassmate,
-                                        getRecommendsRespond.getPayload().getFriends());
-                            } else if (type == 3) {
-                                System.out.println("拉取好友3---" + getRecommendsRespond.toString());
+                            }else if (type == 2) {
+                                System.out.println("等待邀请---" + getRecommendsRespond.toString());
                                 initbooKFriendsList(type,
                                         getRecommendsRespond.getPayload().getTotal(),
                                         afLvWaitInvite,
                                         getRecommendsRespond.getPayload().getFriends());
+                            } else if (type == 3) {
+                                System.out.println("同校好友---" + getRecommendsRespond.toString());
+                                initbooKFriendsList(type,
+                                        getRecommendsRespond.getPayload().getTotal(),
+                                        afLvSchoolClassmate,
+                                        getRecommendsRespond.getPayload().getFriends());
                             }
-
                         }
                     }
 

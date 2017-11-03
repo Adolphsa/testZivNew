@@ -68,7 +68,7 @@ dependencies {
     compile 'org.greenrobot:greendao:3.2.2'
     compile'org.greenrobot:greendao-generator:3.0.0'
     compile 'com.library.tangxiaolv:effectiveshapeview:1.0.1'
-    compile 'com.jwenfeng.pulltorefresh:library:1.2.5'
+    compile 'com.jwenfeng.pulltorefresh:library:1.2.6'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     compile files('src/main/jniLibs/cloudwns-sdk-android-v2.6.0.jar')

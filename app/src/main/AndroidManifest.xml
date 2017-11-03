@@ -49,7 +49,7 @@
         <activity android:name=".userinfo.ActivityMyInfo" />
         <activity android:name=".userinfo.ActivityAllDiamond" />
         <activity android:name=".userinfo.ActivityAboutOur" />
-        <activity android:name=".userinfo.ActivitySetting"/>
+        <activity android:name=".userinfo.ActivitySetting" android:launchMode="singleTask"/>
         <activity android:name=".friend.ActivityContacts"/>
         <activity android:name=".friend.ActivitySchoolmate"/>
         <activity android:name=".friend.ActivityWaitInvite"/>

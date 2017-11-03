@@ -8,6 +8,8 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -17,6 +19,7 @@ import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,15 +43,17 @@ public class ActivityContacts extends AppCompatActivity {
     SearchView aafdSearchView;
     @BindView(R.id.aafd_list_view)
     ListView aafdListView;
+    @BindView(R.id.aafd_ptf_refresh)
+    PullToRefreshLayout aafdPtfRefresh;
 
     @OnClick(R.id.layout_title_back)
     public void back(View view) {
         finish();
     }
 
-    //List<GetAddFriendMsgs.PayloadBean.MsgsBean> dataList;
-    //FriendsDetailAdapter friendsDetailAdapter;
     ContactsAdapter contactsAdapter;
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> mDataList;
+    int mPageNum = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +62,9 @@ public class ActivityContacts extends AppCompatActivity {
         ButterKnife.bind(this);
 
         layoutTitle.setText("通讯录好友");
-        getRecommends(1);
+        mDataList = new ArrayList<>();
+        getRecommends(1,mPageNum);
+        loadMore();
     }
 
     private void initContactListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList){
@@ -91,11 +98,30 @@ public class ActivityContacts extends AppCompatActivity {
         aafdListView.setAdapter(contactsAdapter);
     }
 
+    //加载更多
+    private void loadMore(){
+        aafdPtfRefresh.setCanRefresh(false);
+        aafdPtfRefresh.setRefreshListener(new BaseRefreshListener() {
+            @Override
+            public void refresh() {
+
+            }
+
+            @Override
+            public void loadMore() {
+                mPageNum++;
+                System.out.println("pageNum---" + mPageNum);
+                getRecommends(1,mPageNum);
+            }
+        });
+    }
+
     //拉取通讯录好友
-    private void getRecommends(final int type) {
+    private void getRecommends(final int type,int pageNum) {
 
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
+        recommendsMap.put("pageNum", pageNum);
         recommendsMap.put("uin", 100008);
         recommendsMap.put("token", "Mb8ydHGuW/tlJdXBA4jVqUwhYPBjkowtXvuEg9mzrllmwZ1qzdzESWpT+5NoCvzkNzTY52hRImN9TEBkcoc9UitaHHgHnjOcTAuLr89Y+wVrJB9aV9YTHI4RCdjrmFPCXE6ybJbpyK3AHGoPZGH224wxU4WWtJ1OI0qd");
         recommendsMap.put("ver", SharePreferenceUtil.get(ActivityContacts.this, YPlayConstant.YPLAY_VER, 0));
@@ -112,13 +138,18 @@ public class ActivityContacts extends AppCompatActivity {
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         System.out.println("通讯录好友---" + getRecommendsRespond.toString());
                         if (getRecommendsRespond.getCode() == 0) {
-                            initContactListView(getRecommendsRespond.getPayload().getFriends());
+                            List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList =
+                                    getRecommendsRespond.getPayload().getFriends();
+                            mDataList.addAll(tempList);
+                            initContactListView(mDataList);
                         }
+                        aafdPtfRefresh.finishLoadMore();
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("拉取通讯录好友异常---" + e.getMessage());
+                        aafdPtfRefresh.finishLoadMore();
                     }
 
                     @Override
