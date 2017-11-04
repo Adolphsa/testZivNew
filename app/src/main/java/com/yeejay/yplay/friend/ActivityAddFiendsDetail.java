@@ -94,7 +94,7 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
 
         Map<String, Object> getAddFriendmsgsMap = new HashMap<>();
         getAddFriendmsgsMap.put("updateLastReadMsgId", 0);
-        getAddFriendmsgsMap.put("uin", 100008);
+        getAddFriendmsgsMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
         getAddFriendmsgsMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         getAddFriendmsgsMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()

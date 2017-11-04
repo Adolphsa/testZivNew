@@ -148,7 +148,9 @@ public class SchoolList extends AppCompatActivity {
                 schoolInfoBean = mDataList.get(position);
                 holder.slItemName.setText(schoolInfoBean.getSchool());
                 holder.slItemNumber.setText(String.valueOf(schoolInfoBean.getMemberCnt()));
-                holder.slItemAddress.setText(schoolInfoBean.getCity());
+                StringBuilder str1 = new StringBuilder(schoolInfoBean.getProvince());
+                str1.append(schoolInfoBean.getCity());
+                holder.slItemAddress.setText(str1);
             return convertView;
         }
     }

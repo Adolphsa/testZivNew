@@ -144,7 +144,7 @@ public class ActivitySetting extends AppCompatActivity {
 
     }
 
-    private static final int REQ_CODE_SEL_IMG = 10;
+    private static final int REQ_CODE_SEL_IMG = 15;
     private static final int CROP_IMAGE = 11;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 200;
     private static final int REQUEST_CODE_CHOICE_GENDER = 201;

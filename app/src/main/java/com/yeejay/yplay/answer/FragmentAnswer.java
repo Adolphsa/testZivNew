@@ -1,6 +1,7 @@
 package com.yeejay.yplay.answer;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -66,6 +67,10 @@ public class FragmentAnswer extends BaseFragment {
 
     int questionNum = 0;
     int nextPersonCount = 1;
+    int btn1Cnt,btn2Cnt,btn3Cnt,btn4Cnt;
+    int total;
+    int tag;
+
 
     @BindView(R.id.frgans_tv_or)
     TextView frgansTvOr;
@@ -89,6 +94,13 @@ public class FragmentAnswer extends BaseFragment {
         if (questionsBean != null){
             vote(questionsBean.getQid(),optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
+            frgansBtn1.setClickable(false);
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            new ProgressTask((1 + btn1Cnt)*120 / total,1).execute();
+            new ProgressTask(btn2Cnt*120 / total,2).execute();
+            new ProgressTask(btn3Cnt*120/total,3).execute();
+            new ProgressTask(btn4Cnt*120/total,4).execute();
         }
 
     }
@@ -98,6 +110,13 @@ public class FragmentAnswer extends BaseFragment {
         if (questionsBean != null){
             vote(questionsBean.getQid(),optionsList.get(1).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
+
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            new ProgressTask(btn1Cnt*120 / total,1).execute();
+            new ProgressTask((1+btn2Cnt)*120 / total,2).execute();
+            new ProgressTask(btn3Cnt*120/total,3).execute();
+            new ProgressTask(btn4Cnt*120/total,4).execute();
         }
     }
 
@@ -106,6 +125,13 @@ public class FragmentAnswer extends BaseFragment {
         if (questionsBean != null){
             vote(questionsBean.getQid(),optionsList.get(2).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
+
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            new ProgressTask(btn1Cnt*120 / total,1).execute();
+            new ProgressTask((btn2Cnt)*120 / total,2).execute();
+            new ProgressTask((1+btn3Cnt)*120/total,3).execute();
+            new ProgressTask(btn4Cnt*120/total,4).execute();
         }
 
     }
@@ -115,6 +141,13 @@ public class FragmentAnswer extends BaseFragment {
         if (questionsBean != null){
             vote(questionsBean.getQid(),optionsList.get(3).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
+
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            new ProgressTask(btn1Cnt*120 / total,1).execute();
+            new ProgressTask((btn2Cnt)*120 / total,2).execute();
+            new ProgressTask((btn3Cnt)*120/total,3).execute();
+            new ProgressTask((1+btn4Cnt)*120/total,4).execute();
         }
     }
 
@@ -132,9 +165,49 @@ public class FragmentAnswer extends BaseFragment {
 
     }
 
+    public class ProgressTask extends AsyncTask<Void, Integer, Void> {
+        private int initPrg = 0;
+        private int mProgress;
+        private int buttonType;
+
+        public ProgressTask(int progress,int buttonType){
+            mProgress = progress;
+            this.buttonType = buttonType;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            while(initPrg < mProgress) {
+                publishProgress(initPrg += 3);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            frgansBtn1.setClickable(true);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            if (buttonType == 1){
+                frgansBtn1.updateProgress(values[0]);
+            }else if (buttonType == 2){
+                frgansBtn2.updateProgress(values[0]);
+            }else if (buttonType == 3){
+                frgansBtn3.updateProgress(values[0]);
+            }else if (buttonType == 4){
+                frgansBtn4.updateProgress(values[0]);
+            }
+
+        }
+
+    }
+
     @OnClick(R.id.frgans_btn_keep)
     public void btnKeep(View view) {
         //点击继续
+        System.out.println("点击继续");
         hideKeep();
         questionNum++;
         if (questionNum >= 15){
@@ -142,6 +215,11 @@ public class FragmentAnswer extends BaseFragment {
             return;
         }
         nextQuestionUpdate();
+        frgansBtn1.updateProgress(0);
+        frgansBtn2.updateProgress(0);
+        frgansBtn3.updateProgress(0);
+        frgansBtn4.updateProgress(0);
+
         frgansBtn1.setEnabled(true);
         frgansBtn2.setEnabled(true);
         frgansBtn3.setEnabled(true);
@@ -181,6 +259,7 @@ public class FragmentAnswer extends BaseFragment {
             }
         });
         getQuestionsList();
+
     }
 
     @Override
@@ -273,7 +352,6 @@ public class FragmentAnswer extends BaseFragment {
                             if (questionsList.size() > 0){
                                 nextQuestionUpdate();
                             }
-
                         }
                     }
 
@@ -326,8 +404,13 @@ public class FragmentAnswer extends BaseFragment {
                             changeName(optionsList.get(0).getNickName(),
                                     optionsList.get(1).getNickName(),
                                     optionsList.get(2).getNickName(),
-                                    optionsList.get(3).getNickName()
-                            );
+                                    optionsList.get(3).getNickName());
+
+                            //获取被投票的次数
+                            btn1Cnt = optionsList.get(0).getBeSelCnt();
+                            btn2Cnt = optionsList.get(1).getBeSelCnt();
+                            btn3Cnt = optionsList.get(2).getBeSelCnt();
+                            btn4Cnt = optionsList.get(3).getBeSelCnt();
                         }
                     }
 
@@ -367,11 +450,6 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull VoteRespond voteRespond) {
                         System.out.println("投票返回---" + voteRespond);
-                        frgansBtn1.setProgress(optionsList.get(0).getBeSelCnt() + 50);
-                        frgansBtn2.setProgress(optionsList.get(1).getBeSelCnt() + 50);
-                        frgansBtn3.setProgress(optionsList.get(2).getBeSelCnt() + 50);
-                        frgansBtn4.setProgress(optionsList.get(3).getBeSelCnt() + 50);
-
                         frgansBtn1.setEnabled(false);
                         frgansBtn2.setEnabled(false);
                         frgansBtn3.setEnabled(false);

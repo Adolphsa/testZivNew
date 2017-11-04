@@ -122,8 +122,8 @@ public class ActivitySchoolmate extends AppCompatActivity {
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
         recommendsMap.put("pageNum", pageNum);
-        recommendsMap.put("uin", 100008);
-        recommendsMap.put("token", "Mb8ydHGuW/tlJdXBA4jVqUwhYPBjkowtXvuEg9mzrllmwZ1qzdzESWpT+5NoCvzkNzTY52hRImN9TEBkcoc9UitaHHgHnjOcTAuLr89Y+wVrJB9aV9YTHI4RCdjrmFPCXE6ybJbpyK3AHGoPZGH224wxU4WWtJ1OI0qd");
+        recommendsMap.put("uin", SharePreferenceUtil.get(ActivitySchoolmate.this, YPlayConstant.YPLAY_UIN, 0));
+        recommendsMap.put("token", SharePreferenceUtil.get(ActivitySchoolmate.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(ActivitySchoolmate.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
                 .getSchoolmates(recommendsMap)

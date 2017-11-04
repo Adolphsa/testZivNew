@@ -38,8 +38,10 @@ public class ChoiceSex extends AppCompatActivity {
         TextView title = (TextView) findViewById(R.id.layout_title);
 
         Bundle bundle = getIntent().getExtras();
-        isActivitySetting = bundle.getInt("activity_setting");
-        System.out.println("isActivitySetting---" + isActivitySetting);
+        if (bundle != null){
+            isActivitySetting = bundle.getInt("activity_setting");
+            System.out.println("isActivitySetting---" + isActivitySetting);
+        }
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override

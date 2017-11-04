@@ -1,15 +1,12 @@
 package com.yeejay.yplay.customview;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.widget.Button;
 
 import com.yeejay.yplay.R;
 
@@ -18,249 +15,64 @@ import com.yeejay.yplay.R;
  * Created by Administrator on 2017/10/30.
  */
 
-public class ProgressButton extends Button{
+public class ProgressButton extends android.support.v7.widget.AppCompatButton {
 
-    private int mProgress; //当前进度
-    private int mMaxProgress = 100; //最大进度：默认为100
-    private int mMinProgress = 0;//最小进度：默认为0
-    private GradientDrawable mProgressDrawable;// 加载进度时的进度颜色
-    private GradientDrawable mProgressDrawableBg;// 加载进度时的背景色
-    private StateListDrawable mNormalDrawable; // 按钮在不同状态的颜色效果
-    private boolean isShowProgress;  //是否展示进度
-    private boolean isFinish; // 结束状态
-    private boolean isStop;// 停止状态
-    private boolean isStart ; // 刚开始的状态
-    private OnStateListener onStateListener; //结束时的监听
-    private float cornerRadius; // 圆角半径
+    //public static final int TYPE_FILL = 0;
+    //public static final int TYPE_STROKE = 1;
 
+    private Paint mPaint = new Paint();
+    private int mProgress;
+    //private int currentType = TYPE_FILL;
 
+    public ProgressButton(Context context) {
+        super(context);
+    }
 
     public ProgressButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
     }
 
-    public ProgressButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context, attrs);
+    public ProgressButton(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public ProgressButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs);
-    }
-
-    private void init(Context context,AttributeSet attributeSet) {
-
-        // 初始化按钮状态Drawable
-        mNormalDrawable = new StateListDrawable();
-        // 初始化进度条Drawable
-        mProgressDrawable = (GradientDrawable)getResources().getDrawable(
-                R.drawable.rect_progress).mutate();
-        // 初始化进度条背景Drawable
-        mProgressDrawableBg = (GradientDrawable)getResources().getDrawable(
-                R.drawable.rect_progressbg).mutate();
-
-        TypedArray attr =  context.obtainStyledAttributes(attributeSet, R.styleable.progressbutton);
-
-        try {
-
-            // 默认的圆角大小
-            float defValue = getResources().getDimension(R.dimen.corner_radius);
-            // 获取圆角大小
-            cornerRadius = attr.getDimension(R.styleable.progressbutton_buttonCornerRadius, defValue);
-
-
-            // 获取是否显示进度信息的属性
-            isShowProgress = attr.getBoolean(R.styleable.progressbutton_showProgressNum,true);
-
-            // 给按钮的状态Drawable添加被点击时的状态
-            mNormalDrawable.addState(new int[]{android.R.attr.state_pressed},
-                    getPressedDrawable(attr));
-            // 给按钮的状态Drawable添加其他时候的状态
-            mNormalDrawable.addState(new int[] { }, getNormalDrawable(attr));
-
-
-            // 获取进度条颜色属性值
-            int defaultProgressColor = getResources().getColor(R.color.purple_progress);
-            int progressColor = attr.getColor(R.styleable.progressbutton_progressColor,defaultProgressColor);
-            // 设置进度条Drawable的颜色
-            mProgressDrawable.setColor(progressColor);
-
-            // 获取进度条背景颜色属性值
-            int defaultProgressBgColor = getResources().getColor(R.color.progress_bg);
-            int progressBgColor = attr.getColor(R.styleable.progressbutton_progressBgColor,defaultProgressBgColor);
-            // 设置进度条背景Drawable的颜色
-            mProgressDrawableBg.setColor(progressBgColor);
-
-
-
-        } finally {
-            attr.recycle();
-        }
-
-        // 初始化状态
-        isFinish = false;
-        isStop = true;
-        isStart = false;
-
-        // 设置圆角
-        mProgressDrawable.setCornerRadius(cornerRadius);
-        mProgressDrawableBg.setCornerRadius(cornerRadius);
-        // 设置按钮背景为状态Drawable
-        setBackgroundCompat(mNormalDrawable);
-    }
-
-
-
+    @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas canvas) {
 
-        if (mProgress > mMinProgress && mProgress <= mMaxProgress && !isFinish) {
-
-            // 更新进度：
-
-            float scale = (float) getProgress() / (float) mMaxProgress;
-            float indicatorWidth = (float) getMeasuredWidth() * scale;
-
-
-            mProgressDrawable.setBounds(0, 0, (int) indicatorWidth, getMeasuredHeight());
-
-            mProgressDrawable.draw(canvas);
-
-            // 进度完成时回调方法，并更变状态
-            if(mProgress==mMaxProgress) {
-                setBackgroundCompat(mProgressDrawable);
-                isFinish = true;
-                if(onStateListener!=null) {
-                    onStateListener.onFinish();
-                }
-
-            }
-
-        }
+            mPaint.setColor(getContext().getResources().getColor(R.color.green_yellow));
+            mPaint.setAntiAlias(true);
+            mPaint.setAlpha(128);
+            mPaint.setStrokeWidth(1.0f);
+            Rect rect = new Rect();
+            canvas.getClipBounds(rect);
+            rect.left += getPaddingLeft();
+            rect.top += getPaddingTop();
+            rect.right = (rect.left - getPaddingLeft()) + (mProgress * getWidth() / 100) - getPaddingRight();
+            rect.bottom -= getPaddingBottom();
+            canvas.drawRoundRect(new RectF(rect), 8.0f, 8.0f, mPaint);
 
         super.onDraw(canvas);
     }
 
-    // 设置进度信息
-    public void setProgress(int progress) {
-
-        if(!isFinish&&!isStop){
+    public void updateProgress(int progress) {
+        if(progress >= 0 && progress <= 100) {
             mProgress = progress;
-            if(isShowProgress) setText(mProgress + " %");
-            // 设置背景
-            setBackgroundCompat(mProgressDrawableBg);
+            invalidate();
+        } else if(progress < 0) {
+            mProgress = 0;
+            invalidate();
+        } else if(progress > 100) {
+            mProgress = 100;
             invalidate();
         }
-
     }
 
-
-    // 获取进度
-    public int getProgress() {
-        return mProgress;
-    }
-
-    // 设置为停止状态
-    public void setStop(boolean stop) {
-        isStop = stop;
-        invalidate();
-    }
-
-    public boolean isStop() {
-        return isStop;
-    }
-
-    public boolean isFinish() {
-        return isFinish;
-    }
-
-    // 切换状态：
-    public void toggle(){
-        if(!isFinish&&isStart){
-            if(isStop){
-                setStop(false);
-                onStateListener.onContinue();
-            } else {
-                setStop(true);
-                onStateListener.onStop();
-            }
-        }else {
-            setStop(false);
-            isStart = true;
-        }
-    }
-
-    // 设置按钮背景
-    private void setBackgroundCompat(Drawable drawable) {
-        int pL = getPaddingLeft();
-        int pT = getPaddingTop();
-        int pR = getPaddingRight();
-        int pB = getPaddingBottom();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            setBackground(drawable);
-        } else {
-            setBackgroundDrawable(drawable);
-        }
-        setPadding(pL, pT, pR, pB);
-    }
-
-
-    // 初始化状态
-    public void initState(){
-        setBackgroundCompat(mNormalDrawable);
-        isFinish = false;
-        isStop = true;
-        isStart = false;
-        mProgress = 0;
-    }
-
-
-    // 获取状态Drawable的正常状态下的背景
-    private Drawable getNormalDrawable( TypedArray attr) {
-
-        GradientDrawable drawableNormal =
-                (GradientDrawable) getResources().getDrawable(R.drawable.rect_normal).mutate();// 修改时就不会影响其它drawable对象的状态
-        drawableNormal.setCornerRadius(cornerRadius); // 设置圆角半径
-
-        int defaultNormal =  getResources().getColor(R.color.blue_normal);
-        int colorNormal =  attr.getColor(R.styleable.progressbutton_buttonNormalColor,defaultNormal);
-        drawableNormal.setColor(colorNormal);//设置颜色
-
-        return drawableNormal;
-    }
-
-    // 获取按钮被点击时的Drawable
-    private Drawable getPressedDrawable( TypedArray attr) {
-        GradientDrawable drawablePressed =
-                (GradientDrawable) getResources().getDrawable(R.drawable.rect_pressed).mutate();// 修改时就不会影响其它drawable对象的状态
-        drawablePressed.setCornerRadius(cornerRadius);// 设置圆角半径
-
-        int defaultPressed = getResources().getColor(R.color.blue_pressed);
-        int colorPressed = attr.getColor(R.styleable.progressbutton_buttonPressedColor,defaultPressed);
-        drawablePressed.setColor(colorPressed);//设置颜色
-
-        return drawablePressed;
-    }
-
-    // 设置状态监听接口
-    interface OnStateListener{
-
-        abstract void onFinish();
-        abstract void onStop();
-        abstract void onContinue();
-
-    }
-
-    public void setOnStateListener(OnStateListener onStateListener){
-        this.onStateListener = onStateListener;
-    }
-
-    public void isShowProgressNum(boolean b){
-        this.isShowProgress = b;
-    }
+//    public void setType(int type) {
+//        if(type == TYPE_FILL || type == TYPE_STROKE)
+//            currentType = type;
+//        else
+//            currentType = TYPE_FILL;
+//    }
 
 }
