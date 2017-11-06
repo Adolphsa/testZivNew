@@ -3,6 +3,7 @@ package com.yeejay.yplay.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.utils.YplayTimeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,6 +38,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     private DaoFriendFeedsDao mDaoFriendFeedsDao;
     private List<DaoFriendFeeds> daoFriendFeedsList;
     private DaoFriendFeeds daoFriendFeeds;
+    private List<Integer> listCb = new ArrayList<>();//用于记录位置
 
     public FriendFeedsAdapter(Context context,
                               List<DaoFriendFeeds> daoFriendFeedsList,
@@ -54,15 +57,30 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     @Override
     public void onBindViewHolder(FeedsViewHolder holder, int position) {
 
-        System.out.println("position---" + position);
         daoFriendFeeds = daoFriendFeedsList.get(position);
+        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
 
-        if (daoFriendFeeds != null && daoFriendFeeds.getIsReaded()){
-            System.out.println("修改背景");
-            holder.ffItemRl.setBackgroundColor(Color.parseColor("#FF4081"));
+        if (listCb != null){
+            System.out.println("清除所有");
+            listCb.clear();
         }
 
-        Picasso.with(mContext).load(daoFriendFeeds.getFriendHeadImgUrl()).into(holder.ffItemHeaderImg);
+        if (daoFriendFeeds.getIsReaded()){
+            listCb.add(position);
+            System.out.println("增加---" + position + "到ListCb");
+        }
+
+        if (listCb != null && listCb.contains(position)){
+            System.out.println("修改背景");
+            holder.ffItemRl.setBackgroundColor(Color.parseColor("#FF4081"));
+        }else {
+            holder.ffItemRl.setBackgroundColor(Color.parseColor("#ffffff"));
+        }
+
+        String url = daoFriendFeeds.getFriendHeadImgUrl();
+        if (!TextUtils.isEmpty(url)){
+            Picasso.with(mContext).load(url).into(holder.ffItemHeaderImg);
+        }
         holder.ffItemName.setText(daoFriendFeeds.getFriendNickName());
         holder.ffItemTvTime.setText(YplayTimeUtils.format(daoFriendFeeds.getTs()));
         holder.ffItemQuestionContent.setText(daoFriendFeeds.getQtext());
@@ -72,6 +90,8 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         builder.append("的");
         builder.append(boyOrGirl(daoFriendFeeds.getVoteFromGender()));
         holder.ffItemTvWhere.setText(builder);
+
+
     }
 
     @Override

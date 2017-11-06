@@ -93,13 +93,20 @@ public class AddFriendsAdapter extends BaseAdapter implements View.OnClickListen
         }
         String url = contentList.get(position).getFromHeadImgUrl();
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+            Picasso.with(context).load(url).resize(40,40).into(holder.afItemHeaderImg);
         }
         holder.afItemName.setText(contentList.get(position).getFromNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
+
+        System.out.println("姓名---" + contentList.get(position).getFromNickName() +
+        ",状态---" + contentList.get(position).getStatus());
+
+
         if (contentList.get(position).getStatus() == 0){
+            holder.afBtnAccept.setText("接受");
+            holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }else if (contentList.get(position).getStatus() == 1){
             holder.afBtnAccept.setText("已添加");

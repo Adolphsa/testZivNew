@@ -317,6 +317,10 @@ public class UserInfo extends AppCompatActivity {
             Toast.makeText(UserInfo.this,"请设置姓名", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (name.length() > 20){
+            Toast.makeText(UserInfo.this,"请输入合理的姓名长度", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Map<String,Object> nameMap = new HashMap<>();
         nameMap.put("nickname",name);

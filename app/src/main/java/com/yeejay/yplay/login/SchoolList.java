@@ -3,6 +3,7 @@ package com.yeejay.yplay.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
@@ -56,11 +58,13 @@ public class SchoolList extends AppCompatActivity {
         setContentView(R.layout.activity_school_list);
 
         Bundle bundle = getIntent().getExtras();
-        mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
-        mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
-        schoolType = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_TYPE);
-        grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
-        isActivitySetting = bundle.getInt("activity_setting_class_school");
+        if (bundle != null){
+            mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
+            mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
+            schoolType = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_TYPE);
+            grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
+            isActivitySetting = bundle.getInt("activity_setting_class_school");
+        }
 
         Button btnBack = (Button) findViewById(R.id.layout_title_back);
         TextView title = (TextView) findViewById(R.id.layout_title);
@@ -261,7 +265,8 @@ public class SchoolList extends AppCompatActivity {
                                 SchoolList.this.setResult(202,intent);
                                 SchoolList.this.startActivity(intent);
                             }else {
-                                startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                                //startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                                jumpToWhere();
                             }
 
                         }
@@ -278,5 +283,22 @@ public class SchoolList extends AppCompatActivity {
 
                     }
                 });
+    }
+
+
+    private void jumpToWhere(){
+
+        //判断性别
+        int gender = (int)SharePreferenceUtil.get(SchoolList.this,YPlayConstant.TEMP_GENDER,0);
+        if (gender == 0){
+            startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+        }
+        //判断基本信息
+        String name = (String) SharePreferenceUtil.get(SchoolList.this,YPlayConstant.TEMP_NICK_NAME,"yplay");
+        if (TextUtils.isEmpty(name) || name.equals("yplay")){
+            startActivity(new Intent(SchoolList.this,UserInfo.class));
+        }
+
+        startActivity(new Intent(SchoolList.this, MainActivity.class));
     }
 }

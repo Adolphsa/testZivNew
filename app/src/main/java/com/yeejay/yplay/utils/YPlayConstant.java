@@ -16,5 +16,10 @@ public class YPlayConstant {
     public static final String YPLAY_SCHOOL_TYPE = "yplay_school_type";
     public static final String YPLAY_SCHOOL_GRADE = "yplay_school_grade";
     public static final String YPLAY_HEADER_IMG = "yplay_header_img";
-    
+
+    public static final String TEMP_NICK_NAME = "temp_nick_name";
+    public static final String TEMP_HEAD_IMAGE_URL = "temp_head_image_url";
+    public static final String TEMP_GENDER = "temp_gender";
+    public static final String TEMP_GRADE = "temp_grade";
+    public static final String TEMP_SCHOOL_ID = "temp_school_id";
 }

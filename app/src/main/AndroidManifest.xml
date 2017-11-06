@@ -3,8 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.yeejay.yplay">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-sdk tools:overrideLibrary="com.jwenfeng.library" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -16,8 +18,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-sdk  tools:overrideLibrary="com.jwenfeng.library"/>
-
     <application
         android:name=".YplayApplication"
         android:allowBackup="true"
@@ -26,15 +26,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:launchMode="singleTop">
+        <activity
+            android:name=".login.Login"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".login.LoginAge"/>
-        <activity android:name=".login.Login" />
+        <activity android:name=".login.LoginAge" />
+        <!--<activity android:name=".login.Login" />-->
         <activity android:name=".login.LoginAuthorization" />
         <activity android:name=".login.ClassList" />
         <activity android:name=".login.SchoolList" />
@@ -49,32 +51,36 @@
         <activity android:name=".userinfo.ActivityMyInfo" />
         <activity android:name=".userinfo.ActivityAllDiamond" />
         <activity android:name=".userinfo.ActivityAboutOur" />
-        <activity android:name=".userinfo.ActivitySetting" android:launchMode="singleTask"/>
-        <activity android:name=".friend.ActivityContacts"/>
-        <activity android:name=".friend.ActivitySchoolmate"/>
-        <activity android:name=".friend.ActivityWaitInvite"/>
-        <!--<activity android:name=".MainActivity"/>-->
+        <activity
+            android:name=".userinfo.ActivitySetting"
+            android:launchMode="singleTask" />
+        <activity android:name=".friend.ActivityContacts" />
+        <activity android:name=".friend.ActivitySchoolmate" />
+        <activity android:name=".friend.ActivityWaitInvite" />
+         <activity android:name=".MainActivity"/>
+
 
         <!-- service -->
-        <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名-->
+        <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
         <service
             android:name="com.tencent.wns.service.WnsMain"
             android:exported="false"
             android:process=":wns">
             <intent-filter>
-                <action android:name="com.tencent.wns.service.WnsMain"/>
+                <action android:name="com.tencent.wns.service.WnsMain" />
             </intent-filter>
         </service>
-        <!-- 注册WNS 心跳接收器-->
+        <!-- 注册WNS 心跳接收器 -->
         <receiver
             android:name="com.tencent.base.os.clock.AlarmClockReceiver"
             android:exported="false"
             android:process=":wns">
             <intent-filter>
-                <action android:name="wns.heartbeat"/>
+                <action android:name="wns.heartbeat" />
             </intent-filter>
         </receiver>
 
+        <activity android:name=".friend.ActivitySearchFriends"></activity>
     </application>
 
 </manifest>

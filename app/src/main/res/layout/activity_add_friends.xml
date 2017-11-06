@@ -9,14 +9,17 @@
 
     <include layout="@layout/layout_title_bar" />
 
-    <SearchView
+    <TextView
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:iconifiedByDefault="false"
-        android:queryHint="搜索用户名" />
-        
+        android:text="搜索用户名"
+        android:drawableLeft="@drawable/search"
+        android:padding="8dp"
+        android:drawablePadding="8dp"
+        android:background="@drawable/item_background"
+        />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

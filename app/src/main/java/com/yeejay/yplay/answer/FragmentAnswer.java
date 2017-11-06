@@ -31,6 +31,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import cn.iwgang.countdownview.CountdownView;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -64,14 +65,6 @@ public class FragmentAnswer extends BaseFragment {
     Button frgansBtnKeep;
     @BindView(R.id.frgans_btn_next_question)
     Button frgansBtnNextQuestion;
-
-    int questionNum = 0;
-    int nextPersonCount = 1;
-    int btn1Cnt,btn2Cnt,btn3Cnt,btn4Cnt;
-    int total;
-    int tag;
-
-
     @BindView(R.id.frgans_tv_or)
     TextView frgansTvOr;
     @BindView(R.id.frgans_tv_relieve)
@@ -80,7 +73,16 @@ public class FragmentAnswer extends BaseFragment {
     Button frgansBtnInvite;
     @BindView(R.id.frg_user_info)
     ImageButton frgUserInfo;
+    @BindView(R.id.frgans_count_down_view)
+    CountdownView frgansCountDownView;
 
+    int questionNum = 0;
+    int nextPersonCount = 1;
+    int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
+    int total;
+
+    //倒计时时间
+    private final static int LIMIT_TIME = 10*1000;
     List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;
     QuestionListRespond.PayloadBean.QuestionsBean questionsBean;
 
@@ -89,65 +91,77 @@ public class FragmentAnswer extends BaseFragment {
 
     List<VoteOptionsBean> voteOptionsBeanList;
 
+    @OnClick(R.id.frgans_tv_relieve)
+    public void relieve(View view){
+        System.out.println("解除冷冻");
+        relieve();
+    }
+
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
-        if (questionsBean != null){
-            vote(questionsBean.getQid(),optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+        if (questionsBean != null) {
+            vote(questionsBean.getQid(), optionsList.get(0).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
             frgansBtn1.setClickable(false);
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
 
-            new ProgressTask((1 + btn1Cnt)*120 / total,1).execute();
-            new ProgressTask(btn2Cnt*120 / total,2).execute();
-            new ProgressTask(btn3Cnt*120/total,3).execute();
-            new ProgressTask(btn4Cnt*120/total,4).execute();
+            System.out.println("total---" + total);
+            System.out.println(",btn1Cnt---" + btn1Cnt
+                    + ",btn2Cnt---" + btn2Cnt
+                    + ",btn3Cnt---" + btn3Cnt
+                    + ",btn4Cnt---" + btn4Cnt);
+
+            new ProgressTask((1 + btn1Cnt) * 120 / total, 1).execute();
+            new ProgressTask(btn2Cnt * 120 / total, 2).execute();
+            new ProgressTask(btn3Cnt * 120 / total, 3).execute();
+            new ProgressTask(btn4Cnt * 120 / total, 4).execute();
         }
 
     }
 
     @OnClick(R.id.frgans_btn2)
     public void btn2(View view) {
-        if (questionsBean != null){
-            vote(questionsBean.getQid(),optionsList.get(1).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+        if (questionsBean != null) {
+            vote(questionsBean.getQid(), optionsList.get(1).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
 
-            new ProgressTask(btn1Cnt*120 / total,1).execute();
-            new ProgressTask((1+btn2Cnt)*120 / total,2).execute();
-            new ProgressTask(btn3Cnt*120/total,3).execute();
-            new ProgressTask(btn4Cnt*120/total,4).execute();
+            new ProgressTask(btn1Cnt * 120 / total, 1).execute();
+            new ProgressTask((1 + btn2Cnt) * 120 / total, 2).execute();
+            new ProgressTask(btn3Cnt * 120 / total, 3).execute();
+            new ProgressTask(btn4Cnt * 120 / total, 4).execute();
         }
     }
 
     @OnClick(R.id.frgans_btn3)
     public void btn3(View view) {
-        if (questionsBean != null){
-            vote(questionsBean.getQid(),optionsList.get(2).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+        if (questionsBean != null) {
+            vote(questionsBean.getQid(), optionsList.get(2).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
 
-            new ProgressTask(btn1Cnt*120 / total,1).execute();
-            new ProgressTask((btn2Cnt)*120 / total,2).execute();
-            new ProgressTask((1+btn3Cnt)*120/total,3).execute();
-            new ProgressTask(btn4Cnt*120/total,4).execute();
+            new ProgressTask(btn1Cnt * 120 / total, 1).execute();
+            new ProgressTask((btn2Cnt) * 120 / total, 2).execute();
+            new ProgressTask((1 + btn3Cnt) * 120 / total, 3).execute();
+            new ProgressTask(btn4Cnt * 120 / total, 4).execute();
         }
 
     }
 
     @OnClick(R.id.frgans_btn4)
     public void btn4(View view) {
-        if (questionsBean != null){
-            vote(questionsBean.getQid(),optionsList.get(3).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
+        if (questionsBean != null) {
+            vote(questionsBean.getQid(), optionsList.get(3).getUin(), GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
 
-            new ProgressTask(btn1Cnt*120 / total,1).execute();
-            new ProgressTask((btn2Cnt)*120 / total,2).execute();
-            new ProgressTask((btn3Cnt)*120/total,3).execute();
-            new ProgressTask((1+btn4Cnt)*120/total,4).execute();
+            new ProgressTask(btn1Cnt * 120 / total, 1).execute();
+            new ProgressTask((btn2Cnt) * 120 / total, 2).execute();
+            new ProgressTask((btn3Cnt) * 120 / total, 3).execute();
+            new ProgressTask((1 + btn4Cnt) * 120 / total, 4).execute();
         }
     }
 
@@ -158,7 +172,7 @@ public class FragmentAnswer extends BaseFragment {
 //            return;
 //        }
         //换批人
-        if (questionsBean != null){
+        if (questionsBean != null) {
             getQuestionsCandidate(questionsBean.getQid());
             nextPersonCount++;
         }
@@ -166,18 +180,19 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     public class ProgressTask extends AsyncTask<Void, Integer, Void> {
+
         private int initPrg = 0;
         private int mProgress;
         private int buttonType;
 
-        public ProgressTask(int progress,int buttonType){
+        public ProgressTask(int progress, int buttonType) {
             mProgress = progress;
             this.buttonType = buttonType;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            while(initPrg < mProgress) {
+            while (initPrg < mProgress) {
                 publishProgress(initPrg += 3);
             }
             return null;
@@ -190,13 +205,13 @@ public class FragmentAnswer extends BaseFragment {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-            if (buttonType == 1){
+            if (buttonType == 1) {
                 frgansBtn1.updateProgress(values[0]);
-            }else if (buttonType == 2){
+            } else if (buttonType == 2) {
                 frgansBtn2.updateProgress(values[0]);
-            }else if (buttonType == 3){
+            } else if (buttonType == 3) {
                 frgansBtn3.updateProgress(values[0]);
-            }else if (buttonType == 4){
+            } else if (buttonType == 4) {
                 frgansBtn4.updateProgress(values[0]);
             }
 
@@ -210,7 +225,8 @@ public class FragmentAnswer extends BaseFragment {
         System.out.println("点击继续");
         hideKeep();
         questionNum++;
-        if (questionNum >= 15){
+        System.out.println("继续questionNumber---" + questionNum);
+        if (questionNum >= 15) {
             questionOut15();
             return;
         }
@@ -230,18 +246,28 @@ public class FragmentAnswer extends BaseFragment {
     public void nextQuestion(View view) {
         //过
         questionNum++;
-        if (questionNum >= 15){
+        System.out.println("过questionNumber---" + questionNum);
+        if (questionNum >= 15) {
             questionOut15();
             return;
         }
         nextQuestionUpdate();
         System.out.println("过");
+        frgansBtn1.updateProgress(0);
+        frgansBtn2.updateProgress(0);
+        frgansBtn3.updateProgress(0);
+        frgansBtn4.updateProgress(0);
+
+        frgansBtn1.setEnabled(true);
+        frgansBtn2.setEnabled(true);
+        frgansBtn3.setEnabled(true);
+        frgansBtn4.setEnabled(true);
     }
 
     @OnClick(R.id.frgans_btn_invite)
-    public void inviteFriend(View view){
+    public void inviteFriend(View view) {
         //邀请好友
-        startActivity(new Intent(getActivity(),ActivityInviteFriend.class));
+        startActivity(new Intent(getActivity(), ActivityInviteFriend.class));
     }
 
     @Override
@@ -259,27 +285,33 @@ public class FragmentAnswer extends BaseFragment {
             }
         });
         getQuestionsList();
-
+        frgansCountDownView.setOnCountdownEndListener(new CountdownView.OnCountdownEndListener() {
+            @Override
+            public void onEnd(CountdownView cv) {
+                System.out.println("倒计时结束");
+                relieve();
+            }
+        });
     }
 
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
-        if (isVisibleToUser){
+        if (isVisibleToUser) {
             System.out.println("FragmentAnswer---答题可见");
         }
     }
 
     private void nextQuestionUpdate() {
 
-        if (questionsList != null && questionsList.size() > 0){
+        if (questionsList != null && questionsList.size() > 0) {
             questionsBean = questionsList.get(questionNum);
-            if (questionsBean != null){
+            if (questionsBean != null) {
                 System.out.println("quesionNum---" + questionNum);
                 frgansTvNumber.setText((questionNum + 1) + "/15");
                 String url = questionsBean.getQiconUrl();
-                if (!TextUtils.isEmpty(url)){
-                    Picasso.with(getActivity()).load(url).resize(200,150).into(frgansImg);
+                if (!TextUtils.isEmpty(url)) {
+                    Picasso.with(getActivity()).load(url).resize(200, 150).into(frgansImg);
                 }
                 frgansQuestion.setText(questionsBean.getQtext());
                 getQuestionsCandidate(questionsBean.getQid());
@@ -310,9 +342,12 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     //点击继续15次
-    private void questionOut15(){
+    private void questionOut15() {
         frgansImg.setImageDrawable(getResources().getDrawable(R.drawable.suo));
-        frgansQuestion.setText("技能冷却60分钟00秒");
+        frgansQuestion.setText("技能冷却");
+        frgansCountDownView.setVisibility(View.VISIBLE);
+        frgansCountDownView.start(LIMIT_TIME);
+
         frgansBtn1.setVisibility(View.INVISIBLE);
         frgansBtn2.setVisibility(View.INVISIBLE);
         frgansBtn3.setVisibility(View.INVISIBLE);
@@ -326,13 +361,33 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtnInvite.setVisibility(View.VISIBLE);
     }
 
-    //拉取问题列表
-    private void getQuestionsList(){
+    //解除冷冻
+    private void relieve(){
 
-        Map<String,Object> questionsListMap = new HashMap<>();
-        questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN,0));
-        questionsListMap.put("token",SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN,"yplay"));
-        questionsListMap.put("ver",SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_VER,0));
+        questionNum = 0;
+        getQuestionsList();
+
+        frgansTvOr.setVisibility(View.INVISIBLE);
+        frgansTvRelieve.setVisibility(View.INVISIBLE);
+        frgansCountDownView.setVisibility(View.GONE);
+
+        frgansTnNextPerson.setVisibility(View.VISIBLE);
+        frgansBtnNextQuestion.setVisibility(View.VISIBLE);
+        frgansBtnInvite.setVisibility(View.INVISIBLE);
+
+        frgansBtn1.setVisibility(View.VISIBLE);
+        frgansBtn2.setVisibility(View.VISIBLE);
+        frgansBtn3.setVisibility(View.VISIBLE);
+        frgansBtn4.setVisibility(View.VISIBLE);
+    }
+
+    //拉取问题列表
+    private void getQuestionsList() {
+
+        Map<String, Object> questionsListMap = new HashMap<>();
+        questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        questionsListMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .getQuestionsList(questionsListMap)
@@ -347,9 +402,9 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull QuestionListRespond questionListRespond) {
                         System.out.println("问题列表---" + questionListRespond.toString());
-                        if (questionListRespond.getCode() == 0){
+                        if (questionListRespond.getCode() == 0) {
                             questionsList = questionListRespond.getPayload().getQuestions();
-                            if (questionsList.size() > 0){
+                            if (questionsList.size() > 0) {
                                 nextQuestionUpdate();
                             }
                         }
@@ -369,13 +424,13 @@ public class FragmentAnswer extends BaseFragment {
 
 
     //某个问题的候选人
-    private void getQuestionsCandidate(int qid){
+    private void getQuestionsCandidate(int qid) {
 
-        Map<String,Object> questionsCandidateMap = new HashMap<>();
-        questionsCandidateMap.put("qid",qid);
-        questionsCandidateMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN,0));
-        questionsCandidateMap.put("token",SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN,"yplay"));
-        questionsCandidateMap.put("ver",SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_VER,0));
+        Map<String, Object> questionsCandidateMap = new HashMap<>();
+        questionsCandidateMap.put("qid", qid);
+        questionsCandidateMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        questionsCandidateMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionsCandidateMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .getQuestionsCandidate(questionsCandidateMap)
@@ -390,16 +445,16 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull QuestionCandidateRespond questionCandidateRespond) {
                         System.out.println("某个问题的候选者---" + questionCandidateRespond.toString());
-                        if (questionCandidateRespond.getCode() == 0){
+                        if (questionCandidateRespond.getCode() == 0) {
                             optionsList = questionCandidateRespond.getPayload().getOptions();
                             voteOptionsBeanList = new ArrayList<VoteOptionsBean>();
-                            if (voteOptionsBeanList.size() > 0){
+                            if (voteOptionsBeanList.size() > 0) {
                                 voteOptionsBeanList.clear();
-                            }else {
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(),optionsList.get(0).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(),optionsList.get(1).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(),optionsList.get(2).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(),optionsList.get(3).getNickName()));
+                            } else {
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName()));
                             }
                             changeName(optionsList.get(0).getNickName(),
                                     optionsList.get(1).getNickName(),
@@ -427,15 +482,15 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     //投票
-    private void vote(int qid, int voteToUin, String options){
+    private void vote(int qid, int voteToUin, String options) {
 
-        Map<String,Object> voteMap = new HashMap<>();
-        voteMap.put("qid",qid);
-        voteMap.put("voteToUin",voteToUin);
-        voteMap.put("options",options);
-        voteMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN,0));
-        voteMap.put("token",SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN,"yplay"));
-        voteMap.put("ver",SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_VER,0));
+        Map<String, Object> voteMap = new HashMap<>();
+        voteMap.put("qid", qid);
+        voteMap.put("voteToUin", voteToUin);
+        voteMap.put("options", options);
+        voteMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        voteMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        voteMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .vote(voteMap)

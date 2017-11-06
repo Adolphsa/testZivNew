@@ -7,7 +7,6 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
@@ -44,7 +43,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     @BindView(R.id.layout_title)
     TextView layoutTitle;
     @BindView(R.id.searchView)
-    SearchView searchView;
+    TextView searchView;
     @BindView(R.id.af_lv_add_friends_list_view)
     MesureListView afLvAddFriends;
     @BindView(R.id.af_lv_book_friends_list)
@@ -57,6 +56,12 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     @OnClick(R.id.layout_title_back)
     public void back(View view) {
         finish();
+    }
+
+    @OnClick(R.id.searchView)
+    public void clickSearch(View view){
+        startActivity(new Intent(AddFriends.this,ActivitySearchFriends.class));
+
     }
 
     List<GetAddFriendMsgs.PayloadBean.MsgsBean> friendsList;
@@ -75,7 +80,6 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         getRecommends(1);
         getRecommends(3);
         getRecommends(2);
-
     }
 
     //加好友请求列表
@@ -267,6 +271,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                                     = getAddFriendMsgs.getPayload().getMsgs();
                             int total = getAddFriendMsgs.getPayload().getTotal();
                             initAddFriendsListView(total, tempList);
+
                         }
                     }
 
@@ -428,6 +433,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         recommendsMap.put("type", type);
         recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        System.out.println("token---" + SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
                 .getSchoolmates(recommendsMap)

@@ -3,11 +3,13 @@ package com.yeejay.yplay.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
@@ -110,7 +112,8 @@ public class ChoiceSex extends AppCompatActivity {
                                 ChoiceSex.this.setResult(201,intent);
                                 ChoiceSex.this.finish();
                             }else {
-                                startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                                //startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                                jumpToWhere();
                             }
 
                         }else {
@@ -129,5 +132,16 @@ public class ChoiceSex extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void jumpToWhere(){
+
+        //判断基本信息
+        String name = (String) SharePreferenceUtil.get(ChoiceSex.this,YPlayConstant.TEMP_NICK_NAME,"yplay");
+        if (TextUtils.isEmpty(name) || name.equals("yplay")){
+            startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+        }
+
+        startActivity(new Intent(ChoiceSex.this, MainActivity.class));
     }
 }

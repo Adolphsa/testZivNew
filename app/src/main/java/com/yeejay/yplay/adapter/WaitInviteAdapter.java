@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import tangxiaolv.com.library.EffectiveShapeView;
 
 /**
  * 通讯录好友适配器
@@ -105,6 +105,8 @@ public class WaitInviteAdapter extends BaseAdapter implements View.OnClickListen
             holder.afBtnAccept.setText("已邀请");
             holder.afBtnAccept.setEnabled(false);
         }else {
+            holder.afBtnAccept.setText("邀请");
+            holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }
         holder.afBtnAccept.setTag(position);
@@ -113,7 +115,7 @@ public class WaitInviteAdapter extends BaseAdapter implements View.OnClickListen
 
     static class ViewHolder {
         @BindView(R.id.af_item_header_img)
-        ImageView afItemHeaderImg;
+        EffectiveShapeView afItemHeaderImg;
         @BindView(R.id.af_item_name)
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)

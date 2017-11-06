@@ -32,12 +32,15 @@
         android:padding="5dp"
         android:text="搜索实话号" />
 
-    <ListView
-        android:id="@+id/aif_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
 
-    </ListView>
+    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
+        android:id="@+id/aif_ptf_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/aif_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
+
 </LinearLayout>

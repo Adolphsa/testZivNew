@@ -154,8 +154,14 @@ public interface YPlayApi {
     Observable<GetRecommendsRespond> getSchoolmates(@FieldMap Map<String,Object> filemap);
 
     //通过username搜索好友
+    @FormUrlEncoded
+    @POST("/api/sns/searchfriend")
+    Observable<GetRecommendsRespond> searchFriends(@FieldMap Map<String,Object> filemap);
 
     //获取用户与我当前的关系状态
+    @FormUrlEncoded
+    @POST("/api/sns/getusersstatuswithme")
+    Observable<GetRecommendsRespond> getStatusWithMe(@FieldMap Map<String,Object> filemap);
 
 
     //获取用户的资料

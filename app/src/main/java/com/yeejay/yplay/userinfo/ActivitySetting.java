@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -118,7 +119,6 @@ public class ActivitySetting extends AppCompatActivity {
         Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
         intent.putExtra("activity_setting",1);
         startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
-
     }
 
     //学校信息
@@ -134,7 +134,6 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_phone_number)
     public void settingPhoneNumber() {
         System.out.println("电话号码");
-
     }
 
     //退出
@@ -183,7 +182,18 @@ public class ActivitySetting extends AppCompatActivity {
         ButterKnife.bind(this);
 
         layoutTitle.setText("设置");
+        initData();
         getMyInfo();
+    }
+
+    private void initData() {
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        dirStr = root + File.separator + "yplay" + File.separator + "image";
+        File dir = new File(dirStr);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
     }
 
     //初始化资料
@@ -208,8 +218,10 @@ public class ActivitySetting extends AppCompatActivity {
             switch(requestCode){
                 case REQ_CODE_SEL_IMG:
                     //获取选择的图片的URI
-                    Uri uri = data.getData();
-                    cropImage(uri);
+                    if (data != null){
+                        Uri uri = data.getData();
+                        cropImage(uri);
+                    }
                     break;
                 case CROP_IMAGE:
                     //图片裁剪完，已经保存到文件中
@@ -220,16 +232,13 @@ public class ActivitySetting extends AppCompatActivity {
                     break;
             }
         }else if (requestCode == REQUEST_CODE_CHOICE_GENDER){
-            String  gender = data.getStringExtra("activity_setting_gender");
-            System.out.println("性别---" + gender);
-            settingGender.setText(gender);
+            if (data != null){
+                String  gender = data.getStringExtra("activity_setting_gender");
+                System.out.println("性别---" + gender);
+                settingGender.setText(gender);
+            }
         }else if (requestCode == REQUEST_CODE_SCHOOL){
             System.out.println("那你看那看---" + requestCode);
-//            int schoolType = data.getIntExtra("as_school_type",0);
-//            int grade = data.getIntExtra("as_grade",0);
-//            String schoolName = data.getStringExtra("as_school_name");
-////
-//            System.out.println("哈哈哈schooltype---" + schoolType + "grade---" + grade);
             getMyInfo();
         }
     }
@@ -253,7 +262,7 @@ public class ActivitySetting extends AppCompatActivity {
      * 选择图片文件
      */
     private void selectImage(){
-        Intent intent = new Intent(Intent.ACTION_PICK);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, REQ_CODE_SEL_IMG);
     }
@@ -272,6 +281,7 @@ public class ActivitySetting extends AppCompatActivity {
         intent.putExtra("outputY", 300);
         imageName = System.currentTimeMillis() + ".jpg";
         tempFile = new File(dirStr + File.separator + imageName);
+        System.out.println("文件位置---" + tempFile.getPath());
         tempUri = Uri.fromFile(tempFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
         intent.putExtra("return-data", false); //裁剪后的数据不以bitmap的形式返回
@@ -305,9 +315,7 @@ public class ActivitySetting extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-
-                    }
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {}
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
@@ -354,9 +362,7 @@ public class ActivitySetting extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<BaseRespond>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-
-                    }
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {}
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {

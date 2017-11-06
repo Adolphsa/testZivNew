@@ -38,10 +38,12 @@ public class ClassList extends AppCompatActivity {
         setContentView(R.layout.activity_class_list);
 
         Bundle bundle = getIntent().getExtras();
-        mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
-        mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
-        isActivitySetting = bundle.getInt("activity_setting_school");
-        System.out.println("activity_setting_school" + isActivitySetting);
+        if (bundle != null){
+            mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
+            mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
+            isActivitySetting = bundle.getInt("activity_setting_school");
+            System.out.println("activity_setting_school" + isActivitySetting);
+        }
 
         mPrimaryListView = (ListView) findViewById(R.id.cl_primary_list);
         mHighListView = (ListView) findViewById(R.id.cl_high_list);

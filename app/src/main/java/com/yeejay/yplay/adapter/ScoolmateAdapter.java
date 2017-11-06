@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import tangxiaolv.com.library.EffectiveShapeView;
 
 /**
  * 添加朋友列表适配器
@@ -102,23 +102,34 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
-        holder.afBtnAccept.setOnClickListener(acceptListener); //1---通讯录 2---等待邀请 3--同校好友
+        //holder.afBtnAccept.setOnClickListener(acceptListener); //1---通讯录 2---等待邀请 3--同校好友
         int status = contentList.get(position).getStatus();
         if (type == 1 ){     //通讯录好友
             if (status == 2){
                 holder.afBtnAccept.setText("已申请");
                 holder.afBtnAccept.setEnabled(false);
+            }else {
+                holder.afBtnAccept.setText("加好友");
+                holder.afBtnAccept.setEnabled(true);
+                holder.afBtnAccept.setOnClickListener(acceptListener);
             }
         }else if (type == 2) {   //等待邀请
-            holder.afBtnAccept.setText("邀请");
             if (status == 5){
                 holder.afBtnAccept.setText("已邀请");
                 holder.afBtnAccept.setEnabled(false);
+            }else {
+                holder.afBtnAccept.setText("邀请");
+                holder.afBtnAccept.setEnabled(true);
+                holder.afBtnAccept.setOnClickListener(acceptListener);
             }
         }else if (type == 3){   //同校好友
             if (status == 2){
                 holder.afBtnAccept.setText("已申请");
                 holder.afBtnAccept.setEnabled(false);
+            }else {
+                holder.afBtnAccept.setText("加好友");
+                holder.afBtnAccept.setEnabled(true);
+                holder.afBtnAccept.setOnClickListener(acceptListener);
             }
         }
         holder.afBtnAccept.setTag(position);
@@ -127,7 +138,7 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
 
     static class ViewHolder {
         @BindView(R.id.af_item_header_img)
-        ImageView afItemHeaderImg;
+        EffectiveShapeView afItemHeaderImg;
         @BindView(R.id.af_item_name)
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)

@@ -1,20 +1,17 @@
 package com.yeejay.yplay.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * 登录返回
  * Created by Administrator on 2017/10/29.
  */
 
-public class LoginRespond implements Parcelable {
+public class LoginRespond {
 
 
     /**
      * code : 0
      * msg : succ
-     * payload : {"uin":100008,"token":"T/8JXhHRn/p/gmKbB6PAltejPSJfLATKAuSuZPK+7Nosuyo3TD3qfIYLQKOWf2GsYiEpaHiOQkY2y3yhaWFTzkYee5wcmUYlDhaRU/7rs3K3WzZytpvzuE2aPd9XwtlqdyuwboPDFM5sccm7riU//qV5g0qy1vFU4aat+KDF52e1HXiGqjEt2DtHY1vRxF9pP55dtajHwfAkW/v/K2oGNEWfDuo=","ver":1,"isNewUser":1}
+     * payload : {"uin":100008,"token":"oZ9vc6nmkfC4yPqF/PdikvI9oP9wN7e5uZABqGVtjjTg5KMlcXHk/QsDfw8n35GwjRD7rArOlOpqyR8zhb00yay80oiG/VEELvfq1s/LkShu4fa+3Tew7zhM7OsJAp8KDxKikHrDjsjpxvfnaPWfUiDPQaMnLnbtIBd6pODeltXINzF5Kg==","ver":1,"isNewUser":0,"info":{"uin":100008,"userName":"adolph","phone":"13480995624","nickName":"拉卡","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509953589095.jpg","gender":2,"grade":3,"schoolId":54404,"schoolType":1,"schoolName":"荔香中学","country":"中国","province":"广东","city":"深圳市","ts":0}}
      */
 
     private int code;
@@ -45,18 +42,29 @@ public class LoginRespond implements Parcelable {
         this.payload = payload;
     }
 
-    public static class PayloadBean implements Parcelable {
+    @Override
+    public String toString() {
+        return "LoginRespond{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", payload=" + payload +
+                '}';
+    }
+
+    public static class PayloadBean {
         /**
          * uin : 100008
-         * token : T/8JXhHRn/p/gmKbB6PAltejPSJfLATKAuSuZPK+7Nosuyo3TD3qfIYLQKOWf2GsYiEpaHiOQkY2y3yhaWFTzkYee5wcmUYlDhaRU/7rs3K3WzZytpvzuE2aPd9XwtlqdyuwboPDFM5sccm7riU//qV5g0qy1vFU4aat+KDF52e1HXiGqjEt2DtHY1vRxF9pP55dtajHwfAkW/v/K2oGNEWfDuo=
+         * token : oZ9vc6nmkfC4yPqF/PdikvI9oP9wN7e5uZABqGVtjjTg5KMlcXHk/QsDfw8n35GwjRD7rArOlOpqyR8zhb00yay80oiG/VEELvfq1s/LkShu4fa+3Tew7zhM7OsJAp8KDxKikHrDjsjpxvfnaPWfUiDPQaMnLnbtIBd6pODeltXINzF5Kg==
          * ver : 1
-         * isNewUser : 1
+         * isNewUser : 0
+         * info : {"uin":100008,"userName":"adolph","phone":"13480995624","nickName":"拉卡","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509953589095.jpg","gender":2,"grade":3,"schoolId":54404,"schoolType":1,"schoolName":"荔香中学","country":"中国","province":"广东","city":"深圳市","ts":0}
          */
 
         private int uin;
         private String token;
         private int ver;
         private int isNewUser;
+        private InfoBean info;
 
         public int getUin() {
             return uin;
@@ -90,40 +98,13 @@ public class LoginRespond implements Parcelable {
             this.isNewUser = isNewUser;
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
+        public InfoBean getInfo() {
+            return info;
         }
 
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(this.uin);
-            dest.writeString(this.token);
-            dest.writeInt(this.ver);
-            dest.writeInt(this.isNewUser);
+        public void setInfo(InfoBean info) {
+            this.info = info;
         }
-
-        public PayloadBean() {
-        }
-
-        protected PayloadBean(Parcel in) {
-            this.uin = in.readInt();
-            this.token = in.readString();
-            this.ver = in.readInt();
-            this.isNewUser = in.readInt();
-        }
-
-        public static final Creator<PayloadBean> CREATOR = new Creator<PayloadBean>() {
-            @Override
-            public PayloadBean createFromParcel(Parcel source) {
-                return new PayloadBean(source);
-            }
-
-            @Override
-            public PayloadBean[] newArray(int size) {
-                return new PayloadBean[size];
-            }
-        };
 
         @Override
         public String toString() {
@@ -132,50 +113,185 @@ public class LoginRespond implements Parcelable {
                     ", token='" + token + '\'' +
                     ", ver=" + ver +
                     ", isNewUser=" + isNewUser +
+                    ", info=" + info +
                     '}';
         }
-    }
 
+        public static class InfoBean {
+            /**
+             * uin : 100008
+             * userName : adolph
+             * phone : 13480995624
+             * nickName : 拉卡
+             * headImgUrl : http://yplay-1253229355.image.myqcloud.com/headimgs/1509953589095.jpg
+             * gender : 2
+             * age : 0
+             * grade : 3
+             * schoolId : 54404
+             * schoolType : 1
+             * schoolName : 荔香中学
+             * country : 中国
+             * province : 广东
+             * city : 深圳市
+             * ts : 0
+             */
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+            private int uin;
+            private String userName;
+            private String phone;
+            private String nickName;
+            private String headImgUrl;
+            private int gender;
+            private int age;
+            private int grade;
+            private int schoolId;
+            private int schoolType;
+            private String schoolName;
+            private String country;
+            private String province;
+            private String city;
+            private int ts;
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.code);
-        dest.writeString(this.msg);
-        dest.writeParcelable((Parcelable) this.payload, flags);
-    }
+            public int getUin() {
+                return uin;
+            }
 
-    public LoginRespond() {
-    }
+            public void setUin(int uin) {
+                this.uin = uin;
+            }
 
-    protected LoginRespond(Parcel in) {
-        this.code = in.readInt();
-        this.msg = in.readString();
-        this.payload = in.readParcelable(PayloadBean.class.getClassLoader());
-    }
+            public String getUserName() {
+                return userName;
+            }
 
-    public static final Parcelable.Creator<LoginRespond> CREATOR = new Parcelable.Creator<LoginRespond>() {
-        @Override
-        public LoginRespond createFromParcel(Parcel source) {
-            return new LoginRespond(source);
+            public void setUserName(String userName) {
+                this.userName = userName;
+            }
+
+            public String getPhone() {
+                return phone;
+            }
+
+            public void setPhone(String phone) {
+                this.phone = phone;
+            }
+
+            public String getNickName() {
+                return nickName;
+            }
+
+            public void setNickName(String nickName) {
+                this.nickName = nickName;
+            }
+
+            public String getHeadImgUrl() {
+                return headImgUrl;
+            }
+
+            public void setHeadImgUrl(String headImgUrl) {
+                this.headImgUrl = headImgUrl;
+            }
+
+            public int getGender() {
+                return gender;
+            }
+
+            public void setGender(int gender) {
+                this.gender = gender;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public int getGrade() {
+                return grade;
+            }
+
+            public void setGrade(int grade) {
+                this.grade = grade;
+            }
+
+            public int getSchoolId() {
+                return schoolId;
+            }
+
+            public void setSchoolId(int schoolId) {
+                this.schoolId = schoolId;
+            }
+
+            public int getSchoolType() {
+                return schoolType;
+            }
+
+            public void setSchoolType(int schoolType) {
+                this.schoolType = schoolType;
+            }
+
+            public String getSchoolName() {
+                return schoolName;
+            }
+
+            public void setSchoolName(String schoolName) {
+                this.schoolName = schoolName;
+            }
+
+            public String getCountry() {
+                return country;
+            }
+
+            public void setCountry(String country) {
+                this.country = country;
+            }
+
+            public String getProvince() {
+                return province;
+            }
+
+            public void setProvince(String province) {
+                this.province = province;
+            }
+
+            public String getCity() {
+                return city;
+            }
+
+            public void setCity(String city) {
+                this.city = city;
+            }
+
+            public int getTs() {
+                return ts;
+            }
+
+            public void setTs(int ts) {
+                this.ts = ts;
+            }
+
+            @Override
+            public String toString() {
+                return "InfoBean{" +
+                        "uin=" + uin +
+                        ", userName='" + userName + '\'' +
+                        ", phone='" + phone + '\'' +
+                        ", nickName='" + nickName + '\'' +
+                        ", headImgUrl='" + headImgUrl + '\'' +
+                        ", gender=" + gender +
+                        ", age=" + age +
+                        ", grade=" + grade +
+                        ", schoolId=" + schoolId +
+                        ", schoolType=" + schoolType +
+                        ", schoolName='" + schoolName + '\'' +
+                        ", country='" + country + '\'' +
+                        ", province='" + province + '\'' +
+                        ", city='" + city + '\'' +
+                        ", ts=" + ts +
+                        '}';
+            }
         }
-
-        @Override
-        public LoginRespond[] newArray(int size) {
-            return new LoginRespond[size];
-        }
-    };
-
-    @Override
-    public String toString() {
-        return "LoginRespond{" +
-                "code=" + code +
-                ", msg='" + msg + '\'' +
-                ", payload=" + payload +
-                '}';
     }
 }

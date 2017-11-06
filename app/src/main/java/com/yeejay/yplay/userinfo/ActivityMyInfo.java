@@ -120,8 +120,8 @@ public class ActivityMyInfo extends AppCompatActivity {
             if (!TextUtils.isEmpty(url)){
                 Picasso.with(ActivityMyInfo.this).load(url).resize(80,80).into(amiItemHeaderImg);
             }
-            amiTvName.setText(infoBean.getUserName());
-            amiTvName2.setText(infoBean.getNickName());
+            amiTvName.setText(infoBean.getNickName());
+            amiTvName2.setText(infoBean.getUserName());
             amiTvIsGraduate.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
             StringBuilder str1 = new StringBuilder(String.valueOf(infoBean.getFriendCnt()));
             str1.append("好友");
