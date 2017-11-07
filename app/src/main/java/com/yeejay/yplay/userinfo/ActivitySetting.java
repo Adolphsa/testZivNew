@@ -340,7 +340,7 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //修改头像
-    private void updateHeaderImg(String headImgId,String nickName,int gender,String userName){
+    private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName){
 
         Map<String,Object> imgMap = new HashMap<>();
         if (!TextUtils.isEmpty(nickName))
@@ -373,10 +373,11 @@ public class ActivitySetting extends AppCompatActivity {
                             }else if (tag == 1){
                                 System.out.println("修改姓名成功---" + baseRespond.toString());
                                 Toast.makeText(ActivitySetting.this,"修改姓名成功",Toast.LENGTH_SHORT).show();
-
+                                settingName.setText(nickName);
                             }else if (tag == 2){
                                 System.out.println("修改用户名成功---" + baseRespond.toString());
                                 Toast.makeText(ActivitySetting.this,"修改用户名成功",Toast.LENGTH_SHORT).show();
+                                settingUserName.setText(userName);
                             }
 
                         }
@@ -450,7 +451,6 @@ public class ActivitySetting extends AppCompatActivity {
                              if (tag == 1){
                                  System.out.println("修改姓名---" + name);
                                  updateHeaderImg(null,name,0,null);
-                                 settingName.setText(editText.getText().toString().trim());
                              }else if (tag == 2){
                                  System.out.println("修改用户名---" + name);
                                  updateHeaderImg(null,null,0,name);

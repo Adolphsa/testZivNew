@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:background="@color/feeds_title_color"
         >
         <ImageButton
             android:id="@+id/ff_user_info"

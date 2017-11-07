@@ -12,11 +12,76 @@
         android:layout_height="wrap_content"
         >
     </android.support.v4.view.ViewPager>
-    <com.luseen.spacenavigation.SpaceNavigationView
-        android:id="@+id/main_nav_bar"
+
+    <RelativeLayout
+        android:id="@+id/mainnav_bar2"
         android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/white"
+        android:layout_alignParentBottom="true"
+        >
+        <Button
+            android:id="@+id/main_nav_bar_left2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:drawableTop="@drawable/feeds_icon_yes"
+            android:background="@android:color/transparent"
+            android:layout_toLeftOf="@+id/main_nav_center2"
+            />
+        <Button
+        android:id="@+id/main_nav_center2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:drawableTop="@drawable/play"
+        android:background="@android:color/transparent"
+        android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/main_nav_right2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/message_no"
+            android:background="@android:color/transparent"
+            android:layout_toRightOf="@+id/main_nav_center2"
+            android:layout_alignParentBottom="true"
+            />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/main_nav_bar_rl"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/play_color2"
+        >
+    <Button
+        android:id="@+id/main_nav_bar_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="动态"
+        android:drawableTop="@drawable/feeds_icon_no"
+        android:background="@android:color/transparent"
+        android:textColor="@color/text_color_gray"
+        android:drawablePadding="6dp"
+        android:layout_marginBottom="3dp"
         />
 
+    <Button
+        android:id="@+id/main_nav_bar_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:drawableTop="@drawable/message_no"
+        android:text="消息"
+        android:textColor="@color/text_color_gray"
+        android:background="@android:color/transparent"
+        android:drawablePadding="6dp"
+        android:layout_marginBottom="3dp"
+        />
+    </RelativeLayout>
 </RelativeLayout>

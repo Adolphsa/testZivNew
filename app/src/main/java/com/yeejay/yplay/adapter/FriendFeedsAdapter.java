@@ -72,7 +72,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
 
         if (listCb != null && listCb.contains(position)){
             System.out.println("修改背景");
-            holder.ffItemRl.setBackgroundColor(Color.parseColor("#FF4081"));
+            holder.ffItemRl.setBackgroundColor(Color.parseColor("#dddddd"));
         }else {
             holder.ffItemRl.setBackgroundColor(Color.parseColor("#ffffff"));
         }

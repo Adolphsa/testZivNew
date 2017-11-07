@@ -5,10 +5,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
-import com.luseen.spacenavigation.SpaceItem;
-import com.luseen.spacenavigation.SpaceNavigationView;
-import com.luseen.spacenavigation.SpaceOnClickListener;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.friend.FragmentFriend;
@@ -19,14 +19,60 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.main_view_pager)
     ViewPager viewPager;
+    @BindView(R.id.main_nav_bar_left)
+    Button mainNavBarLeft;
+    @BindView(R.id.main_nav_bar_right)
+    Button mainNavBarRight;
+    @BindView(R.id.main_nav_bar_rl)
+    RelativeLayout mainNavBarRl;
 
-    @BindView(R.id.main_nav_bar)
-    SpaceNavigationView spaceNavigationView;
+    @BindView(R.id.main_nav_bar_left2)
+    Button mainNavBarLeft2;
+    @BindView(R.id.main_nav_center2)
+    Button mainNavCenter2;
+    @BindView(R.id.main_nav_right2)
+    Button mainNavRight2;
+    @BindView(R.id.mainnav_bar2)
+    RelativeLayout mainnavBar2;
+
+    @OnClick(R.id.main_nav_bar_left)
+    public void leftButton(View view) {
+        viewPager.setCurrentItem(0);
+        feedsFragmentStatus();
+    }
+
+
+    @OnClick(R.id.main_nav_bar_right)
+    public void rightButton(View view) {
+        viewPager.setCurrentItem(2);
+        messageFragmentStatus();
+    }
+
+    //左二
+    @OnClick(R.id.main_nav_bar_left2)
+    public void leftButton2(View view){
+        viewPager.setCurrentItem(0);
+        feedsFragmentStatus();
+    }
+
+    @OnClick(R.id.main_nav_center2)
+    public void ceneterButton2(View view){
+        viewPager.setCurrentItem(1);
+        playFragmentStatus();
+    }
+
+    @OnClick(R.id.main_nav_right2)
+    public void rightButton2(View view){
+        viewPager.setCurrentItem(2);
+        messageFragmentStatus();
+    }
+
 
     FragmentAdapter frgAdapter;
     FragmentFriend fragmentFriend;
@@ -39,10 +85,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        initSpaceNavigationView(savedInstanceState);
+        initMainView();
         addFragment();
         viewPager.setAdapter(frgAdapter);
         viewPager.setCurrentItem(1);
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                System.out.println("当前为第" + i + "页");
+                if (i == 0){
+                    feedsFragmentStatus();
+                }else if (i == 1){
+                    playFragmentStatus();
+                }else if (i == 2){
+                    messageFragmentStatus();
+                }
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
     private void addFragment() {
@@ -57,45 +127,36 @@ public class MainActivity extends AppCompatActivity {
         frgAdapter = new FragmentAdapter(getSupportFragmentManager(), fragments);
     }
 
-    private void initSpaceNavigationView(Bundle savedInstanceState) {
-        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
-        spaceNavigationView.addSpaceItem(new SpaceItem("", R.drawable.userinfo_small));
-        spaceNavigationView.addSpaceItem(new SpaceItem("", R.drawable.userinfo_small));
+    private void initMainView(){
+        mainNavBarRl.setVisibility(View.VISIBLE);
+        mainnavBar2.setVisibility(View.GONE);
 
-        spaceNavigationView.setSpaceOnClickListener(new SpaceOnClickListener() {
-            @Override
-            public void onCentreButtonClick() {
-                System.out.println("中间按钮被点击了");
-                viewPager.setCurrentItem(1);
-            }
+    }
 
-            @Override
-            public void onItemClick(int itemIndex, String itemName) {
-                System.out.println("itemIndex---" + itemIndex + ",itemName" + itemName);
-                if (itemIndex == 0) {
-                    viewPager.setCurrentItem(0);
-                    //拉取数据
-                    //fragmentFriend.getFriendFeeds(BaseUtils.getCurrentDayTimeMillis(), 10);
-                } else if (itemIndex == 1) {
-                    viewPager.setCurrentItem(2);
-                }
-            }
+    //动态
+    private void feedsFragmentStatus(){
+        mainNavBarRl.setVisibility(View.INVISIBLE);
+        mainnavBar2.setVisibility(View.VISIBLE);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
+    }
 
-            @Override
-            public void onItemReselected(int itemIndex, String itemName) {
-                System.out.println("onItemReselected---" + itemIndex);
-                if (itemIndex == 0) {
-                    viewPager.setCurrentItem(0);
-                } else if (itemIndex == 1) {
-                    viewPager.setCurrentItem(2);
-                }
-            }
-        });
+    //答题
+    private void playFragmentStatus(){
+        mainNavBarRl.setVisibility(View.VISIBLE);
+        mainnavBar2.setVisibility(View.INVISIBLE);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+    }
+
+    //消息
+    private void messageFragmentStatus(){
+        mainNavBarRl.setVisibility(View.INVISIBLE);
+        mainnavBar2.setVisibility(View.VISIBLE);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
     }
 
     @Override
-    public boolean onKeyDown(int keyCode,KeyEvent event){
-        if(keyCode==KeyEvent.KEYCODE_BACK)
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }

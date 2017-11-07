@@ -1,6 +1,5 @@
 package com.yeejay.yplay.answer;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
@@ -8,18 +7,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
-import com.yeejay.yplay.friend.ActivitySearchFriends;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
@@ -40,8 +38,8 @@ public class ActivityInviteFriend extends AppCompatActivity {
 
     @BindView(R.id.aif_back)
     ImageButton aifBack;
-    @BindView(R.id.aif_tv_search_view)
-    TextView aifTvSearchView;
+//    @BindView(R.id.aif_tv_search_view)
+//    TextView aifTvSearchView;
     @BindView(R.id.aif_list_view)
     ListView aifListView;
     @BindView(R.id.aif_ptf_refresh)
@@ -57,6 +55,9 @@ public class ActivityInviteFriend extends AppCompatActivity {
         setContentView(R.layout.activity_invite_friend);
         ButterKnife.bind(this);
 
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityInviteFriend.this,true);
+
         mDataList = new ArrayList<>();
         getRecommends(2,mPageNum);
         loadMore();
@@ -65,11 +66,6 @@ public class ActivityInviteFriend extends AppCompatActivity {
     @OnClick(R.id.aif_back)
     public void back(View view){
         finish();
-    }
-
-    @OnClick(R.id.aif_tv_search_view)
-    public void tvSearch(View view){
-        startActivity(new Intent(ActivityInviteFriend.this,ActivitySearchFriends.class));
     }
 
     private void init(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {

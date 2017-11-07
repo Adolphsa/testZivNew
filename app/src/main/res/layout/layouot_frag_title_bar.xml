@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="8dp"
+    android:layout_height="38dp"
+    android:id="@+id/base_title_rl"
     >
 
     <ImageButton
         android:id="@+id/frg_user_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/userinfo_small"
+        android:src="@drawable/my_no_number"
         android:background="@android:color/transparent"
+        android:layout_marginLeft="20dp"
+        android:layout_centerVertical="true"
         />
     <TextView
         android:id="@+id/frg_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="大实话"
+        android:text="投稿"
         android:layout_centerInParent="true"
         android:textSize="18sp"
-        android:textColor="@android:color/black"
+        android:textColor="@color/edit_title_text_color"
+        android:gravity="center"
         />
-
+    <ImageButton
+        android:id="@+id/frg_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/edit"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:background="@android:color/transparent"
+        android:layout_centerVertical="true"
+        />
 </RelativeLayout>

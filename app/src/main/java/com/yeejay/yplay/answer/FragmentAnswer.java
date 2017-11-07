@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -45,8 +47,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class FragmentAnswer extends BaseFragment {
 
-    @BindView(R.id.frgans_tv_number)
-    TextView frgansTvNumber;
     @BindView(R.id.frgans_img)
     ImageView frgansImg;
     @BindView(R.id.frgans_question)
@@ -75,6 +75,14 @@ public class FragmentAnswer extends BaseFragment {
     ImageButton frgUserInfo;
     @BindView(R.id.frgans_count_down_view)
     CountdownView frgansCountDownView;
+    @BindView(R.id.base_title_rl)
+    RelativeLayout baseTitleRl;
+    @BindView(R.id.frg_title)
+    TextView frgTitle;
+    @BindView(R.id.frg_edit)
+    ImageButton frgEdit;
+    @BindView(R.id.frgans_linear_layout)
+    LinearLayout frgansLinlearLayout;
 
     int questionNum = 0;
     int nextPersonCount = 1;
@@ -82,7 +90,7 @@ public class FragmentAnswer extends BaseFragment {
     int total;
 
     //倒计时时间
-    private final static int LIMIT_TIME = 10*1000;
+    private final static int LIMIT_TIME = 20*1000;
     List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;
     QuestionListRespond.PayloadBean.QuestionsBean questionsBean;
 
@@ -94,7 +102,7 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_tv_relieve)
     public void relieve(View view){
         System.out.println("解除冷冻");
-        relieve();
+//        relieve();
     }
 
     @OnClick(R.id.frgans_btn1)
@@ -277,6 +285,13 @@ public class FragmentAnswer extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+
+        getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+        baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
+        frgTitle.setVisibility(View.INVISIBLE);
+        frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color2));
+
+
         frgUserInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -308,10 +323,10 @@ public class FragmentAnswer extends BaseFragment {
             questionsBean = questionsList.get(questionNum);
             if (questionsBean != null) {
                 System.out.println("quesionNum---" + questionNum);
-                frgansTvNumber.setText((questionNum + 1) + "/15");
+               // frgansTvNumber.setText((questionNum + 1) + "/15");
                 String url = questionsBean.getQiconUrl();
                 if (!TextUtils.isEmpty(url)) {
-                    Picasso.with(getActivity()).load(url).resize(200, 150).into(frgansImg);
+                    Picasso.with(getActivity()).load(url).into(frgansImg);
                 }
                 frgansQuestion.setText(questionsBean.getQtext());
                 getQuestionsCandidate(questionsBean.getQid());
@@ -343,7 +358,7 @@ public class FragmentAnswer extends BaseFragment {
 
     //点击继续15次
     private void questionOut15() {
-        frgansImg.setImageDrawable(getResources().getDrawable(R.drawable.suo));
+        frgansImg.setImageDrawable(getResources().getDrawable(R.drawable.play_socket));
         frgansQuestion.setText("技能冷却");
         frgansCountDownView.setVisibility(View.VISIBLE);
         frgansCountDownView.start(LIMIT_TIME);
@@ -379,6 +394,16 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtn2.setVisibility(View.VISIBLE);
         frgansBtn3.setVisibility(View.VISIBLE);
         frgansBtn4.setVisibility(View.VISIBLE);
+
+        frgansBtn1.updateProgress(0);
+        frgansBtn2.updateProgress(0);
+        frgansBtn3.updateProgress(0);
+        frgansBtn4.updateProgress(0);
+
+        frgansBtn1.setEnabled(true);
+        frgansBtn2.setEnabled(true);
+        frgansBtn3.setEnabled(true);
+        frgansBtn4.setEnabled(true);
     }
 
     //拉取问题列表

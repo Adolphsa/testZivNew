@@ -62,6 +62,11 @@ public class FragmentFriend extends BaseFragment {
 
     int refreshOffset = 0;
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
     //加好友
     @OnClick(R.id.ff_imgbtn_add_friends)
     public void ffAddFriends(View view) {
@@ -75,6 +80,7 @@ public class FragmentFriend extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+
         //跳转到我的资料
         jumpToUserInfo();
         mDataList = new ArrayList<>();
@@ -142,7 +148,7 @@ public class FragmentFriend extends BaseFragment {
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
-        if (isVisibleToUser){
+        if (isVisibleToUser) {
             System.out.println("FragmentFriend---可见");
             long ts = System.currentTimeMillis();
             System.out.println("ts---" + ts);
@@ -348,8 +354,4 @@ public class FragmentFriend extends BaseFragment {
     }
 
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-    }
 }

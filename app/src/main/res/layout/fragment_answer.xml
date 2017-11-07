@@ -3,37 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:id="@+id/frgans_linear_layout"
+    >
 
     <include layout="@layout/layouot_frag_title_bar" />
 
-    <TextView
-        android:id="@+id/frgans_tv_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="5dp"
-        android:padding="5dp"
-        android:text="1/15" />
-
     <ImageView
         android:id="@+id/frgans_img"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
+        android:layout_width="186dp"
+        android:layout_height="186dp"
         android:src="@drawable/app_img"
         android:layout_gravity="center"
         android:scaleType="fitXY"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         />
     <TextView
         android:id="@+id/frgans_question"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="这个人的笑声最魔性"
         android:layout_gravity="center"
-        android:padding="8dp"
-        android:textSize="16sp"
-        android:layout_marginTop="10dp"
+        android:textSize="22sp"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="23dp"
+        android:layout_marginRight="23dp"
+        android:gravity="center"
+        android:textColor="@color/white"
     />
     <cn.iwgang.countdownview.CountdownView
         android:id="@+id/frgans_count_down_view"
@@ -43,12 +39,12 @@
         app:isHideTimeBackground="true"
         app:isShowMinute="true"
         app:isShowSecond="true"
-        app:timeTextColor="#000000"
+        app:timeTextColor="#ffffff"
         app:timeTextSize="22sp"
         app:isTimeTextBold="true"
         app:suffixGravity="bottom"
-        app:suffixTextColor="#000000"
-        app:suffixTextSize="12sp"
+        app:suffixTextColor="#ffffff"
+        app:suffixTextSize="22sp"
         app:suffixMinute="分"
         app:suffixSecond="秒"
         android:visibility="gone"
@@ -57,57 +53,59 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="35dp"
         >
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn1"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
             android:gravity="center"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="42dp"
             android:text="faker"
-            android:background="@color/white"
+            android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn2"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
             android:gravity="center"
             android:text="孙亚龙"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="60dp"
-            android:background="@color/white"
+            android:layout_toRightOf="@+id/frgans_btn1"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn3"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
             android:gravity="center"
             android:text="笑笑"
             android:layout_below="@+id/frgans_btn1"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="42dp"
             android:layout_marginTop="10dp"
-            android:background="@color/white"
+            android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn4"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
             android:text="五五开"
             android:gravity="center"
-            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/frgans_btn3"
+            android:layout_marginLeft="20dp"
             android:layout_below="@+id/frgans_btn2"
-            android:layout_marginRight="60dp"
             android:layout_marginTop="10dp"
-            android:background="@color/white"
+            android:background="@drawable/play_button_background"
             />
         <TextView
             android:id="@+id/frgans_tv_or"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="或者"
+            android:text="—— 或者 ——"
+            android:textSize="16sp"
             android:layout_centerHorizontal="true"
             android:visibility="invisible"
+            android:textColor="@android:color/white"
             />
         <TextView
             android:id="@+id/frgans_tv_relieve"
@@ -115,58 +113,56 @@
             android:layout_height="wrap_content"
             android:text="解除冷却"
             android:layout_centerHorizontal="true"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
             android:layout_below="@id/frgans_tv_or"
             android:layout_marginTop="20dp"
             android:visibility="invisible"
+            />
+        <Button
+            android:id="@+id/frgans_btn_invite"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
+            android:text="邀请好友"
+            android:background="@drawable/play_button_background"
+            android:layout_centerInParent="true"
+            android:visibility="invisible"
+            android:layout_below="@+id/frgans_tv_relieve"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/play_color2"
             />
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/frgans_rl_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:padding="3dp"
+        android:layout_marginTop="18dp"
         >
-
         <Button
             android:id="@+id/frgans_tn_next_person"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="换批人"
-            android:background="@android:color/transparent"
-            android:layout_marginLeft="17dp"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
+            android:background="@drawable/selector_paly_replace"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="17dp" />
-        <Button
-            android:id="@+id/frgans_btn_keep"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="点击继续"
-            android:background="@android:color/transparent"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"
+            android:layout_marginStart="42dp"
             />
         <Button
-            android:id="@+id/frgans_btn_invite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="邀请好友"
-            android:background="@android:color/transparent"
+            android:id="@+id/frgans_btn_keep"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
+            android:background="@drawable/selector_go_on"
             android:layout_centerInParent="true"
             android:visibility="invisible"
             />
         <Button
             android:id="@+id/frgans_btn_next_question"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="过"
-            android:background="@android:color/transparent"
-            android:layout_marginRight="20dp"
-            android:layout_alignParentRight="true"
+            android:layout_width="136dp"
+            android:layout_height="58dp"
+            android:background="@drawable/selector_next"
+           android:layout_toRightOf="@+id/frgans_tn_next_person"
+            android:layout_marginLeft="20dp"
             />
 
     </RelativeLayout>

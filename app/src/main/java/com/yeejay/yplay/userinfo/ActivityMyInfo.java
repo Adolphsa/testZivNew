@@ -104,6 +104,8 @@ public class ActivityMyInfo extends AppCompatActivity {
         setContentView(R.layout.activity_my_info);
         ButterKnife.bind(this);
 
+        System.out.println("我的----------");
+
         mDataList = new ArrayList<>();
         int uin = (int)SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
 

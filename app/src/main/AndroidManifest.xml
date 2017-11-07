@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".login.Login"
+            android:name=".MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".login.LoginAge" />
-        <!--<activity android:name=".login.Login" />-->
+        <activity android:name=".login.Login" />
         <activity android:name=".login.LoginAuthorization" />
         <activity android:name=".login.ClassList" />
         <activity android:name=".login.SchoolList" />
@@ -57,7 +57,7 @@
         <activity android:name=".friend.ActivityContacts" />
         <activity android:name=".friend.ActivitySchoolmate" />
         <activity android:name=".friend.ActivityWaitInvite" />
-         <activity android:name=".MainActivity"/>
+         <!--<activity android:name=".MainActivity"/>-->
 
 
         <!-- service -->

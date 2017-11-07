@@ -19,4 +19,22 @@
     <color name="purple_progress">#03a9f4</color>
 
     <color name="green_yellow">#ADFF2F</color>
+
+    <!--play color-->
+    <color name="play_color1">#7785FF</color>
+    <color name="play_color2">#52E0AF</color>
+    <color name="play_color3">#FF7A8F</color>
+    <color name="play_color4">#57A8FF</color>
+
+    <!--edit color-->
+    <color name="edit_title_text_color">#483DE2</color>
+
+    <!--text color-->
+    <color name="text_color_gray">#333333</color>
+
+    <!--feeds-->
+    <color name="feeds_title_color">#EE4765</color>
+
+    <!--message-->
+    <color name="message_title_color">#57A8FF</color>
 </resources>

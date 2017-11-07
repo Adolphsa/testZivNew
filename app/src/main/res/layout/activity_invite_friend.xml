@@ -8,30 +8,30 @@
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.answer.ActivityInviteFriend">
 
-    <ImageButton
-        android:id="@+id/aif_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_delete"
-        />
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="邀请好友\n
-   解锁更多问题"
-        android:textSize="28sp"
-        android:gravity="center"
-        android:padding="20dp"
-        />
+        android:layout_height="38dp"
+        android:background="@color/white"
+        >
 
-    <TextView
-        android:id="@+id/aif_tv_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="5dp"
-        android:text="搜索实话号" />
-
+        <ImageButton
+            android:id="@+id/aif_back"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/play_back"
+            android:layout_marginLeft="20dp"
+            android:scaleType="fitXY"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="邀请好友"
+            android:layout_centerInParent="true"
+            android:textColor="@color/play_color2"
+            android:textSize="18sp"
+            />
+    </RelativeLayout>
 
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:id="@+id/aif_ptf_refresh"
