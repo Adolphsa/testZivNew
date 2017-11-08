@@ -24,13 +24,13 @@ import tangxiaolv.com.library.EffectiveShapeView;
  * Created by Administrator on 2017/10/27.
  */
 
-public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListener {
+public class ScoolmateAdapter2 extends BaseAdapter implements View.OnClickListener {
 
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
 
-    List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromAddrBookBean> contentList;
+    List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromNotRegisterBean> contentList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -53,10 +53,10 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
         void acceptClick(View v);
     }
 
-    public ScoolmateAdapter(Context context,
-                            hideCallback hideCallback,
-                            acceptCallback acceptCallback,
-                            List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromAddrBookBean> list) {
+    public ScoolmateAdapter2(Context context,
+                             hideCallback hideCallback,
+                             acceptCallback acceptCallback,
+                             List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromNotRegisterBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -111,7 +111,9 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
         }else if (recommendType == 2){ //等待邀请
             holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_invite);
+            holder.afBtnAccept.setVisibility(View.INVISIBLE);
+            holder.afBtnAccept2.setVisibility(View.VISIBLE);
+
         }else if (recommendType == 3){ //同校非好友
             String str = FriendFeedsUtil.schoolType(contentList.get(position).getSchoolType(),
                     contentList.get(position).getGrade());
@@ -119,7 +121,9 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
         }
         holder.afBtnAccept.setOnClickListener(acceptListener);
+        holder.afBtnAccept2.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
+        holder.afBtnAccept2.setTag(position);
         return convertView;
     }
 

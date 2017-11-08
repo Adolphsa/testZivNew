@@ -6,6 +6,7 @@ import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.GetRecommendAll;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
@@ -188,4 +189,14 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/user/getusersbyphone")
     Observable<UserInfoResponde> getUserInfoByPhone(@FieldMap Map<String,Object> filemap);
+
+    //空页面随机推荐好友
+    @FormUrlEncoded
+    @POST("/api/sns/getrandomrecommends")
+    Observable<GetRecommendsRespond> recommendFriendsForNull(@FieldMap Map<String,Object> filemap);
+
+    //⼀一次拉取多个类型的好友推荐列列表
+    @FormUrlEncoded
+    @POST("/api/sns/getrecommendsall")
+    Observable<GetRecommendAll> getAllRecommends(@FieldMap Map<String,Object> filemap);
 }

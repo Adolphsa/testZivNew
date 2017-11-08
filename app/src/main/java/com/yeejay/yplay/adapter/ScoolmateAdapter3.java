@@ -24,13 +24,13 @@ import tangxiaolv.com.library.EffectiveShapeView;
  * Created by Administrator on 2017/10/27.
  */
 
-public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListener {
+public class ScoolmateAdapter3 extends BaseAdapter implements View.OnClickListener {
 
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
 
-    List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromAddrBookBean> contentList;
+    List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromSameSchoolBean> contentList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -53,10 +53,10 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
         void acceptClick(View v);
     }
 
-    public ScoolmateAdapter(Context context,
-                            hideCallback hideCallback,
-                            acceptCallback acceptCallback,
-                            List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromAddrBookBean> list) {
+    public ScoolmateAdapter3(Context context,
+                             hideCallback hideCallback,
+                             acceptCallback acceptCallback,
+                             List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromSameSchoolBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -134,8 +134,6 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
         TextView afItemTvSharesFriends;
         @BindView(R.id.af_btn_accept)
         Button afBtnAccept;
-        @BindView(R.id.af_btn_accept2)
-        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

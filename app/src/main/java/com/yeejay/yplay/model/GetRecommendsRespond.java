@@ -95,6 +95,7 @@ public class GetRecommendsRespond {
              * schoolType : 0
              * schoolName :
              * phone : 13001000165
+             * recommendType : 1
              * status : 4
              */
 
@@ -107,6 +108,7 @@ public class GetRecommendsRespond {
             private int schoolType;
             private String schoolName;
             private String phone;
+            private int recommendType;
             private int status;
 
             public int getUin() {
@@ -181,6 +183,14 @@ public class GetRecommendsRespond {
                 this.phone = phone;
             }
 
+            public void setRecommendType(int recommendType) {
+                this.recommendType = recommendType;
+            }
+
+            public int getRecommendType() {
+                return recommendType;
+            }
+
             public int getStatus() {
                 return status;
             }
@@ -188,6 +198,7 @@ public class GetRecommendsRespond {
             public void setStatus(int status) {
                 this.status = status;
             }
+
 
             @Override
             public String toString() {
@@ -201,6 +212,7 @@ public class GetRecommendsRespond {
                         ", schoolType=" + schoolType +
                         ", schoolName='" + schoolName + '\'' +
                         ", phone='" + phone + '\'' +
+                        ", recommendType=" + recommendType +
                         ", status=" + status +
                         '}';
             }

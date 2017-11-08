@@ -84,8 +84,12 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         holder.ffItemName.setText(daoFriendFeeds.getFriendNickName());
         holder.ffItemTvTime.setText(YplayTimeUtils.format(daoFriendFeeds.getTs()));
         holder.ffItemQuestionContent.setText(daoFriendFeeds.getQtext());
-        Picasso.with(mContext).load(daoFriendFeeds.getQiconUrl()).into(holder.ffItemSmallImg);
-        StringBuilder builder = new StringBuilder("来自");
+        if (daoFriendFeeds.getFriendGender() == 1){//男
+            holder.ffItemSmallImg.setImageResource(R.drawable.feeds_boy);
+        }else{//女
+            holder.ffItemSmallImg.setImageResource(R.drawable.feeds_girl);
+        }
+        StringBuilder builder = new StringBuilder("来自:");
         builder.append(schoolType(daoFriendFeeds.getVoteFromSchoolType(),daoFriendFeeds.getVoteFromGrade()));
         builder.append("的");
         builder.append(boyOrGirl(daoFriendFeeds.getVoteFromGender()));

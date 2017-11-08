@@ -105,11 +105,16 @@ public class ActivityMyInfo extends AppCompatActivity {
         ButterKnife.bind(this);
 
         System.out.println("我的----------");
-
         mDataList = new ArrayList<>();
-        int uin = (int)SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("我的----------onResume");
         getMyInfo();
+        int uin = (int)SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
         getUserDiamondInfo(uin,1);
         getMyFriendsList(mPageNum);
     }

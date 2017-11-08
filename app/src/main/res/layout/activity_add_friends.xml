@@ -5,24 +5,73 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/white"
     tools:context="com.yeejay.yplay.friend.AddFriends">
 
-    <include layout="@layout/layout_title_bar" />
+    <include layout="@layout/layout_title_bar2" />
 
     <TextView
         android:id="@+id/searchView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="搜索用户名"
+        android:layout_height="40dp"
+        android:text="搜索门牌号"
+        android:textColor="@color/feeds_hight_gray"
         android:drawableLeft="@drawable/search"
-        android:padding="8dp"
-        android:drawablePadding="8dp"
-        android:background="@drawable/item_background"
-        />
+        android:gravity="center_vertical"
+        android:drawablePadding="15dp"
+        android:background="@color/feeds_search_color"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="10dp"
+        android:textSize="16sp" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        >
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="通讯录好友"
+            android:background="@android:color/transparent"
+            android:textColor="@color/feeds_text_color"
+            android:drawableTop="@drawable/feeds_contacts"
+            android:drawablePadding="8dp"
+            android:layout_weight="1"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="同校同学"
+            android:background="@android:color/transparent"
+            android:textColor="@color/feeds_text_color"
+            android:drawableTop="@drawable/feeds_school_mate"
+            android:drawablePadding="8dp"
+            android:layout_weight="1"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="等待邀请"
+            android:background="@android:color/transparent"
+            android:textColor="@color/feeds_text_color"
+            android:drawableTop="@drawable/feeds_wait_invite"
+            android:drawablePadding="8dp"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
+    
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -31,7 +80,9 @@
                 <com.yeejay.yplay.customview.MesureListView
                     android:id="@+id/af_lv_add_friends_list_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    />
 
                 <com.yeejay.yplay.customview.MesureListView
                     android:id="@+id/af_lv_book_friends_list"

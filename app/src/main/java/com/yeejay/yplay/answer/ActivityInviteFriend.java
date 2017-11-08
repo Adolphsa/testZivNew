@@ -89,7 +89,8 @@ public class ActivityInviteFriend extends AppCompatActivity {
             public void acceptClick(View v) {
                 System.out.println("邀请按钮被点击");
                 Button button = (Button) v;
-                button.setText("已邀请");
+                //button.setText("已邀请");
+                button.setBackgroundResource(R.drawable.play_invite_yes);
                 button.setEnabled(false);
                 //邀请好友的请求
 

@@ -36,7 +36,9 @@
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:id="@+id/aif_ptf_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        >
         <ListView
             android:id="@+id/aif_list_view"
             android:layout_width="match_parent"

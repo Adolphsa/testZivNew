@@ -47,6 +47,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class FragmentAnswer extends BaseFragment {
 
+    @BindView(R.id.frans_question_number)
+    TextView fransTvQuestionCount;
     @BindView(R.id.frgans_img)
     ImageView frgansImg;
     @BindView(R.id.frgans_question)
@@ -323,7 +325,7 @@ public class FragmentAnswer extends BaseFragment {
             questionsBean = questionsList.get(questionNum);
             if (questionsBean != null) {
                 System.out.println("quesionNum---" + questionNum);
-               // frgansTvNumber.setText((questionNum + 1) + "/15");
+                fransTvQuestionCount.setText(( questionNum+1) + "/15");
                 String url = questionsBean.getQiconUrl();
                 if (!TextUtils.isEmpty(url)) {
                     Picasso.with(getActivity()).load(url).into(frgansImg);
@@ -363,6 +365,8 @@ public class FragmentAnswer extends BaseFragment {
         frgansCountDownView.setVisibility(View.VISIBLE);
         frgansCountDownView.start(LIMIT_TIME);
 
+        fransTvQuestionCount.setVisibility(View.INVISIBLE);
+
         frgansBtn1.setVisibility(View.INVISIBLE);
         frgansBtn2.setVisibility(View.INVISIBLE);
         frgansBtn3.setVisibility(View.INVISIBLE);
@@ -381,6 +385,9 @@ public class FragmentAnswer extends BaseFragment {
 
         questionNum = 0;
         getQuestionsList();
+
+        fransTvQuestionCount.setVisibility(View.VISIBLE);
+        fransTvQuestionCount.setText(( questionNum+1) + "/15");
 
         frgansTvOr.setVisibility(View.INVISIBLE);
         frgansTvRelieve.setVisibility(View.INVISIBLE);

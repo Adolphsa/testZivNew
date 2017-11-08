@@ -117,7 +117,7 @@ public class LoginAge extends AppCompatActivity {
         normalDialog.show();
     }
 
-    //设置姓名
+    //设置年龄
     private void settingAge(int age){
 
         Map<String,Object> nameMap = new HashMap<>();

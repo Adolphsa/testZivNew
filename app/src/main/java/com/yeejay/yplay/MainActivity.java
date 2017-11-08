@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         feedsFragmentStatus();
     }
 
-
     @OnClick(R.id.main_nav_bar_right)
     public void rightButton(View view) {
         viewPager.setCurrentItem(2);
@@ -72,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setCurrentItem(2);
         messageFragmentStatus();
     }
-
 
     FragmentAdapter frgAdapter;
     FragmentFriend fragmentFriend;

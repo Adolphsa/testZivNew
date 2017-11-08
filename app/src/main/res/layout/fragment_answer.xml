@@ -8,7 +8,15 @@
     >
 
     <include layout="@layout/layouot_frag_title_bar" />
-
+    <TextView
+        android:id="@+id/frans_question_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1/15"
+        android:textSize="14sp"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/white"
+        />
     <ImageView
         android:id="@+id/frgans_img"
         android:layout_width="186dp"
@@ -17,6 +25,7 @@
         android:layout_gravity="center"
         android:scaleType="fitXY"
         android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
         />
     <TextView
         android:id="@+id/frgans_question"
@@ -25,7 +34,7 @@
         android:text="这个人的笑声最魔性"
         android:layout_gravity="center"
         android:textSize="22sp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="23dp"
         android:layout_marginRight="23dp"
         android:gravity="center"
@@ -53,7 +62,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="20dp"
         >
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn1"
