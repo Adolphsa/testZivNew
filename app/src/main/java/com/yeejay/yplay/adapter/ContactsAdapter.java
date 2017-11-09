@@ -96,31 +96,42 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
         }
         holder.afItemName.setText(contentList.get(position).getNickName());
-        holder.afBtnHide.setOnClickListener(hideListener);
-        holder.afBtnHide.setTag(position);
-        holder.afBtnHide.setVisibility(View.VISIBLE);
+        String  phone = contentList.get(position).getPhone();
+        holder.afItemTvSharesFriends.setText(phone);
+//        holder.afBtnHide.setOnClickListener(hideListener);
+//        holder.afBtnHide.setTag(position);
+//        holder.afBtnHide.setVisibility(View.VISIBLE);
+        holder.afBtnAccept2.setVisibility(View.GONE);
         int status = contentList.get(position).getStatus();
-        if (status == 2){
-            holder.afBtnAccept.setText("已申请");
+        if (status == 1){ //好友
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_is_friend);
+            holder.afBtnAccept.setEnabled(false);
+        }else if (status == 2){ //已申请
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_apply);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setText("加好友");
             holder.afBtnAccept.setEnabled(true);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }
         holder.afBtnAccept.setTag(position);
+
         return convertView;
     }
 
     static class ViewHolder {
         @BindView(R.id.af_item_header_img)
         EffectiveShapeView afItemHeaderImg;
+        @BindView(R.id.af_item_text_family_name)
+        TextView afItemFamilyName;
         @BindView(R.id.af_item_name)
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)
         TextView afItemTvSharesFriends;
         @BindView(R.id.af_btn_accept)
         Button afBtnAccept;
+        @BindView(R.id.af_btn_accept2)
+        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

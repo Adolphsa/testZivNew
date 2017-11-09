@@ -109,6 +109,7 @@ public class ScoolmateAdapter extends BaseAdapter implements View.OnClickListene
         if (recommendType == 1){    //通讯录好友
             holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
+            holder.afBtnAccept2.setVisibility(View.GONE);
         }else if (recommendType == 2){ //等待邀请
             holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_invite);

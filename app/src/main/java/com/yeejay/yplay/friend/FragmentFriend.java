@@ -106,7 +106,9 @@ public class FragmentFriend extends BaseFragment {
                 intent.putExtra("yplay_friend_school_grade",
                         FriendFeedsUtil.schoolType(tempFeeds.getVoteFromSchoolType(),
                                 tempFeeds.getVoteFromGrade()));
-
+                intent.putExtra("yplay_friend_gender",tempFeeds.getFriendGender());
+                intent.putExtra("yplay_friend_uin",tempFeeds.getFriendUin());
+                System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
                 //将被点击的item设置为已读
                 DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
                         .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
@@ -157,12 +159,6 @@ public class FragmentFriend extends BaseFragment {
             long ts = System.currentTimeMillis();
             System.out.println("ts---" + ts);
             getFriendFeeds(ts, 10);
-
-            if (mDataList == null ){
-                fransFrfLayout.setVisibility(View.VISIBLE);
-                ffPtfRefreshLayout.setVisibility(View.GONE);
-                initRecommentFriends();
-            }
 
         }
 
@@ -246,8 +242,20 @@ public class FragmentFriend extends BaseFragment {
         System.out.println("刷新----refreshOffser---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
-        mDataList.addAll(refreshList);
-        feedsAdapter.notifyDataSetChanged();
+        if (refreshList.size() == 0){
+            System.out.println("无动态");
+            fransFrfLayout.setVisibility(View.VISIBLE);
+            ffPtfRefreshLayout.setVisibility(View.GONE);
+            initRecommentFriends();
+        }else {
+            System.out.println("有动态");
+            fransFrfLayout.setVisibility(View.GONE);
+            ffPtfRefreshLayout.setVisibility(View.VISIBLE);
+            mDataList.addAll(refreshList);
+            feedsAdapter.notifyDataSetChanged();
+        }
+
+
     }
 
     //数据查询
@@ -368,8 +376,8 @@ public class FragmentFriend extends BaseFragment {
     ListView rfListView;
 
     //初始化推荐好友界面
-    private void initRecommentFriends(){
-        if (fransFrfLayout.isShown()){
+    private void initRecommentFriends() {
+        if (fransFrfLayout.isShown()) {
             rfListView = (ListView) fransFrfLayout.findViewById(R.id.frf_list_view);
             Button addFriend = (Button) fransFrfLayout.findViewById(R.id.frf_btn_add_friend);
             TextView noMoreShowTv = (TextView) fransFrfLayout.findViewById(R.id.frf_no_more_show);
@@ -386,14 +394,18 @@ public class FragmentFriend extends BaseFragment {
                 public void onClick(View v) {
                     System.out.println("不再显示");
                     rl.setVisibility(View.INVISIBLE);
+                    SharePreferenceUtil.put(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,true);
                 }
             });
-
+            boolean noMoreShow = (boolean)SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,false);
+            if (noMoreShow){
+                rl.setVisibility(View.GONE);
+            }
             recommendFriendsForNull();
         }
     }
 
-    private void initRecommendList(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList){
+    private void initRecommendList(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
 
         recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(getActivity(),
                 new RecommendFriendForNullAdapter.hideCallback() {
@@ -406,16 +418,16 @@ public class FragmentFriend extends BaseFragment {
                     @Override
                     public void acceptClick(View v) {
                         Button button = (Button) v;
-                        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean= tempList.get((int) v.getTag());
+                        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = tempList.get((int) v.getTag());
                         int recommendType = friendsBean.getRecommendType();
-                        if (recommendType == 1 || recommendType == 2){
+                        if (recommendType == 1 || recommendType == 2) {
                             button.setBackgroundResource(R.drawable.play_invite_yes);
                             //邀请
                             String phone = GsonUtil.GsonString(friendsBean.getPhone());
                             System.out.println("邀请的电话---" + phone);
                             String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                             invitefriendsbysms(base64phone);
-                        }else if (recommendType == 3){
+                        } else if (recommendType == 3) {
                             button.setBackgroundResource(R.drawable.btn_alread_applt);
                             int uin = friendsBean.getUin();
                             addFriend(uin);
@@ -427,12 +439,12 @@ public class FragmentFriend extends BaseFragment {
     }
 
     //获取推荐好友信息
-    private void recommendFriendsForNull(){
+    private void recommendFriendsForNull() {
 
         Map<String, Object> tempMap = new HashMap<>();
-        tempMap .put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        tempMap .put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        tempMap .put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        tempMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        tempMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        tempMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
                 .recommendFriendsForNull(tempMap)
                 .subscribeOn(Schedulers.io())
@@ -446,7 +458,7 @@ public class FragmentFriend extends BaseFragment {
                     @Override
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         System.out.println("推荐好友---" + getRecommendsRespond.toString());
-                        if (getRecommendsRespond.getCode() == 0){
+                        if (getRecommendsRespond.getCode() == 0) {
                             initRecommendList(getRecommendsRespond.getPayload().getFriends());
                         }
                     }

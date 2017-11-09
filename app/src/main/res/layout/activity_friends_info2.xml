@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    >
+
+    <include layout="@layout/layout_title_bar2"/>
+
+    <include layout="@layout/layout_user_info"/>
+
+    <include layout="@layout/layout_user_info_friends"
+
+        />
+    <include layout="@layout/layout_user_info_diamond"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <include
+            android:id="@+id/diamond_detail1"
+            layout="@layout/layout_user_info_diamond_detail"
+            android:layout_width="0dp"
+            android:layout_height="130dp"
+            android:layout_weight="1"
+            android:layout_marginTop="30dp"
+            />
+        <include
+            android:id="@+id/diamond_detail2"
+            layout="@layout/layout_user_info_diamond_detail"
+            android:layout_width="0dp"
+            android:layout_height="130dp"
+            android:layout_weight="1"
+            android:layout_marginTop="30dp"
+            />
+        <include
+            android:id="@+id/diamond_detail3"
+            layout="@layout/layout_user_info_diamond_detail"
+            android:layout_width="0dp"
+            android:layout_height="130dp"
+            android:layout_weight="1"
+            android:layout_marginTop="30dp"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/remove_friend"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="解除好友"
+        android:textColor="@color/play_color2"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+
+        />
+</LinearLayout>

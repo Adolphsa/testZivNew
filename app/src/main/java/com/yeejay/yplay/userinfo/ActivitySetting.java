@@ -380,6 +380,8 @@ public class ActivitySetting extends AppCompatActivity {
                                 settingUserName.setText(userName);
                             }
 
+                        }else if (baseRespond.getCode() == 11011){
+                            Toast.makeText(ActivitySetting.this,"用户名已经存在",Toast.LENGTH_SHORT).show();
                         }
                     }
 

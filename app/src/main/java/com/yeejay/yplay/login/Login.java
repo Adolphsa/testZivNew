@@ -146,30 +146,40 @@ public class Login extends AppCompatActivity {
     private void jumpToWhere(LoginRespond.PayloadBean.InfoBean infoBean){
         //判断年龄
         int age = infoBean.getAge();
-        System.out.println("年龄---" + age);
-        if (age == 0){
-            startActivity(new Intent(Login.this,LoginAge.class));
-        }
-        //判断年级
         int grade = infoBean.getGrade();
-        if (grade == 0){
-            startActivity(new Intent(Login.this,LoginAuthorization.class));
-        }
-        //判断学校信息
         int schoolId = infoBean.getSchoolId();
-        if (schoolId == 0){
-            startActivity(new Intent(Login.this,LoginAuthorization.class));
-        }
-        //判断性别
         int gender = infoBean.getGender();
-        if (gender == 0){
-            startActivity(new Intent(Login.this,ChoiceSex.class));
-        }
-        //判断基本信息
         String name = infoBean.getNickName();
-        if (TextUtils.isEmpty(name)){
-            startActivity(new Intent(Login.this,UserInfo.class));
+        System.out.println("年龄---" + age);
+        if (age == 0 || grade == 0 || schoolId == 0 || gender == 0 || TextUtils.isEmpty(name)){
+            startActivity(new Intent(Login.this,LoginAge.class));
+            return;
         }
+//        //判断年级
+//        //int grade = infoBean.getGrade();
+//        if (grade == 0){
+//            startActivity(new Intent(Login.this,LoginAuthorization.class));
+//
+//            return;
+//        }
+//        //判断学校信息
+//        //int schoolId = infoBean.getSchoolId();
+//        if (schoolId == 0){
+//            startActivity(new Intent(Login.this,LoginAuthorization.class));
+//            return;
+//        }
+//        //判断性别
+//        //int gender = infoBean.getGender();
+//        if (gender == 0){
+//            startActivity(new Intent(Login.this,ChoiceSex.class));
+//            return;
+//        }
+//        //判断基本信息
+//        //String name = infoBean.getNickName();
+//        if (TextUtils.isEmpty(name)){
+//            startActivity(new Intent(Login.this,UserInfo.class));
+//            return;
+//        }
 
         startActivity(new Intent(Login.this, MainActivity.class));
     }
@@ -244,6 +254,7 @@ public class Login extends AppCompatActivity {
                                 saveData(loginRespond.getPayload().getInfo());
                                 //逻辑跳转
                                 jumpToWhere(loginRespond.getPayload().getInfo());
+                                //startActivity(new Intent(Login.this,LoginAge.class));
                             }
                         } else {
                             Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();

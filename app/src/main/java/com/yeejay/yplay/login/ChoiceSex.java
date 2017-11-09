@@ -112,8 +112,8 @@ public class ChoiceSex extends AppCompatActivity {
                                 ChoiceSex.this.setResult(201,intent);
                                 ChoiceSex.this.finish();
                             }else {
-                                //startActivity(new Intent(ChoiceSex.this,UserInfo.class));
-                                jumpToWhere();
+                                startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                                //jumpToWhere();
                             }
 
                         }else {

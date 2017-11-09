@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="80dp"
+    android:background="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
@@ -24,7 +25,7 @@
         android:layout_toRightOf="@+id/afi_item_text_family_name"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="13dp"
         android:layout_marginLeft="19dp"
         />
 
@@ -37,7 +38,8 @@
         android:layout_below="@+id/af_item_name"
         android:layout_marginLeft="19dp"
         android:textSize="14sp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="10dp"
         />
 
     <Button

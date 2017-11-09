@@ -117,6 +117,7 @@ public class ScoolmateAdapter3 extends BaseAdapter implements View.OnClickListen
                     contentList.get(position).getGrade());
             holder.afItemTvSharesFriends.setText("同校" + str);
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
+            holder.afBtnAccept2.setVisibility(View.GONE);
         }
         holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
@@ -134,6 +135,8 @@ public class ScoolmateAdapter3 extends BaseAdapter implements View.OnClickListen
         TextView afItemTvSharesFriends;
         @BindView(R.id.af_btn_accept)
         Button afBtnAccept;
+        @BindView(R.id.af_btn_accept2)
+        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

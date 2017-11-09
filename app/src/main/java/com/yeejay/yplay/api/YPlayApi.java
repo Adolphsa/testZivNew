@@ -199,4 +199,6 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/sns/getrecommendsall")
     Observable<GetRecommendAll> getAllRecommends(@FieldMap Map<String,Object> filemap);
+
+
 }

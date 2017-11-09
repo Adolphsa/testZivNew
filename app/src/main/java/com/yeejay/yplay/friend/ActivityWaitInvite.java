@@ -5,8 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -18,6 +18,7 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
@@ -36,18 +37,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ActivityWaitInvite extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
-    @BindView(R.id.aafd_searchView)
-    SearchView aafdSearchView;
     @BindView(R.id.aafd_list_view)
     ListView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
 
-    @OnClick(R.id.layout_title_back)
+    @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
     }
@@ -61,6 +60,9 @@ public class ActivityWaitInvite extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activty_add_fiends_detail);
         ButterKnife.bind(this);
+
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityWaitInvite.this,true);
 
         layoutTitle.setText("等待邀请");
         mDataList = new ArrayList<>();
@@ -89,10 +91,9 @@ public class ActivityWaitInvite extends AppCompatActivity {
             public void acceptClick(View v) {
                 System.out.println("邀请按钮被点击");
                 Button button = (Button) v;
-                button.setText("已邀请");
+                button.setBackgroundResource(R.drawable.play_invite_yes);
                 button.setEnabled(false);
                 //邀请好友的请求
-
                 String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
                 System.out.println("邀请的电话---" + phone);
                 String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);

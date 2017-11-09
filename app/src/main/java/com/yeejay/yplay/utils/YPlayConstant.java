@@ -13,6 +13,9 @@ public class YPlayConstant {
     public static final String YPLAY_VER = "yplay_ver";
     public static final String YPLAY_FIRST_LATITUDE = "yplay_first_latitude";
     public static final String YPLAY_FIRST_LONGITUDE = "yplay_first_longitude";
+    public static final String YPLAY_LATITUDE = "yplay_latitude";
+    public static final String YPLAY_LONGITUDE = "yplay_longitude";
+
     public static final String YPLAY_SCHOOL_TYPE = "yplay_school_type";
     public static final String YPLAY_SCHOOL_GRADE = "yplay_school_grade";
     public static final String YPLAY_HEADER_IMG = "yplay_header_img";
@@ -22,4 +25,6 @@ public class YPlayConstant {
     public static final String TEMP_GENDER = "temp_gender";
     public static final String TEMP_GRADE = "temp_grade";
     public static final String TEMP_SCHOOL_ID = "temp_school_id";
+
+    public static final String YPLAY_NO_MORE_SHOW = "no_more_show";
 }

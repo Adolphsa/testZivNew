@@ -65,7 +65,8 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
     }
 
     @Override
-    public void onClick(View v) {}
+    public void onClick(View v) {
+    }
 
     @Override
     public int getCount() {
@@ -89,38 +90,33 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
             convertView = View.inflate(context, R.layout.item_add_friends, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
-        }else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
         String url = contentList.get(position).getHeadImgUrl();
-        if (!TextUtils.isEmpty(url)){
+        if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
         }
         holder.afItemName.setText(contentList.get(position).getNickName());
-        holder.afBtnHide.setOnClickListener(hideListener);
-        holder.afBtnHide.setTag(position);
-        holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
-        if (status == 0){
-            if (myUin == contentList.get(position).getUin()){
-                holder.afBtnAccept.setVisibility(View.INVISIBLE);
-                holder.afBtnHide.setVisibility(View.INVISIBLE);
-            }else {
-                holder.afBtnAccept.setText("加好友");
-                holder.afBtnAccept.setEnabled(true);
-                holder.afBtnAccept.setOnClickListener(acceptListener);
-            }
-        }else if (status == 1){
-            holder.afBtnAccept.setText("好友");
+        if (status == 0) {//非好友
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
+            holder.afBtnAccept.setEnabled(true);
+            holder.afBtnAccept.setOnClickListener(acceptListener);
+        } else if (status == 1) {//互为好友
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_is_friend);
             holder.afBtnAccept.setEnabled(false);
-        }else if (status == 2){
-            holder.afBtnAccept.setText("已申请");
+        } else if (status == 2) {//已申请
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_apply);
             holder.afBtnAccept.setEnabled(false);
-
-        }else if (status == 3){
-
+        } else if (status == 3) {//接受
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_accept);
+            holder.afBtnAccept.setEnabled(true);
+            holder.afBtnAccept.setOnClickListener(acceptListener);
         }
+        holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
         holder.afBtnAccept.setTag(position);
+        holder.afBtnAccept2.setVisibility(View.GONE);
         return convertView;
     }
 
@@ -133,6 +129,8 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
         TextView afItemTvSharesFriends;
         @BindView(R.id.af_btn_accept)
         Button afBtnAccept;
+        @BindView(R.id.af_btn_accept2)
+        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

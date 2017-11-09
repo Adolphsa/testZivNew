@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.friend.ActivityFriendsInfo">
 
-    <include layout="@layout/layout_title_bar"/>
+    <include layout="@layout/layout_title_bar2"/>
 
     <LinearLayout
         android:layout_width="match_parent"

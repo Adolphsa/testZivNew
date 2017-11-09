@@ -36,6 +36,7 @@
         >
 
         <Button
+            android:id="@+id/af_btn_add_contacts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="通讯录好友"
@@ -46,6 +47,7 @@
             android:layout_weight="1"
             />
         <Button
+            android:id="@+id/af_btn_add_schoolmate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="同校同学"
@@ -56,6 +58,7 @@
             android:layout_weight="1"
             />
         <Button
+            android:id="@+id/af_btn_wait_invite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="等待邀请"

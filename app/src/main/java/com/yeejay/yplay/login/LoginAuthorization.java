@@ -242,6 +242,9 @@ public class LoginAuthorization extends AppCompatActivity {
             Intent intent = new Intent(LoginAuthorization.this,ClassList.class);
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE,mLocation.getLatitude());
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE,mLocation.getLongitude());
+
+            SharePreferenceUtil.put(LoginAuthorization.this,YPlayConstant.YPLAY_LATITUDE,String.valueOf(mLocation.getLatitude()));
+            SharePreferenceUtil.put(LoginAuthorization.this,YPlayConstant.YPLAY_LONGITUDE,String.valueOf(mLocation.getLongitude()));
             //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
             upLoadingContacts();
             startActivity(intent);

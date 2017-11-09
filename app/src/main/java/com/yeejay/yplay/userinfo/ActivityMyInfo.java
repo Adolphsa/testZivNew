@@ -21,6 +21,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
@@ -81,6 +82,11 @@ public class ActivityMyInfo extends AppCompatActivity {
     @OnClick(R.id.my_tv_back)
     public void back(View view) {
         finish();
+    }
+
+    @OnClick(R.id.ami_item_header_img)
+    public void test(View view){
+        startActivity(new Intent(ActivityMyInfo.this,AddFriends.class));
     }
 
     //logo

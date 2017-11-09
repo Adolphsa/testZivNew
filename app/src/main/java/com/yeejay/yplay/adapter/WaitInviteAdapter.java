@@ -95,8 +95,8 @@ public class WaitInviteAdapter extends BaseAdapter implements View.OnClickListen
         }
         holder.afItemName.setText(nickName);
         holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
-        holder.afBtnHide.setOnClickListener(hideListener);
-        holder.afBtnHide.setTag(position);
+//        holder.afBtnHide.setOnClickListener(hideListener);
+//        holder.afBtnHide.setTag(position);
         //holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 5){

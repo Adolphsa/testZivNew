@@ -3,6 +3,7 @@ package com.yeejay.yplay.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
@@ -44,7 +46,18 @@ public class ClassList extends AppCompatActivity {
             isActivitySetting = bundle.getInt("activity_setting_school");
             System.out.println("activity_setting_school" + isActivitySetting);
         }
+        if (mLatitude == 0 || mLongitude == 0){
 
+            String tempLat = (String) SharePreferenceUtil.get(ClassList.this,YPlayConstant.YPLAY_LATITUDE,"");
+            String tempLon = (String) SharePreferenceUtil.get(ClassList.this,YPlayConstant.YPLAY_LONGITUDE,"");
+            System.out.println("未读---" + tempLat + ",---" + tempLon);
+            if (!TextUtils.isEmpty(tempLat)){
+                mLatitude = Double.valueOf(tempLat);
+            }
+            if (!TextUtils.isEmpty(tempLon)){
+                mLongitude  = Double.valueOf(tempLon);
+            }
+        }
         mPrimaryListView = (ListView) findViewById(R.id.cl_primary_list);
         mHighListView = (ListView) findViewById(R.id.cl_high_list);
         mCollegeListView = (ListView) findViewById(R.id.cl_college_list);

@@ -64,9 +64,25 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     @OnClick(R.id.searchView)
     public void clickSearch(View view){
         startActivity(new Intent(AddFriends.this,ActivitySearchFriends.class));
-
     }
-
+    @OnClick(R.id.af_btn_add_contacts)
+    public void btnAddContacts() {
+        //通讯录好友
+        System.out.println("通讯录好友");
+        startActivity(new Intent(AddFriends.this,ActivityContacts.class));
+    }
+    @OnClick(R.id.af_btn_add_schoolmate)
+    public void btnAddSchool() {
+        //同校好友
+        System.out.println("同校好友");
+        startActivity(new Intent(AddFriends.this,ActivitySchoolmate.class));
+    }
+    @OnClick(R.id.af_btn_wait_invite)
+    public void btnWaitInvite() {
+        //等待邀请
+        System.out.println("等待邀请");
+        startActivity(new Intent(AddFriends.this,ActivityWaitInvite.class));
+    }
     List<GetAddFriendMsgs.PayloadBean.MsgsBean> friendsList;
     AddFriendsAdapter addFriendsAdapter;
     ScoolmateAdapter bookFriendsAdapter;

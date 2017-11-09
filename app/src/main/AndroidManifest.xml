@@ -59,7 +59,6 @@
         <activity android:name=".friend.ActivityWaitInvite" />
          <activity android:name=".MainActivity"/>
 
-
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
         <service

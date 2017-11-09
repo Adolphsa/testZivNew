@@ -140,8 +140,8 @@ public class LoginAge extends AppCompatActivity {
                     public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
                         System.out.println("设置年龄---" + baseRespond.toString());
                         if (baseRespond.getCode() == 0){
-                            //startActivity(new Intent(LoginAge.this, LoginAuthorization.class));
-                            jumpToWhere();
+                            startActivity(new Intent(LoginAge.this, LoginAuthorization.class));
+                            //jumpToWhere();
                         }else {
                             Toast.makeText(LoginAge.this,"设置年龄失败",Toast.LENGTH_SHORT).show();
                         }
@@ -165,21 +165,25 @@ public class LoginAge extends AppCompatActivity {
         int grade = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_GRADE,0);
         if (grade == 0){
             startActivity(new Intent(LoginAge.this,LoginAuthorization.class));
+            return;
         }
         //判断学校信息
         int schoolId = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_SCHOOL_ID,0);
         if (schoolId == 0){
             startActivity(new Intent(LoginAge.this,LoginAuthorization.class));
+            return;
         }
         //判断性别
         int gender = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_GENDER,0);
         if (gender == 0){
             startActivity(new Intent(LoginAge.this,ChoiceSex.class));
+            return;
         }
         //判断基本信息
         String name = (String) SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_NICK_NAME,"yplay");
         if (TextUtils.isEmpty(name) || name.equals("yplay")){
             startActivity(new Intent(LoginAge.this,UserInfo.class));
+            return;
         }
 
         startActivity(new Intent(LoginAge.this, MainActivity.class));

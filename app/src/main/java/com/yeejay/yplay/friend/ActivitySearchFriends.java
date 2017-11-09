@@ -7,10 +7,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.SearchFriendsAdapter;
@@ -19,6 +20,7 @@ import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.HashMap;
@@ -36,18 +38,23 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ActivitySearchFriends extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
-    TextView layoutTitle;
     @BindView(R.id.asf_search_view)
     SearchView asfSearchView;
     @BindView(R.id.asf_list_view)
     ListView asfListView;
+    @BindView(R.id.asf_btn_cancel)
+    Button asfBtnCancel;
+    @BindView(R.id.asf_rl)
+    RelativeLayout asfRl;
+    @BindView(R.id.asf_tv_result)
+    TextView asfTvResult;
+    @BindView(R.id.asf_no_found_img)
+    ImageView asfNoFoundImg;
+    @BindView(R.id.asf_no_found)
+    ImageView asfNoFound;
 
-
-    @OnClick(R.id.layout_title_back)
-    public void back(View view){
+    @OnClick(R.id.asf_btn_cancel)
+    public void back() {
         finish();
     }
 
@@ -60,13 +67,14 @@ public class ActivitySearchFriends extends AppCompatActivity {
         setContentView(R.layout.activity_search_friends);
         ButterKnife.bind(this);
 
-        myUin = (int)SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_UIN, 0);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivitySearchFriends.this, true);
+        myUin = (int) SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_UIN, 0);
 
-        layoutTitle.setText("搜索好友");
         initSearchView();
     }
 
-    private void initSearchView(){
+    private void initSearchView() {
         asfSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -82,13 +90,15 @@ public class ActivitySearchFriends extends AppCompatActivity {
         });
     }
 
-    private void initListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList){
+    private void initListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
 
-        if (tempList == null){
-            Toast.makeText(ActivitySearchFriends.this,"没有找到此用户",Toast.LENGTH_SHORT).show();
+        if (tempList.size() == 0) {
+            asfNoFound.setVisibility(View.VISIBLE);
+            asfNoFoundImg.setVisibility(View.INVISIBLE);
             return;
         }
-
+        asfNoFound.setVisibility(View.INVISIBLE);
+        asfNoFoundImg.setVisibility(View.INVISIBLE);
         searchFriendsAdapter = new SearchFriendsAdapter(ActivitySearchFriends.this,
                 new SearchFriendsAdapter.hideCallback() {
                     @Override
@@ -98,7 +108,7 @@ public class ActivitySearchFriends extends AppCompatActivity {
                         removeFriend(tempList.get((int) button.getTag()).getUin());
                         button.setVisibility(View.INVISIBLE);
                         if (tempList.size() > 0) {
-                            System.out.println("tempList---" + tempList.size() + "----" +(int) v.getTag());
+                            System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
                             tempList.remove((int) v.getTag());
                             searchFriendsAdapter.notifyDataSetChanged();
                         }
@@ -108,18 +118,23 @@ public class ActivitySearchFriends extends AppCompatActivity {
             @Override
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
-                Button button = (Button)v;
-                button.setText("已添加");
+                Button button = (Button) v;
+                int status = tempList.get((int) button.getTag()).getStatus();
+                if (status == 0){
+                    button.setBackgroundResource(R.drawable.feeds_status_apply);
+                }else if (status == 3){
+                    button.setBackgroundResource(R.drawable.feeds_status_is_friend);
+                }
                 button.setEnabled(false);
                 //邀请好友
                 addFriend(tempList.get((int) button.getTag()).getUin());
             }
-        },tempList,myUin);
+        }, tempList, myUin);
         asfListView.setAdapter(searchFriendsAdapter);
     }
 
     //搜索好友
-    private void searchFriends(String username){
+    private void searchFriends(String username) {
 
         Map<String, Object> searchFriendsMap = new HashMap<>();
         searchFriendsMap.put("username", username);
@@ -139,7 +154,7 @@ public class ActivitySearchFriends extends AppCompatActivity {
                     @Override
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         System.out.println("搜索好友---" + getRecommendsRespond.toString());
-                        if (getRecommendsRespond.getCode() == 0){
+                        if (getRecommendsRespond.getCode() == 0) {
                             initListView(getRecommendsRespond.getPayload().getFriends());
                         }
                     }

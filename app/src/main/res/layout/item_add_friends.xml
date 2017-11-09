@@ -2,19 +2,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="80dp"
+    android:background="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/af_item_header_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/shape_round_background"
+        android:src="@mipmap/ic_launcher"
         android:layout_centerVertical="true"
         android:scaleType="fitXY"
         app:shape="circle"
         android:layout_marginLeft="19dp"
         />
-
+    <TextView
+        android:id="@+id/af_item_text_family_name"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/shape_round_background"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="19dp"
+        android:text="段"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:visibility="gone"
+        />
     <TextView
         android:id="@+id/af_item_name"
         android:layout_width="wrap_content"
@@ -23,7 +35,7 @@
         android:layout_toRightOf="@+id/af_item_header_img"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="13dp"
         android:layout_marginLeft="19dp"
         />
 
@@ -37,18 +49,31 @@
         android:layout_marginLeft="19dp"
         android:textSize="14sp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="10dp"
         />
 
     <Button
         android:id="@+id/af_btn_accept"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="接受"
-        android:layout_alignParentRight="true"
+        android:layout_width="40dp"
+        android:layout_height="45dp"
         android:layout_marginRight="20dp"
+        android:background="@drawable/feeds_status_invite"
         android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:scaleType="fitXY"
         />
 
+    <Button
+        android:id="@+id/af_btn_accept2"
+        android:layout_width="80dp"
+        android:layout_height="34sp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/selector_play_invite"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="21dp"
+        android:visibility="visible"
+        />
     <Button
         android:id="@+id/af_btn_hide"
         android:layout_width="wrap_content"
@@ -57,5 +82,6 @@
         android:background="@android:color/transparent"
         android:layout_toLeftOf="@+id/af_btn_accept"
         android:layout_centerVertical="true"
+        android:visibility="gone"
         />
 </RelativeLayout>

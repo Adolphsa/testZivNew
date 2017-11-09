@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -17,6 +17,7 @@ import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
@@ -35,18 +36,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ActivityContacts extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
-    @BindView(R.id.aafd_searchView)
-    SearchView aafdSearchView;
     @BindView(R.id.aafd_list_view)
     ListView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
 
-    @OnClick(R.id.layout_title_back)
+    @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
     }
@@ -61,6 +60,9 @@ public class ActivityContacts extends AppCompatActivity {
         setContentView(R.layout.activity_activty_add_fiends_detail);
         ButterKnife.bind(this);
 
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContacts.this,true);
+
         layoutTitle.setText("通讯录好友");
         mDataList = new ArrayList<>();
         getRecommends(1,mPageNum);
@@ -74,14 +76,6 @@ public class ActivityContacts extends AppCompatActivity {
             @Override
             public void hideClick(View v) {
                 System.out.println("隐藏按钮被点击");
-                Button button = (Button) v;
-                removeFriend(tempList.get((int) button.getTag()).getUin());
-                button.setVisibility(View.INVISIBLE);
-                if (tempList.size() > 0) {
-                    System.out.println("tempList---" + tempList.size() + "----" +(int) v.getTag());
-                    tempList.remove((int) v.getTag());
-                    contactsAdapter.notifyDataSetChanged();
-                }
 
             }
         }, new ContactsAdapter.acceptCallback() {
@@ -89,7 +83,7 @@ public class ActivityContacts extends AppCompatActivity {
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
                 Button button = (Button)v;
-                button.setText("已添加");
+                button.setBackgroundResource(R.drawable.feeds_status_apply);
                 button.setEnabled(false);
                //邀请好友
                 addFriend(tempList.get((int) button.getTag()).getUin());

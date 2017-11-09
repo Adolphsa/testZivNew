@@ -119,6 +119,7 @@ public class ScoolmateAdapter2 extends BaseAdapter implements View.OnClickListen
                     contentList.get(position).getGrade());
             holder.afItemTvSharesFriends.setText("同校" + str);
             holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
+            holder.afBtnAccept2.setVisibility(View.GONE);
         }
         holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept2.setOnClickListener(acceptListener);

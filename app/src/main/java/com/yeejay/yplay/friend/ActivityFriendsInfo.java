@@ -4,127 +4,128 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import tangxiaolv.com.library.EffectiveShapeView;
 
 public class ActivityFriendsInfo extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
-    @BindView(R.id.afi_tv_school_name)
-    TextView afiTvSchoolName;
-    @BindView(R.id.afi_item_header_img)
-    ImageView afiItemHeaderImg;
-    @BindView(R.id.afi_tv_name)
-    TextView afiTvName;
-    @BindView(R.id.afi_tv_name2)
-    TextView afiTvName2;
-    @BindView(R.id.afi_small_img)
-    ImageView afiSmallImg;
-    @BindView(R.id.afi_tv_is_graduate)
-    TextView afiTvIsGraduate;
-    @BindView(R.id.afi_btn_friends_state)
-    Button afiBtnFriendsState;
-    @BindView(R.id.afi_tv_friends_number)
-    TextView afiTvFriendsNumber;
-    @BindView(R.id.afi_tv_diamond_number)
-    TextView afiTvDiamondNumber;
-    @BindView(R.id.afi_list_view)
-    ListView afiListView;
+    @BindView(R.id.lui_name)
+    TextView luiName;
+    @BindView(R.id.lui_gender)
+    ImageView luiGender;
+    @BindView(R.id.lui_user_name)
+    TextView luiUserName;
+    @BindView(R.id.lui_school_name)
+    TextView luiSchoolName;
+    @BindView(R.id.lui_grade)
+    TextView luiGrade;
+    @BindView(R.id.lui_header_img)
+    EffectiveShapeView luiHeaderImg;
+    @BindView(R.id.layout_title_rl)
+    RelativeLayout layoutTitleRl;
+
+    @BindView(R.id.friend_tv_num)
+    TextView friendTvNum;
+    @BindView(R.id.diamond_tv_num)
+    TextView diamondTvNum;
+    int friendUin;
+
+    @OnClick(R.id.remove_friend)
+    public void removeFriend(View view){
+        showNormalDialog();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friends_info);
+        setContentView(R.layout.activity_friends_info2);
         ButterKnife.bind(this);
 
-        Bundle bundle = getIntent().getExtras();
-        String headerImg =  bundle.getString("yplay_friend_header_img");
-        String schoolName =  bundle.getString("yplay_friend_school_name");
-        String friendName =  bundle.getString("yplay_friend_name");
-        String friendSchoolGrade=  bundle.getString("yplay_friend_school_grade");
+        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+        layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
 
-        Picasso.with(this).load(headerImg).into(afiItemHeaderImg);
-        afiTvSchoolName.setText(schoolName);
-        afiTvName.setText(friendName);
-        afiTvIsGraduate.setText(friendSchoolGrade);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String headerImg = bundle.getString("yplay_friend_header_img");
+            String schoolName = bundle.getString("yplay_friend_school_name");
+            String friendName = bundle.getString("yplay_friend_name");
+            String friendSchoolGrade = bundle.getString("yplay_friend_school_grade");
+            System.out.println("学校年级---" + friendSchoolGrade);
+            int gender = bundle.getInt("yplay_friend_gender");
+
+            layoutTitle.setText(friendName);
+            layoutTitle.setTextColor(getResources().getColor(R.color.white));
+            layoutTitleBack.setBackgroundResource(R.drawable.back_white);
+
+            friendUin = bundle.getInt("yplay_friend_uin");
+
+            if (!TextUtils.isEmpty(headerImg)) {
+                Picasso.with(this).load(headerImg).into(luiHeaderImg);
+            }
+            luiName.setText(friendName);
+
+            luiSchoolName.setText(schoolName);
+            luiGrade.setText(friendSchoolGrade);
+            if (gender == 1) {
+                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
+            } else {
+                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
+            }
+            getFriendInfo(friendUin);
+        }
+
         initTitle();
     }
 
-    private void initView(){
-
+    //初始化用户资料
+    private void initUserInfo(UserInfoResponde.PayloadBean.InfoBean infoBean) {
+        luiUserName.setText(infoBean.getUserName());
+        friendTvNum.setText(infoBean.getFriendCnt() + "");
+        diamondTvNum.setText(infoBean.getGemCnt() + "");
     }
 
-    private void initTitle(){
+    private void initTitle() {
         layoutTitleBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-        layoutTitle.setText("好友");
-
-        afiListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return 3;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                if (convertView == null){
-                    convertView = View.inflate(ActivityFriendsInfo.this,R.layout.item_afi,null);
-                    holder = new ViewHolder();
-                    holder.itemAfiImg = (ImageView) convertView.findViewById(R.id.afi_item_img);
-                    holder.itemAfiText = (TextView) convertView.findViewById(R.id.afi_item_text);
-                    convertView.setTag(holder);
-                }else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-                if (position == 0){
-                    holder.itemAfiText.setText("我可以和他说所有的话");
-                }else if (position == 1){
-                    holder.itemAfiText.setText("美妆达人");
-                }else if (position == 2){
-                    holder.itemAfiText.setText("垂直剪刀布经常赢");
-                }
-                return convertView;
-            }
-        });
-        afiBtnFriendsState.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showNormalDialog();
-            }
-        });
     }
 
 
-    private void showNormalDialog(){
+    private void showNormalDialog() {
+
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(ActivityFriendsInfo.this);
         normalDialog.setMessage("解除好友关系后，你也会在对方的好友列表中消失");
@@ -132,6 +133,7 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        removeFriend(friendUin);
                     }
                 });
         normalDialog.setNegativeButton("取消",
@@ -143,10 +145,123 @@ public class ActivityFriendsInfo extends AppCompatActivity {
         normalDialog.show();
     }
 
-    private static class ViewHolder{
-        ImageView itemAfiImg;
-        TextView itemAfiText;
+
+    //查询朋友的信息
+    private void getFriendInfo(int friendUin) {
+        Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("userUin", friendUin);
+        friendMap.put("uin", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        friendMap.put("token", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendMap.put("ver", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserInfo(friendMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {}
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
+                        if (userInfoResponde.getCode() == 0) {
+                            UserInfoResponde.PayloadBean.InfoBean infoBean =
+                                    userInfoResponde.getPayload().getInfo();
+                            initUserInfo(infoBean);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
+
+
+    //获取钻石信息
+    private void getUserDiamondInfo(int userUin, int pageNum, int pageSize) {
+
+        Map<String, Object> diamondInfoMap = new HashMap<>();
+        diamondInfoMap.put("userUin", userUin);
+        diamondInfoMap.put("pageNum", pageNum);
+        diamondInfoMap.put("pageSize", pageSize);
+        diamondInfoMap.put("uin", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        diamondInfoMap.put("token", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        diamondInfoMap.put("ver", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUsersDamonInfo(diamondInfoMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UsersDiamondInfoRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
+                        System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
+                        if (usersDiamondInfoRespond.getCode() == 0) {
+
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("获取用户钻石信息异常---" + e.getMessage());
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    //删除好友
+    private void removeFriend(int toUin) {
+
+        Map<String, Object> removeFreindMap = new HashMap<>();
+        removeFreindMap.put("toUin", toUin);
+        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .removeFriend(removeFreindMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("删除好友---" + baseRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("删除好友异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
 }
 
 

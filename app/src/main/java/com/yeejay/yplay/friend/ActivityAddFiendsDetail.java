@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -37,8 +36,6 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
     Button layoutTitleBack;
     @BindView(R.id.layout_title)
     TextView layoutTitle;
-    @BindView(R.id.aafd_searchView)
-    SearchView aafdSearchView;
     @BindView(R.id.aafd_list_view)
     ListView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)

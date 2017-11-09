@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:paddingTop="20dp"
+    >
+
+    <ImageView
+        android:id="@+id/friend_iv1"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/friend_count"
+        android:scaleType="fitXY"
+        android:layout_marginLeft="20dp"
+    />
+    <TextView
+        android:id="@+id/friend_tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/play_color2"
+        android:text="好友"
+        android:layout_toRightOf="@id/friend_iv1"
+        android:layout_marginLeft="10dp"
+        />
+    <TextView
+        android:id="@+id/friend_tv_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/play_color2"
+        android:text="0"
+        android:layout_toRightOf="@id/friend_tv1"
+        android:layout_marginLeft="10dp"
+        />
+</RelativeLayout>

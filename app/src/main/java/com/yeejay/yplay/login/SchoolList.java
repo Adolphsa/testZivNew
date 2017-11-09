@@ -66,6 +66,11 @@ public class SchoolList extends AppCompatActivity {
             isActivitySetting = bundle.getInt("activity_setting_class_school");
         }
 
+        if (mLatitude == 0 || mLongitude == 0){
+            mLatitude = (double)SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_LATITUDE,0.0);
+            mLongitude = (double)SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_LONGITUDE,0.0);
+        }
+
         Button btnBack = (Button) findViewById(R.id.layout_title_back);
         TextView title = (TextView) findViewById(R.id.layout_title);
         mSchoolListView = (ListView) findViewById(R.id.sl_school_list);
@@ -265,8 +270,8 @@ public class SchoolList extends AppCompatActivity {
                                 SchoolList.this.setResult(202,intent);
                                 SchoolList.this.startActivity(intent);
                             }else {
-                                //startActivity(new Intent(SchoolList.this,ChoiceSex.class));
-                                jumpToWhere();
+                                startActivity(new Intent(SchoolList.this,ChoiceSex.class));
+                                //jumpToWhere();
                             }
 
                         }

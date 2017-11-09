@@ -96,19 +96,21 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
         }
         holder.afItemName.setText(contentList.get(position).getNickName());
-        holder.afBtnHide.setOnClickListener(hideListener);
-        holder.afBtnHide.setTag(position);
-        holder.afBtnHide.setVisibility(View.VISIBLE);
+//        holder.afBtnHide.setOnClickListener(hideListener);
+//        holder.afBtnHide.setTag(position);
+//        holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 2){
-            holder.afBtnAccept.setText("已申请");
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_apply);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setText("加好友");
+
             holder.afBtnAccept.setEnabled(true);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }
         holder.afBtnAccept.setTag(position);
+        holder.afBtnAccept2.setVisibility(View.GONE);
         return convertView;
     }
 
@@ -121,8 +123,11 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         TextView afItemTvSharesFriends;
         @BindView(R.id.af_btn_accept)
         Button afBtnAccept;
+        @BindView(R.id.af_btn_accept2)
+        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
+
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);
