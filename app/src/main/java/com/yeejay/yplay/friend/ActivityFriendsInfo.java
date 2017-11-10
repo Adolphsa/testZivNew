@@ -21,6 +21,7 @@ import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -32,6 +33,8 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import tangxiaolv.com.library.EffectiveShapeView;
+
+import static com.yeejay.yplay.utils.FriendFeedsUtil.schoolType;
 
 public class ActivityFriendsInfo extends AppCompatActivity {
 
@@ -58,12 +61,32 @@ public class ActivityFriendsInfo extends AppCompatActivity {
     TextView friendTvNum;
     @BindView(R.id.diamond_tv_num)
     TextView diamondTvNum;
+
     int friendUin;
+    private RelativeLayout rl1;
+    private RelativeLayout rl2;
+    private RelativeLayout rl3;
+    private EffectiveShapeView diamondDetailImg1;
+    private TextView diamondDetailTv1;
+    private EffectiveShapeView diamondDetailImg2;
+    private TextView diamondDetailTv2;
+    private EffectiveShapeView diamondDetailImg3;
+    private TextView diamondDetailTv3;
+
+    @OnClick(R.id.layout_title_back2)
+    public void back(View view) {
+        finish();
+    }
 
     @OnClick(R.id.remove_friend)
-    public void removeFriend(View view){
+    public void removeFriend(View view) {
         showNormalDialog();
     }
+
+//    @OnClick(R.id.lui_header_img)
+//    public void test(View view) {
+//        testToast();
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,53 +99,96 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            String headerImg = bundle.getString("yplay_friend_header_img");
-            String schoolName = bundle.getString("yplay_friend_school_name");
             String friendName = bundle.getString("yplay_friend_name");
-            String friendSchoolGrade = bundle.getString("yplay_friend_school_grade");
-            System.out.println("学校年级---" + friendSchoolGrade);
-            int gender = bundle.getInt("yplay_friend_gender");
+            friendUin = bundle.getInt("yplay_friend_uin");
 
             layoutTitle.setText(friendName);
             layoutTitle.setTextColor(getResources().getColor(R.color.white));
             layoutTitleBack.setBackgroundResource(R.drawable.back_white);
 
-            friendUin = bundle.getInt("yplay_friend_uin");
-
-            if (!TextUtils.isEmpty(headerImg)) {
-                Picasso.with(this).load(headerImg).into(luiHeaderImg);
-            }
-            luiName.setText(friendName);
-
-            luiSchoolName.setText(schoolName);
-            luiGrade.setText(friendSchoolGrade);
-            if (gender == 1) {
-                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
-            } else {
-                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
-            }
             getFriendInfo(friendUin);
         }
 
-        initTitle();
+        initDiamondTop();
+
+        getUserDiamondInfo(friendUin,1,10);
     }
 
     //初始化用户资料
     private void initUserInfo(UserInfoResponde.PayloadBean.InfoBean infoBean) {
-        luiUserName.setText(infoBean.getUserName());
-        friendTvNum.setText(infoBean.getFriendCnt() + "");
-        diamondTvNum.setText(infoBean.getGemCnt() + "");
-    }
 
-    private void initTitle() {
-        layoutTitleBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+        if (infoBean != null) {
+            String url = infoBean.getHeadImgUrl();
+            if (!TextUtils.isEmpty(url)) {
+                Picasso.with(this).load(url).into(luiHeaderImg);
             }
-        });
+            luiName.setText(infoBean.getNickName());
+            luiUserName.setText(infoBean.getUserName());
+            luiGrade.setText(schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
+            if (infoBean.getGender() == 1) {
+                luiGender.setVisibility(View.VISIBLE);
+                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
+            } else {
+                luiGender.setVisibility(View.VISIBLE);
+                luiGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
+            }
+            luiSchoolName.setText(infoBean.getSchoolName());
+            friendTvNum.setText(infoBean.getFriendCnt() + "");
+            diamondTvNum.setText(infoBean.getGemCnt() + "");
+        }
     }
 
+    //初始化钻石top
+    private void initDiamondTop(){
+
+        rl1 = (RelativeLayout) findViewById(R.id.diamond_detail1);
+        TextView diamondDetailTop1 = (TextView) rl1.findViewById(R.id.diamond_detail_top);
+        diamondDetailImg1 = (EffectiveShapeView) rl1.findViewById(R.id.diamond_detail_img);
+        diamondDetailTv1 = (TextView) rl1.findViewById(R.id.diamond_detail_tv);
+        diamondDetailTop1.setText("Top1");
+
+        rl2 = (RelativeLayout) findViewById(R.id.diamond_detail2);
+        TextView diamondDetailTop2 = (TextView) rl2.findViewById(R.id.diamond_detail_top);
+        diamondDetailImg2 = (EffectiveShapeView) rl2.findViewById(R.id.diamond_detail_img);
+        diamondDetailTv2 = (TextView) rl2.findViewById(R.id.diamond_detail_tv);
+        diamondDetailTop2.setText("Top2");
+
+        rl3 = (RelativeLayout) findViewById(R.id.diamond_detail3);
+        TextView diamondDetailTop3 = (TextView) rl3.findViewById(R.id.diamond_detail_top);
+        diamondDetailImg3 = (EffectiveShapeView) rl3.findViewById(R.id.diamond_detail_img);
+        diamondDetailTv3 = (TextView) rl3.findViewById(R.id.diamond_detail_tv);
+        diamondDetailTop3.setText("Top3");
+
+    }
+
+    //初始化钻石详情
+    private void initDiamondDetail(UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean1,
+                                   UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean2,
+                                   UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean3){
+
+
+        if (statsBean1 != null){
+            String url1 = statsBean1.getQiconUrl();
+            if (!TextUtils.isEmpty(url1)){
+                Picasso.with(ActivityFriendsInfo.this).load(url1).into(diamondDetailImg1);
+            }
+            diamondDetailTv1.setText(statsBean1.getQtext());
+        }
+        if (statsBean2 != null){
+            String url2 = statsBean2.getQiconUrl();
+            if (!TextUtils.isEmpty(url2)){
+                Picasso.with(ActivityFriendsInfo.this).load(url2).into(diamondDetailImg2);
+            }
+            diamondDetailTv2.setText(statsBean2.getQtext());
+        }
+        if (statsBean3 != null){
+            String url3 = statsBean3.getQiconUrl();
+            if (!TextUtils.isEmpty(url3)){
+                Picasso.with(ActivityFriendsInfo.this).load(url3).into(diamondDetailImg3);
+            }
+            diamondDetailTv3.setText(statsBean3.getQtext());
+        }
+    }
 
     private void showNormalDialog() {
 
@@ -159,7 +225,8 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {}
+                    public void onSubscribe(Disposable d) {
+                    }
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
@@ -208,10 +275,21 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                     public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
                         System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
                         if (usersDiamondInfoRespond.getCode() == 0) {
+                            UsersDiamondInfoRespond.PayloadBean payloadBean = usersDiamondInfoRespond.getPayload();
+
+                            if (payloadBean != null && payloadBean.getStats() != null){
+                                List<UsersDiamondInfoRespond.PayloadBean.StatsBean> statsBeanList =
+                                        usersDiamondInfoRespond.getPayload().getStats();
+                                if (statsBeanList.size() >= 1){
+                                    initDiamondDetail(statsBeanList.get(0),null,null);
+                                }else if (statsBeanList.size() >= 2){
+                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(1),null);
+                                }if (statsBeanList.size() >= 3){
+                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(2),statsBeanList.get(3));
+                                }
+                            }
 
                         }
-
-
                     }
 
                     @Override
@@ -261,6 +339,18 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                     }
                 });
     }
+
+
+//    private void testToast() {
+//
+//        Toast toast = new Toast(this);
+//        toast.setGravity(Gravity.TOP, 0, 0);
+//        TextView view = new TextView(this);
+//        view.setText("我是测试oast");
+//        view.setBackgroundColor(getResources().getColor(R.color.feeds_title_color));
+//        toast.setView(view);
+//        toast.show();
+//    }
 
 }
 

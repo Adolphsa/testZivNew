@@ -28,7 +28,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.Login"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,7 +37,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".login.LoginAge" />
-        <!--<activity android:name=".login.Login" />-->
+        <!-- <activity android:name=".login.Login" /> -->
         <activity android:name=".login.LoginAuthorization" />
         <activity android:name=".login.ClassList" />
         <activity android:name=".login.SchoolList" />
@@ -57,7 +58,7 @@
         <activity android:name=".friend.ActivityContacts" />
         <activity android:name=".friend.ActivitySchoolmate" />
         <activity android:name=".friend.ActivityWaitInvite" />
-         <activity android:name=".MainActivity"/>
+        <activity android:name=".MainActivity" />
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
@@ -79,7 +80,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".friend.ActivitySearchFriends"></activity>
+        <activity android:name=".friend.ActivitySearchFriends" />
+        <activity android:name=".friend.TestActivity"/>
     </application>
 
 </manifest>

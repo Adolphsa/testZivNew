@@ -57,6 +57,8 @@ public class UserInfoResponde {
 
         private InfoBean info;
 
+        private int status;
+
         public InfoBean getInfo() {
             return info;
         }
@@ -65,10 +67,19 @@ public class UserInfoResponde {
             this.info = info;
         }
 
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
         @Override
         public String toString() {
             return "PayloadBean{" +
                     "info=" + info +
+                    ", status=" + status +
                     '}';
         }
 

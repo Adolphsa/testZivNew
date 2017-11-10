@@ -1,82 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:id="@+id/login_scroll_view"
     tools:context="com.yeejay.yplay.login.Login">
 
-    <include layout="@layout/layout_title_bar"/>
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="120dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:fillViewport="true"
+        android:layout_weight="1"
         >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/login_tv_phone_number"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:padding="3dp"
-            android:layout_marginLeft="20dp"
-            />
-        <EditText
-            android:id="@+id/login_edt_number"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/login_et_phone_number"
-            android:layout_marginRight="40dp"
-            android:layout_marginLeft="20dp"
-            android:inputType="number"
-            android:maxLength="11"
-            />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/login_auth_code"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:padding="3dp"
-            android:layout_marginLeft="20dp"
-            />
-        <EditText
-            android:id="@+id/login_edt_auth_code"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/login_edt_auth_code"
-            android:layout_marginLeft="20dp"
-            android:inputType="number"
-            />
-        <Button
-            android:id="@+id/login_get_auth_code"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/login_get_auth_code"           android:background="@android:color/transparent"
-            android:textSize="18sp"
-            android:enabled="false"
-            />
-    </LinearLayout>
+            android:background="@color/feeds_title_color"
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/login_btn_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/login_next"
-        android:background="@android:color/transparent"
-        android:layout_marginTop="20dp"
-        android:layout_gravity="center"
-        android:textSize="18sp"
-        android:enabled="false"
-        />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="60dp"
+                android:text="欢迎"
+                android:textColor="@color/white"
+                android:textSize="28sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:text="这是一个啥啥啥的App"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="54dp"
+                >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/login_signup" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="122dp"
+                    android:scrollbars="none"
+                    android:background="@drawable/shape_login_background">
+
+                    <TextView
+                        android:id="@+id/tv86"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="72dp"
+                        android:layout_marginTop="50dp"
+                        android:text="+86"
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+
+                    <EditText
+                        android:id="@+id/login_edt_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_alignBottom="@+id/tv86"
+                        android:layout_marginLeft="10dp"
+                        android:layout_toRightOf="@+id/tv86"
+                        android:background="@null"
+                        android:hint="@string/login_et_phone_number"
+                        android:inputType="number"
+                        android:maxLength="11"
+                        android:paddingLeft="10dp"
+                        android:textColorHint="@color/black20"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/login_edt_number"
+                        android:layout_marginTop="5.5dp"
+                        android:layout_marginLeft="72dp"
+                        android:src="@drawable/login_line" />
+
+                    <EditText
+                        android:id="@+id/login_edt_auth_code"
+                        android:layout_width="180dp"
+                        android:layout_height="20dp"
+                        android:layout_below="@+id/tv86"
+                        android:layout_marginLeft="72dp"
+                        android:layout_marginTop="40dp"
+                        android:background="@null"
+                        android:hint="@string/login_edt_auth_code"
+                        android:inputType="number"
+                        android:textColorHint="@color/black20"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:id="@+id/img2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/login_edt_auth_code"
+                        android:layout_marginTop="5.5dp"
+                        android:layout_marginLeft="72dp"
+                        android:src="@drawable/login_line" />
+
+                    <Button
+                        android:id="@+id/login_get_auth_code"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/login_edt_auth_code"
+                        android:gravity="bottom"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="40dp"
+                        android:background="@android:color/transparent"
+                        android:enabled="false"
+                        android:text="@string/login_get_auth_code"
+                        android:textColor="@color/black50"
+                        android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="注册代表你已阅读并同意用户协议与隐私条款"
+                        android:textSize="10sp"
+                        android:textColor="@color/feeds_hight_gray50"
+                        android:layout_below="@+id/img2"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="9.5dp"
+                        />
+                    <Button
+                        android:id="@+id/login_btn_next"
+                        android:layout_width="204dp"
+                        android:layout_height="40dp"
+                        android:layout_below="@+id/login_edt_auth_code"
+                        android:layout_marginTop="50dp"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/shape_login_in_background"
+                        android:enabled="false"
+                        android:text="@string/login_next"
+                        android:textSize="17sp" />
+                </RelativeLayout>
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

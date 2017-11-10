@@ -1,7 +1,6 @@
 package com.yeejay.yplay.friend;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Base64;
@@ -33,7 +32,6 @@ import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
-import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -72,6 +70,8 @@ public class FragmentFriend extends BaseFragment {
     List<DaoFriendFeeds> mDataList;
 
     int refreshOffset = 0;
+    boolean isShowAddFriends = true;
+    private RelativeLayout rl;
 
     @Override
     public void onDestroyView() {
@@ -92,7 +92,7 @@ public class FragmentFriend extends BaseFragment {
         mDaoFriendFeedsDao = YplayApplication.getInstance().getDaoSession().getDaoFriendFeedsDao();
 
         ffSwipeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        ffSwipeRecyclerView.addItemDecoration(new DefaultItemDecoration(Color.GRAY));
+        ffSwipeRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
 
         ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override
@@ -100,13 +100,7 @@ public class FragmentFriend extends BaseFragment {
                 System.out.println("被点击的item---" + position);
                 DaoFriendFeeds tempFeeds = mDataList.get(position);
                 Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
-                intent.putExtra("yplay_friend_header_img", tempFeeds.getFriendHeadImgUrl());
-                intent.putExtra("yplay_friend_school_name", tempFeeds.getVoteFromSchoolName());
                 intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
-                intent.putExtra("yplay_friend_school_grade",
-                        FriendFeedsUtil.schoolType(tempFeeds.getVoteFromSchoolType(),
-                                tempFeeds.getVoteFromGrade()));
-                intent.putExtra("yplay_friend_gender",tempFeeds.getFriendGender());
                 intent.putExtra("yplay_friend_uin",tempFeeds.getFriendUin());
                 System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
                 //将被点击的item设置为已读
@@ -159,6 +153,10 @@ public class FragmentFriend extends BaseFragment {
             long ts = System.currentTimeMillis();
             System.out.println("ts---" + ts);
             getFriendFeeds(ts, 10);
+
+//            fransFrfLayout.setVisibility(View.VISIBLE);
+//            ffPtfRefreshLayout.setVisibility(View.GONE);
+//            initRecommentFriends();
 
         }
 
@@ -242,13 +240,14 @@ public class FragmentFriend extends BaseFragment {
         System.out.println("刷新----refreshOffser---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
-        if (refreshList.size() == 0){
+        if (refreshList.size() == 0 && isShowAddFriends){
             System.out.println("无动态");
             fransFrfLayout.setVisibility(View.VISIBLE);
             ffPtfRefreshLayout.setVisibility(View.GONE);
             initRecommentFriends();
         }else {
             System.out.println("有动态");
+            isShowAddFriends = false;
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
             mDataList.addAll(refreshList);
@@ -381,7 +380,7 @@ public class FragmentFriend extends BaseFragment {
             rfListView = (ListView) fransFrfLayout.findViewById(R.id.frf_list_view);
             Button addFriend = (Button) fransFrfLayout.findViewById(R.id.frf_btn_add_friend);
             TextView noMoreShowTv = (TextView) fransFrfLayout.findViewById(R.id.frf_no_more_show);
-            final RelativeLayout rl = (RelativeLayout) fransFrfLayout.findViewById(R.id.frf_recommend_rl);
+            rl = (RelativeLayout) fransFrfLayout.findViewById(R.id.frf_recommend_rl);
             addFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -401,6 +400,7 @@ public class FragmentFriend extends BaseFragment {
             if (noMoreShow){
                 rl.setVisibility(View.GONE);
             }
+            //rl.setVisibility(View.VISIBLE);
             recommendFriendsForNull();
         }
     }
@@ -459,7 +459,14 @@ public class FragmentFriend extends BaseFragment {
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         System.out.println("推荐好友---" + getRecommendsRespond.toString());
                         if (getRecommendsRespond.getCode() == 0) {
-                            initRecommendList(getRecommendsRespond.getPayload().getFriends());
+
+                            if (getRecommendsRespond.getPayload().getFriends() != null
+                                    && getRecommendsRespond.getPayload().getFriends().size() > 0){
+                                initRecommendList(getRecommendsRespond.getPayload().getFriends());
+                            }else {
+                                rl.setVisibility(View.GONE);
+                            }
+
                         }
                     }
 

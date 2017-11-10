@@ -7,10 +7,14 @@
     <color name="la_blue">#2196F3</color>
     <color name="divider_color">#FFB7B2B2</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="black20">#33000000</color>
+    <color name="black50">#80000000</color>
     <color name="super_light_grey">#FAFAFA</color>
     <color name="line_grey">#D7D7D7</color>
 
     <color name="progress_bg">#fff2c0</color>
+    <color name="divider_color2">#FFF9F9F9</color>
 
 
     <color name="blue_pressed">#7cb342</color>
@@ -35,7 +39,10 @@
 
     <!--feeds-->
     <color name="feeds_title_color">#EE4765</color>
+    <color name="feeds_title_color_10">#1AEE4765</color>
+
     <color name="feeds_hight_gray">#9A9FA7</color>
+    <color name="feeds_hight_gray50">#809A9FA7</color>
     <color name="feeds_selector_color">#F0F0F0</color>
     <color name="feeds_search_color">#F9F9F9</color>
     <color name="feeds_text_color">#52E0AF</color>

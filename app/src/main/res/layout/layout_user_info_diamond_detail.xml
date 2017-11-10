@@ -10,7 +10,8 @@
         android:id="@+id/diamond_detail_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/no_found_img"
+        android:src="@drawable/diamond_default"
+        android:scaleType="fitXY"
         app:shape="circle"
         android:layout_centerHorizontal="true"
         />
@@ -23,7 +24,7 @@
         android:textSize="10sp"
         android:background="@drawable/shape_text_user_info"
         android:gravity="center_horizontal"
-        android:layout_marginTop="45dp"
+        android:layout_alignBottom="@+id/diamond_detail_img"
         android:layout_centerHorizontal="true"
         />
 
@@ -31,7 +32,6 @@
         android:id="@+id/diamond_detail_tv"
         android:layout_width="100dp"
         android:layout_height="42dp"
-        android:text="哈哈哈哈哈哈哈哈哈哈哈哈"
         android:textSize="10sp"
         android:textColor="@color/text_color_gray"
         android:layout_below="@+id/diamond_detail_top"

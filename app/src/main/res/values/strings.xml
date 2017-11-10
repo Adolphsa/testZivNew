@@ -14,11 +14,11 @@
 
     <!--Login-->
     <string name="login_tv_phone_number">手机号</string>
-    <string name="login_et_phone_number">请输入手机号</string>
+    <string name="login_et_phone_number">输入手机号</string>
     <string name="login_auth_code">验证码</string>
-    <string name="login_edt_auth_code">请输入验证码</string>
-    <string name="login_get_auth_code">获取验证码</string>
-    <string name="login_next">下一步</string>
+    <string name="login_edt_auth_code">输入验证码</string>
+    <string name="login_get_auth_code">获取验证</string>
+    <string name="login_next">快速进入</string>
     <string name="laz_tv_authorization">权限开启</string>
     <string name="laz_btn_get_address">获取地址位置</string>
     <string name="laz_tv_tips1">帮助你找到你的学校</string>

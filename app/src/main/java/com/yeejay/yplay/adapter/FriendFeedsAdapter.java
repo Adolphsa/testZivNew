@@ -1,7 +1,6 @@
 package com.yeejay.yplay.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -58,33 +57,22 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     public void onBindViewHolder(FeedsViewHolder holder, int position) {
 
         daoFriendFeeds = daoFriendFeedsList.get(position);
-        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
+//        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
 
-        if (listCb != null){
-            System.out.println("清除所有");
-            listCb.clear();
-        }
-
-        if (daoFriendFeeds.getIsReaded()){
-            listCb.add(position);
-            System.out.println("增加---" + position + "到ListCb");
-        }
-
-        if (listCb != null && listCb.contains(position)){
-            System.out.println("修改背景");
-            holder.ffItemRl.setBackgroundColor(Color.parseColor("#dddddd"));
-        }else {
-            holder.ffItemRl.setBackgroundColor(Color.parseColor("#ffffff"));
-        }
-
+        holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         String url = daoFriendFeeds.getFriendHeadImgUrl();
+        holder.ffItemHeaderImg.setTag(url);
+
         if (!TextUtils.isEmpty(url)){
             Picasso.with(mContext).load(url).into(holder.ffItemHeaderImg);
+        }else {
+            holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }
+
         holder.ffItemName.setText(daoFriendFeeds.getFriendNickName());
         holder.ffItemTvTime.setText(YplayTimeUtils.format(daoFriendFeeds.getTs()));
         holder.ffItemQuestionContent.setText(daoFriendFeeds.getQtext());
-        if (daoFriendFeeds.getFriendGender() == 1){//男
+        if (daoFriendFeeds.getVoteFromGender() == 1){//男
             holder.ffItemSmallImg.setImageResource(R.drawable.feeds_boy);
         }else{//女
             holder.ffItemSmallImg.setImageResource(R.drawable.feeds_girl);
@@ -94,8 +82,6 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         builder.append("的");
         builder.append(boyOrGirl(daoFriendFeeds.getVoteFromGender()));
         holder.ffItemTvWhere.setText(builder);
-
-
     }
 
     @Override
