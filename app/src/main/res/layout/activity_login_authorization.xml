@@ -5,50 +5,78 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/edit_title_text_color"
     tools:context="com.yeejay.yplay.login.LoginAuthorization">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/laz_tv_authorization"
-        android:gravity="center"
-        android:padding="5dp"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:text="@string/la_app_name"
-        />
-    <Button
-        android:id="@+id/laz_btn_address"
+    <ImageButton
+        android:id="@+id/laz_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/laz_btn_get_address"
+        android:layout_marginLeft="20dp"
         android:background="@android:color/transparent"
-        android:layout_gravity="center"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/laz_tv_tips1"
-        android:layout_gravity="center"
-        />
-    <Button
-        android:id="@+id/laz_btn_address_book"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/laz_btn_get_address_book"
-        android:background="@android:color/transparent"
-        android:layout_gravity="center"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/laz_tv_tips2"
-        android:layout_gravity="center"
-        />
+        android:src="@drawable/back_white" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/login_signup" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="122dp"
+            android:background="@drawable/shape_login_background"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:text="给权限才能玩哦"
+                android:textColor="@color/black"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:text="方便进去学校 找到好友"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/laz_btn_address_book"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="通讯录"
+                android:drawableTop="@drawable/contacts_yes"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="52dp"
+                android:textColor="@color/edit_text_color2"
+                android:textSize="16sp"
+                />
+            <Button
+                android:id="@+id/laz_btn_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="地理位置"
+                android:drawableTop="@drawable/selector_location_btn"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:textColor="@color/edit_text_color2"
+                android:textSize="16sp"
+                android:drawablePadding="7dp"
+                />
+
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

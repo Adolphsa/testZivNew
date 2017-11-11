@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,36 +26,47 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class LoginAge extends AppCompatActivity {
 
+    @BindView(R.id.la_back)
+    ImageButton laBack;
+    @BindView(R.id.la_tv_age)
+    TextView mAgeView;
+    @BindView(R.id.la_btn_quick_start)
+    Button mQuickStartBtn;
+    @BindView(R.id.la_wheel_view)
     WheelView mWheelView;
+
+    @OnClick(R.id.la_back)
+    public void back(View view) {
+        finish();
+    }
+
     Handler mHandler = new Handler();
     ArrayList<String> ageList;
     String mAge;
-
-    TextView mAgeView;
-    LinearLayout mLinearLayout;
-    Button mQuickStartBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_age);
+        ButterKnife.bind(this);
 
-        mWheelView = (WheelView) findViewById(R.id.la_wheel_view);
-        mLinearLayout = (LinearLayout) findViewById(R.id.la_ll_privacy);
-        mAgeView = (TextView) findViewById(R.id.la_tv_age);
-        mQuickStartBtn = (Button) findViewById(R.id.la_btn_quick_start);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
 
         ageList = new ArrayList<String>();
         //添加年龄数据
-        for (int i = 0; i < 112; i++){
-            ageList.add(i +" ");
+        for (int i = 0; i < 112; i++) {
+            ageList.add(i + " ");
         }
 
         mWheelView.setOffset(1);
@@ -68,13 +79,12 @@ public class LoginAge extends AppCompatActivity {
                     @Override
                     public void run() {
                         mAgeView.setText(item);
+                        mAgeView.setTextColor(getResources().getColor(R.color.black));
                         mAge = item;
                         System.out.println("mAge---" + mAge);
-                        if (mLinearLayout.isShown()){
-                            mLinearLayout.setVisibility(View.INVISIBLE);
-                            mQuickStartBtn.setVisibility(View.VISIBLE);
-                        }
 
+                        mQuickStartBtn.setEnabled(true);
+                        mQuickStartBtn.setTextColor(getResources().getColor(R.color.white));
                     }
                 });
             }
@@ -83,14 +93,14 @@ public class LoginAge extends AppCompatActivity {
         mQuickStartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Integer.parseInt(mAge.trim()) < 12){
+                if (Integer.parseInt(mAge.trim()) < 12) {
                     //年龄未达到要求
                     showNormalDialog();
-                }else if (Integer.parseInt(mAge.trim()) >= 12 && Integer.parseInt(mAge.trim()) < 24){
+                } else if (Integer.parseInt(mAge.trim()) >= 12 && Integer.parseInt(mAge.trim()) < 24) {
                     //允许进入
                     settingAge(Integer.parseInt(mAge.trim()));
 
-                }else {
+                } else {
                     //年龄未达到要求
                     showNormalDialog();
                 }
@@ -101,7 +111,7 @@ public class LoginAge extends AppCompatActivity {
     /**
      * 显示对话框
      */
-    private void showNormalDialog(){
+    private void showNormalDialog() {
 
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(LoginAge.this);
@@ -118,13 +128,13 @@ public class LoginAge extends AppCompatActivity {
     }
 
     //设置年龄
-    private void settingAge(int age){
+    private void settingAge(int age) {
 
-        Map<String,Object> nameMap = new HashMap<>();
-        nameMap.put("age",age);
-        nameMap.put("uin", SharePreferenceUtil.get(LoginAge.this, YPlayConstant.YPLAY_UIN,0));
-        nameMap.put("token",SharePreferenceUtil.get(LoginAge.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
-        nameMap.put("ver",SharePreferenceUtil.get(LoginAge.this,YPlayConstant.YPLAY_VER,0));
+        Map<String, Object> nameMap = new HashMap<>();
+        nameMap.put("age", age);
+        nameMap.put("uin", SharePreferenceUtil.get(LoginAge.this, YPlayConstant.YPLAY_UIN, 0));
+        nameMap.put("token", SharePreferenceUtil.get(LoginAge.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        nameMap.put("ver", SharePreferenceUtil.get(LoginAge.this, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .settingName(nameMap)
@@ -132,25 +142,25 @@ public class LoginAge extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<BaseRespond>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    public void onSubscribe(@NonNull Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+                    public void onNext(@NonNull BaseRespond baseRespond) {
                         System.out.println("设置年龄---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0){
+                        if (baseRespond.getCode() == 0) {
                             startActivity(new Intent(LoginAge.this, LoginAuthorization.class));
                             //jumpToWhere();
-                        }else {
-                            Toast.makeText(LoginAge.this,"设置年龄失败",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(LoginAge.this, "设置年龄失败", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                    public void onError(@NonNull Throwable e) {
                         System.out.println("设置年龄异常---" + e.getMessage());
-                        Toast.makeText(LoginAge.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginAge.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -160,29 +170,29 @@ public class LoginAge extends AppCompatActivity {
                 });
     }
 
-    private void jumpToWhere(){
+    private void jumpToWhere() {
         //判断年级
-        int grade = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_GRADE,0);
-        if (grade == 0){
-            startActivity(new Intent(LoginAge.this,LoginAuthorization.class));
+        int grade = (int) SharePreferenceUtil.get(LoginAge.this, YPlayConstant.TEMP_GRADE, 0);
+        if (grade == 0) {
+            startActivity(new Intent(LoginAge.this, LoginAuthorization.class));
             return;
         }
         //判断学校信息
-        int schoolId = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_SCHOOL_ID,0);
-        if (schoolId == 0){
-            startActivity(new Intent(LoginAge.this,LoginAuthorization.class));
+        int schoolId = (int) SharePreferenceUtil.get(LoginAge.this, YPlayConstant.TEMP_SCHOOL_ID, 0);
+        if (schoolId == 0) {
+            startActivity(new Intent(LoginAge.this, LoginAuthorization.class));
             return;
         }
         //判断性别
-        int gender = (int)SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_GENDER,0);
-        if (gender == 0){
-            startActivity(new Intent(LoginAge.this,ChoiceSex.class));
+        int gender = (int) SharePreferenceUtil.get(LoginAge.this, YPlayConstant.TEMP_GENDER, 0);
+        if (gender == 0) {
+            startActivity(new Intent(LoginAge.this, ChoiceSex.class));
             return;
         }
         //判断基本信息
-        String name = (String) SharePreferenceUtil.get(LoginAge.this,YPlayConstant.TEMP_NICK_NAME,"yplay");
-        if (TextUtils.isEmpty(name) || name.equals("yplay")){
-            startActivity(new Intent(LoginAge.this,UserInfo.class));
+        String name = (String) SharePreferenceUtil.get(LoginAge.this, YPlayConstant.TEMP_NICK_NAME, "yplay");
+        if (TextUtils.isEmpty(name) || name.equals("yplay")) {
+            startActivity(new Intent(LoginAge.this, UserInfo.class));
             return;
         }
 

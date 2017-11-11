@@ -2,24 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:background="@drawable/item_class_list"
+    android:layout_height="80dp">
 
     <TextView
         android:id="@+id/cl_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="初一"
-        android:textSize="18sp"
-        android:padding="3dp"
-        android:textColor="@android:color/black"
-        android:layout_marginLeft="20dp"
+        android:text="初中一年级"
+        android:textSize="16sp"
+        android:textColor="@color/text_color_gray3"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="50dp"
         />
     <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="4.5dp"
+        android:layout_height="7.8dp"
         android:scaleType="fitXY"
-        android:src="@drawable/arrow"
+        android:src="@drawable/item_arrows"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="33.4dp"
+        android:layout_centerVertical="true"
         />
 </RelativeLayout>

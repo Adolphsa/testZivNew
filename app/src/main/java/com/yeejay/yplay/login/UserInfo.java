@@ -20,7 +20,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yanzhenjie.permission.AndPermission;
@@ -50,6 +49,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import tangxiaolv.com.library.EffectiveShapeView;
 
 public class UserInfo extends AppCompatActivity {
 
@@ -61,7 +61,7 @@ public class UserInfo extends AppCompatActivity {
     private File tempFile;
     private Uri tempUri;
 
-    ImageButton userHeadImage;
+    EffectiveShapeView userHeadImage;
     String imageName;
     EditText userName;
     String dirStr;
@@ -92,18 +92,17 @@ public class UserInfo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
 
-        Button btnBack = (Button) findViewById(R.id.layout_title_back);
-        TextView title = (TextView) findViewById(R.id.layout_title);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
 
+        ImageButton btnBack = (ImageButton) findViewById(R.id.uif_back);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-        title.setText("基础资料");
 
-        userHeadImage = (ImageButton) findViewById(R.id.uif_imgBtn);
+        userHeadImage = (EffectiveShapeView) findViewById(R.id.uif_imgBtn);
         userName = (EditText) findViewById(R.id.uif_edt_name);
         Button nextStep = (Button) findViewById(R.id.uif_btn_next);
 

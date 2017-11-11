@@ -5,21 +5,81 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/play_color4"
     tools:context="com.yeejay.yplay.login.ChoiceSex">
 
-    <include layout="@layout/layout_title_bar"/>
 
-    <Button
-        android:id="@+id/cs_btn_boy"
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/cs_back"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="男"
-        />
+        android:layout_marginLeft="20dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/back_white" />
 
-    <Button
-        android:id="@+id/cs_btn_girl"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="女"
-        />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/login_signup" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="122dp"
+            android:background="@drawable/shape_login_background"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:text="蓝的铝哒"
+                android:textColor="@color/black"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:text="低头好好看 确认性别"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/cs_btn_girl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="女生"
+                android:drawableTop="@drawable/selector_girl_btn"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="52dp"
+                android:textColor="@drawable/selector_girl_text_color"
+                android:textSize="16sp"
+                android:drawableRight="@drawable/item_arrows"
+                />
+            <Button
+                android:id="@+id/cs_btn_boy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="男生"
+                android:drawableTop="@drawable/selector_boy_btn"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:textColor="@drawable/selector_boy_text_color"
+                android:textSize="16sp"
+                android:drawableRight="@drawable/item_arrows"
+                />
+
+        </LinearLayout>
+    </RelativeLayout>
+
 </LinearLayout>

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.yanzhenjie.permission.AndPermission;
@@ -110,8 +112,17 @@ public class LoginAuthorization extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_authorization);
 
+        getWindow().setStatusBarColor(getResources().getColor(R.color.edit_title_text_color));
+
         mBtnGetAddressAuthority = (Button) findViewById(R.id.laz_btn_address);
         mBtnGetNumberBookAuthority = (Button) findViewById(R.id.laz_btn_address_book);
+        ImageButton back = (ImageButton) findViewById(R.id.laz_back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         mBtnGetAddressAuthority.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,6 +184,12 @@ public class LoginAuthorization extends AppCompatActivity {
         if (mLocation != null){
             System.out.println("地理位置权限申请成功2");
             addressAuthoritySuccess = true;
+
+            Drawable nav_up = getResources().getDrawable(R.drawable.location_no);
+            nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+            mBtnGetAddressAuthority.setCompoundDrawables(null, nav_up, null, null);
+            mBtnGetAddressAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
+
             System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
         }
     }
@@ -219,6 +236,12 @@ public class LoginAuthorization extends AppCompatActivity {
                     mContactsList.add(contactsInfo);
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
+
+            Drawable nav_up = getResources().getDrawable(R.drawable.contacts_no);
+            nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+            mBtnGetNumberBookAuthority.setCompoundDrawables(null, nav_up, null, null);
+            mBtnGetNumberBookAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
+
             if (mContactsList.size() > 0){
                 numberBookAuthoritySuccess = true;
                 System.out.println("通讯录权限申请成功");
@@ -249,7 +272,6 @@ public class LoginAuthorization extends AppCompatActivity {
             upLoadingContacts();
             startActivity(intent);
         }
-
     }
 
     //上传通讯录

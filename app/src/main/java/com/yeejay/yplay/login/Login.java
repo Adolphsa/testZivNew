@@ -3,7 +3,6 @@ package com.yeejay.yplay.login;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -50,45 +49,25 @@ public class Login extends AppCompatActivity {
 
     @OnClick(R.id.login_edt_number)
     public void loginPhone(){
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //将ScrollView滚动到底
-//                loginScrollView.fullScroll(View.FOCUS_DOWN);
-//                System.out.println("手机号");
-//            }
-//        }, 500);
     }
     @OnClick(R.id.login_edt_auth_code)
     public void loginAuthCode(){
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //将ScrollView滚动到底
-//                loginScrollView.fullScroll(View.FOCUS_DOWN);
-//                System.out.println("验证码");
-//            }
-//        }, 500);
-
     }
-
-
-    private Handler mHandler = new Handler();
 
     CountDownTimer countDownTimer = new CountDownTimer(60000, 1000) {  //按钮倒计时
         @Override
         public void onTick(long millisUntilFinished) {
-            mBtnAuthCode.setText(millisUntilFinished / 1000 + "秒");
+            mBtnAuthCode.setTextColor(getResources().getColor(R.color.black50));
+            mBtnAuthCode.setText("发送" + millisUntilFinished / 1000 + "秒");
         }
 
         @Override
         public void onFinish() {
             mBtnAuthCode.setEnabled(true);
             mBtnAuthCode.setText(R.string.login_get_auth_code);
+            mBtnAuthCode.setTextColor(getResources().getColor(R.color.black));
         }
     };
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,30 +77,30 @@ public class Login extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
 
-
         if ((long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0) == 0) {
             System.out.println("第一次为零");
             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UUID, System.currentTimeMillis());
         }
 
-
         //监听手机号输入栏的变化
         mEdtPhoneNumber.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() == 11) {
-                    mBtnAuthCode.setEnabled(true);
-                } else {
-                    mBtnAuthCode.setEnabled(false);
-                }
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (s.length() == 11) {
+                    mBtnAuthCode.setEnabled(true);
+                    mBtnAuthCode.setTextColor(getResources().getColor(R.color.black));
+                    mBtnAuthCode.setText("发验证码");
+                    countDownTimer.cancel();
+                } else {
+                    mBtnAuthCode.setEnabled(false);
+                    mBtnAuthCode.setTextColor(getResources().getColor(R.color.black50));
+                }
             }
         });
         //监听验证码输入栏的变化
@@ -131,16 +110,17 @@ public class Login extends AppCompatActivity {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    mBtnNext.setEnabled(true);
-                } else {
-                    mBtnNext.setEnabled(false);
-                }
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (s.length() == 4 && mEdtPhoneNumber.getText().toString().length() > 0) {
+                    mBtnNext.setEnabled(true);
+                    mBtnNext.setTextColor(getResources().getColor(R.color.white));
+                } else {
+                    mBtnNext.setEnabled(false);
+                    mBtnNext.setTextColor(getResources().getColor(R.color.text_color_gray2));
+                }
             }
         });
 
@@ -185,6 +165,7 @@ public class Login extends AppCompatActivity {
         System.out.println("年龄---" + age);
         if (age == 0 || grade == 0 || schoolId == 0 || gender == 0 || TextUtils.isEmpty(name)) {
             startActivity(new Intent(Login.this, LoginAge.class));
+            //重新登录检查权限
             return;
         }
 //        //判断年级

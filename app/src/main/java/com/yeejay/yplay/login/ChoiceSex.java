@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.yeejay.yplay.MainActivity;
@@ -36,8 +36,10 @@ public class ChoiceSex extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choice_sex);
 
-        Button btnBack = (Button) findViewById(R.id.layout_title_back);
-        TextView title = (TextView) findViewById(R.id.layout_title);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color4));
+
+        ImageButton btnBack = (ImageButton) findViewById(R.id.cs_back);
+
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
@@ -51,7 +53,7 @@ public class ChoiceSex extends AppCompatActivity {
                 finish();
             }
         });
-        title.setText("选择你的性别");
+
 
         Button boyBtn = (Button) findViewById(R.id.cs_btn_boy);
         Button girlBtn = (Button) findViewById(R.id.cs_btn_girl);

@@ -30,12 +30,19 @@
     <color name="play_color3">#FF7A8F</color>
     <color name="play_color4">#57A8FF</color>
     <color name="play_round_background">#ECECEC</color>
+    <color name="class_color">#FFAB57</color>
+
+    <color name="class_item_select_color">#1AFFB300</color>
 
     <!--edit color-->
     <color name="edit_title_text_color">#483DE2</color>
+    <color name="edit_text_color2">#5F54FA</color>
+    <color name="edit_text_color3">#CCCFD3</color>
 
     <!--text color-->
     <color name="text_color_gray">#333333</color>
+    <color name="text_color_gray2">#999999</color>
+    <color name="text_color_gray3">#555555</color>
 
     <!--feeds-->
     <color name="feeds_title_color">#EE4765</color>
@@ -46,7 +53,9 @@
     <color name="feeds_selector_color">#F0F0F0</color>
     <color name="feeds_search_color">#F9F9F9</color>
     <color name="feeds_text_color">#52E0AF</color>
+    <color name="feeds_text_color50">#8052E0AF</color>
 
     <!--message-->
     <color name="message_title_color">#57A8FF</color>
+
 </resources>

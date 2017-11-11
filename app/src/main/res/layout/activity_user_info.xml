@@ -4,55 +4,96 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/feeds_title_color"
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.login.UserInfo">
 
-    <include layout="@layout/layout_title_bar"/>
-    <TextView
+    <ImageButton
+        android:id="@+id/uif_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="请完善个人资料，方便朋友认出你"
-        android:layout_gravity="center"
-        android:layout_marginTop="43dp"
-        />
-    <ImageButton
-        android:id="@+id/uif_imgBtn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/userinfo_head"
-        android:layout_gravity="center"
-        android:layout_marginTop="38dp"
-        android:scaleType="fitXY"
+        android:layout_marginLeft="20dp"
         android:background="@android:color/transparent"
-        />
-    <LinearLayout
+        android:src="@drawable/back_white" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        >
+        android:layout_height="match_parent">
+
         <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/userinfo_small"
-            android:layout_gravity="center"
-            android:layout_marginLeft="24dp"
-        />
-        <EditText
-            android:id="@+id/uif_edt_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="真实姓名"
-            android:layout_marginLeft="8dp"
-            />
-    </LinearLayout>
-    
-    <Button
-        android:id="@+id/uif_btn_next"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:text="下一步"
-        />
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/login_signup" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="122dp"
+            android:background="@drawable/shape_login_background"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:text="添加头像和头像吧"
+                android:textColor="@color/black"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:text="输入真实信息 方便朋友认出你"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <tangxiaolv.com.library.EffectiveShapeView
+                android:id="@+id/uif_imgBtn"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/header_deafult"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="18dp"
+                app:shape="circle"
+                />
+            <EditText
+                android:id="@+id/uif_edt_name"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginTop="28dp"
+                android:background="@null"
+                android:hint="输入姓名"
+                android:gravity="center_horizontal"
+                android:textColorHint="@color/black20"
+                android:textSize="16sp"
+                android:textCursorDrawable="@drawable/shape_cursor_drawable"
+                />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/login_edt_number"
+                android:layout_marginTop="7.5dp"
+                android:layout_marginLeft="65.5dp"
+                android:src="@drawable/login_line" />
+
+            <Button
+                android:id="@+id/uif_btn_next"
+                android:layout_width="204dp"
+                android:layout_height="40dp"
+                android:layout_below="@+id/login_edt_auth_code"
+                android:layout_marginTop="50dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/selector_login_btn_background"
+                android:text="来啊，造作啊!"
+                android:textSize="17sp"
+                android:textColor="@color/white"
+                android:layout_gravity="center_horizontal"
+                />
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

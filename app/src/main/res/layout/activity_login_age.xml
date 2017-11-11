@@ -4,80 +4,90 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/message_title_color"
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.login.LoginAge">
 
-    <TextView
-        android:id="@+id/la_tv_name"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:text="@string/la_app_name"
-        />
+    <ImageButton
+        android:id="@+id/la_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/back_white" />
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:id="@+id/la_ll_privacy"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="@string/la_privacy1"
-                />
-            <TextView
-                android:id="@+id/la_tv_clause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/la_privacy2"
-                android:textColor="@color/la_blue"
-                />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/la_privacy3"
-                />
-            <TextView
-                android:id="@+id/la_tv_privacy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/la_privacy4"
-                android:textColor="@color/la_blue"
-                />
-        </LinearLayout>
-        <Button
-            android:id="@+id/la_btn_quick_start"
+        android:layout_height="match_parent">
+
+        <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="@string/la_quick_start"
-            android:background="@android:color/transparent"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"
-            android:textSize="18sp"
-            />
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/login_signup" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="122dp"
+            android:background="@drawable/shape_login_background"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:text="几岁啦"
+                android:textColor="@color/black"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:text="一YOUNG不一样"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/la_tv_age"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="37dp"
+                android:text="选择年龄"
+                android:textColor="@color/black20"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/login_edt_number"
+                android:layout_marginLeft="65.5dp"
+                android:layout_marginTop="7.5dp"
+                android:src="@drawable/login_line" />
+
+            <Button
+                android:id="@+id/la_btn_quick_start"
+                android:layout_width="204dp"
+                android:layout_height="40dp"
+                android:layout_below="@+id/login_edt_auth_code"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="45.5dp"
+                android:background="@drawable/selector_login_btn_background"
+                android:enabled="false"
+                android:text="下一步"
+                android:textColor="@color/text_color_gray2"
+                android:textSize="17sp" />
+
+            <com.yeejay.yplay.customview.WheelView
+                android:id="@+id/la_wheel_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"/>
+        </LinearLayout>
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/la_tv_age"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/la_choice_age"
-        android:gravity="center"
-        android:textSize="18sp"
-        android:padding="3dp"
-        />
-    <com.yeejay.yplay.customview.WheelView
-        android:id="@+id/la_wheel_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </com.yeejay.yplay.customview.WheelView>
 </LinearLayout>

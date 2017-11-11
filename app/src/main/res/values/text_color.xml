@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <drawable name="boy_text_select_color">#57A8FF</drawable>
+    <drawable name="girl_text_select_color">#EE4765</drawable>
+    <drawable name="boy_text_unselct_color">#CCCFD3</drawable>
+</resources>
