@@ -91,6 +91,8 @@ public class FragmentAnswer extends BaseFragment {
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
 
+    int color = R.color.edit_text_color2;
+
     //倒计时时间
     private final static int LIMIT_TIME = 20*1000;
     List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;

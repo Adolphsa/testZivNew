@@ -50,6 +50,7 @@
 
     <color name="feeds_hight_gray">#9A9FA7</color>
     <color name="feeds_hight_gray50">#809A9FA7</color>
+    <color name="feeds_hight_gray45">#739A9FA7</color>
     <color name="feeds_selector_color">#F0F0F0</color>
     <color name="feeds_search_color">#F9F9F9</color>
     <color name="feeds_text_color">#52E0AF</color>
@@ -58,4 +59,6 @@
     <!--message-->
     <color name="message_title_color">#57A8FF</color>
 
+    
+    <color name="color_transparent">#00000000</color>
 </resources>

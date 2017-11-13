@@ -75,4 +75,8 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
 //            currentType = TYPE_FILL;
 //    }
 
+
+    public void setmProgressColor(){
+
+    }
 }

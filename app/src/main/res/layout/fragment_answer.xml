@@ -151,7 +151,7 @@
             android:id="@+id/frgans_tn_next_person"
             android:layout_width="136dp"
             android:layout_height="58dp"
-            android:background="@drawable/selector_paly_replace"
+            android:background="@drawable/box2"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -161,7 +161,7 @@
             android:id="@+id/frgans_btn_keep"
             android:layout_width="136dp"
             android:layout_height="58dp"
-            android:background="@drawable/selector_go_on"
+            android:background="@drawable/box3"
             android:layout_centerInParent="true"
             android:visibility="invisible"
             />
@@ -169,7 +169,7 @@
             android:id="@+id/frgans_btn_next_question"
             android:layout_width="136dp"
             android:layout_height="58dp"
-            android:background="@drawable/selector_next"
+            android:background="@drawable/box1"
            android:layout_toRightOf="@+id/frgans_tn_next_person"
             android:layout_marginLeft="20dp"
             />

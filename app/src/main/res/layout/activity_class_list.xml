@@ -3,31 +3,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
     android:background="@color/class_color"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context="com.yeejay.yplay.login.ClassList">
 
-
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/cl_title_ll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        >
 
-        <RelativeLayout
+        <ImageButton
+            android:id="@+id/cl_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/back_white"
+            android:visibility="invisible"
+            />
+    </LinearLayout>
+
+    <com.yeejay.yplay.customview.LazyScrollView
+        android:id="@+id/cl_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"
+            android:orientation="vertical">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:src="@drawable/login_signup" />
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/login_signup2" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="122dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/shape_login_background"
                 android:orientation="vertical">
 
@@ -36,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="40dp"
-                    android:text="几年级啦？"
+                    android:text="几年级啦"
                     android:textColor="@color/black"
                     android:textSize="26sp" />
 
@@ -49,12 +69,19 @@
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
-                <ListView
+                <com.yeejay.yplay.customview.MesureListView
                     android:id="@+id/cl_grade_list"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="26dp"
+                    android:divider="@color/feeds_hight_gray45"
+                    android:dividerHeight="0.2dp"
+                    />
             </LinearLayout>
-        </RelativeLayout>
-    </ScrollView>
+        </LinearLayout>
+
+
+    </com.yeejay.yplay.customview.LazyScrollView>
+
 
 </LinearLayout>

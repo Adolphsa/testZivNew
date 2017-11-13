@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:background="@drawable/item_class_list"
-    android:layout_height="80dp">
+    android:layout_height="wrap_content"
+    android:background="@drawable/item_class_list">
 
     <TextView
         android:id="@+id/cl_item_title"
@@ -13,8 +13,11 @@
         android:textSize="16sp"
         android:textColor="@color/text_color_gray3"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="50dp"
+        android:layout_marginLeft="40dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         />
+
     <ImageView
         android:layout_width="4.5dp"
         android:layout_height="7.8dp"

@@ -25,39 +25,85 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:windowSoftInputMode="stateHidden">
         <activity
-            android:name=".login.Login"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden">
+            android:name=".login.LoadingActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".login.LoginAge" />
-        <!-- <activity android:name=".login.Login" /> -->
-        <activity android:name=".login.LoginAuthorization" />
-        <activity android:name=".login.ClassList" />
-        <activity android:name=".login.SchoolList" />
-        <activity android:name=".login.ChoiceSex" />
-        <activity android:name=".login.UserInfo" />
-        <activity android:name=".answer.ActivityInviteFriend" />
-        <activity android:name=".answer.ActivityInvite" />
-        <activity android:name=".friend.ActivityFriendsInfo" />
-        <activity android:name=".friend.AddFriends" />
-        <activity android:name=".friend.ActivityAddFiendsDetail" />
-        <activity android:name=".message.ActivityChatWindow" />
-        <activity android:name=".userinfo.ActivityMyInfo" />
-        <activity android:name=".userinfo.ActivityAllDiamond" />
-        <activity android:name=".userinfo.ActivityAboutOur" />
+        <activity
+            android:name=".login.LoginAge"
+            android:screenOrientation="portrait" />
+         <activity android:name=".login.Login"
+         android:windowSoftInputMode="adjustResize|stateHidden"
+             android:screenOrientation="portrait"
+
+             />
+        <activity
+            android:name=".login.LoginAuthorization"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".login.ClassList"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".login.SchoolList"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".login.ChoiceSex"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".login.UserInfo"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".answer.ActivityInviteFriend"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".answer.ActivityInvite"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.ActivityFriendsInfo"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.AddFriends"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.ActivityAddFiendsDetail"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".message.ActivityChatWindow"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".userinfo.ActivityMyInfo"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".userinfo.ActivityAllDiamond"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".userinfo.ActivityAboutOur"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".userinfo.ActivitySetting"
-            android:launchMode="singleTask" />
-        <activity android:name=".friend.ActivityContacts" />
-        <activity android:name=".friend.ActivitySchoolmate" />
-        <activity android:name=".friend.ActivityWaitInvite" />
-        <activity android:name=".MainActivity" />
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.ActivityContacts"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.ActivitySchoolmate"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friend.ActivityWaitInvite"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
@@ -79,8 +125,11 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".friend.ActivitySearchFriends" />
-        <activity android:name=".friend.TestActivity"/>
+        <activity
+            android:name=".friend.ActivitySearchFriends"
+            android:screenOrientation="portrait" />
+        <!-- <activity android:name=".friend.TestActivity"/> -->
+        <!--<activity android:name=".login.LoadingActivity"/>-->
     </application>
 
 </manifest>

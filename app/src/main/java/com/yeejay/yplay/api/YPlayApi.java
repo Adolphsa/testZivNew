@@ -200,5 +200,8 @@ public interface YPlayApi {
     @POST("/api/sns/getrecommendsall")
     Observable<GetRecommendAll> getAllRecommends(@FieldMap Map<String,Object> filemap);
 
-
+    //退出登录
+    @FormUrlEncoded
+    @POST("/api/account/logout")
+    Observable<BaseRespond> logout(@FieldMap Map<String,Object> filemap);
 }

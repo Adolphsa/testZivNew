@@ -7,11 +7,11 @@
         android:id="@+id/sl_school_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="40dp"
         android:layout_marginTop="6dp"
         android:text="南山小学"
         android:textSize="14sp"
-        android:textColor="#000000"
+        android:textColor="@color/text_color_gray3"
         />
     <TextView
         android:id="@+id/sl_school_number"
@@ -24,14 +24,15 @@
         android:layout_alignParentRight="true"
         android:layout_marginTop="6dp"
         android:layout_marginRight="37dp"
+        android:visibility="gone"
         />
     <TextView
         android:id="@+id/sl_school_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="40dp"
         android:text="深圳"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textColor="#999999"
         android:layout_below="@+id/sl_school_name"
         android:layout_marginTop="5dp"
@@ -49,11 +50,13 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="37dp"
         android:layout_marginTop="5dp"
+        android:visibility="gone"
         />
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/sl_item_arrow"
+        android:layout_width="4.5dp"
+        android:layout_height="7.8dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/item_arrows"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="16dp"

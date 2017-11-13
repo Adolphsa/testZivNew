@@ -31,6 +31,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
+import com.yeejay.yplay.login.Login;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
@@ -140,6 +141,7 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_exit)
     public void settingExit() {
         System.out.println("退出");
+        logout();
 
     }
 
@@ -433,6 +435,45 @@ public class ActivitySetting extends AppCompatActivity {
                     }
                 });
     }
+
+    //退出登录
+    private void logout(){
+        Map<String, Object> logoutMap = new HashMap<>();
+        logoutMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
+        logoutMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        logoutMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getMyInfo(logoutMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("退出登录---" + userInfoResponde.toString());
+                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_UIN);
+                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_TOKEN);
+                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_VER);
+                        startActivity(new Intent(ActivitySetting.this, Login.class));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("退出登录---异常" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
 
     //展示对话框
      private void showInputDialog(String title,String message){

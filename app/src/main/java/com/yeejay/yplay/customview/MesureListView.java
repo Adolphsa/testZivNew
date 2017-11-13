@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.widget.ListView;
 
 /**
+ * 自定义ListView
  * Created by Administrator on 2017/11/2.
  */
 
@@ -26,4 +27,5 @@ public class MesureListView  extends ListView{
 
         super.onMeasure(widthMeasureSpec, expandSpec);
     }
+
 }

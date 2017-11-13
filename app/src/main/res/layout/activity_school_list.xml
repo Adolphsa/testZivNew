@@ -5,20 +5,87 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/white"
     tools:context="com.yeejay.yplay.login.SchoolList">
 
-    <include layout="@layout/layout_title_bar"/>
+    <LinearLayout
+        android:id="@+id/sl_title_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/edit_text_color2"
+        >
+
+        <ImageButton
+            android:id="@+id/sl_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/back_white" />
+    </LinearLayout>
 
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:id="@+id/sl_ptf_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-        <ListView
-            android:id="@+id/sl_school_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+    <com.yeejay.yplay.customview.LazyScrollView
+        android:id="@+id/sl_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@color/edit_title_text_color"
+                android:scaleType="fitXY"
+                android:src="@drawable/school_header_img" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="36dp"
+                    android:text="在哪里上学呀"
+                    android:textColor="@color/black"
+                    android:textSize="26sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:text="找同校好友燥起来"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+
+                    <com.yeejay.yplay.customview.MesureListView
+                        android:id="@+id/sl_school_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="26dp"
+                        android:divider="@color/feeds_hight_gray45"
+                        android:dividerHeight="0.2dp"
+                        />
+
+
+            </LinearLayout>
+        </LinearLayout>
+    </com.yeejay.yplay.customview.LazyScrollView>
     </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 
 </LinearLayout>

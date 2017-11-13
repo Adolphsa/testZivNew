@@ -91,6 +91,7 @@ public class UserInfoResponde {
              * nickName : TT
              * headImgUrl : http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png
              * gender : 2
+             * age : 10
              * grade : 0
              * schoolId : 3
              * schoolType : 2
@@ -109,6 +110,7 @@ public class UserInfoResponde {
             private String nickName;
             private String headImgUrl;
             private int gender;
+            private int age;
             private int grade;
             private int schoolId;
             private int schoolType;
@@ -166,6 +168,14 @@ public class UserInfoResponde {
 
             public void setGender(int gender) {
                 this.gender = gender;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
             }
 
             public int getGrade() {
