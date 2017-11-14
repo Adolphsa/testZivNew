@@ -10,8 +10,8 @@
         android:id="@+id/main_view_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        >
-    </android.support.v4.view.ViewPager>
+        />
+
 
     <RelativeLayout
         android:id="@+id/mainnav_bar2"
@@ -54,7 +54,7 @@
         android:id="@+id/main_nav_bar_rl"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@color/play_color2"
+        android:background="@android:color/transparent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true">
     <Button

@@ -125,6 +125,9 @@ public class LoginAuthorization extends AppCompatActivity {
                     System.out.println("地理位置有权限");
                     setLocationBackground();
                 }
+                if (numberBookAuthoritySuccess && addressAuthoritySuccess){
+                    authorizationSuccess();
+                }
                 break;
             }
         }
@@ -369,7 +372,7 @@ public class LoginAuthorization extends AppCompatActivity {
         Drawable nav_up = getResources().getDrawable(R.drawable.contacts_yes);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
         mBtnGetNumberBookAuthority.setCompoundDrawables(null, nav_up, null, null);
-        mBtnGetNumberBookAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
+        //mBtnGetNumberBookAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
         mBtnGetNumberBookAuthority.setEnabled(false);
     }
 
@@ -378,7 +381,7 @@ public class LoginAuthorization extends AppCompatActivity {
         Drawable nav_up = getResources().getDrawable(R.drawable.location_yes);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
         mBtnGetAddressAuthority.setCompoundDrawables(null, nav_up, null, null);
-        mBtnGetAddressAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
+        //mBtnGetAddressAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
         mBtnGetAddressAuthority.setEnabled(false);
     }
 

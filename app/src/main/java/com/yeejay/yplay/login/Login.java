@@ -25,8 +25,11 @@ import android.widget.Toast;
 
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.customview.CountDownTimer;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ContactsInfo;
 import com.yeejay.yplay.model.LoginRespond;
@@ -74,6 +77,9 @@ public class Login extends AppCompatActivity {
     public void loginAuthCode(){
     }
 
+    MyInfoDao myInfoDao;
+
+
     CountDownTimer countDownTimer = new CountDownTimer(60000, 1000) {  //按钮倒计时
         @Override
         public void onTick(long millisUntilFinished) {
@@ -100,6 +106,8 @@ public class Login extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
 
+        myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+
         if ((long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0) == 0) {
             System.out.println("第一次为零");
             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UUID, System.currentTimeMillis());
@@ -115,16 +123,31 @@ public class Login extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+
                 if (s.length() == 11) {
+                    System.out.println("手机号码的长度---" + s.toString());
                     mBtnAuthCode.setEnabled(true);
                     mBtnAuthCode.setTextColor(getResources().getColor(R.color.black));
                     mBtnAuthCode.setText("发验证码");
                     countDownTimer.cancel();
+
+                    //判断验证码的长度
+                    String authCode = mEdtAuthCode.getText().toString();
+                    if (!TextUtils.isEmpty(authCode) && authCode.length() == 4){
+                        mBtnNext.setEnabled(true);
+                        mBtnNext.setTextColor(getResources().getColor(R.color.white));
+                    }
+
                 } else {
                     mBtnAuthCode.setEnabled(false);
                     mBtnAuthCode.setTextColor(getResources().getColor(R.color.black50));
+
+                    mBtnNext.setEnabled(false);
+                    mBtnNext.setTextColor(getResources().getColor(R.color.text_color_gray2));
                 }
             }
+
+
         });
         //监听验证码输入栏的变化
         mEdtAuthCode.addTextChangedListener(new TextWatcher() {
@@ -386,6 +409,8 @@ public class Login extends AppCompatActivity {
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, loginRespond.getPayload().getToken());
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, loginRespond.getPayload().getVer());
 
+                            insertUin(loginRespond.getPayload());
+
                             if (loginRespond.getPayload().getIsNewUser() == 1) {
                                 startActivity(new Intent(Login.this, LoginAge.class));
                             } else {
@@ -414,6 +439,21 @@ public class Login extends AppCompatActivity {
                     }
                 });
     }
+
+    //插入uin到数据库
+    private void insertUin(LoginRespond.PayloadBean payloadBean){
+
+
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(payloadBean.getUin()))
+                .build().unique();
+
+        if (myInfo == null){
+            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0);
+            myInfoDao.insert(insert);
+            System.out.println("插入数据库");
+        }
+    }
+
 
     //获取自己的资料
     private void getMyInfo(int uin,String token,int ver){

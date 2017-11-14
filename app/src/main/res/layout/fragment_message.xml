@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/layouot_frag_title_bar"/>
+    <include layout="@layout/layouot_frag_title_bar"
+        android:id="@+id/message_title"
+        />
 
     <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
         android:id="@+id/message_recyclerView"

@@ -10,9 +10,7 @@
 
     <include layout="@layout/layout_user_info"/>
 
-    <include layout="@layout/layout_user_info_friends"
-
-        />
+    <include layout="@layout/layout_user_info_friends" />
     <include layout="@layout/layout_user_info_diamond"/>
 
     <LinearLayout

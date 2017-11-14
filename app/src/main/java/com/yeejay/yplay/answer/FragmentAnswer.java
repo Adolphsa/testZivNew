@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
@@ -23,6 +24,7 @@ import com.yeejay.yplay.model.VoteOptionsBean;
 import com.yeejay.yplay.model.VoteRespond;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -85,13 +87,23 @@ public class FragmentAnswer extends BaseFragment {
     ImageButton frgEdit;
     @BindView(R.id.frgans_linear_layout)
     LinearLayout frgansLinlearLayout;
+//    @BindView(R.id.frans_progress)
+//    ProgressBar frandProgress;
 
     int questionNum = 0;
     int nextPersonCount = 1;
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
 
-    int color = R.color.edit_text_color2;
+    int backgroundColor[] = {R.color.play_color1,
+                            R.color.play_color2,
+                            R.color.play_color3,
+                            R.color.play_color4};
+
+    int buttonColor[] = {R.color.button_color1,
+                        R.color.button_color2,
+                        R.color.button_color3,
+                        R.color.button_color4};
 
     //倒计时时间
     private final static int LIMIT_TIME = 20*1000;
@@ -127,6 +139,8 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn2Cnt * 120 / total, 2).execute();
             new ProgressTask(btn3Cnt * 120 / total, 3).execute();
             new ProgressTask(btn4Cnt * 120 / total, 4).execute();
+        }else {
+            System.out.println("返回异常");
         }
 
     }
@@ -143,6 +157,8 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((1 + btn2Cnt) * 120 / total, 2).execute();
             new ProgressTask(btn3Cnt * 120 / total, 3).execute();
             new ProgressTask(btn4Cnt * 120 / total, 4).execute();
+        }else {
+            System.out.println("返回异常");
         }
     }
 
@@ -158,6 +174,8 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((btn2Cnt) * 120 / total, 2).execute();
             new ProgressTask((1 + btn3Cnt) * 120 / total, 3).execute();
             new ProgressTask(btn4Cnt * 120 / total, 4).execute();
+        }else {
+            System.out.println("返回异常");
         }
 
     }
@@ -174,9 +192,12 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((btn2Cnt) * 120 / total, 2).execute();
             new ProgressTask((btn3Cnt) * 120 / total, 3).execute();
             new ProgressTask((1 + btn4Cnt) * 120 / total, 4).execute();
+        }else {
+            System.out.println("返回异常");
         }
     }
 
+    //换一换
     @OnClick(R.id.frgans_tn_next_person)
     public void nextPersons(View view) {
 //        if (nextPersonCount > 5){
@@ -217,6 +238,15 @@ public class FragmentAnswer extends BaseFragment {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
+
+            System.out.println("问题个数---" + questionNum);
+            frgansBtn1.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn2.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn3.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn4.setButtonColor(buttonColor[questionNum%3]);
+
+            System.out.println("颜色参数---" + questionNum%3);
+
             if (buttonType == 1) {
                 frgansBtn1.updateProgress(values[0]);
             } else if (buttonType == 2) {
@@ -235,45 +265,56 @@ public class FragmentAnswer extends BaseFragment {
     public void btnKeep(View view) {
         //点击继续
         System.out.println("点击继续");
-        hideKeep();
-        questionNum++;
-        System.out.println("继续questionNumber---" + questionNum);
-        if (questionNum >= 15) {
-            questionOut15();
-            return;
-        }
-        nextQuestionUpdate();
-        frgansBtn1.updateProgress(0);
-        frgansBtn2.updateProgress(0);
-        frgansBtn3.updateProgress(0);
-        frgansBtn4.updateProgress(0);
 
-        frgansBtn1.setEnabled(true);
-        frgansBtn2.setEnabled(true);
-        frgansBtn3.setEnabled(true);
-        frgansBtn4.setEnabled(true);
+        if (questionsBean != null){
+            hideKeep();
+            questionNum++;
+            System.out.println("继续questionNumber---" + questionNum);
+            if (questionNum >= 15) {
+                questionOut15();
+                return;
+            }
+            nextQuestionUpdate();
+            frgansBtn1.updateProgress(0);
+            frgansBtn2.updateProgress(0);
+            frgansBtn3.updateProgress(0);
+            frgansBtn4.updateProgress(0);
+
+            frgansBtn1.setEnabled(true);
+            frgansBtn2.setEnabled(true);
+            frgansBtn3.setEnabled(true);
+            frgansBtn4.setEnabled(true);
+        }else {
+            System.out.println("返回异常");
+        }
+
     }
 
     @OnClick(R.id.frgans_btn_next_question)
     public void nextQuestion(View view) {
         //过
-        questionNum++;
-        System.out.println("过questionNumber---" + questionNum);
-        if (questionNum >= 15) {
-            questionOut15();
-            return;
-        }
-        nextQuestionUpdate();
-        System.out.println("过");
-        frgansBtn1.updateProgress(0);
-        frgansBtn2.updateProgress(0);
-        frgansBtn3.updateProgress(0);
-        frgansBtn4.updateProgress(0);
+        if (questionsBean != null){
+            questionNum++;
+            System.out.println("过questionNumber---" + questionNum);
+            if (questionNum >= 15) {
+                questionOut15();
+                return;
+            }
+            nextQuestionUpdate();
+            System.out.println("过");
+            frgansBtn1.updateProgress(0);
+            frgansBtn2.updateProgress(0);
+            frgansBtn3.updateProgress(0);
+            frgansBtn4.updateProgress(0);
 
-        frgansBtn1.setEnabled(true);
-        frgansBtn2.setEnabled(true);
-        frgansBtn3.setEnabled(true);
-        frgansBtn4.setEnabled(true);
+            frgansBtn1.setEnabled(true);
+            frgansBtn2.setEnabled(true);
+            frgansBtn3.setEnabled(true);
+            frgansBtn4.setEnabled(true);
+        }else {
+            System.out.println("返回异常");
+        }
+
     }
 
     @OnClick(R.id.frgans_btn_invite)
@@ -290,11 +331,11 @@ public class FragmentAnswer extends BaseFragment {
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
 
-        getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
-        baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
-        frgTitle.setVisibility(View.INVISIBLE);
-        frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color2));
+        getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color4));
+        frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color4));
+        baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color4));
 
+        frgTitle.setVisibility(View.INVISIBLE);
 
         frgUserInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -313,11 +354,25 @@ public class FragmentAnswer extends BaseFragment {
         });
     }
 
+    //修改颜色
+    private void changeColor(int color){
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.setBottomColor(color);
+        frgansLinlearLayout.setBackgroundColor(getResources().getColor(color));
+        baseTitleRl.setBackgroundColor(getResources().getColor(color));
+    }
+
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser) {
             System.out.println("FragmentAnswer---答题可见");
+            MainActivity mainActivity = (MainActivity) getActivity();
+            System.out.println("queationNum%3 == " + (questionNum%3) + ",queationNum---" + questionNum);
+            mainActivity.setmColor(backgroundColor[questionNum%3]);
+            if (!NetWorkUtil.isNetWorkAvailable(getActivity())){
+//             frandProgress.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -334,6 +389,8 @@ public class FragmentAnswer extends BaseFragment {
                 }
                 frgansQuestion.setText(questionsBean.getQtext());
                 getQuestionsCandidate(questionsBean.getQid());
+
+                changeColor(backgroundColor[questionNum%3]);
             }
 
         }
@@ -362,6 +419,10 @@ public class FragmentAnswer extends BaseFragment {
 
     //点击继续15次
     private void questionOut15() {
+
+        //修改背景颜色
+        changeColor(R.color.play_color2);
+
         frgansImg.setImageDrawable(getResources().getDrawable(R.drawable.play_socket));
         frgansQuestion.setText("技能冷却");
         frgansCountDownView.setVisibility(View.VISIBLE);
@@ -441,6 +502,7 @@ public class FragmentAnswer extends BaseFragment {
                             if (questionsList.size() > 0) {
                                 nextQuestionUpdate();
                             }
+//                            frandProgress.setVisibility(View.INVISIBLE);
                         }
                     }
 

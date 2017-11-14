@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
@@ -24,6 +25,8 @@ import butterknife.OnClick;
 
 public class FragmentMessage extends BaseFragment{
 
+    @BindView(R.id.message_title)
+    RelativeLayout messageTitle;
     @BindView(R.id.frg_title)
     TextView frgTitle;
     @BindView(R.id.frg_user_info)
@@ -46,6 +49,7 @@ public class FragmentMessage extends BaseFragment{
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+        messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
         initMessageView();
     }

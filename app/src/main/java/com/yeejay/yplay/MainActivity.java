@@ -77,6 +77,17 @@ public class MainActivity extends AppCompatActivity {
     FragmentAnswer fragmentAnswer;
     FragmentMessage fragmentMessage;
 
+    private int mColor;
+    public int getmColor() {
+        return mColor;
+    }
+
+    public void setmColor(int mColor) {
+        this.mColor = mColor;
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,9 +100,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setCurrentItem(1);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int i, float v, int i1) {
-
-            }
+            public void onPageScrolled(int i, float v, int i1) {}
 
             @Override
             public void onPageSelected(int i) {
@@ -142,7 +151,8 @@ public class MainActivity extends AppCompatActivity {
     private void playFragmentStatus(){
         mainNavBarRl.setVisibility(View.VISIBLE);
         mainnavBar2.setVisibility(View.INVISIBLE);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+        getWindow().setStatusBarColor(getResources().getColor(mColor));
+
     }
 
     //消息
@@ -150,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
         mainNavBarRl.setVisibility(View.INVISIBLE);
         mainnavBar2.setVisibility(View.VISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
+    }
+
+    //设置状态栏的颜色
+    public void setBottomColor(int color){
+        getWindow().setStatusBarColor(getResources().getColor(color));
+        mColor = color;
     }
 
     @Override

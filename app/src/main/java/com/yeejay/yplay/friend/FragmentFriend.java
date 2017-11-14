@@ -25,6 +25,8 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
@@ -379,7 +381,8 @@ public class FragmentFriend extends BaseFragment {
         if (fransFrfLayout.isShown()) {
             rfListView = (ListView) fransFrfLayout.findViewById(R.id.frf_list_view);
             Button addFriend = (Button) fransFrfLayout.findViewById(R.id.frf_btn_add_friend);
-            TextView noMoreShowTv = (TextView) fransFrfLayout.findViewById(R.id.frf_no_more_show);
+            Button noMoreShowTv = (Button) fransFrfLayout.findViewById(R.id.frf_no_more_show);
+            TextView seeMore = (TextView) fransFrfLayout.findViewById(R.id.frf_see_more);
             rl = (RelativeLayout) fransFrfLayout.findViewById(R.id.frf_recommend_rl);
             addFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -388,18 +391,40 @@ public class FragmentFriend extends BaseFragment {
                     startActivity(new Intent(getActivity(), AddFriends.class));
                 }
             });
+
             noMoreShowTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     System.out.println("不再显示");
                     rl.setVisibility(View.INVISIBLE);
+
                     SharePreferenceUtil.put(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,true);
+
+                    //将数据库中的值变为1
+                    MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+                    int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+                    MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                            .build().unique();
+                    if (myInfo != null){
+                        myInfo.setIsNoMoreShow(1);
+                        myInfoDao.update(myInfo);
+                    }
+
                 }
             });
-            boolean noMoreShow = (boolean)SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,false);
-            if (noMoreShow){
+            MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+            int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+            MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                    .build().unique();
+            if (myInfo != null && myInfo.getIsNoMoreShow() == 1){
                 rl.setVisibility(View.GONE);
             }
+
+
+//            boolean noMoreShow = (boolean)SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,false);
+//            if (noMoreShow){
+//
+//            }
             //rl.setVisibility(View.VISIBLE);
             recommendFriendsForNull();
         }

@@ -2,17 +2,16 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
-    android:paddingTop="20dp"
-    >
+    android:layout_height="51dp">
 
     <ImageView
         android:id="@+id/friend_iv1"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:src="@drawable/friend_count"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/my_info_my_friend"
         android:scaleType="fitXY"
         android:layout_marginLeft="20dp"
+        android:layout_centerVertical="true"
     />
     <TextView
         android:id="@+id/friend_tv1"
@@ -20,18 +19,29 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="@color/play_color2"
-        android:text="好友"
+        android:text="我的好友"
         android:layout_toRightOf="@id/friend_iv1"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="6dp"
+        android:layout_centerVertical="true"
         />
     <TextView
         android:id="@+id/friend_tv_num"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/play_color2"
+        android:textSize="14sp"
+        android:textColor="@color/text_color_gray2"
         android:text="0"
-        android:layout_toRightOf="@id/friend_tv1"
-        android:layout_marginLeft="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="35dp"
+        android:layout_centerVertical="true"
+        />
+    <ImageView
+        android:layout_width="4.5dp"
+        android:layout_height="7.7dp"
+        android:src="@drawable/item_arrows"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20.4dp"
+        android:layout_centerVertical="true"
+
         />
 </RelativeLayout>

@@ -41,13 +41,31 @@
             android:descendantFocusability="blocksDescendants"
             android:orientation="vertical">
 
-            <ImageView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@color/edit_title_text_color"
-                android:scaleType="fitXY"
-                android:src="@drawable/school_header_img" />
+                android:orientation="vertical"
+                android:background="@color/edit_text_color2"
+                >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/login_img5" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@color/edit_title_text_color"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/login_img5_2"
+                    />
+            </LinearLayout>
+
+
 
             <LinearLayout
                 android:layout_width="match_parent"

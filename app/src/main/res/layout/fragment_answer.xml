@@ -4,8 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:id="@+id/frgans_linear_layout"
-    >
+    android:id="@+id/frgans_linear_layout">
 
     <include layout="@layout/layouot_frag_title_bar" />
     <TextView
@@ -24,7 +23,6 @@
         android:src="@drawable/app_img"
         android:layout_gravity="center"
         android:scaleType="fitXY"
-        android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         />
     <TextView
@@ -34,7 +32,6 @@
         android:text="这个人的笑声最魔性"
         android:layout_gravity="center"
         android:textSize="22sp"
-        android:layout_marginTop="10dp"
         android:layout_marginLeft="23dp"
         android:layout_marginRight="23dp"
         android:gravity="center"
@@ -62,46 +59,62 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="50dp"
         >
+        <!--<ProgressBar-->
+            <!--android:id="@+id/frans_progress"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--/>-->
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn1"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="126.8dp"
+            android:layout_height="56.8dp"
             android:gravity="center"
-            android:layout_marginLeft="42dp"
+            android:layout_marginLeft="53dp"
             android:text="faker"
+            android:textSize="18sp"
+            android:textColor="@color/black20"
             android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn2"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="126.8dp"
+            android:layout_height="56.8dp"
             android:gravity="center"
             android:text="孙亚龙"
+            android:textSize="18sp"
+            android:textColor="@color/black20"
             android:layout_toRightOf="@+id/frgans_btn1"
             android:layout_marginLeft="20dp"
+            android:layout_marginRight="53dp"
             android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn3"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="126.8dp"
+            android:layout_height="56.8dp"
             android:gravity="center"
             android:text="笑笑"
+            android:textSize="18sp"
+            android:textColor="@color/black20"
             android:layout_below="@+id/frgans_btn1"
-            android:layout_marginLeft="42dp"
+            android:layout_marginLeft="53dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn4"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="126.8dp"
+            android:layout_height="56.8dp"
             android:text="五五开"
+            android:textSize="18sp"
             android:gravity="center"
+            android:textColor="@color/black20"
             android:layout_toRightOf="@+id/frgans_btn3"
             android:layout_marginLeft="20dp"
+            android:layout_marginRight="53dp"
             android:layout_below="@+id/frgans_btn2"
             android:layout_marginTop="10dp"
             android:background="@drawable/play_button_background"
@@ -110,11 +123,12 @@
             android:id="@+id/frgans_tv_or"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="—— 或者 ——"
-            android:textSize="16sp"
+            android:text="— 或者 —"
+            android:textSize="14sp"
             android:layout_centerHorizontal="true"
             android:visibility="invisible"
-            android:textColor="@android:color/white"
+            android:textColor="@color/white40"
+            android:layout_marginTop="39dp"
             />
         <TextView
             android:id="@+id/frgans_tv_relieve"
@@ -130,49 +144,46 @@
             />
         <Button
             android:id="@+id/frgans_btn_invite"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
-            android:text="邀请好友"
-            android:background="@drawable/play_button_background"
+            android:layout_width="142dp"
+            android:layout_height="60dp"
+            android:background="@drawable/select_play_invite_friend"
             android:layout_centerInParent="true"
             android:visibility="invisible"
             android:layout_below="@+id/frgans_tv_relieve"
-            android:layout_marginTop="10dp"
-            android:textColor="@color/play_color2"
+            android:layout_marginTop="20dp"
             />
-    </RelativeLayout>
-    <RelativeLayout
-        android:id="@+id/frgans_rl_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        >
+
         <Button
             android:id="@+id/frgans_tn_next_person"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="125dp"
+            android:layout_height="45dp"
             android:background="@drawable/box2"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="42dp"
+            android:layout_below="@+id/frgans_btn3"
+            android:layout_marginTop="33.6dp"
+            android:layout_alignLeft="@+id/frgans_btn3"
             />
+
         <Button
             android:id="@+id/frgans_btn_keep"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="125dp"
+            android:layout_height="45dp"
             android:background="@drawable/box3"
             android:layout_centerInParent="true"
             android:visibility="invisible"
+            android:layout_below="@+id/frgans_btn3"
+            android:layout_marginTop="33.6dp"
             />
         <Button
             android:id="@+id/frgans_btn_next_question"
-            android:layout_width="136dp"
-            android:layout_height="58dp"
+            android:layout_width="125dp"
+            android:layout_height="46dp"
             android:background="@drawable/box1"
-           android:layout_toRightOf="@+id/frgans_tn_next_person"
+            android:layout_toRightOf="@+id/frgans_tn_next_person"
             android:layout_marginLeft="20dp"
+            android:layout_below="@+id/frgans_btn3"
+            android:layout_marginTop="33.6dp"
+            android:layout_alignRight="@id/frgans_btn4"
             />
-
     </RelativeLayout>
+
 </LinearLayout>

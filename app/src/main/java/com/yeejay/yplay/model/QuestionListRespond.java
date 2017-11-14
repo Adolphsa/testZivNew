@@ -57,7 +57,44 @@ public class QuestionListRespond implements Parcelable {
     }
 
     public static class PayloadBean implements Parcelable {
+
+        private int freezeStatus;
+        private int freezeTs;
+        private int nowTs;
+        private int total;
         private List<QuestionsBean> questions;
+
+        public int getFreezeStatus() {
+            return freezeStatus;
+        }
+
+        public void setFreezeStatus(int freezeStatus) {
+            this.freezeStatus = freezeStatus;
+        }
+
+        public int getFreezeTs() {
+            return freezeTs;
+        }
+
+        public void setFreezeTs(int freezeTs) {
+            this.freezeTs = freezeTs;
+        }
+
+        public int getNowTs() {
+            return nowTs;
+        }
+
+        public void setNowTs(int nowTs) {
+            this.nowTs = nowTs;
+        }
+
+        public int getTotal() {
+            return total;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
+        }
 
         public List<QuestionsBean> getQuestions() {
             return questions;
@@ -70,9 +107,14 @@ public class QuestionListRespond implements Parcelable {
         @Override
         public String toString() {
             return "PayloadBean{" +
-                    "questions=" + questions +
+                    "freezeStatus=" + freezeStatus +
+                    ", freezeTs=" + freezeTs +
+                    ", nowTs=" + nowTs +
+                    ", total=" + total +
+                    ", questions=" + questions +
                     '}';
         }
+
 
         public static class QuestionsBean implements Parcelable {
             /**
@@ -178,6 +220,9 @@ public class QuestionListRespond implements Parcelable {
             };
         }
 
+        public PayloadBean() {
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -185,17 +230,22 @@ public class QuestionListRespond implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.freezeStatus);
+            dest.writeInt(this.freezeTs);
+            dest.writeInt(this.nowTs);
+            dest.writeInt(this.total);
             dest.writeTypedList(this.questions);
         }
 
-        public PayloadBean() {
-        }
-
         protected PayloadBean(Parcel in) {
+            this.freezeStatus = in.readInt();
+            this.freezeTs = in.readInt();
+            this.nowTs = in.readInt();
+            this.total = in.readInt();
             this.questions = in.createTypedArrayList(QuestionsBean.CREATOR);
         }
 
-        public static final Parcelable.Creator<PayloadBean> CREATOR = new Parcelable.Creator<PayloadBean>() {
+        public static final Creator<PayloadBean> CREATOR = new Creator<PayloadBean>() {
             @Override
             public PayloadBean createFromParcel(Parcel source) {
                 return new PayloadBean(source);

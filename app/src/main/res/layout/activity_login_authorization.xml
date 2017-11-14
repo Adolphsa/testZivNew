@@ -24,12 +24,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/login_signup" />
+            android:src="@drawable/login_img3" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="122dp"
+            android:layout_marginTop="140dp"
             android:background="@drawable/shape_login_background"
             android:orientation="vertical">
 
@@ -59,9 +59,10 @@
                 android:drawableTop="@drawable/contacts_no"
                 android:background="@android:color/transparent"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="52dp"
+                android:layout_marginTop="40dp"
                 android:textColor="@color/edit_text_color2"
                 android:textSize="16sp"
+                android:drawablePadding="7dp"
                 />
             <Button
                 android:id="@+id/laz_btn_address"
@@ -71,7 +72,7 @@
                 android:drawableTop="@drawable/location_no"
                 android:background="@android:color/transparent"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="40dp"
                 android:textColor="@color/edit_text_color2"
                 android:textSize="16sp"
                 android:drawablePadding="7dp"

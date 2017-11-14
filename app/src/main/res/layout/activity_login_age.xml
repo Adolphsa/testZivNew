@@ -24,12 +24,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/login_signup" />
+            android:src="@drawable/login_img2" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="122dp"
+            android:layout_marginTop="140dp"
             android:background="@drawable/shape_login_background"
             android:orientation="vertical">
 

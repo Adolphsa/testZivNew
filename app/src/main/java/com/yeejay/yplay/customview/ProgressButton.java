@@ -23,6 +23,15 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
     private Paint mPaint = new Paint();
     private int mProgress;
     //private int currentType = TYPE_FILL;
+    private int buttonColor = R.color.green_yellow;
+
+    public int getButtonColor() {
+        return buttonColor;
+    }
+
+    public void setButtonColor(int buttonColor) {
+        this.buttonColor = buttonColor;
+    }
 
     public ProgressButton(Context context) {
         super(context);
@@ -40,7 +49,7 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
     @Override
     protected void onDraw(Canvas canvas) {
 
-            mPaint.setColor(getContext().getResources().getColor(R.color.green_yellow));
+            mPaint.setColor(getContext().getResources().getColor(buttonColor));
             mPaint.setAntiAlias(true);
             mPaint.setAlpha(128);
             mPaint.setStrokeWidth(1.0f);
@@ -75,8 +84,4 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
 //            currentType = TYPE_FILL;
 //    }
 
-
-    public void setmProgressColor(){
-
-    }
 }

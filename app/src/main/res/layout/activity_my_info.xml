@@ -7,6 +7,24 @@
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.userinfo.ActivityMyInfo">
 
+    <include layout="@layout/layout_title_bar2"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            .
+        </LinearLayout>
+
+
+    </ScrollView>
+
+
+
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

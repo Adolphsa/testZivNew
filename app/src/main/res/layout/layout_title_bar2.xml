@@ -23,5 +23,14 @@
         android:textColor="@color/play_color2"
         android:textSize="18sp"
         />
-
+    <ImageButton
+        android:id="@+id/layout_setting"
+        android:layout_width="34dp"
+        android:layout_height="31.7dp"
+        android:src="@drawable/setting"
+        android:background="@android:color/transparent"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:visibility="visible"
+        />
 </RelativeLayout>

@@ -2,8 +2,8 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:paddingTop="40dp"
+    android:layout_height="wrap_content"
+    android:paddingTop="20dp"
     >
 
     <ImageView
@@ -34,4 +34,13 @@
         android:layout_toRightOf="@id/diamond_tv1"
         android:layout_marginLeft="10dp"
         />
+    <ListView
+        android:id="@+id/diamond_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/diamond_tv_num"
+        >
+
+
+    </ListView>
 </RelativeLayout>

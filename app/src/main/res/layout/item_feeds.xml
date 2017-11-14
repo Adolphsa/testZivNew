@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="90dp"
+    android:layout_height="wrap_content"
     android:background="@drawable/item_feeds_background"
     android:id="@+id/ff_item_rl"
     >
@@ -26,7 +26,7 @@
         android:textColor="@color/feeds_hight_gray"
         android:textSize="18sp"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         />
     <TextView
         android:id="@+id/ff_item_receive"
@@ -73,6 +73,7 @@
         android:textSize="12sp"
         android:textColor="@color/feeds_hight_gray"
         android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
         />
     <ImageView
         android:id="@+id/ff_item_small_img"

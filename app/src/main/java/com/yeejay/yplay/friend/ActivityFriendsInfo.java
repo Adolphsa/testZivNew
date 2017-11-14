@@ -5,11 +5,13 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
@@ -42,6 +44,8 @@ public class ActivityFriendsInfo extends AppCompatActivity {
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
     TextView layoutTitle;
+    @BindView(R.id.layout_setting)
+    ImageButton layoutSetting;
     @BindView(R.id.lui_name)
     TextView luiName;
     @BindView(R.id.lui_gender)
@@ -73,6 +77,7 @@ public class ActivityFriendsInfo extends AppCompatActivity {
     private EffectiveShapeView diamondDetailImg3;
     private TextView diamondDetailTv3;
 
+
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
@@ -83,10 +88,10 @@ public class ActivityFriendsInfo extends AppCompatActivity {
         showNormalDialog();
     }
 
-//    @OnClick(R.id.lui_header_img)
-//    public void test(View view) {
-//        testToast();
-//    }
+    @OnClick(R.id.lui_header_img)
+    public void test(View view) {
+        testToast();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +101,7 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
+        layoutSetting.setVisibility(View.VISIBLE);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -341,16 +347,16 @@ public class ActivityFriendsInfo extends AppCompatActivity {
     }
 
 
-//    private void testToast() {
-//
-//        Toast toast = new Toast(this);
-//        toast.setGravity(Gravity.TOP, 0, 0);
-//        TextView view = new TextView(this);
-//        view.setText("我是测试oast");
-//        view.setBackgroundColor(getResources().getColor(R.color.feeds_title_color));
-//        toast.setView(view);
-//        toast.show();
-//    }
+    private void testToast() {
+
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP, 0, 0);
+        TextView view = new TextView(this);
+        view.setText("我是测试oast");
+        view.setBackgroundColor(getResources().getColor(R.color.feeds_title_color));
+        toast.setView(view);
+        toast.show();
+    }
 
 }
 

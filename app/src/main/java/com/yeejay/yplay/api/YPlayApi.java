@@ -96,7 +96,7 @@ public interface YPlayApi {
 
     //拉取问题列表
     @FormUrlEncoded
-    @POST("/api/vote/getrandomquestions")
+    @POST("/api/vote/getrandomquestions2")
     Observable<QuestionListRespond> getQuestionsList(@FieldMap Map<String,Object> filemap);
 
     //某个问题的拉取候选者
@@ -204,4 +204,6 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/account/logout")
     Observable<BaseRespond> logout(@FieldMap Map<String,Object> filemap);
+
+
 }
