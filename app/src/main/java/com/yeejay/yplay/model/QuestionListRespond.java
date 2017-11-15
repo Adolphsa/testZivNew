@@ -61,6 +61,7 @@ public class QuestionListRespond implements Parcelable {
         private int freezeStatus;
         private int freezeTs;
         private int nowTs;
+        private int freezeDuration;
         private int total;
         private List<QuestionsBean> questions;
 
@@ -88,6 +89,14 @@ public class QuestionListRespond implements Parcelable {
             this.nowTs = nowTs;
         }
 
+        public int getFreezeDuration() {
+            return freezeDuration;
+        }
+
+        public void setFreezeDuration(int freezeDuration) {
+            this.freezeDuration = freezeDuration;
+        }
+
         public int getTotal() {
             return total;
         }
@@ -104,12 +113,17 @@ public class QuestionListRespond implements Parcelable {
             this.questions = questions;
         }
 
+        public static Creator<PayloadBean> getCREATOR() {
+            return CREATOR;
+        }
+
         @Override
         public String toString() {
             return "PayloadBean{" +
                     "freezeStatus=" + freezeStatus +
                     ", freezeTs=" + freezeTs +
                     ", nowTs=" + nowTs +
+                    ", freezeDuration=" + freezeDuration +
                     ", total=" + total +
                     ", questions=" + questions +
                     '}';
@@ -233,6 +247,7 @@ public class QuestionListRespond implements Parcelable {
             dest.writeInt(this.freezeStatus);
             dest.writeInt(this.freezeTs);
             dest.writeInt(this.nowTs);
+            dest.writeInt(this.freezeDuration);
             dest.writeInt(this.total);
             dest.writeTypedList(this.questions);
         }
@@ -241,6 +256,7 @@ public class QuestionListRespond implements Parcelable {
             this.freezeStatus = in.readInt();
             this.freezeTs = in.readInt();
             this.nowTs = in.readInt();
+            this.freezeDuration = in.readInt();
             this.total = in.readInt();
             this.questions = in.createTypedArrayList(QuestionsBean.CREATOR);
         }

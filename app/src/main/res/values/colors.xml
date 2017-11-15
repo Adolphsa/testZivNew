@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#FFB7B2B2</color>
 
     <color name="la_blue">#2196F3</color>
     <color name="divider_color">#FFB7B2B2</color>
@@ -36,11 +36,17 @@
 
     <color name="class_item_select_color">#1AFFB300</color>
 
-    <!--button color-->
-    <color name="button_color1">#807785FF</color>
-    <color name="button_color2">#8052E0AF</color>
-    <color name="button_color3">#80FF7A8F</color>
-    <color name="button_color4">#8057A8FF</color>
+    <!--button color 20-->
+    <color name="button_color201">#337785FF</color>
+    <color name="button_color202">#3352E0AF</color>
+    <color name="button_color203">#33FF7A8F</color>
+    <color name="button_color204">#3357A8FF</color>
+
+    <!--button color 70-->
+    <color name="button_color701">#B37785FF</color>
+    <color name="button_color702">#B352E0AF</color>
+    <color name="button_color703">#B3FF7A8F</color>
+    <color name="button_color704">#B357A8FF</color>
 
     <!--edit color-->
     <color name="edit_title_text_color">#483DE2</color>

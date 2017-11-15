@@ -96,6 +96,7 @@ public class GetRecommendsRespond {
              * schoolName :
              * phone : 13001000165
              * recommendType : 1
+             * recommendDesc ："同校好友"
              * status : 4
              */
 
@@ -109,6 +110,7 @@ public class GetRecommendsRespond {
             private String schoolName;
             private String phone;
             private int recommendType;
+            private String recommendDesc;
             private int status;
 
             public int getUin() {
@@ -191,6 +193,14 @@ public class GetRecommendsRespond {
                 return recommendType;
             }
 
+            public void setRecommendDesc(String recommendDesc) {
+                this.recommendDesc = recommendDesc;
+            }
+
+            public String getRecommendDesc() {
+                return recommendDesc;
+            }
+
             public int getStatus() {
                 return status;
             }
@@ -199,9 +209,8 @@ public class GetRecommendsRespond {
                 this.status = status;
             }
 
-
             @Override
-            public String toString() {
+            public String  toString() {
                 return "FriendsBean{" +
                         "uin=" + uin +
                         ", nickName='" + nickName + '\'' +
@@ -213,6 +222,7 @@ public class GetRecommendsRespond {
                         ", schoolName='" + schoolName + '\'' +
                         ", phone='" + phone + '\'' +
                         ", recommendType=" + recommendType +
+                        ", recommendDesc='" + recommendDesc + '\'' +
                         ", status=" + status +
                         '}';
             }

@@ -129,6 +129,16 @@
             android:screenOrientation="portrait" />
         <!-- <activity android:name=".friend.TestActivity"/> -->
         <!--<activity android:name=".login.LoadingActivity"/>-->
+
+
+        <!--接受网络状态的广播-->
+        <!--<receiver android:name=".receiver.NetworkReceiver">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
     </application>
 
 </manifest>

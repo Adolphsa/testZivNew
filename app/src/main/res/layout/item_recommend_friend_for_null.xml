@@ -48,7 +48,7 @@
         android:layout_below="@+id/af_item_name"
         android:layout_marginLeft="19dp"
         android:textSize="14sp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="10dp"
         />
 

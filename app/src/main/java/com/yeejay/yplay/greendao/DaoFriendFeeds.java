@@ -17,6 +17,7 @@ public class DaoFriendFeeds {
     private Long id;
     @Index(unique = true)
     private long ts;
+    private int uin;
     private int voteRecordId;
     private int friendUin;
     private String friendNickName;
@@ -32,14 +33,16 @@ public class DaoFriendFeeds {
     private String voteFromSchoolName;
     private int voteFromGrade;
     private boolean isReaded;
-    @Generated(hash = 343719046)
-    public DaoFriendFeeds(Long id, long ts, int voteRecordId, int friendUin,
-            String friendNickName, int friendGender, String friendHeadImgUrl,
-            int qid, String qtext, String qiconUrl, int voteFromUin,
-            int voteFromGender, int voteFromSchoolId, int voteFromSchoolType,
-            String voteFromSchoolName, int voteFromGrade, boolean isReaded) {
+    @Generated(hash = 2021960420)
+    public DaoFriendFeeds(Long id, long ts, int uin, int voteRecordId,
+            int friendUin, String friendNickName, int friendGender,
+            String friendHeadImgUrl, int qid, String qtext, String qiconUrl,
+            int voteFromUin, int voteFromGender, int voteFromSchoolId,
+            int voteFromSchoolType, String voteFromSchoolName, int voteFromGrade,
+            boolean isReaded) {
         this.id = id;
         this.ts = ts;
+        this.uin = uin;
         this.voteRecordId = voteRecordId;
         this.friendUin = friendUin;
         this.friendNickName = friendNickName;
@@ -160,5 +163,11 @@ public class DaoFriendFeeds {
     }
     public void setIsReaded(boolean isReaded) {
         this.isReaded = isReaded;
+    }
+    public int getUin() {
+        return this.uin;
+    }
+    public void setUin(int uin) {
+        this.uin = uin;
     }
 }

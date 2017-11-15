@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:wheel="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:id="@+id/frgans_linear_layout">
 
@@ -28,7 +29,7 @@
     <TextView
         android:id="@+id/frgans_question"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:text="这个人的笑声最魔性"
         android:layout_gravity="center"
         android:textSize="22sp"
@@ -37,6 +38,7 @@
         android:gravity="center"
         android:textColor="@color/white"
     />
+
     <cn.iwgang.countdownview.CountdownView
         android:id="@+id/frgans_count_down_view"
         android:layout_width="wrap_content"
@@ -57,25 +59,26 @@
         />
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        >
-        <!--<ProgressBar-->
-            <!--android:id="@+id/frans_progress"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--/>-->
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal">
+        <ProgressBar
+            android:id="@+id/frans_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:progressDrawable="@drawable/prorgress_color"
+            />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn1"
             android:layout_width="126.8dp"
             android:layout_height="56.8dp"
             android:gravity="center"
-            android:layout_marginLeft="53dp"
+
             android:text="faker"
             android:textSize="18sp"
-            android:textColor="@color/black20"
+            android:textColor="@color/black50"
             android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
@@ -85,10 +88,10 @@
             android:gravity="center"
             android:text="孙亚龙"
             android:textSize="18sp"
-            android:textColor="@color/black20"
+            android:textColor="@color/black50"
             android:layout_toRightOf="@+id/frgans_btn1"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="53dp"
+            android:layout_marginLeft="17.2dp"
+
             android:background="@drawable/play_button_background"
             />
         <com.yeejay.yplay.customview.ProgressButton
@@ -98,27 +101,24 @@
             android:gravity="center"
             android:text="笑笑"
             android:textSize="18sp"
-            android:textColor="@color/black20"
+            android:textColor="@color/black50"
             android:layout_below="@+id/frgans_btn1"
-            android:layout_marginLeft="53dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="17.2dp"
             android:background="@drawable/play_button_background"
             />
+
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn4"
             android:layout_width="126.8dp"
             android:layout_height="56.8dp"
-            android:text="五五开"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:textColor="@color/black20"
-            android:layout_toRightOf="@+id/frgans_btn3"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="53dp"
-            android:layout_below="@+id/frgans_btn2"
-            android:layout_marginTop="10dp"
+            android:layout_alignBaseline="@+id/frgans_btn3"
+            android:layout_alignBottom="@+id/frgans_btn3"
+            android:layout_alignStart="@+id/frgans_btn2"
             android:background="@drawable/play_button_background"
-            />
+            android:gravity="center"
+            android:text="五五开"
+            android:textColor="@color/black50"
+            android:textSize="18sp" />
         <TextView
             android:id="@+id/frgans_tv_or"
             android:layout_width="wrap_content"
@@ -139,7 +139,7 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:layout_below="@id/frgans_tv_or"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:visibility="invisible"
             />
         <Button

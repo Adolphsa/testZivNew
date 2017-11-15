@@ -51,8 +51,8 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
 
             mPaint.setColor(getContext().getResources().getColor(buttonColor));
             mPaint.setAntiAlias(true);
-            mPaint.setAlpha(128);
-            mPaint.setStrokeWidth(1.0f);
+            //mPaint.setAlpha(128);
+            //mPaint.setStrokeWidth(1.0f);
             Rect rect = new Rect();
             canvas.getClipBounds(rect);
             rect.left += getPaddingLeft();

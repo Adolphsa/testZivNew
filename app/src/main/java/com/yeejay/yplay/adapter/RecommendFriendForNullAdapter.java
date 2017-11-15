@@ -91,31 +91,42 @@ public class RecommendFriendForNullAdapter extends BaseAdapter implements View.O
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        String url = contentList.get(position).getHeadImgUrl();
+        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = contentList.get(position);
+        String url = friendsBean.getHeadImgUrl();
+        int recommendType = friendsBean.getRecommendType();
         if (!TextUtils.isEmpty(url)){
             Picasso.with(context).load(url).into(holder.rfHeaderImg);
             holder.afiTvFamilyName.setVisibility(View.INVISIBLE);
         }else {
-            String nickName = contentList.get(position).getNickName();
+            String nickName = friendsBean.getNickName();
             if (!TextUtils.isEmpty(nickName)){
-                holder.afiTvFamilyName.setText(nickName.substring(0,1));
-                holder.rfHeaderImg.setVisibility(View.INVISIBLE);
+                if (recommendType == 1 || recommendType == 3 || recommendType == 4){
+                    holder.afiTvFamilyName.setVisibility(View.INVISIBLE);
+                    holder.rfHeaderImg.setVisibility(View.VISIBLE);
+                    holder.rfHeaderImg.setImageResource(R.drawable.header_deafult);
+                }else if (recommendType == 2){
+                    holder.afiTvFamilyName.setText(nickName.substring(0,1));
+                    holder.rfHeaderImg.setVisibility(View.INVISIBLE);
+                }
             }
         }
-        String nickName = contentList.get(position).getNickName();
+        String nickName = friendsBean.getNickName();
         holder.afItemName.setText(nickName);
-        int recommendType = contentList.get(position).getRecommendType();
-        if (recommendType == 1 || recommendType == 2){
-            holder.afItemTvSharesFriends.setText("通讯录好友");
-            holder.afBtnAccept.setBackgroundResource(R.drawable.play_invite_no);
+        holder.afItemTvSharesFriends.setText(friendsBean.getRecommendDesc());
+        if (recommendType == 2){ //邀请
+            //holder.afItemTvSharesFriends.setText("通讯录好友");
+            holder.afBtnAccept.setBackgroundResource(R.drawable.red_invite);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
 
-        }else if (recommendType == 3){
-            holder.afItemTvSharesFriends.setText("同校好友");
+        }else if(recommendType == 1 || recommendType == 3 || recommendType == 4){ //加好友
+            //holder.afItemTvSharesFriends.setText("同校好友");
             holder.afBtnAccept.setBackgroundResource(R.drawable.btn_add_friend); //加好友
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
+
+
+
         }
 
         holder.afBtnAccept.setTag(position);

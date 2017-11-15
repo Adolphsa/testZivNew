@@ -38,9 +38,5 @@
         android:id="@+id/diamond_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/diamond_tv_num"
-        >
-
-
-    </ListView>
+        android:layout_below="@+id/diamond_tv_num"/>
 </RelativeLayout>

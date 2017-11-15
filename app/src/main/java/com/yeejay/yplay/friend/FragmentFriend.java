@@ -242,14 +242,14 @@ public class FragmentFriend extends BaseFragment {
         System.out.println("刷新----refreshOffser---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
-        if (refreshList.size() == 0 && isShowAddFriends){
+        if (refreshList.size() == 0){
             System.out.println("无动态");
             fransFrfLayout.setVisibility(View.VISIBLE);
             ffPtfRefreshLayout.setVisibility(View.GONE);
             initRecommentFriends();
         }else {
             System.out.println("有动态");
-            isShowAddFriends = false;
+
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
             mDataList.addAll(refreshList);
@@ -261,8 +261,9 @@ public class FragmentFriend extends BaseFragment {
 
     //数据查询
     private List<DaoFriendFeeds> refreshQuery(int refreshOffset) {
-
+        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
         List<DaoFriendFeeds> tempDataBasefeedsList = mDaoFriendFeedsDao.queryBuilder()
+                .where(DaoFriendFeedsDao.Properties.Uin.eq(uin))
                 .orderDesc(DaoFriendFeedsDao.Properties.Ts)
                 .offset(refreshOffset * 10)
                 .limit(10)
@@ -274,6 +275,8 @@ public class FragmentFriend extends BaseFragment {
     //插入数据到数据库
     private void insertFeedsToDataBase(FriendFeedsRespond.PayloadBean.FeedsBean feedsBean) {
 
+        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+
         DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
                 .where(DaoFriendFeedsDao.Properties.Ts.eq(feedsBean.getTs()))
                 .build().unique();
@@ -281,6 +284,7 @@ public class FragmentFriend extends BaseFragment {
             System.out.println("插入数据库");
             DaoFriendFeeds insert = new DaoFriendFeeds(null,
                     feedsBean.getTs(),
+                    uin,
                     feedsBean.getVoteRecordId(),
                     feedsBean.getFriendUin(),
                     feedsBean.getFriendNickName(),
@@ -378,12 +382,14 @@ public class FragmentFriend extends BaseFragment {
 
     //初始化推荐好友界面
     private void initRecommentFriends() {
+
         if (fransFrfLayout.isShown()) {
             rfListView = (ListView) fransFrfLayout.findViewById(R.id.frf_list_view);
             Button addFriend = (Button) fransFrfLayout.findViewById(R.id.frf_btn_add_friend);
-            Button noMoreShowTv = (Button) fransFrfLayout.findViewById(R.id.frf_no_more_show);
+            ImageButton noMoreShowTv = (ImageButton) fransFrfLayout.findViewById(R.id.frf_no_more_show);
             TextView seeMore = (TextView) fransFrfLayout.findViewById(R.id.frf_see_more);
             rl = (RelativeLayout) fransFrfLayout.findViewById(R.id.frf_recommend_rl);
+            final PullToRefreshLayout recommendPullView = (PullToRefreshLayout) fransFrfLayout.findViewById(R.id.frf_recommend_pull_view);
             addFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -412,6 +418,31 @@ public class FragmentFriend extends BaseFragment {
 
                 }
             });
+
+            //查看更多
+            seeMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(getActivity(), AddFriends.class));
+                }
+            });
+
+            recommendPullView.setRefreshListener(new BaseRefreshListener() {
+                @Override
+                public void refresh() {
+                    System.out.println("刷新");
+                    long ts = System.currentTimeMillis();
+                    getFriendFeeds(ts, 10);
+                    recommendPullView.finishRefresh();
+                }
+
+                @Override
+                public void loadMore() {
+                    System.out.println("加载更多");
+                    recommendPullView.finishLoadMore();
+
+                }
+            });
             MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
             int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
             MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
@@ -420,12 +451,6 @@ public class FragmentFriend extends BaseFragment {
                 rl.setVisibility(View.GONE);
             }
 
-
-//            boolean noMoreShow = (boolean)SharePreferenceUtil.get(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,false);
-//            if (noMoreShow){
-//
-//            }
-            //rl.setVisibility(View.VISIBLE);
             recommendFriendsForNull();
         }
     }
@@ -445,14 +470,14 @@ public class FragmentFriend extends BaseFragment {
                         Button button = (Button) v;
                         GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = tempList.get((int) v.getTag());
                         int recommendType = friendsBean.getRecommendType();
-                        if (recommendType == 1 || recommendType == 2) {
+                        if (recommendType == 2) {
                             button.setBackgroundResource(R.drawable.play_invite_yes);
                             //邀请
                             String phone = GsonUtil.GsonString(friendsBean.getPhone());
                             System.out.println("邀请的电话---" + phone);
                             String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                             invitefriendsbysms(base64phone);
-                        } else if (recommendType == 3) {
+                        } else if(recommendType == 1 || recommendType == 3 || recommendType == 4){
                             button.setBackgroundResource(R.drawable.btn_alread_applt);
                             int uin = friendsBean.getUin();
                             addFriend(uin);

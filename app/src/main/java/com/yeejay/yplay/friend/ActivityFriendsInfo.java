@@ -15,12 +15,16 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+
+import org.greenrobot.greendao.query.DeleteQuery;
 
 import java.util.HashMap;
 import java.util.List;
@@ -332,6 +336,7 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
                         System.out.println("删除好友---" + baseRespond.toString());
+                        deleteFriendInfo();
                     }
 
                     @Override
@@ -344,6 +349,20 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    //删除好友资料
+    private void deleteFriendInfo(){
+
+        DaoFriendFeedsDao friendFeedsDao = YplayApplication.getInstance()
+                .getDaoSession()
+                .getDaoFriendFeedsDao();
+
+        DeleteQuery deleteQuery = friendFeedsDao.queryBuilder()
+                                .where(DaoFriendFeedsDao.Properties.FriendUin.eq(friendUin))
+                                .buildDelete();
+        deleteQuery.executeDeleteWithoutDetachingEntities();
+        finish();
     }
 
 

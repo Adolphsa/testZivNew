@@ -99,6 +99,11 @@ public interface YPlayApi {
     @POST("/api/vote/getrandomquestions2")
     Observable<QuestionListRespond> getQuestionsList(@FieldMap Map<String,Object> filemap);
 
+    //跳过下个问题
+    @FormUrlEncoded
+    @POST("/api/vote/doskip")
+    Observable<BaseRespond> doskipQuestion(@FieldMap Map<String,Object> filemap);
+
     //某个问题的拉取候选者
     @FormUrlEncoded
     @POST("/api/vote/getrandomoptions")
