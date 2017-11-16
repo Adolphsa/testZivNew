@@ -7,116 +7,347 @@
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.userinfo.ActivitySetting">
 
-    <include layout="@layout/layout_title_bar"/>
-    <tangxiaolv.com.library.EffectiveShapeView
-        android:id="@+id/setting_img_header"
-        android:layout_width="88dp"
-        android:layout_height="88dp"
-        android:src="@drawable/userinfo_head"
-        android:padding="3dp"
-        android:scaleType="fitCenter"
-        app:shape="circle"
-        android:layout_gravity="center_horizontal"
-        />
+    <include layout="@layout/layout_title_bar2" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="个人信息"
-        />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="个人信息"
+                android:textColor="@color/play_color2"
+                android:textSize="16sp"
+                android:layout_marginTop="37dp"
+                />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="71.5dp"
+
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:text="头像"
+                    android:textColor="@color/text_color_gray"
+                    android:textSize="16sp" />
+
+                <tangxiaolv.com.library.EffectiveShapeView
+                    android:id="@+id/setting_img_header"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="40dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/header_deafult"
+                    app:shape="circle" />
+
+                <ImageView
+                    android:layout_width="4.5dp"
+                    android:layout_height="7.7dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="21dp"
+                    android:src="@drawable/item_arrows" />
+            </RelativeLayout>
+
+            <com.yeejay.yplay.customview.MesureListView
+                android:id="@+id/setting_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dividerHeight="0.2dp"
+                android:divider="@color/feeds_search_color"
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/feeds_search_color" />
+
+            <!--学校信息-->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="134dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="学校信息"
+                    android:textColor="@color/play_color2"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/setting_school"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="21dp"
+                    android:drawablePadding="11.1dp"
+                    android:drawableRight="@drawable/item_arrows"
+                    android:text="修改"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/setting_school"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="学校"
+                    android:textColor="@color/text_color_gray"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/setting_school_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/setting_school"
+                    android:layout_marginRight="21dp"
+                    android:layout_marginTop="23dp"
+                    android:text="十六的月亮"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/setting_school_name"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="年级"
+                    android:textColor="@color/text_color_gray"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/setting_grade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/setting_school_name"
+                    android:layout_marginRight="21dp"
+                    android:layout_marginTop="20dp"
+                    android:text="大学一年级"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <!--私人信息-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/feeds_search_color" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="96dp">
+                <TextView
+                    android:id="@+id/setting_private_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="私人信息"
+                    android:textColor="@color/play_color2"
+                    android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/setting_private_info"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="20dp"
+                    android:text="仅自己可见"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/setting_private_info"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="手机号码"
+                    android:textColor="@color/text_color_gray"
+                    android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/setting_phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/setting_private_info"
+                    android:layout_marginRight="21dp"
+                    android:layout_marginTop="20dp"
+                    android:text=""
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+            
+            <!--联系我们-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/feeds_search_color" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45.5dp"
+                android:text="联系我们"
+                android:textColor="@color/text_color_gray"
+                android:textSize="16sp"
+                android:paddingLeft="20dp"
+                android:paddingTop="14dp"
+                android:drawableRight="@drawable/item_arrows"
+                android:paddingRight="20.4dp"
+                android:paddingBottom="13.5dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45.5dp"
+                android:text="退出登录"
+                android:textColor="@color/text_color_red"
+                android:textSize="16sp"
+                android:paddingLeft="20dp"
+                android:paddingTop="14dp"
+                android:drawableRight="@drawable/item_arrows"
+                android:paddingRight="20.4dp"
+                android:paddingBottom="13.5dp"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="117dp"
+                android:orientation="vertical"
+                android:background="@color/feeds_search_color"
+                >
+                
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/version_img"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="42dp"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.0版本"
+                    android:textSize="12sp"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:layout_marginTop="4dp"
+                    android:layout_gravity="center_horizontal"
+                    />
+            </LinearLayout>
+            
+        </LinearLayout>
+
+    </ScrollView>
+
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_color"
         android:layout_marginTop="3dp"
-        />
+        android:background="@color/divider_color" />
+
     <TextView
         android:id="@+id/setting_name"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:padding="5dp"
-        android:text="亚瑟"
-        android:gravity="center_vertical"
-        android:drawablePadding="10dp"
         android:background="@drawable/item_background"
-        />
+        android:drawableLeft="@drawable/userinfo_small"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="亚瑟" />
+
     <TextView
         android:id="@+id/setting_user_name"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:background="@drawable/item_background"
         android:drawableLeft="@drawable/userinfo_small"
-        android:padding="5dp"
-        android:text="faker123"
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
-        android:background="@drawable/item_background"
-        />
+        android:padding="5dp"
+        android:text="faker123" />
+
     <TextView
         android:id="@+id/setting_gender"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:background="@drawable/item_background"
         android:drawableLeft="@drawable/userinfo_small"
-        android:padding="5dp"
-        android:text="男"
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
-        android:background="@drawable/item_background"
-        />
+        android:padding="5dp"
+        android:text="男" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="学校信息"
         android:layout_marginTop="10dp"
-        />
+        android:text="学校信息" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_color"
         android:layout_marginTop="3dp"
-        />
+        android:background="@color/divider_color" />
+
     <TextView
         android:id="@+id/setting_school_info"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:background="@drawable/item_background"
         android:drawableLeft="@drawable/userinfo_small"
-        android:padding="5dp"
-        android:text="2012届 大学二年级"
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
-        android:background="@drawable/item_background"
-        />
+        android:padding="5dp"
+        android:text="2012届 大学二年级" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="私人信息"
         android:layout_marginTop="10dp"
-        />
+        android:text="私人信息" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_color"
         android:layout_marginTop="3dp"
-        />
+        android:background="@color/divider_color" />
+
     <TextView
-        android:id="@+id/setting_phone_number"
+        
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:drawableLeft="@drawable/userinfo_small"
-        android:padding="5dp"
-        android:text="15971855656"
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
-        />
+        android:padding="5dp"
+        android:text="15971855656" />
 
     <Button
         android:id="@+id/setting_exit"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="退出"
         android:layout_gravity="center_horizontal"
-        />
+        android:layout_marginTop="30dp"
+        android:text="退出" />
 </LinearLayout>

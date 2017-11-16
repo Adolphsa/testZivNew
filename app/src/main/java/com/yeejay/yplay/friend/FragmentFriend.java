@@ -72,7 +72,6 @@ public class FragmentFriend extends BaseFragment {
     List<DaoFriendFeeds> mDataList;
 
     int refreshOffset = 0;
-    boolean isShowAddFriends = true;
     private RelativeLayout rl;
 
     @Override

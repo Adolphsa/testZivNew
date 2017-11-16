@@ -57,6 +57,7 @@
     <color name="text_color_gray">#333333</color>
     <color name="text_color_gray2">#999999</color>
     <color name="text_color_gray3">#555555</color>
+    <color name="text_color_red">#FF0000</color>
 
     <!--feeds-->
     <color name="feeds_title_color">#EE4765</color>

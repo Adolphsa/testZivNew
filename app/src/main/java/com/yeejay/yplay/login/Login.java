@@ -211,54 +211,58 @@ public class Login extends AppCompatActivity {
     //跳转逻辑判断
     private void jumpToWhere(int tempAge, int tempGrade, int tempSchoolId, int tempGender, String tempNickName) {
         //判断年龄
-        int age = tempAge;
-        int grade = tempGrade;
-        int schoolId = tempSchoolId;
-        int gender = tempGender;
-        String name = tempNickName;
+//        int age = tempAge;
+//        int grade = tempGrade;
+//        int schoolId = tempSchoolId;
+//        int gender = tempGender;
+//        String name = tempNickName;
 
-        System.out.println("年龄---" + age);
-        if (age == 0 || grade == 0 || schoolId == 0 || gender == 0 || TextUtils.isEmpty(name)) {
+        System.out.println("年龄---" + tempAge);
+        if (tempAge == 0 ||
+                tempGrade == 0 ||
+                tempSchoolId == 0 ||
+                tempGender == 0 ||
+                TextUtils.isEmpty(tempNickName)) {
             startActivity(new Intent(Login.this, LoginAge.class));
             //重新登录检查权限
             return;
         }
 
-        //年龄
-        if (age == 0 ) {
-            startActivity(new Intent(Login.this, LoginAge.class));
-            return;
-        }
-
-        //权限
-        getContacts();
-        getLonLat();
-        if (!addressAuthoritySuccess || !numberBookAuthoritySuccess){
-            startActivity(new Intent(Login.this,LoginAuthorization.class));
-            return;
-        }
-
-        //判断年级
-        if (grade == 0){
-            startActivity(new Intent(Login.this,ClassList.class));
-            return;
-        }
-
-        //判断学校信息
-        if (schoolId == 0){
-            startActivity(new Intent(Login.this,ClassList.class));
-            return;
-        }
-        //判断性别
-        if (gender == 0){
-            startActivity(new Intent(Login.this,ChoiceSex.class));
-            return;
-        }
-        //判断基本信息
-        if (TextUtils.isEmpty(name)){
-            startActivity(new Intent(Login.this,UserInfo.class));
-            return;
-        }
+//        //年龄
+//        if (age == 0 ) {
+//            startActivity(new Intent(Login.this, LoginAge.class));
+//            return;
+//        }
+//
+//        //权限
+//        getContacts();
+//        getLonLat();
+//        if (!addressAuthoritySuccess || !numberBookAuthoritySuccess){
+//            startActivity(new Intent(Login.this,LoginAuthorization.class));
+//            return;
+//        }
+//
+//        //判断年级
+//        if (grade == 0){
+//            startActivity(new Intent(Login.this,ClassList.class));
+//            return;
+//        }
+//
+//        //判断学校信息
+//        if (schoolId == 0){
+//            startActivity(new Intent(Login.this,ClassList.class));
+//            return;
+//        }
+//        //判断性别
+//        if (gender == 0){
+//            startActivity(new Intent(Login.this,ChoiceSex.class));
+//            return;
+//        }
+//        //判断基本信息
+//        if (TextUtils.isEmpty(name)){
+//            startActivity(new Intent(Login.this,UserInfo.class));
+//            return;
+//        }
 
         startActivity(new Intent(Login.this, MainActivity.class));
     }
@@ -443,12 +447,11 @@ public class Login extends AppCompatActivity {
     //插入uin到数据库
     private void insertUin(LoginRespond.PayloadBean payloadBean){
 
-
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(payloadBean.getUin()))
                 .build().unique();
 
         if (myInfo == null){
-            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0);
+            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0);
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }

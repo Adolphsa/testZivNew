@@ -28,7 +28,7 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
         <activity
-            android:name=".login.Login"
+            android:name=".login.LoadingActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
@@ -40,10 +40,10 @@
         <activity
             android:name=".login.LoginAge"
             android:screenOrientation="portrait" />
-        <!--<activity-->
-            <!--android:name=".login.Login"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--android:windowSoftInputMode="adjustResize|stateHidden" />-->
+        <activity
+            android:name=".login.Login"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".login.LoginAuthorization"
             android:screenOrientation="portrait" />
@@ -104,6 +104,14 @@
             android:name=".MainActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".friend.ActivitySearchFriends"
+            android:screenOrientation="portrait" />
+
+        <!--<activity android:name=".login.LoadingActivity"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--/>-->
+
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
         <service
@@ -124,11 +132,8 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".friend.ActivitySearchFriends"
-            android:screenOrientation="portrait" />
         <!-- <activity android:name=".friend.TestActivity"/> -->
-        <!--<activity android:name=".login.LoadingActivity"/>-->
+
 
 
         <!--接受网络状态的广播-->

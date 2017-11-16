@@ -16,8 +16,13 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +34,7 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
@@ -38,6 +44,7 @@ import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.io.ByteArrayOutputStream;
@@ -62,9 +69,9 @@ import static com.yeejay.yplay.R.layout.activity_setting;
 
 public class ActivitySetting extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
     @BindView(R.id.setting_img_header)
     EffectiveShapeView settingImgHeader;
@@ -81,7 +88,12 @@ public class ActivitySetting extends AppCompatActivity {
     @BindView(R.id.setting_exit)
     Button settingButton;
 
-    @OnClick(R.id.layout_title_back)
+    //个人资料
+    @BindView(R.id.setting_list_view)
+    MesureListView settingInfoListView;
+
+
+    @OnClick(R.id.layout_title_back2)
     public void back() {
         finish();
     }
@@ -101,25 +113,21 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_name)
     public void settingName() {
         System.out.println("姓名");
-        tag = 1;
-        showInputDialog("输入真实姓名","只有两次修改机会");
+
     }
 
     //用户名
     @OnClick(R.id.setting_user_name)
     public void setSettingUserName() {
         System.out.println("用户名");
-        tag = 2;
-        showInputDialog("修改用户名","");
+
     }
 
     //性别
     @OnClick(R.id.setting_gender)
     public void setSettingGender() {
         System.out.println("性别");
-        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-        intent.putExtra("activity_setting",1);
-        startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
+
     }
 
     //学校信息
@@ -183,7 +191,11 @@ public class ActivitySetting extends AppCompatActivity {
         setContentView(activity_setting);
         ButterKnife.bind(this);
 
-        layoutTitle.setText("设置");
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivitySetting.this,true);
+
+        layoutTitle.setText("资料详情");
+
         initData();
         getMyInfo();
     }
@@ -210,6 +222,82 @@ public class ActivitySetting extends AppCompatActivity {
             str.append(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
             settingSchoolInfo.setText(str);
             settingPhoneNumber.setText(infoBean.getPhone());
+    }
+
+    private void initMyInfo(final UserInfoResponde.PayloadBean.InfoBean infoBean){
+
+        settingInfoListView.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return 3;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return null;
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ViewHolder holder;
+                if (convertView == null){
+                    convertView = View.inflate(ActivitySetting.this,R.layout.item_setting,null);
+                    holder = new ViewHolder();
+                    holder.itemSettingInfoText = (TextView) convertView.findViewById(R.id.item_setting_tv);
+                    holder.itemSettingInfoText1 = (TextView) convertView.findViewById(R.id.item_setting_tv1);
+                    convertView.setTag(holder);
+                }else {
+                    holder = (ViewHolder) convertView.getTag();
+                }
+                String nickName = infoBean.getNickName();
+                String userName = infoBean.getUserName();
+                String gender = infoBean.getGender() == 1 ? "男" : "女";
+                if (position == 0){
+                    holder.itemSettingInfoText.setText("姓名");
+                    holder.itemSettingInfoText1.setText(nickName);
+                }else if (position == 1){
+                    holder.itemSettingInfoText.setText("门牌号");
+                    holder.itemSettingInfoText1.setText(userName);
+                }else if (position == 2){
+                    holder.itemSettingInfoText.setText("性别");
+                    holder.itemSettingInfoText1.setText(gender);
+                }
+                return convertView;
+            }
+        });
+
+
+        settingInfoListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0){
+                    System.out.println("姓名");
+                    tag = 1;
+                    showInputDialog("输入真实姓名","只有两次修改机会");
+                }else if (position == 1){
+                    System.out.println("门牌号");
+                    tag = 2;
+                    showInputDialog("修改用户名","");
+
+                }else if (position == 2){
+                    System.out.println("性别");
+                    Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+                    intent.putExtra("activity_setting",1);
+                    startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
+                }
+            }
+        });
+    }
+
+    private static class ViewHolder {
+
+        TextView itemSettingInfoText;
+        TextView itemSettingInfoText1;
     }
 
     @Override
@@ -420,7 +508,8 @@ public class ActivitySetting extends AppCompatActivity {
                     public void onNext(@NonNull UserInfoResponde userInfoResponde) {
                         System.out.println("获取自己的资料---" + userInfoResponde.toString());
                         if (userInfoResponde.getCode() == 0){
-                            initView(userInfoResponde.getPayload().getInfo());
+                            //initView(userInfoResponde.getPayload().getInfo());
+                            initMyInfo(userInfoResponde.getPayload().getInfo());
                         }
                     }
 

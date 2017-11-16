@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,18 +15,27 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
-import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.friend.AddFriends;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
+import com.yeejay.yplay.model.AddFriendRespond;
+import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
+import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -46,63 +56,100 @@ import tangxiaolv.com.library.EffectiveShapeView;
 
 public class ActivityMyInfo extends AppCompatActivity {
 
-    @BindView(R.id.my_tv_back)
-    Button myTvBack;
-    @BindView(R.id.my_tv_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton myTvBack;
+    @BindView(R.id.layout_title2)
     TextView myTvTitle;
-    @BindView(R.id.my_ib_logo)
-    ImageButton myIbLogo;
-    @BindView(R.id.ami_tv_school_name)
-    TextView amiTvSchoolName;
-    @BindView(R.id.ami_item_header_img)
-    EffectiveShapeView amiItemHeaderImg;
-    @BindView(R.id.ami_tv_name)
-    TextView amiTvName;
-    @BindView(R.id.ami_tv_name2)
-    TextView amiTvName2;
-    @BindView(R.id.ami_small_img)
-    ImageView amiSmallImg;
-    @BindView(R.id.ami_tv_is_graduate)
-    TextView amiTvIsGraduate;
-    @BindView(R.id.ami_btn_setting)
-    ImageButton amiBtnSetting;
-    @BindView(R.id.ami_info_friends_number)
-    TextView amiTvFriendsNumber;
-    @BindView(R.id.ami_info_diamond_number)
-    TextView amiTvDiamondNumber;
-    @BindView(R.id.ami_diamond_list_view)
-    ListView amiDiamondListView;
-    @BindView(R.id.ami_friends_list_view)
-    ListView amiFriendsListView;
-    @BindView(R.id.ami_ptf_refresh)
-    PullToRefreshLayout amiPtfRefresh;
-    @BindView(R.id.ami_tv_friend_num)
-    TextView amiFriendNum;
+    @BindView(R.id.layout_setting)
+    ImageButton layoutSetting;
+    @BindView(R.id.layout_title_rl)
+    RelativeLayout layoutTitleRl;
 
-    @OnClick(R.id.my_tv_back)
+    //我的资料
+    @BindView(R.id.lui_header_img)
+    EffectiveShapeView amiItemHeaderImg;
+    @BindView(R.id.lui_name)
+    TextView amiTvName;
+    @BindView(R.id.lui_gender)
+    ImageView amiGender;
+    @BindView(R.id.lui_user_name)
+    TextView amiTvName2;
+    @BindView(R.id.lui_school_name)
+    TextView amiTvSchoolName;
+    @BindView(R.id.lui_grade)
+    TextView amiGrade;
+
+    //钻石
+    @BindView(R.id.diamond_tv_num)
+    TextView amiTvDiamondNumber;
+    @BindView(R.id.diamond_list)
+    MesureListView amiDiamondListView;
+    @BindView(R.id.diamond_line)
+    View amiDiamonLine;
+    @BindView(R.id.diamond_null_img)
+    ImageView amiDiamondNullImg;
+
+    //好友相关
+    @BindView(R.id.ami_include_my_friends)
+    RelativeLayout myFriendsRl;
+    @BindView(R.id.ami_include_friend_request)
+    RelativeLayout friendRequestRl;
+    @BindView(R.id.ami_include_add_friend)
+    RelativeLayout addFriendsRl;
+
+    //扩列开启
+    @BindView(R.id.ami_view2)
+    View amiView2;
+    @BindView(R.id.frf_no_more_show)
+    ImageButton frfNoMoreShow;
+    @BindView(R.id.frf_see_more)
+    TextView frfSeeMore;
+    @BindView(R.id.diamond_expansion)
+    RelativeLayout diamondExpansionRl;
+    @BindView(R.id.frf_list_view)
+    ListView diamondExpansionListView;
+
+    //返回
+    @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
     }
 
-    @OnClick(R.id.ami_item_header_img)
-    public void test(View view){
-        startActivity(new Intent(ActivityMyInfo.this,AddFriends.class));
-    }
-
-    //logo
-    @OnClick(R.id.my_ib_logo)
-    public void logo(View view){
-        startActivity(new Intent(ActivityMyInfo.this,ActivityAboutOur.class));
-    }
-
     //设置
-    @OnClick(R.id.ami_btn_setting)
-    public void setting(View view){
-        startActivity(new Intent(ActivityMyInfo.this,ActivitySetting.class));
+    @OnClick(R.id.layout_setting)
+    public void setting(View view) {
+        startActivity(new Intent(ActivityMyInfo.this, ActivitySetting.class));
+    }
+
+    //不再显示
+    @OnClick(R.id.frf_no_more_show)
+    public void diamondNoMoreShow(View v) {
+
+        diamondExpansionRl.setVisibility(View.GONE);
+        //将数据库中的值变为1
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null) {
+            myInfo.setIsNoMoreShow2(1);
+            myInfoDao.update(myInfo);
+        }
+    }
+
+    //查看更多
+    @OnClick(R.id.frf_see_more)
+    public void DiamondseeMore(View v) {
+        startActivity(new Intent(ActivityMyInfo.this, AddFriends.class));
     }
 
     List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
     int mPageNum = 1;
+
+    TextView friendRequestNum;
+    TextView friendNumTv;
+
+    RecommendFriendForNullAdapter recommendFriendForNullAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +157,12 @@ public class ActivityMyInfo extends AppCompatActivity {
         setContentView(R.layout.activity_my_info);
         ButterKnife.bind(this);
 
-        System.out.println("我的----------");
+        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+        initTitle();
+        initFriendsList();
+
+        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
+        getUserDiamondInfo(uin, 1);
         mDataList = new ArrayList<>();
 
     }
@@ -118,49 +170,75 @@ public class ActivityMyInfo extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        System.out.println("我的----------onResume");
         getMyInfo();
-        int uin = (int)SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
-        getUserDiamondInfo(uin,1);
-        getMyFriendsList(mPageNum);
+
+
+        getAddFriendMessageCount();
+        recommendFriends();
+    }
+
+    //初始化标题
+    private void initTitle() {
+        layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
+        layoutSetting.setVisibility(View.VISIBLE);
+        myTvBack.setBackgroundResource(R.drawable.white_back);
+        myTvTitle.setText("我的");
+        myTvTitle.setTextColor(getResources().getColor(R.color.white));
     }
 
     //初始化我的资料
-    private void initMyInfo(UserInfoResponde.PayloadBean.InfoBean infoBean ){
-        if (infoBean != null){
+    private void initMyInfo(UserInfoResponde.PayloadBean.InfoBean infoBean) {
+
+        if (infoBean != null) {
             amiTvSchoolName.setText(infoBean.getSchoolName());
             String url = infoBean.getHeadImgUrl();
-            if (!TextUtils.isEmpty(url)){
-                Picasso.with(ActivityMyInfo.this).load(url).resize(80,80).into(amiItemHeaderImg);
+            if (!TextUtils.isEmpty(url)) {
+                Picasso.with(ActivityMyInfo.this).load(url).resize(80, 80).into(amiItemHeaderImg);
             }
             amiTvName.setText(infoBean.getNickName());
             amiTvName2.setText(infoBean.getUserName());
-            amiTvIsGraduate.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
-            StringBuilder str1 = new StringBuilder(String.valueOf(infoBean.getFriendCnt()));
-            str1.append("好友");
-            amiTvFriendsNumber.setText(str1);
-            StringBuilder str2 = new StringBuilder(String.valueOf(infoBean.getGemCnt()));
-            str2.append("钻石");
-           amiTvDiamondNumber.setText(str2);
+            amiGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
+            if (infoBean.getGender() == 1) {
+                amiGender.setVisibility(View.VISIBLE);
+                amiGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
+            } else {
+                amiGender.setVisibility(View.VISIBLE);
+                amiGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
+            }
+
+            //钻石数量
+            int diamondNum = infoBean.getGemCnt();
+            amiTvDiamondNumber.setText(String.valueOf(diamondNum));
+
+            //好友数量
+            int friendsNum = infoBean.getFriendCnt();
+            friendRequestNum.setText(String.valueOf(friendsNum));
         }
 
     }
 
     //初始化钻石
-    private void initDiamondList(UsersDiamondInfoRespond.PayloadBean payloadBean){
+    private void initDiamondList(UsersDiamondInfoRespond.PayloadBean payloadBean) {
 
-        View footView = View.inflate(ActivityMyInfo.this,R.layout.item_af_listview_foot,null);
+        final View footView = View.inflate(ActivityMyInfo.this, R.layout.item_af_listview_foot, null);
         int total = payloadBean.getTotal();
-        if (total > 3){
+        if (total > 0) {
+            amiDiamondNullImg.setVisibility(View.GONE);
+            amiDiamonLine.setVisibility(View.GONE);
+        }
+        if (total >= 3) {
             TextView countTv = (TextView) footView.findViewById(R.id.af_foot_tv1);
-            countTv.setText("查看更多" + (total-3));
-            amiDiamondListView.addFooterView(footView);
+            countTv.setText("查看全部");
+            amiDiamonLine.setVisibility(View.VISIBLE);
+            if (!footView.isShown()){
+                amiDiamondListView.addFooterView(footView);
+            }
         }
         final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = payloadBean.getStats();
         amiDiamondListView.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return tempList.size() > 3 ? 3 : tempList.size();
+                return tempList.size() >= 3 ? 3 : tempList.size();
             }
 
             @Override
@@ -178,18 +256,31 @@ public class ActivityMyInfo extends AppCompatActivity {
                 ViewHolder holder;
                 UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean;
                 if (convertView == null){
-                    convertView = View.inflate(ActivityMyInfo.this,R.layout.item_afi,null);
+                    convertView = View.inflate(ActivityMyInfo.this, R.layout.item_user_info_diamond, null);
                     holder = new ViewHolder();
-                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.afi_item_img);
-                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.afi_item_text);
+                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.item_diamond_top_img);
+                    holder.itemAmiImg2 = (ImageView) convertView.findViewById(R.id.item_diamond_img);
+                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.item_diamond_text);
                     convertView.setTag(holder);
                 }else {
                     holder = (ViewHolder) convertView.getTag();
                 }
                 statsBean = tempList.get(position);
+                if (position == 0){
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top1));
+                } else if (position == 1) {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top2));
+                } else if (position == 2) {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+                }else {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+                }
+                System.out.println("钻石position---" + position);
                 String url = statsBean.getQiconUrl();
-                if (!TextUtils.isEmpty(url)){
-                    Picasso.with(ActivityMyInfo.this).load(url).resize(35,35).into(holder.itemAmiImg);
+                if (!TextUtils.isEmpty(url)) {
+                    Picasso.with(ActivityMyInfo.this).load(url).into(holder.itemAmiImg2);
+                } else {
+                    holder.itemAmiImg2.setImageDrawable(getDrawable(R.drawable.diamond));
                 }
                 holder.itemAmiText.setText(statsBean.getQtext());
                 return convertView;
@@ -198,84 +289,101 @@ public class ActivityMyInfo extends AppCompatActivity {
         amiDiamondListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 3){
-                    startActivity(new Intent(ActivityMyInfo.this,ActivityAllDiamond.class));
+                if (position == 3) {
+                    startActivity(new Intent(ActivityMyInfo.this, ActivityAllDiamond.class));
                 }
             }
         });
     }
 
     //初始化我的好友列表
-    private void initFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList){
+    private void initFriendsList() {
 
-        amiFriendsListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return tempList.size();
-            }
+        //我的好友
+        friendNumTv = (TextView) myFriendsRl.findViewById(R.id.friend_tv_num);
 
-            @Override
-            public Object getItem(int position) {
-                return tempList.get(position);
-            }
+        //好友请求
+        ImageView friendRequestImg = (ImageView) friendRequestRl.findViewById(R.id.friend_iv1);
+        TextView friendRequestTv = (TextView) friendRequestRl.findViewById(R.id.friend_tv1);
+        friendRequestNum = (TextView) friendRequestRl.findViewById(R.id.friend_tv_num);
 
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
+        friendRequestImg.setImageDrawable(getDrawable(R.drawable.my_info_friend_request));
+        friendRequestTv.setText("好友请求");
 
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                viewHolderFriends holder;
-                if (convertView == null){
-                    convertView = View.inflate(ActivityMyInfo.this,R.layout.item_all_diamond,null);
-                    holder = new viewHolderFriends();
-                    holder.itemAadImg = (EffectiveShapeView) convertView.findViewById(R.id.item_aad_img);
-                    holder.itemAadText1 = (TextView) convertView.findViewById(R.id.item_aad_text1);
-                    holder.itemAadText2 = (TextView) convertView.findViewById(R.id.item_aad_text2);
-                    convertView.setTag(holder);
-                }else {
-                    holder = (viewHolderFriends) convertView.getTag();
-                }
-                FriendsListRespond.PayloadBean.FriendsBean friendsBean = tempList.get(position);
-                String url = friendsBean.getHeadImgUrl();
-                if (!TextUtils.isEmpty(url)){
-                    Picasso.with(ActivityMyInfo.this).load(url).resize(50,50).into(holder.itemAadImg);
-                }
-                holder.itemAadText1.setText(friendsBean.getNickName());
-                return convertView;
-            }
-        });
-        amiFriendsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showNormalDialog();
-            }
-        });
-        loadMore();
+        //添加好友
+        ImageView addFriendImg = (ImageView) addFriendsRl.findViewById(R.id.friend_iv1);
+        TextView addFriendTv = (TextView) addFriendsRl.findViewById(R.id.friend_tv1);
+        TextView addFriendNum = (TextView) addFriendsRl.findViewById(R.id.friend_tv_num);
+
+        addFriendImg.setImageDrawable(getDrawable(R.drawable.my_info_add_friend));
+        addFriendTv.setText("添加好友");
+        addFriendNum.setVisibility(View.GONE);
+    }
+
+    //扩列开启相关
+    private void initRecommendList(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
+
+        //从数据库读取值来设定开启扩列的显示与否
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null && myInfo.getIsNoMoreShow2() == 1) {
+            diamondExpansionRl.setVisibility(View.GONE);
+        }
+
+        recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(ActivityMyInfo.this,
+                new RecommendFriendForNullAdapter.hideCallback() {
+                    @Override
+                    public void hideClick(View v) {
+
+                    }
+                },
+                new RecommendFriendForNullAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        Button button = (Button) v;
+                        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = tempList.get((int) v.getTag());
+                        int recommendType = friendsBean.getRecommendType();
+                        if (recommendType == 2) {
+                            button.setBackgroundResource(R.drawable.play_invite_yes);
+                            //邀请
+                            String phone = GsonUtil.GsonString(friendsBean.getPhone());
+                            System.out.println("邀请的电话---" + phone);
+                            String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
+                            invitefriendsbysms(base64phone);
+                        } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) {
+                            button.setBackgroundResource(R.drawable.btn_alread_applt);
+                            int uin = friendsBean.getUin();
+                            addFriend(uin);
+                        }
+                    }
+                },
+                tempList);
+        diamondExpansionListView.setAdapter(recommendFriendForNullAdapter);
     }
 
     //加载更多
-    private void loadMore(){
-        amiPtfRefresh.setCanRefresh(false);
-        amiPtfRefresh.setRefreshListener(new BaseRefreshListener() {
-            @Override
-            public void refresh() {
-
-            }
-
-            @Override
-            public void loadMore() {
-                mPageNum++;
-                System.out.println("mPageNum---" + mPageNum);
-                getMyFriendsList(mPageNum);
-            }
-        });
-
-    }
+//    private void loadMore(){
+//        amiPtfRefresh.setCanRefresh(false);
+//        amiPtfRefresh.setRefreshListener(new BaseRefreshListener() {
+//            @Override
+//            public void refresh() {
+//
+//            }
+//
+//            @Override
+//            public void loadMore() {
+//                mPageNum++;
+//                System.out.println("mPageNum---" + mPageNum);
+//                getMyFriendsList(mPageNum);
+//            }
+//        });
+//
+//    }
 
     //显示对话框
-    private void showNormalDialog(){
+    private void showNormalDialog() {
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(ActivityMyInfo.this);
         normalDialog.setMessage("解除好友关系后，你也会在对方的好友列表中消失");
@@ -294,19 +402,15 @@ public class ActivityMyInfo extends AppCompatActivity {
         normalDialog.show();
     }
 
-    private static class ViewHolder{
+    private static class ViewHolder {
         ImageView itemAmiImg;
+        ImageView itemAmiImg2;
         TextView itemAmiText;
     }
 
-    private static class viewHolderFriends{
-        EffectiveShapeView itemAadImg;
-        TextView itemAadText1;
-        TextView itemAadText2;
-    }
 
     //获取自己的资料
-    private void getMyInfo(){
+    private void getMyInfo() {
 
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
@@ -319,13 +423,12 @@ public class ActivityMyInfo extends AppCompatActivity {
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-
                     }
 
                     @Override
                     public void onNext(@NonNull UserInfoResponde userInfoResponde) {
                         System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0){
+                        if (userInfoResponde.getCode() == 0) {
                             initMyInfo(userInfoResponde.getPayload().getInfo());
                         }
                     }
@@ -343,10 +446,11 @@ public class ActivityMyInfo extends AppCompatActivity {
     }
 
     //获取钻石信息
-    private void getUserDiamondInfo(int userUin,int pageNum){
+    private void getUserDiamondInfo(int userUin, int pageNum) {
+
         Map<String, Object> diamondInfoMap = new HashMap<>();
-        diamondInfoMap.put("userUin",userUin);
-        diamondInfoMap.put("pageNum",pageNum);
+        diamondInfoMap.put("userUin", userUin);
+        diamondInfoMap.put("pageNum", pageNum);
         diamondInfoMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
         diamondInfoMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         diamondInfoMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
@@ -357,13 +461,12 @@ public class ActivityMyInfo extends AppCompatActivity {
                 .subscribe(new Observer<UsersDiamondInfoRespond>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-
                     }
 
                     @Override
                     public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
                         System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
-                        if (usersDiamondInfoRespond.getCode() == 0){
+                        if (usersDiamondInfoRespond.getCode() == 0) {
                             initDiamondList(usersDiamondInfoRespond.getPayload());
                         }
                     }
@@ -375,17 +478,53 @@ public class ActivityMyInfo extends AppCompatActivity {
 
                     @Override
                     public void onComplete() {
-
                     }
                 });
     }
 
+    //获取未读的消息数
+    private void getAddFriendMessageCount() {
+
+        Map<String, Object> unreadFriendMsgCountMap = new HashMap<>();
+        unreadFriendMsgCountMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        unreadFriendMsgCountMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        unreadFriendMsgCountMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUnreadMessageCount(unreadFriendMsgCountMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UnReadMsgCountRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull UnReadMsgCountRespond unReadMsgCountRespond) {
+                        System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
+                        if (unReadMsgCountRespond.getCode() == 0) {
+                            int count = unReadMsgCountRespond.getPayload().getCnt();
+                            friendNumTv.setText(String.valueOf(count));
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("未读好友消息数异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
 
     //获取好友列表
-    private void getMyFriendsList(int pageNum){
+    private void getMyFriendsList(int pageNum) {
 
         Map<String, Object> myFriendsMap = new HashMap<>();
-        myFriendsMap.put("pageNum",pageNum);
+        myFriendsMap.put("pageNum", pageNum);
         myFriendsMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
         myFriendsMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myFriendsMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
@@ -402,24 +541,64 @@ public class ActivityMyInfo extends AppCompatActivity {
                     @Override
                     public void onNext(@NonNull FriendsListRespond friendsListRespond) {
                         System.out.println("获取我的好友列表---" + friendsListRespond.toString());
-                        if (friendsListRespond.getCode() == 0){
+                        if (friendsListRespond.getCode() == 0) {
                             mDataList.addAll(friendsListRespond.getPayload().getFriends());
-                            if (mDataList.size() > 0){
-                                initFriendsList(mDataList);
+                            if (mDataList.size() > 0) {
+
                                 int friendCount = friendsListRespond.getPayload().getTotal();
                                 System.out.println("朋友---" + friendCount);
-                                amiFriendNum.setText("朋友" + friendCount);
+                                //amiFriendNum.setText("朋友" + friendCount);
                             }
 
                         }
-
-                        amiPtfRefresh.finishLoadMore();
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("获取我的好友列表异常---" + e.getMessage());
-                        amiPtfRefresh.finishLoadMore();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+    //获取推荐好友信息
+    private void recommendFriends() {
+
+        Map<String, Object> tempMap = new HashMap<>();
+        tempMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        tempMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        tempMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .recommendFriendsForNull(tempMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<GetRecommendsRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
+                        System.out.println("推荐好友---" + getRecommendsRespond.toString());
+                        if (getRecommendsRespond.getCode() == 0) {
+
+                            if (getRecommendsRespond.getPayload().getFriends() != null
+                                    && getRecommendsRespond.getPayload().getFriends().size() > 0) {
+                                initRecommendList(getRecommendsRespond.getPayload().getFriends());
+                            } else {
+                                diamondExpansionRl.setVisibility(View.GONE);
+                                amiView2.setVisibility(View.GONE);
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("推荐好友异常---" + e.getMessage());
                     }
 
                     @Override
@@ -427,5 +606,74 @@ public class ActivityMyInfo extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    //通过短信邀请好友
+    private void invitefriendsbysms(String friends) {
+        Map<String, Object> removeFreindMap = new HashMap<>();
+        removeFreindMap.put("friends", friends);
+        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .removeFriend(removeFreindMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("短信邀请好友---" + baseRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("短信邀请好友异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    //发送加好友的请求
+    private void addFriend(int toUin) {
+        Map<String, Object> addFreindMap = new HashMap<>();
+        addFreindMap.put("toUin", toUin);
+        addFreindMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        addFreindMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        addFreindMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .addFriend(addFreindMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<AddFriendRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull AddFriendRespond addFriendRespond) {
+                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("发送加好友请求异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
     }
 }

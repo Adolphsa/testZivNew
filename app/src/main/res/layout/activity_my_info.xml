@@ -7,193 +7,60 @@
     android:orientation="vertical"
     tools:context="com.yeejay.yplay.userinfo.ActivityMyInfo">
 
-    <include layout="@layout/layout_title_bar2"/>
+    <include layout="@layout/layout_title_bar2" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <include layout="@layout/layout_user_info"/>
+            <include layout="@layout/layout_user_info" />
 
-            <include layout="@layout/layout_user_info_diamond"/>
+            <include layout="@layout/layout_user_info_diamond" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/feeds_search_color" />
 
+            <include
+                android:id="@+id/ami_include_my_friends"
+                layout="@layout/layout_user_info_friends" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.3dp"
+                android:background="@color/feeds_search_color" />
+
+            <include
+                android:id="@+id/ami_include_friend_request"
+                layout="@layout/layout_user_info_friends" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.3dp"
+                android:background="@color/feeds_search_color" />
+
+            <include
+                android:id="@+id/ami_include_add_friend"
+                layout="@layout/layout_user_info_friends" />
+
+            <View
+                android:id="@+id/ami_view2"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/feeds_search_color" />
+
+            <include layout="@layout/layout_expansion" />
 
         </LinearLayout>
-
 
     </ScrollView>
 
 
-
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/my_tv_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:text="返回" />
-
-        <TextView
-            android:id="@+id/my_tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="我的"
-            android:textColor="@android:color/black"
-            android:textSize="20sp" />
-
-        <ImageButton
-            android:id="@+id/my_ib_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/userinfo_small" />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp"
-        android:background="@drawable/shape_border"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/ami_tv_school_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:text="积水潭师专"
-            android:textSize="20sp" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <tangxiaolv.com.library.EffectiveShapeView
-                android:id="@+id/ami_item_header_img"
-                android:layout_width="88dp"
-                android:layout_height="88dp"
-                android:src="@mipmap/ic_launcher"
-                android:layout_centerVertical="true"
-                android:padding="3dp"
-                android:scaleType="fitCenter"
-                app:shape="circle"
-                />
-
-            <TextView
-                android:id="@+id/ami_tv_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/ami_item_header_img"
-                android:text="南帝北丐"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/ami_tv_name2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/ami_tv_name"
-                android:layout_toRightOf="@+id/ami_item_header_img"
-                android:padding="3dp"
-                android:text="faker"
-                android:textSize="16sp" />
-
-            <ImageView
-                android:id="@+id/ami_small_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/ami_tv_name2"
-                android:layout_toRightOf="@+id/ami_item_header_img"
-                android:padding="3dp"
-                android:src="@drawable/userinfo_small" />
-
-            <TextView
-                android:id="@+id/ami_tv_is_graduate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/ami_tv_name2"
-                android:layout_toRightOf="@+id/ami_small_img"
-                android:padding="3dp"
-                android:text="2012年  大学二年级" />
-
-            <ImageButton
-                android:id="@+id/ami_btn_setting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/ami_tv_is_graduate"
-                android:layout_alignParentRight="true"
-                android:src="@drawable/userinfo_small" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#000000" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <TextView
-                android:id="@+id/ami_info_friends_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="503好友" />
-
-            <TextView
-                android:id="@+id/ami_info_diamond_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="300钻石" />
-
-        </LinearLayout>
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="top钻石"
-        android:padding="5dp"
-        android:textSize="18sp"
-        android:background="@android:color/darker_gray"
-        />
-    <ListView
-        android:id="@+id/ami_diamond_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
-    <TextView
-        android:id="@+id/ami_tv_friend_num"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="朋友"
-        android:padding="5dp"
-        android:textSize="18sp"
-        android:background="@android:color/darker_gray"
-        />
-    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
-        android:id="@+id/ami_ptf_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ListView
-            android:id="@+id/ami_friends_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </ListView>
-    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 </LinearLayout>

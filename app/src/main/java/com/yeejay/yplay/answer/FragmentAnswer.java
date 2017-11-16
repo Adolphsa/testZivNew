@@ -1,11 +1,6 @@
 package com.yeejay.yplay.answer;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -30,7 +25,6 @@ import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.VoteOptionsBean;
 import com.yeejay.yplay.model.VoteRespond;
-import com.yeejay.yplay.receiver.NetworkReceiver;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -122,37 +116,7 @@ public class FragmentAnswer extends BaseFragment {
             R.color.button_color703,
             R.color.button_color704};
 
-    NetworkReceiver receiver = new NetworkReceiver(){
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            super.onReceive(context, intent);
 
-            //获得ConnectivityManager对象
-            ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            //获取所有网络连接的信息
-            Network[] networks = connMgr.getAllNetworks();
-            for (int i = 0; i < networks.length; i++) {
-                //获取ConnectivityManager对象对应的NetworkInfo对象
-                NetworkInfo networkInfo = connMgr.getNetworkInfo(networks[i]);
-
-                if (networkInfo.isConnected()){
-                    System.out.println("网络已连接1");
-
-                }else {
-                    System.out.println("网络未连接1");
-                }
-
-                if (networkInfo.isAvailable()){
-                    System.out.println("网络可用");
-                }else {
-                    System.out.println("网络不可用");
-                }
-            }
-        }
-    };
-
-    //倒计时时间
-    private final static int LIMIT_TIME = 10*1000;
     List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;
     QuestionListRespond.PayloadBean.QuestionsBean questionsBean;
 
@@ -169,7 +133,8 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
-        if (questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
                     titleNum+1,
                     optionsList.get(0).getUin(),
@@ -205,7 +170,8 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn2)
     public void btn2(View view) {
-        if (questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
                     titleNum+1,
                     optionsList.get(1).getUin(),
@@ -236,7 +202,8 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn3)
     public void btn3(View view) {
-        if (questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
                     titleNum+1,
                     optionsList.get(2).getUin(),
@@ -268,7 +235,8 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn4)
     public void btn4(View view) {
-        if (questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
                     titleNum+1,
                     optionsList.get(3).getUin(),
@@ -302,7 +270,8 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_tn_next_person)
     public void nextPersons(View view) {
         //换批人
-        if (questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
             getQuestionsCandidate(questionsBean.getQid());
             nextPersonCount++;
         }else {
@@ -356,9 +325,11 @@ public class FragmentAnswer extends BaseFragment {
     public void btnKeep(View view) {
         //点击继续
         System.out.println("点击继续");
-        questionNum++;
-        titleNum++;
-        if (questionsBean != null){
+
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null){
+            frandProgress.setVisibility(View.INVISIBLE);
+            questionNum++;
+            titleNum++;
             hideKeep();
             System.out.println("继续questionNumber---" + questionNum);
             if (questionNum >= questionListLength) {
@@ -386,7 +357,8 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn_next_question)
     public void nextQuestion(View view) {
         //过
-        if (questionsBean != null){
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null){
+            frandProgress.setVisibility(View.INVISIBLE);
             titleNum++;
             System.out.println("过questionNum----" + questionNum);
 
@@ -454,8 +426,6 @@ public class FragmentAnswer extends BaseFragment {
                 relieve();
             }
         });
-
-        zhucheGb();
     }
 
     //修改颜色
@@ -659,24 +629,6 @@ public class FragmentAnswer extends BaseFragment {
                 });
     }
 
-
-    //注册广播
-    private void zhucheGb(){
-
-        /**
-         * 监听网络状态
-         */
-        if (receiver == null){
-            receiver = new NetworkReceiver();
-        }
-        IntentFilter intentFilter=new IntentFilter();
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        getActivity().registerReceiver(receiver,intentFilter);
-        System.out.println("注册广播");
-
-    }
-
-
     //某个问题的候选人
     private void getQuestionsCandidate(int qid) {
 
@@ -821,6 +773,5 @@ public class FragmentAnswer extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        getActivity().unregisterReceiver(receiver);
     }
 }

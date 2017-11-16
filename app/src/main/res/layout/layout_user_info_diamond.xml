@@ -1,42 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="20dp"
-    >
+    android:orientation="vertical"
+    android:background="@color/white">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <ImageView
+            android:id="@+id/diamond_iv1"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/diamond"
+            android:scaleType="fitXY"
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:id="@+id/diamond_tv1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/play_color2"
+            android:text="钻石"
+            android:layout_toRightOf="@id/diamond_iv1"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:id="@+id/diamond_tv_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/play_color2"
+            android:text="0"
+            android:layout_toRightOf="@id/diamond_tv1"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            />
+
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/diamond_line"
+        android:layout_width="match_parent"
+        android:layout_height="0.2dp"
+        android:background="@color/feeds_search_color"
+        android:layout_below="@id/frf_img1"
+        />
     <ImageView
-        android:id="@+id/diamond_iv1"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:src="@drawable/diamond"
-        android:scaleType="fitXY"
-        android:layout_marginLeft="20dp"
-    />
-    <TextView
-        android:id="@+id/diamond_tv1"
-        android:layout_width="wrap_content"
+        android:id="@+id/diamond_null_img"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/play_color2"
-        android:text="钻石"
-        android:layout_toRightOf="@id/diamond_iv1"
-        android:layout_marginLeft="10dp"
+        android:src="@drawable/diamond_null_img"
         />
-    <TextView
-        android:id="@+id/diamond_tv_num"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/play_color2"
-        android:text="0"
-        android:layout_toRightOf="@id/diamond_tv1"
-        android:layout_marginLeft="10dp"
-        />
-    <ListView
+    <com.yeejay.yplay.customview.MesureListView
         android:id="@+id/diamond_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/diamond_tv_num"/>
-</RelativeLayout>
+        android:dividerHeight="0.2dp"
+        android:divider="@color/feeds_search_color"
+        />
+</LinearLayout>

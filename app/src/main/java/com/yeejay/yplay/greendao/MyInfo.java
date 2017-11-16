@@ -17,12 +17,14 @@ public class MyInfo {
 
     private int uin;
     private int isNoMoreShow;
+    private int isNoMoreShow2;
 
-    @Generated(hash = 1701828999)
-    public MyInfo(Long id, int uin, int isNoMoreShow) {
+    @Generated(hash = 406392481)
+    public MyInfo(Long id, int uin, int isNoMoreShow, int isNoMoreShow2) {
         this.id = id;
         this.uin = uin;
         this.isNoMoreShow = isNoMoreShow;
+        this.isNoMoreShow2 = isNoMoreShow2;
     }
     @Generated(hash = 980896312)
     public MyInfo() {
@@ -44,5 +46,11 @@ public class MyInfo {
     }
     public void setIsNoMoreShow(int isNoMoreShow) {
         this.isNoMoreShow = isNoMoreShow;
+    }
+    public int getIsNoMoreShow2() {
+        return this.isNoMoreShow2;
+    }
+    public void setIsNoMoreShow2(int isNoMoreShow2) {
+        this.isNoMoreShow2 = isNoMoreShow2;
     }
 }
