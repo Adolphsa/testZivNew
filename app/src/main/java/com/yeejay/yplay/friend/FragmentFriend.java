@@ -23,6 +23,7 @@ import com.yeejay.yplay.adapter.FriendFeedsAdapter;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
+import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -33,7 +34,9 @@ import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -100,17 +103,9 @@ public class FragmentFriend extends BaseFragment {
             public void onItemClick(View itemView, int position) {
                 System.out.println("被点击的item---" + position);
                 DaoFriendFeeds tempFeeds = mDataList.get(position);
-                Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
-                intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
-                intent.putExtra("yplay_friend_uin",tempFeeds.getFriendUin());
-                System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
-                //将被点击的item设置为已读
-                DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
-                        .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
-                        .build().unique();
-                daoFriendFeeds.setIsReaded(true);
-                mDaoFriendFeedsDao.update(daoFriendFeeds);
-                startActivity(intent);
+
+                //查询关系之后再跳转
+                getFriendInfo(tempFeeds.getFriendUin(),tempFeeds);
             }
         });
 
@@ -132,7 +127,7 @@ public class FragmentFriend extends BaseFragment {
             @Override
             public void loadMore() {
                 if (mDataList.size() > 0) {
-                    refreshOffset++;
+
                     long ts = mDataList.get(mDataList.size() - 1).getTs();
                     System.out.println("向下翻页----" + refreshOffset + ts);
                     getFriendFeeds(ts, 10);
@@ -241,21 +236,22 @@ public class FragmentFriend extends BaseFragment {
         System.out.println("刷新----refreshOffser---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
-        if (refreshList.size() == 0){
+        if (refreshList.size() != 0){
+            refreshOffset++;
+            mDataList.addAll(refreshList);
+        }
+
+        if (mDataList.size() == 0){
             System.out.println("无动态");
             fransFrfLayout.setVisibility(View.VISIBLE);
             ffPtfRefreshLayout.setVisibility(View.GONE);
             initRecommentFriends();
         }else {
             System.out.println("有动态");
-
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
-            mDataList.addAll(refreshList);
             feedsAdapter.notifyDataSetChanged();
         }
-
-
     }
 
     //数据查询
@@ -598,6 +594,84 @@ public class FragmentFriend extends BaseFragment {
                     }
                 });
 
+    }
+
+    //查询我和好友的关系
+    private void getFriendInfo(int friendUin,final DaoFriendFeeds tempFeeds) {
+        Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("userUin", friendUin);
+        friendMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        friendMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserInfo(friendMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
+                        if (userInfoResponde.getCode() == 0) {
+                            int status = userInfoResponde.getPayload().getStatus();
+
+                            if (status == 0){//非好友
+                                showCardDialog(userInfoResponde.getPayload().getInfo());
+                            }else if (status == 1){//好友
+                                Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
+                                intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
+                                intent.putExtra("yplay_friend_uin",tempFeeds.getFriendUin());
+                                System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
+                                //将被点击的item设置为已读
+                                DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
+                                        .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
+                                        .build().unique();
+                                daoFriendFeeds.setIsReaded(true);
+                                mDaoFriendFeedsDao.update(daoFriendFeeds);
+                                startActivity(intent);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    //显示名片
+    private void showCardDialog(UserInfoResponde.PayloadBean.InfoBean infoBean){
+        final CardDialog cardDialog = new CardDialog(getActivity(),R.style.CustomDialog);
+        cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
+        cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
+        cardDialog.setCardNameStr(infoBean.getNickName());
+        cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
+        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
+        cardDialog.setAddFriendListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageButton button = (ImageButton )v;
+                button.setImageResource(R.drawable.already_apply);
+            }
+        });
+        cardDialog.setCarDialogRlListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("哈哈哈");
+                cardDialog.dismiss();
+            }
+        });
+        cardDialog.show();
     }
 
 }

@@ -76,4 +76,6 @@
 
     
     <color name="color_transparent">#00000000</color>
+    <color name="color_transparent20">#33000000</color>
+
 </resources>

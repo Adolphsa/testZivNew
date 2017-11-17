@@ -99,6 +99,7 @@ public class GetAddFriendMsgs {
              * schoolType : 1
              * status : 0
              * ts : 1509451163
+             * msgDesc : 关系
              */
 
             private int msgId;
@@ -113,6 +114,7 @@ public class GetAddFriendMsgs {
             private int schoolType;
             private int status;
             private int ts;
+            private String msgDesc;
 
             public int getMsgId() {
                 return msgId;
@@ -210,6 +212,14 @@ public class GetAddFriendMsgs {
                 this.ts = ts;
             }
 
+            public String getMsgDesc() {
+                return msgDesc;
+            }
+
+            public void setMsgDesc(String msgDesc) {
+                this.msgDesc = msgDesc;
+            }
+
             @Override
             public String toString() {
                 return "MsgsBean{" +
@@ -225,6 +235,7 @@ public class GetAddFriendMsgs {
                         ", schoolType=" + schoolType +
                         ", status=" + status +
                         ", ts=" + ts +
+                        ", msgDesc='" + msgDesc + '\'' +
                         '}';
             }
         }

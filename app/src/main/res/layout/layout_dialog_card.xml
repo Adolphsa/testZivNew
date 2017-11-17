@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/card_dialog_rl"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="270dp"
+        android:layout_height="207dp"
+        android:layout_centerInParent="true">
+
+        <RelativeLayout
+            android:layout_width="270dp"
+            android:layout_height="167dp"
+            android:background="@drawable/shape_white_round_background"
+            android:layout_marginTop="40dp"
+            >
+
+            <ImageView
+                android:id="@+id/card_diamond"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/diamond"
+                android:scaleType="fitXY"
+                android:layout_marginLeft="29dp"
+                android:layout_marginTop="56dp"
+                />
+
+            <TextView
+                android:id="@+id/card_diamond_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_toRightOf="@+id/card_diamond"
+                android:textColor="@color/play_color2"
+                android:text="钻石 10"
+                android:layout_marginTop="56dp"
+                />
+
+            <TextView
+                android:id="@+id/card_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_color_gray"
+                android:text="姓名"
+                android:textSize="16sp"
+                android:layout_toRightOf="@+id/card_diamond_count"
+                android:layout_marginLeft="56dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textStyle="bold"
+                android:layout_marginTop="50dp"
+                />
+
+            <ImageButton
+                android:id="@+id/card_add_friends"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/green_add_friend"
+                android:background="@android:color/transparent"
+                android:layout_below="@+id/card_diamond"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="29dp"
+                />
+
+            <TextView
+                android:id="@+id/card_school_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="大学"
+                android:textSize="14sp"
+                android:textColor="@color/text_color_gray"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:layout_alignLeft="@+id/card_name"
+                android:layout_below="@+id/card_name"
+                android:layout_marginTop="15dp"
+                />
+            <TextView
+                android:id="@+id/card_grade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="大学一年级"
+                android:textSize="14sp"
+                android:textColor="@color/text_color_gray"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:layout_alignLeft="@+id/card_school_name"
+                android:layout_below="@+id/card_school_name"
+                android:layout_marginTop="10dp"
+                />
+
+        </RelativeLayout>
+
+        <tangxiaolv.com.library.EffectiveShapeView
+            android:id="@+id/card_img"
+            android:layout_width="81dp"
+            android:layout_height="81dp"
+            android:src="@drawable/header_deafult"
+            android:layout_centerHorizontal="true"
+            app:shape="circle"
+            />
+
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

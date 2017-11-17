@@ -129,7 +129,7 @@ public interface YPlayApi {
     @POST("/api/sns/getaddfriendnewmsgcnt")
     Observable<UnReadMsgCountRespond> getUnreadMessageCount(@FieldMap Map<String,Object> filemap);
 
-    //拉取添加好友消息
+    //拉取添加好友消息数组
     @FormUrlEncoded
     @POST("/api/sns/getaddfriendmsgs")
     Observable<GetAddFriendMsgs> getAddFriendMsg(@FieldMap Map<String,Object> filemap);
@@ -163,12 +163,6 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/sns/searchfriend")
     Observable<GetRecommendsRespond> searchFriends(@FieldMap Map<String,Object> filemap);
-
-    //获取用户与我当前的关系状态
-    @FormUrlEncoded
-    @POST("/api/sns/getusersstatuswithme")
-    Observable<GetRecommendsRespond> getStatusWithMe(@FieldMap Map<String,Object> filemap);
-
 
     //获取用户的资料
     @FormUrlEncoded

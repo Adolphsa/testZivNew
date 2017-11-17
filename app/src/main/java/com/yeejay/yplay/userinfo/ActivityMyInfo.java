@@ -24,6 +24,7 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.friend.ActivityAddFiendsDetail;
 import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
@@ -121,6 +122,28 @@ public class ActivityMyInfo extends AppCompatActivity {
         startActivity(new Intent(ActivityMyInfo.this, ActivitySetting.class));
     }
 
+    //我的好友
+    @OnClick(R.id.ami_include_my_friends)
+    public void myFriends(){
+        System.out.println("我的好友");
+        startActivity(new Intent(ActivityMyInfo.this,ActivityMyFriends.class));
+    }
+
+    //好友请求
+    @OnClick(R.id.ami_include_friend_request)
+    public void friendsRequest(){
+        System.out.println("好友请求");
+        startActivity(new Intent(ActivityMyInfo.this,ActivityAddFiendsDetail.class));
+    }
+
+    //添加好友
+    @OnClick(R.id.ami_include_add_friend)
+    public void addFriends(){
+        System.out.println("添加好友");
+        startActivity(new Intent(ActivityMyInfo.this,AddFriends.class));
+    }
+
+
     //不再显示
     @OnClick(R.id.frf_no_more_show)
     public void diamondNoMoreShow(View v) {
@@ -172,7 +195,6 @@ public class ActivityMyInfo extends AppCompatActivity {
         super.onResume();
         getMyInfo();
 
-
         getAddFriendMessageCount();
         recommendFriends();
     }
@@ -212,7 +234,7 @@ public class ActivityMyInfo extends AppCompatActivity {
 
             //好友数量
             int friendsNum = infoBean.getFriendCnt();
-            friendRequestNum.setText(String.valueOf(friendsNum));
+            friendNumTv.setText(String.valueOf(friendsNum));
         }
 
     }
@@ -504,7 +526,14 @@ public class ActivityMyInfo extends AppCompatActivity {
                         System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
                         if (unReadMsgCountRespond.getCode() == 0) {
                             int count = unReadMsgCountRespond.getPayload().getCnt();
-                            friendNumTv.setText(String.valueOf(count));
+                            if (count == 0){
+                                friendRequestNum.setVisibility(View.VISIBLE);
+                            }else {
+                                friendRequestNum.setText(String.valueOf(count));
+                                friendRequestNum.setBackground(getDrawable(R.drawable.shape_friend_request_background));
+                                friendRequestNum.setTextColor(getResources().getColor(R.color.white));
+                            }
+
                         }
 
                     }
@@ -520,49 +549,6 @@ public class ActivityMyInfo extends AppCompatActivity {
                 });
     }
 
-    //获取好友列表
-    private void getMyFriendsList(int pageNum) {
-
-        Map<String, Object> myFriendsMap = new HashMap<>();
-        myFriendsMap.put("pageNum", pageNum);
-        myFriendsMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        myFriendsMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        myFriendsMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyFriendsList(myFriendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<FriendsListRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull FriendsListRespond friendsListRespond) {
-                        System.out.println("获取我的好友列表---" + friendsListRespond.toString());
-                        if (friendsListRespond.getCode() == 0) {
-                            mDataList.addAll(friendsListRespond.getPayload().getFriends());
-                            if (mDataList.size() > 0) {
-
-                                int friendCount = friendsListRespond.getPayload().getTotal();
-                                System.out.println("朋友---" + friendCount);
-                                //amiFriendNum.setText("朋友" + friendCount);
-                            }
-
-                        }
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取我的好友列表异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
-    }
 
     //获取推荐好友信息
     private void recommendFriends() {

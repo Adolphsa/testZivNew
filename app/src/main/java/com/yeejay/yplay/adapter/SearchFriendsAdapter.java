@@ -116,7 +116,7 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
         }
         holder.afItemTvSharesFriends.setText(contentList.get(position).getPhone());
         holder.afBtnAccept.setTag(position);
-        holder.afBtnAccept2.setVisibility(View.GONE);
+        holder.afBtnAccept.setVisibility(View.GONE);
         return convertView;
     }
 
@@ -127,10 +127,9 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)
         TextView afItemTvSharesFriends;
-        @BindView(R.id.af_btn_accept)
-        Button afBtnAccept;
         @BindView(R.id.af_btn_accept2)
-        Button afBtnAccept2;
+        Button afBtnAccept;
+//
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

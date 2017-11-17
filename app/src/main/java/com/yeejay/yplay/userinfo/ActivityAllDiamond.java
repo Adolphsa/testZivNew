@@ -6,7 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +18,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
@@ -36,16 +37,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ActivityAllDiamond extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
     @BindView(R.id.aad_list_view)
     ListView aadListView;
     @BindView(R.id.aad_ptf_refresh)
     PullToRefreshLayout aadPtfRefresh;
 
-    @OnClick(R.id.layout_title_back)
+    @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
     }
@@ -60,6 +61,9 @@ public class ActivityAllDiamond extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_diamond);
         ButterKnife.bind(this);
+
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityAllDiamond.this, true);
 
         layoutTitle.setText("所有钻石");
         mDataList = new ArrayList<>();
@@ -92,21 +96,27 @@ public class ActivityAllDiamond extends AppCompatActivity {
                 if (convertView == null) {
                     convertView = View.inflate(ActivityAllDiamond.this, R.layout.item_afi, null);
                     holder = new ViewHolder();
+                    holder.itemAmiIndex = (TextView) convertView.findViewById(R.id.afi_item_index);
                     holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.afi_item_img);
                     holder.itemAmiText = (TextView) convertView.findViewById(R.id.afi_item_text);
-                    holder.itemAmiText2 = (TextView) convertView.findViewById(R.id.afi_item_text2);
+                    holder.itemAmiCount = (TextView) convertView.findViewById(R.id.afi_item_count);
                     convertView.setTag(holder);
                 } else {
                     holder = (ViewHolder) convertView.getTag();
                 }
                 UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean = tempList.get(position);
+
+                holder.itemAmiIndex.setText(String.valueOf(position+1));
+
                 String url = statsBean.getQiconUrl();
                 if (!TextUtils.isEmpty(url)){
-                    Picasso.with(ActivityAllDiamond.this).load(url).resize(30,30).into(holder.itemAmiImg);
+                    Picasso.with(ActivityAllDiamond.this).load(url).into(holder.itemAmiImg);
+                }else {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond));
                 }
                 holder.itemAmiText.setText(statsBean.getQtext());
-                holder.itemAmiText2.setVisibility(View.VISIBLE);
-                holder.itemAmiText2.setText("x" + statsBean.getGemCnt());
+
+                holder.itemAmiCount.setText(String.valueOf(statsBean.getGemCnt()));
                 return convertView;
             }
         });
@@ -178,8 +188,9 @@ public class ActivityAllDiamond extends AppCompatActivity {
     }
 
     private static class ViewHolder {
+        TextView itemAmiIndex;
         ImageView itemAmiImg;
         TextView itemAmiText;
-        TextView itemAmiText2;
+        TextView itemAmiCount;
     }
 }

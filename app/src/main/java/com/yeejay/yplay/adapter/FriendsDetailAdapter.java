@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import tangxiaolv.com.library.EffectiveShapeView;
 
 /**
  * 加好友请求适配器
@@ -94,17 +94,22 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         String url = contentList.get(position).getFromHeadImgUrl();
         if (!TextUtils.isEmpty(url)){
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+        }else {
+            holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }
+
+        holder.afItemTvSharesFriends.setText(contentList.get(position).getMsgDesc());
         holder.afItemName.setText(contentList.get(position).getFromNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
         holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 1){
-            holder.afBtnAccept.setText("已添加");
+            holder.afBtnAccept.setBackgroundResource(R.drawable.is_friend);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setText("接受");
+
+            holder.afBtnAccept.setBackgroundResource(R.drawable.green_accept);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }
@@ -114,12 +119,12 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
 
     static class ViewHolder {
         @BindView(R.id.af_item_header_img)
-        ImageView afItemHeaderImg;
+        EffectiveShapeView afItemHeaderImg;
         @BindView(R.id.af_item_name)
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)
         TextView afItemTvSharesFriends;
-        @BindView(R.id.af_btn_accept)
+        @BindView(R.id.af_btn_accept2)
         Button afBtnAccept;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;

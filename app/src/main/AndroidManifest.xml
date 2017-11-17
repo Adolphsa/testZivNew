@@ -103,14 +103,21 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".friend.ActivitySearchFriends"
             android:screenOrientation="portrait" />
 
-        <!--<activity android:name=".login.LoadingActivity"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--/>-->
+        <!-- <activity android:name=".login.LoadingActivity" -->
+        <!-- android:screenOrientation="portrait" -->
+        <!-- /> -->
+
+        <activity android:name=".userinfo.ActivityMyFriends"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".userinfo.ActivityFriendRequest"
+            android:screenOrientation="portrait"
+            />
+
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
@@ -135,14 +142,14 @@
         <!-- <activity android:name=".friend.TestActivity"/> -->
 
 
+        <!-- 接受网络状态的广播 -->
+        <!-- <receiver android:name=".receiver.NetworkReceiver"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/> -->
+        <!-- <category android:name="android.intent.category.DEFAULT" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
 
-        <!--接受网络状态的广播-->
-        <!--<receiver android:name=".receiver.NetworkReceiver">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>-->
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
 
     </application>
 

@@ -18,7 +18,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.customview.LazyScrollView;
@@ -66,28 +65,18 @@ public class ClassList extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.class_color));
 
+        getLonLat();
+
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
-            mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
             isActivitySetting = bundle.getInt("activity_setting_school");
             System.out.println("activity_setting_school" + isActivitySetting);
             System.out.println("年级页面---lat" + mLatitude + ",lon---" + mLongitude);
         }
 
 //        if (mLatitude == 0 || mLongitude == 0) {
-//            String tempLat = (String) SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_LATITUDE, "");
-//            String tempLon = (String) SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_LONGITUDE, "");
-//            System.out.println("未读---" + tempLat + ",---" + tempLon);
-//            if (!TextUtils.isEmpty(tempLat)) {
-//                mLatitude = Double.valueOf(tempLat);
-//            }
-//            if (!TextUtils.isEmpty(tempLon)) {
-//                mLongitude = Double.valueOf(tempLon);
-//            }
+//            Toast.makeText(ClassList.this,"请打开位置权限",Toast.LENGTH_LONG).show();
 //        }
-
-        getLonLat();
 
         mPrimaryListView = (MesureListView) findViewById(R.id.cl_grade_list);
 
@@ -271,7 +260,6 @@ public class ClassList extends AppCompatActivity {
         }
         mLocation = mLocationManager.getLastKnownLocation(mProvider);
         if (mLocation != null){
-
             System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
         }
     }
@@ -284,7 +272,7 @@ public class ClassList extends AppCompatActivity {
         }else if(prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
             return LocationManager.GPS_PROVIDER;
         }else{
-            Toast.makeText(ClassList.this,"没有可用的位置提供器",Toast.LENGTH_SHORT).show();
+            System.out.println("没有可用的位置提供器");
         }
         return null;
     }

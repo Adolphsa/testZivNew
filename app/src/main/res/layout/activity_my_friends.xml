@@ -6,19 +6,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
-    tools:context="com.yeejay.yplay.userinfo.ActivityAllDiamond">
+    tools:context="com.yeejay.yplay.userinfo.ActivityMyFriends">
 
-    <include layout="@layout/layout_title_bar2"/>
+    <include layout="@layout/layout_title_bar2" />
 
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
-        android:id="@+id/aad_ptf_refresh"
+        android:id="@+id/amf_ptf_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
         >
 
         <ListView
-            android:id="@+id/aad_list_view"
+            android:id="@+id/amf_list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@color/feeds_search_color"

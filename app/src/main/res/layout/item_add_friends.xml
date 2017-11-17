@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="77dp"
     android:background="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -9,7 +9,7 @@
         android:id="@+id/af_item_header_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/header_deafult"
         android:layout_centerVertical="true"
         android:scaleType="fitXY"
         app:shape="circle"
@@ -33,34 +33,24 @@
         android:layout_height="wrap_content"
         android:text="段誉"
         android:layout_toRightOf="@+id/af_item_header_img"
-        android:textColor="@android:color/black"
+        android:textColor="@color/text_color_gray"
         android:textSize="18sp"
         android:layout_marginTop="13dp"
-        android:layout_marginLeft="19dp"
+        android:layout_marginLeft="20dp"
         />
 
     <TextView
         android:id="@+id/af_item_tv_shares_friends"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="21个共同好友"
+        android:text="同校大三"
         android:layout_toRightOf="@+id/af_item_header_img"
         android:layout_below="@+id/af_item_name"
-        android:layout_marginLeft="19dp"
+        android:layout_marginLeft="20dp"
         android:textSize="14sp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="10dp"
-        />
-
-    <Button
-        android:id="@+id/af_btn_accept"
-        android:layout_width="40dp"
-        android:layout_height="45dp"
-        android:layout_marginRight="20dp"
-        android:background="@drawable/feeds_status_invite"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:scaleType="fitXY"
+        android:textColor="@color/feeds_hight_gray"
         />
 
     <Button
@@ -68,7 +58,7 @@
         android:layout_width="80dp"
         android:layout_height="34sp"
         android:layout_marginRight="20dp"
-        android:background="@drawable/selector_play_invite"
+        android:background="@drawable/green_add_friend"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="21dp"
@@ -78,10 +68,10 @@
         android:id="@+id/af_btn_hide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="隐藏"
+        android:text="忽略"
         android:background="@android:color/transparent"
-        android:layout_toLeftOf="@+id/af_btn_accept"
+        android:layout_toLeftOf="@+id/af_btn_accept2"
         android:layout_centerVertical="true"
-        android:visibility="gone"
+        android:textColor="@color/feeds_hight_gray"
         />
 </RelativeLayout>

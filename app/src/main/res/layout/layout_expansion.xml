@@ -46,6 +46,7 @@
         android:src="@drawable/feeds_no_more_see"
         />
     <View
+        android:id="@+id/frf_line"
         android:layout_width="match_parent"
         android:layout_height="0.2dp"
         android:background="@color/feeds_hight_gray45"
@@ -56,7 +57,10 @@
         android:id="@+id/frf_list_view"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_below="@+id/frf_img1"
+        android:layout_below="@+id/frf_line"
+        android:layout_marginTop="2dp"
+        android:dividerHeight="0.3dp"
+        android:divider="@color/feeds_hight_gray45"
         />
     <RelativeLayout
         android:layout_width="match_parent"

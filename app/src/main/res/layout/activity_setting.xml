@@ -11,7 +11,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -23,54 +24,157 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="37dp"
                 android:text="个人信息"
                 android:textColor="@color/play_color2"
-                android:textSize="16sp"
-                android:layout_marginTop="37dp"
-                />
+                android:textSize="16sp" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="71.5dp"
-
-                >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="20dp"
-                    android:text="头像"
-                    android:textColor="@color/text_color_gray"
-                    android:textSize="16sp" />
-
-                <tangxiaolv.com.library.EffectiveShapeView
-                    android:id="@+id/setting_img_header"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="40dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/header_deafult"
-                    app:shape="circle" />
-
-                <ImageView
-                    android:layout_width="4.5dp"
-                    android:layout_height="7.7dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="21dp"
-                    android:src="@drawable/item_arrows" />
-            </RelativeLayout>
-
-            <com.yeejay.yplay.customview.MesureListView
-                android:id="@+id/setting_list_view"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:dividerHeight="0.2dp"
-                android:divider="@color/feeds_search_color"
-                />
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="71.5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="24dp"
+                        android:text="头像"
+                        android:textColor="@color/text_color_gray"
+                        android:textSize="16sp" />
+
+                    <tangxiaolv.com.library.EffectiveShapeView
+                        android:id="@+id/setting_img_header"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="40dp"
+                        android:layout_marginTop="8dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/header_deafult"
+                        app:shape="circle" />
+
+                    <ImageView
+                        android:layout_width="4.5dp"
+                        android:layout_height="7.7dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="21dp"
+                        android:layout_marginTop="30dp"
+                        android:src="@drawable/item_arrows" />
+                </RelativeLayout>
+
+                <View android:layout_width="match_parent"
+                    android:layout_height="0.3dp"
+                    android:background="@color/feeds_search_color"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="20dp"
+                        android:text="姓名"
+                        android:textColor="@color/text_color_gray"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/setting_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="36dp"
+                        android:text="哈哈"
+                        android:textColor="@color/feeds_hight_gray"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="4.5dp"
+                        android:layout_height="7.7dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="20.3dp"
+                        android:src="@drawable/item_arrows" />
+                </RelativeLayout>
+
+                <View android:layout_width="match_parent"
+                    android:layout_height="0.3dp"
+                    android:background="@color/feeds_search_color"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="20dp"
+                        android:text="门牌号"
+                        android:textColor="@color/text_color_gray"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/setting_user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="36dp"
+                        android:text="12345"
+                        android:textColor="@color/feeds_hight_gray"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="4.5dp"
+                        android:layout_height="7.7dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="20.3dp"
+                        android:src="@drawable/item_arrows" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/selector_myinfo_item_bacnground">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="20dp"
+                        android:text="性别"
+                        android:textColor="@color/text_color_gray"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/setting_gender"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="36dp"
+                        android:text="男"
+                        android:textColor="@color/feeds_hight_gray"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="4.5dp"
+                        android:layout_height="7.7dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="20.3dp"
+                        android:src="@drawable/item_arrows" />
+                </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -80,7 +184,7 @@
             <!--学校信息-->
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="134dp">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -93,16 +197,24 @@
 
                 <TextView
                     android:id="@+id/setting_school"
-                    android:layout_width="wrap_content"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginRight="20dp"
+                    android:layout_marginRight="37dp"
                     android:layout_marginTop="21dp"
-                    android:drawablePadding="11.1dp"
-                    android:drawableRight="@drawable/item_arrows"
                     android:text="修改"
                     android:textColor="@color/feeds_hight_gray"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    />
+
+                <ImageView
+                    android:layout_width="4.5dp"
+                    android:layout_height="7.7dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="20.3dp"
+                    android:layout_marginTop="28dp"
+                    android:src="@drawable/item_arrows" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -134,7 +246,9 @@
                     android:layout_marginTop="20dp"
                     android:text="年级"
                     android:textColor="@color/text_color_gray"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:layout_marginBottom="20dp"
+                    />
 
                 <TextView
                     android:id="@+id/setting_grade"
@@ -146,7 +260,9 @@
                     android:layout_marginTop="20dp"
                     android:text="大学一年级"
                     android:textColor="@color/feeds_hight_gray"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:layout_marginBottom="20dp"
+                    />
 
             </RelativeLayout>
 
@@ -159,6 +275,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="96dp">
+
                 <TextView
                     android:id="@+id/setting_private_info"
                     android:layout_width="wrap_content"
@@ -168,15 +285,17 @@
                     android:text="私人信息"
                     android:textColor="@color/play_color2"
                     android:textSize="16sp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/setting_private_info"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="20dp"
+                    android:layout_toRightOf="@+id/setting_private_info"
                     android:text="仅自己可见"
                     android:textColor="@color/feeds_hight_gray"
                     android:textSize="16sp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -186,6 +305,7 @@
                     android:text="手机号码"
                     android:textColor="@color/text_color_gray"
                     android:textSize="16sp" />
+
                 <TextView
                     android:id="@+id/setting_phone_number"
                     android:layout_width="wrap_content"
@@ -198,156 +318,91 @@
                     android:textColor="@color/feeds_hight_gray"
                     android:textSize="16sp" />
             </RelativeLayout>
-            
+
             <!--联系我们-->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="10dp"
                 android:background="@color/feeds_search_color" />
-            <TextView
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
-                android:text="联系我们"
-                android:textColor="@color/text_color_gray"
-                android:textSize="16sp"
-                android:paddingLeft="20dp"
-                android:paddingTop="14dp"
-                android:drawableRight="@drawable/item_arrows"
-                android:paddingRight="20.4dp"
-                android:paddingBottom="13.5dp"
-                />
-            <TextView
+                android:background="@drawable/selector_myinfo_item_bacnground">
+
+                <TextView
+                    android:id="@+id/setting_contacts_us"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:text="联系我们"
+                    android:textColor="@color/text_color_gray"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="4.5dp"
+                    android:layout_height="7.7dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="20.4dp"
+                    android:src="@drawable/item_arrows" />
+            </RelativeLayout>
+
+            <View android:layout_width="match_parent"
+                android:layout_height="0.3dp"
+                android:background="@color/feeds_search_color"/>
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
-                android:text="退出登录"
-                android:textColor="@color/text_color_red"
-                android:textSize="16sp"
-                android:paddingLeft="20dp"
-                android:paddingTop="14dp"
-                android:drawableRight="@drawable/item_arrows"
-                android:paddingRight="20.4dp"
-                android:paddingBottom="13.5dp"
-                />
+                android:background="@drawable/selector_myinfo_item_bacnground">
+
+                <TextView
+                    android:id="@+id/setting_exit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="退出登录"
+                    android:textColor="@color/text_color_red"
+                    android:textSize="16sp"
+                    android:layout_centerVertical="true"
+                    />
+
+                <ImageView
+                    android:layout_width="4.5dp"
+                    android:layout_height="7.7dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="20.4dp"
+                    android:src="@drawable/item_arrows" />
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="117dp"
-                android:orientation="vertical"
                 android:background="@color/feeds_search_color"
-                >
-                
+                android:orientation="vertical">
+
                 <ImageView
                     android:layout_width="100dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/version_img"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="42dp"
-                    />
+                    android:src="@drawable/version_img" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1.0版本"
-                    android:textSize="12sp"
-                    android:textColor="@color/feeds_hight_gray"
-                    android:layout_marginTop="4dp"
                     android:layout_gravity="center_horizontal"
-                    />
+                    android:layout_marginTop="4dp"
+                    android:text="1.0版本"
+                    android:textColor="@color/feeds_hight_gray"
+                    android:textSize="12sp" />
             </LinearLayout>
-            
+
         </LinearLayout>
 
     </ScrollView>
 
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="3dp"
-        android:background="@color/divider_color" />
-
-    <TextView
-        android:id="@+id/setting_name"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/item_background"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:drawablePadding="10dp"
-        android:gravity="center_vertical"
-        android:padding="5dp"
-        android:text="亚瑟" />
-
-    <TextView
-        android:id="@+id/setting_user_name"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/item_background"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:drawablePadding="10dp"
-        android:gravity="center_vertical"
-        android:padding="5dp"
-        android:text="faker123" />
-
-    <TextView
-        android:id="@+id/setting_gender"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/item_background"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:drawablePadding="10dp"
-        android:gravity="center_vertical"
-        android:padding="5dp"
-        android:text="男" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="学校信息" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="3dp"
-        android:background="@color/divider_color" />
-
-    <TextView
-        android:id="@+id/setting_school_info"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/item_background"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:drawablePadding="10dp"
-        android:gravity="center_vertical"
-        android:padding="5dp"
-        android:text="2012届 大学二年级" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="私人信息" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="3dp"
-        android:background="@color/divider_color" />
-
-    <TextView
-        
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:drawableLeft="@drawable/userinfo_small"
-        android:drawablePadding="10dp"
-        android:gravity="center_vertical"
-        android:padding="5dp"
-        android:text="15971855656" />
-
-    <Button
-        android:id="@+id/setting_exit"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:text="退出" />
 </LinearLayout>

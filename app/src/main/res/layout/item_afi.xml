@@ -1,33 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="10dp"
+    android:layout_height="77dp"
+    android:background="@color/white"
     >
+
+    <TextView
+        android:id="@+id/afi_item_index"
+        android:layout_width="14dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="1"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="25dp"
+        android:textSize="22sp"
+        android:textColor="@color/feeds_hight_gray"
+        />
 
     <ImageView
         android:id="@+id/afi_item_img"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/userinfo_small" />
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/diamond"
+        android:layout_toRightOf="@+id/afi_item_index"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="11dp"
+        android:scaleType="fitXY"
+        />
 
     <TextView
         android:id="@+id/afi_item_text"
-        android:layout_width="wrap_content"
+        android:layout_width="183dp"
         android:layout_height="wrap_content"
         android:text="我可以和他说所有的话"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/afi_item_img"
+        android:layout_centerVertical="true"
         />
 
     <TextView
-        android:id="@+id/afi_item_text2"
+        android:id="@+id/afi_item_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="x1"
+        android:text="0"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:visibility="gone"
+        android:layout_marginRight="48dp"
+        android:layout_centerVertical="true"
+        android:textColor="@color/play_color2"
+        android:textSize="16sp"
+        />
+
+    <ImageView
+        android:layout_width="17dp"
+        android:layout_height="16dp"
+        android:src="@drawable/diamond"
+        android:scaleType="fitXY"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="25dp"
         />
 </RelativeLayout>

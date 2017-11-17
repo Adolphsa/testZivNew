@@ -16,11 +16,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -34,7 +29,6 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
-import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
@@ -73,24 +67,29 @@ public class ActivitySetting extends AppCompatActivity {
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
     TextView layoutTitle;
+
     @BindView(R.id.setting_img_header)
     EffectiveShapeView settingImgHeader;
+
+    //个人资料
     @BindView(R.id.setting_name)
-    TextView settingName;
+    TextView settingNmae;
     @BindView(R.id.setting_user_name)
-    TextView settingUserName;
+    TextView settingUserNmae;
     @BindView(R.id.setting_gender)
     TextView settingGender;
-    @BindView(R.id.setting_school_info)
-    TextView settingSchoolInfo;
+
+    @BindView(R.id.setting_school)
+    TextView settingSchool;
+    @BindView(R.id.setting_school_name)
+    TextView settingSchoolName;
+    @BindView(R.id.setting_grade)
+    TextView settingGrade;
+
     @BindView(R.id.setting_phone_number)
     TextView settingPhoneNumber;
     @BindView(R.id.setting_exit)
-    Button settingButton;
-
-    //个人资料
-    @BindView(R.id.setting_list_view)
-    MesureListView settingInfoListView;
+    TextView settingExitButton;
 
 
     @OnClick(R.id.layout_title_back2)
@@ -106,37 +105,38 @@ public class ActivitySetting extends AppCompatActivity {
         System.out.println("头像");
         tag = 0;
         applyForAlbumAuthority();
-
     }
 
     //姓名
     @OnClick(R.id.setting_name)
-    public void settingName() {
-        System.out.println("姓名");
-
+    public void settingName(){
+        tag = 1;
+        showInputDialog("输入真实姓名","只有两次修改机会");
     }
 
-    //用户名
+    //用户姓名
     @OnClick(R.id.setting_user_name)
-    public void setSettingUserName() {
-        System.out.println("用户名");
-
+    public void settingUserName(){
+        tag = 2;
+        showInputDialog("修改用户名","");
     }
 
-    //性别
+    //姓名
     @OnClick(R.id.setting_gender)
-    public void setSettingGender() {
+    public void setSettingGender(){
         System.out.println("性别");
-
+        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+        intent.putExtra("activity_setting",1);
+        startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
     }
 
-    //学校信息
-    @OnClick(R.id.setting_school_info)
+    //修改学校信息
+    @OnClick(R.id.setting_school)
     public void setSettingSchoolInfo() {
         System.out.println("学校信息");
         Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-        intent.putExtra("activity_setting_school",10);
-        startActivityForResult(intent,REQUEST_CODE_SCHOOL);
+        intent.putExtra("activity_setting_school", 10);
+        startActivityForResult(intent, REQUEST_CODE_SCHOOL);
     }
 
     //电话号码
@@ -145,12 +145,43 @@ public class ActivitySetting extends AppCompatActivity {
         System.out.println("电话号码");
     }
 
+    //联系我们
+    @OnClick(R.id.setting_contacts_us)
+    public void contacts() {
+        System.out.println("联系我们");
+
+        new AlertDialog.Builder(ActivitySetting.this)
+                .setMessage("咨询，建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
+                .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+    }
+
     //退出
     @OnClick(R.id.setting_exit)
     public void settingExit() {
         System.out.println("退出");
-        logout();
 
+        new AlertDialog.Builder(ActivitySetting.this)
+                .setTitle("退出")
+                .setMessage("确定退出吗？")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        logout();
+                    }
+                })
+                .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
     }
 
     private static final int REQ_CODE_SEL_IMG = 15;
@@ -192,7 +223,7 @@ public class ActivitySetting extends AppCompatActivity {
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
-        StatuBarUtil.setMiuiStatusBarDarkMode(ActivitySetting.this,true);
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivitySetting.this, true);
 
         layoutTitle.setText("资料详情");
 
@@ -211,104 +242,31 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //初始化资料
-    private void initView(UserInfoResponde.PayloadBean.InfoBean infoBean){
+    private void initView(UserInfoResponde.PayloadBean.InfoBean infoBean) {
         String url = infoBean.getHeadImgUrl();
-        if (!TextUtils.isEmpty(url))
-            Picasso.with(ActivitySetting.this).load(url).resize(93,93).into(settingImgHeader);
-            settingName.setText(infoBean.getNickName());
-            settingUserName.setText(infoBean.getUserName());
-            settingGender.setText(infoBean.getGender() == 1 ? "男" : "女");
-            StringBuilder str = new StringBuilder(infoBean.getSchoolName());
-            str.append(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
-            settingSchoolInfo.setText(str);
-            settingPhoneNumber.setText(infoBean.getPhone());
-    }
+        if (!TextUtils.isEmpty(url)) {
+            Picasso.with(ActivitySetting.this).load(url).into(settingImgHeader);
+        }
 
-    private void initMyInfo(final UserInfoResponde.PayloadBean.InfoBean infoBean){
+        settingNmae.setText(infoBean.getNickName());
+        settingUserNmae.setText(infoBean.getUserName());
+        settingGender.setText(infoBean.getGender() == 1 ? "男" : "女");
 
-        settingInfoListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return 3;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                if (convertView == null){
-                    convertView = View.inflate(ActivitySetting.this,R.layout.item_setting,null);
-                    holder = new ViewHolder();
-                    holder.itemSettingInfoText = (TextView) convertView.findViewById(R.id.item_setting_tv);
-                    holder.itemSettingInfoText1 = (TextView) convertView.findViewById(R.id.item_setting_tv1);
-                    convertView.setTag(holder);
-                }else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-                String nickName = infoBean.getNickName();
-                String userName = infoBean.getUserName();
-                String gender = infoBean.getGender() == 1 ? "男" : "女";
-                if (position == 0){
-                    holder.itemSettingInfoText.setText("姓名");
-                    holder.itemSettingInfoText1.setText(nickName);
-                }else if (position == 1){
-                    holder.itemSettingInfoText.setText("门牌号");
-                    holder.itemSettingInfoText1.setText(userName);
-                }else if (position == 2){
-                    holder.itemSettingInfoText.setText("性别");
-                    holder.itemSettingInfoText1.setText(gender);
-                }
-                return convertView;
-            }
-        });
-
-
-        settingInfoListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0){
-                    System.out.println("姓名");
-                    tag = 1;
-                    showInputDialog("输入真实姓名","只有两次修改机会");
-                }else if (position == 1){
-                    System.out.println("门牌号");
-                    tag = 2;
-                    showInputDialog("修改用户名","");
-
-                }else if (position == 2){
-                    System.out.println("性别");
-                    Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-                    intent.putExtra("activity_setting",1);
-                    startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
-                }
-            }
-        });
-    }
-
-    private static class ViewHolder {
-
-        TextView itemSettingInfoText;
-        TextView itemSettingInfoText1;
+        settingSchoolName.setText(infoBean.getSchoolName());
+        String grade = FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade());
+        settingGrade.setText(grade);
+        settingPhoneNumber.setText(infoBean.getPhone());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode == Activity.RESULT_OK){
-            switch(requestCode){
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
                 case REQ_CODE_SEL_IMG:
                     //获取选择的图片的URI
-                    if (data != null){
+                    if (data != null) {
                         Uri uri = data.getData();
                         cropImage(uri);
                     }
@@ -321,14 +279,13 @@ public class ActivitySetting extends AppCompatActivity {
                     settingImgHeader.setImageBitmap(bm);
                     break;
             }
-        }else if (requestCode == REQUEST_CODE_CHOICE_GENDER){
-            if (data != null){
-                String  gender = data.getStringExtra("activity_setting_gender");
+        } else if (requestCode == REQUEST_CODE_CHOICE_GENDER) {
+            if (data != null) {
+                String gender = data.getStringExtra("activity_setting_gender");
                 System.out.println("性别---" + gender);
                 settingGender.setText(gender);
             }
-        }else if (requestCode == REQUEST_CODE_SCHOOL){
-            System.out.println("那你看那看---" + requestCode);
+        } else if (requestCode == REQUEST_CODE_SCHOOL) {
             getMyInfo();
         }
     }
@@ -351,7 +308,7 @@ public class ActivitySetting extends AppCompatActivity {
     /**
      * 选择图片文件
      */
-    private void selectImage(){
+    private void selectImage() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, REQ_CODE_SEL_IMG);
@@ -359,9 +316,10 @@ public class ActivitySetting extends AppCompatActivity {
 
     /**
      * 裁剪图片
+     *
      * @param uri
      */
-    private void cropImage(Uri uri){
+    private void cropImage(Uri uri) {
         Intent intent = new Intent("com.android.camera.action.CROP");
         intent.putExtra("crop", "true");
         intent.setDataAndType(uri, "image/*");
@@ -379,7 +337,7 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //上传图头像
-    private void uploadImage(){
+    private void uploadImage() {
 
         System.out.println("imageName---" + imageName);
 
@@ -400,20 +358,21 @@ public class ActivitySetting extends AppCompatActivity {
         body.setFilecontent(datas);
 
         YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
+                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName, upload, aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {}
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
                         System.out.println("图片上传返回---" + imageUploadRespond.toString());
-                        if (imageUploadRespond.getCode() == 0){
+                        if (imageUploadRespond.getCode() == 0) {
                             //保存图片id
-                            SharePreferenceUtil.put(ActivitySetting.this, YPlayConstant.YPLAY_HEADER_IMG,imageName);
-                            updateHeaderImg(imageName,null,0,null);
+                            SharePreferenceUtil.put(ActivitySetting.this, YPlayConstant.YPLAY_HEADER_IMG, imageName);
+                            updateHeaderImg(imageName, null, 0, null);
                         }
                     }
 
@@ -430,21 +389,21 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //修改头像
-    private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName){
+    private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {
 
-        Map<String,Object> imgMap = new HashMap<>();
+        Map<String, Object> imgMap = new HashMap<>();
         if (!TextUtils.isEmpty(nickName))
-            imgMap.put("nickName",nickName);
+            imgMap.put("nickName", nickName);
         if (gender == 1 || gender == 2)
-            imgMap.put("gender",gender);
+            imgMap.put("gender", gender);
         if (!TextUtils.isEmpty(headImgId))
-            imgMap.put("headImgId",headImgId);
+            imgMap.put("headImgId", headImgId);
         if (!TextUtils.isEmpty(userName))
-            imgMap.put("userName",userName);
+            imgMap.put("userName", userName);
 
-        imgMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN,0));
-        imgMap.put("token",SharePreferenceUtil.get(ActivitySetting.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
-        imgMap.put("ver",SharePreferenceUtil.get(ActivitySetting.this,YPlayConstant.YPLAY_VER,0));
+        imgMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
+        imgMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        imgMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .updateHeaderImg(imgMap)
@@ -452,26 +411,27 @@ public class ActivitySetting extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<BaseRespond>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {}
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0){
-                            if (tag == 0){
+                        if (baseRespond.getCode() == 0) {
+                            if (tag == 0) {
                                 System.out.println("修改图像成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this,"头像修改成功",Toast.LENGTH_SHORT).show();
-                            }else if (tag == 1){
+                                Toast.makeText(ActivitySetting.this, "头像修改成功", Toast.LENGTH_SHORT).show();
+                            } else if (tag == 1) {
                                 System.out.println("修改姓名成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this,"修改姓名成功",Toast.LENGTH_SHORT).show();
-                                settingName.setText(nickName);
-                            }else if (tag == 2){
+                                Toast.makeText(ActivitySetting.this, "修改姓名成功", Toast.LENGTH_SHORT).show();
+                                settingNmae.setText(nickName);
+                            } else if (tag == 2) {
                                 System.out.println("修改用户名成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this,"修改用户名成功",Toast.LENGTH_SHORT).show();
-                                settingUserName.setText(userName);
+                                Toast.makeText(ActivitySetting.this, "修改用户名成功", Toast.LENGTH_SHORT).show();
+                                settingUserNmae.setText(userName);
                             }
 
-                        }else if (baseRespond.getCode() == 11011){
-                            Toast.makeText(ActivitySetting.this,"用户名已经存在",Toast.LENGTH_SHORT).show();
+                        } else if (baseRespond.getCode() == 11011) {
+                            Toast.makeText(ActivitySetting.this, "用户名已经存在", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -488,7 +448,7 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //获取自己的资料
-    private void getMyInfo(){
+    private void getMyInfo() {
 
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
@@ -507,9 +467,8 @@ public class ActivitySetting extends AppCompatActivity {
                     @Override
                     public void onNext(@NonNull UserInfoResponde userInfoResponde) {
                         System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0){
-                            //initView(userInfoResponde.getPayload().getInfo());
-                            initMyInfo(userInfoResponde.getPayload().getInfo());
+                        if (userInfoResponde.getCode() == 0) {
+                            initView(userInfoResponde.getPayload().getInfo());
                         }
                     }
 
@@ -526,7 +485,7 @@ public class ActivitySetting extends AppCompatActivity {
     }
 
     //退出登录
-    private void logout(){
+    private void logout() {
         Map<String, Object> logoutMap = new HashMap<>();
         logoutMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         logoutMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
@@ -537,16 +496,14 @@ public class ActivitySetting extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
+                    public void onSubscribe(Disposable d) {}
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
                         System.out.println("退出登录---" + userInfoResponde.toString());
-                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_UIN);
-                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_TOKEN);
-                        SharePreferenceUtil.remove(ActivitySetting.this,YPlayConstant.YPLAY_VER);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
                         startActivity(new Intent(ActivitySetting.this, Login.class));
                     }
 
@@ -565,41 +522,41 @@ public class ActivitySetting extends AppCompatActivity {
 
 
     //展示对话框
-     private void showInputDialog(String title,String message){
+    private void showInputDialog(String title, String message) {
 
-         final EditText editText = new EditText(ActivitySetting.this);
-         AlertDialog.Builder inputDialog =
-                 new AlertDialog.Builder(ActivitySetting.this);
-         inputDialog.setTitle(title).setView(editText);
-         if (!TextUtils.isEmpty(message)){
-             inputDialog.setMessage(message);
-         }
-         inputDialog.setPositiveButton("确定",
-                 new DialogInterface.OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         String name = editText.getText().toString().trim();
-                         if (name.length() > 0){
-                             if (tag == 1){
-                                 System.out.println("修改姓名---" + name);
-                                 updateHeaderImg(null,name,0,null);
-                             }else if (tag == 2){
-                                 System.out.println("修改用户名---" + name);
-                                 updateHeaderImg(null,null,0,name);
-                             }
-                         }else {
-                             Toast.makeText(ActivitySetting.this,"字符长度不能为0",Toast.LENGTH_SHORT).show();
-                         }
+        final EditText editText = new EditText(ActivitySetting.this);
+        AlertDialog.Builder inputDialog =
+                new AlertDialog.Builder(ActivitySetting.this);
+        inputDialog.setTitle(title).setView(editText);
+        if (!TextUtils.isEmpty(message)) {
+            inputDialog.setMessage(message);
+        }
+        inputDialog.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = editText.getText().toString().trim();
+                        if (name.length() > 0) {
+                            if (tag == 1) {
+                                System.out.println("修改姓名---" + name);
+                                updateHeaderImg(null, name, 0, null);
+                            } else if (tag == 2) {
+                                System.out.println("修改用户名---" + name);
+                                updateHeaderImg(null, null, 0, name);
+                            }
+                        } else {
+                            Toast.makeText(ActivitySetting.this, "字符长度不能为0", Toast.LENGTH_SHORT).show();
+                        }
 
-                     }
-                 });
-         inputDialog.setNegativeButton("取消",
-                 new DialogInterface.OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         System.out.println("取消按钮");
-                     }
-                 });
-         inputDialog.show();
-     }
+                    }
+                });
+        inputDialog.setNegativeButton("取消",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("取消按钮");
+                    }
+                });
+        inputDialog.show();
+    }
 }

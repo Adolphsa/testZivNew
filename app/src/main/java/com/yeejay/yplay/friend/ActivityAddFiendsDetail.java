@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.HashMap;
@@ -32,16 +34,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ActivityAddFiendsDetail extends AppCompatActivity {
 
-    @BindView(R.id.layout_title_back)
-    Button layoutTitleBack;
-    @BindView(R.id.layout_title)
+    @BindView(R.id.layout_title_back2)
+    ImageButton layoutTitleBack;
+    @BindView(R.id.layout_title2)
     TextView layoutTitle;
     @BindView(R.id.aafd_list_view)
     ListView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
 
-    @OnClick(R.id.layout_title_back)
+    @OnClick(R.id.layout_title_back2)
     public void back(View view) {
         finish();
     }
@@ -55,9 +57,13 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
         setContentView(R.layout.activity_activty_add_fiends_detail);
         ButterKnife.bind(this);
 
-        layoutTitle.setText("加好友请求");
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityAddFiendsDetail.this, true);
+
+        layoutTitle.setText("好友请求");
 
         getAddFriendmsgs(mPageNum);
+        loadMore();
     }
 
     private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
@@ -67,7 +73,7 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
                     public void hideClick(View v) {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
-                        removeFriend(tempList.get((int) button.getTag()).getUin());
+                        accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),1);
                         button.setVisibility(View.INVISIBLE);
                         if (tempList.size() > 0) {
                             System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
@@ -81,10 +87,10 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
                 Button button = (Button) v;
-                button.setText("已添加");
+                button.setBackgroundResource(R.drawable.green_accept);
                 button.setEnabled(false);
                 //接受加好友的请求
-                accepeAddFreind(tempList.get((int) button.getTag()).getMsgId());
+                accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
             }
         }, tempList);
         aafdListView.setAdapter(friendsDetailAdapter);
@@ -94,9 +100,7 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
         aafdPtfRefresh.setCanRefresh(false);
         aafdPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
-            public void refresh() {
-
-            }
+            public void refresh() {}
 
             @Override
             public void loadMore() {
@@ -147,9 +151,10 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
     }
 
     //接受好友请求
-    private void accepeAddFreind(int msgId) {
+    private void accepeAddFreind(int msgId, int act) {
         Map<String, Object> accepeAddFreindMap = new HashMap<>();
         accepeAddFreindMap.put("msgId", msgId);
+        accepeAddFreindMap.put("act",act);
         accepeAddFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
         accepeAddFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         accepeAddFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));

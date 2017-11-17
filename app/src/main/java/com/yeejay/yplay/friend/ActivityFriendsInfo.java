@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -17,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
@@ -67,20 +70,21 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
     @BindView(R.id.friend_tv_num)
     TextView friendTvNum;
+
+    //钻石
     @BindView(R.id.diamond_tv_num)
     TextView diamondTvNum;
+    @BindView(R.id.diamond_list)
+    MesureListView amiDiamondListView;
+    @BindView(R.id.diamond_line)
+    View amiDiamonLine;
+    @BindView(R.id.diamond_null_img)
+    ImageView amiDiamondNullImg;
+
+    @BindView(R.id.friend_arrows)
+    ImageView arrowsImg;
 
     int friendUin;
-    private RelativeLayout rl1;
-    private RelativeLayout rl2;
-    private RelativeLayout rl3;
-    private EffectiveShapeView diamondDetailImg1;
-    private TextView diamondDetailTv1;
-    private EffectiveShapeView diamondDetailImg2;
-    private TextView diamondDetailTv2;
-    private EffectiveShapeView diamondDetailImg3;
-    private TextView diamondDetailTv3;
-
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -105,7 +109,8 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
-        layoutSetting.setVisibility(View.VISIBLE);
+        layoutSetting.setVisibility(View.GONE);
+        arrowsImg.setVisibility(View.GONE);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -118,10 +123,7 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
             getFriendInfo(friendUin);
         }
-
-        initDiamondTop();
-
-        getUserDiamondInfo(friendUin,1,10);
+        getUserDiamondInfo(friendUin, 1, 10);
     }
 
     //初始化用户资料
@@ -148,56 +150,78 @@ public class ActivityFriendsInfo extends AppCompatActivity {
         }
     }
 
-    //初始化钻石top
-    private void initDiamondTop(){
 
-        rl1 = (RelativeLayout) findViewById(R.id.diamond_detail1);
-        TextView diamondDetailTop1 = (TextView) rl1.findViewById(R.id.diamond_detail_top);
-        diamondDetailImg1 = (EffectiveShapeView) rl1.findViewById(R.id.diamond_detail_img);
-        diamondDetailTv1 = (TextView) rl1.findViewById(R.id.diamond_detail_tv);
-        diamondDetailTop1.setText("Top1");
+    //初始化钻石
+    private void initDiamondList(UsersDiamondInfoRespond.PayloadBean payloadBean) {
 
-        rl2 = (RelativeLayout) findViewById(R.id.diamond_detail2);
-        TextView diamondDetailTop2 = (TextView) rl2.findViewById(R.id.diamond_detail_top);
-        diamondDetailImg2 = (EffectiveShapeView) rl2.findViewById(R.id.diamond_detail_img);
-        diamondDetailTv2 = (TextView) rl2.findViewById(R.id.diamond_detail_tv);
-        diamondDetailTop2.setText("Top2");
 
-        rl3 = (RelativeLayout) findViewById(R.id.diamond_detail3);
-        TextView diamondDetailTop3 = (TextView) rl3.findViewById(R.id.diamond_detail_top);
-        diamondDetailImg3 = (EffectiveShapeView) rl3.findViewById(R.id.diamond_detail_img);
-        diamondDetailTv3 = (TextView) rl3.findViewById(R.id.diamond_detail_tv);
-        diamondDetailTop3.setText("Top3");
+        int total = payloadBean.getTotal();
+        if (total > 0) {
+            amiDiamondNullImg.setVisibility(View.GONE);
+            amiDiamonLine.setVisibility(View.GONE);
+        }
+        if (total >= 3) {
+            amiDiamonLine.setVisibility(View.VISIBLE);
+        }
+        final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = payloadBean.getStats();
+        amiDiamondListView.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return tempList.size() >= 3 ? 3 : tempList.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return tempList.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ViewHolder holder;
+                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean;
+                if (convertView == null) {
+                    convertView = View.inflate(ActivityFriendsInfo.this, R.layout.item_user_info_diamond, null);
+                    holder = new ViewHolder();
+                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.item_diamond_top_img);
+                    holder.itemAmiImg2 = (ImageView) convertView.findViewById(R.id.item_diamond_img);
+                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.item_diamond_text);
+                    convertView.setTag(holder);
+                } else {
+                    holder = (ViewHolder) convertView.getTag();
+                }
+                statsBean = tempList.get(position);
+                if (position == 0) {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top1));
+                } else if (position == 1) {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top2));
+                } else if (position == 2) {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+                } else {
+                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+                }
+
+                String url = statsBean.getQiconUrl();
+                if (!TextUtils.isEmpty(url)) {
+                    Picasso.with(ActivityFriendsInfo.this).load(url).into(holder.itemAmiImg2);
+                } else {
+                    holder.itemAmiImg2.setImageDrawable(getDrawable(R.drawable.diamond));
+                }
+                holder.itemAmiText.setText(statsBean.getQtext());
+                return convertView;
+            }
+        });
 
     }
 
-    //初始化钻石详情
-    private void initDiamondDetail(UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean1,
-                                   UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean2,
-                                   UsersDiamondInfoRespond.PayloadBean.StatsBean  statsBean3){
-
-
-        if (statsBean1 != null){
-            String url1 = statsBean1.getQiconUrl();
-            if (!TextUtils.isEmpty(url1)){
-                Picasso.with(ActivityFriendsInfo.this).load(url1).into(diamondDetailImg1);
-            }
-            diamondDetailTv1.setText(statsBean1.getQtext());
-        }
-        if (statsBean2 != null){
-            String url2 = statsBean2.getQiconUrl();
-            if (!TextUtils.isEmpty(url2)){
-                Picasso.with(ActivityFriendsInfo.this).load(url2).into(diamondDetailImg2);
-            }
-            diamondDetailTv2.setText(statsBean2.getQtext());
-        }
-        if (statsBean3 != null){
-            String url3 = statsBean3.getQiconUrl();
-            if (!TextUtils.isEmpty(url3)){
-                Picasso.with(ActivityFriendsInfo.this).load(url3).into(diamondDetailImg3);
-            }
-            diamondDetailTv3.setText(statsBean3.getQtext());
-        }
+    private static class ViewHolder {
+        ImageView itemAmiImg;
+        ImageView itemAmiImg2;
+        TextView itemAmiText;
     }
 
     private void showNormalDialog() {
@@ -220,7 +244,6 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                 });
         normalDialog.show();
     }
-
 
     //查询朋友的信息
     private void getFriendInfo(int friendUin) {
@@ -287,16 +310,18 @@ public class ActivityFriendsInfo extends AppCompatActivity {
                         if (usersDiamondInfoRespond.getCode() == 0) {
                             UsersDiamondInfoRespond.PayloadBean payloadBean = usersDiamondInfoRespond.getPayload();
 
-                            if (payloadBean != null && payloadBean.getStats() != null){
+                            if (payloadBean != null && payloadBean.getStats() != null) {
+
+                                initDiamondList(payloadBean);
                                 List<UsersDiamondInfoRespond.PayloadBean.StatsBean> statsBeanList =
                                         usersDiamondInfoRespond.getPayload().getStats();
-                                if (statsBeanList.size() >= 1){
-                                    initDiamondDetail(statsBeanList.get(0),null,null);
-                                }else if (statsBeanList.size() >= 2){
-                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(1),null);
-                                }if (statsBeanList.size() >= 3){
-                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(2),statsBeanList.get(3));
-                                }
+//                                if (statsBeanList.size() >= 1){
+//                                    initDiamondDetail(statsBeanList.get(0),null,null);
+//                                }else if (statsBeanList.size() >= 2){
+//                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(1),null);
+//                                }if (statsBeanList.size() >= 3){
+//                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(2),statsBeanList.get(3));
+//                                }
                             }
 
                         }
@@ -352,15 +377,15 @@ public class ActivityFriendsInfo extends AppCompatActivity {
     }
 
     //删除好友资料
-    private void deleteFriendInfo(){
+    private void deleteFriendInfo() {
 
         DaoFriendFeedsDao friendFeedsDao = YplayApplication.getInstance()
                 .getDaoSession()
                 .getDaoFriendFeedsDao();
 
         DeleteQuery deleteQuery = friendFeedsDao.queryBuilder()
-                                .where(DaoFriendFeedsDao.Properties.FriendUin.eq(friendUin))
-                                .buildDelete();
+                .where(DaoFriendFeedsDao.Properties.FriendUin.eq(friendUin))
+                .buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
         finish();
     }
