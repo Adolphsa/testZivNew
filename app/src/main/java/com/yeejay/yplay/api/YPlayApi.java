@@ -6,7 +6,6 @@ import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
-import com.yeejay.yplay.model.GetRecommendAll;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
@@ -15,6 +14,7 @@ import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.model.VoteRespond;
 
@@ -194,15 +194,14 @@ public interface YPlayApi {
     @POST("/api/sns/getrandomrecommends")
     Observable<GetRecommendsRespond> recommendFriendsForNull(@FieldMap Map<String,Object> filemap);
 
-    //⼀一次拉取多个类型的好友推荐列列表
-    @FormUrlEncoded
-    @POST("/api/sns/getrecommendsall")
-    Observable<GetRecommendAll> getAllRecommends(@FieldMap Map<String,Object> filemap);
-
     //退出登录
     @FormUrlEncoded
     @POST("/api/account/logout")
     Observable<BaseRespond> logout(@FieldMap Map<String,Object> filemap);
 
+    //查询用户的修改配额
+    @FormUrlEncoded
+    @POST("/api/user/getmyprofilemodquota")
+    Observable<UserUpdateLeftCountRespond> getUserUpdateCount(@FieldMap Map<String,Object> filemap);
 
 }

@@ -37,6 +37,7 @@ import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -103,27 +104,45 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_img_header)
     public void settingImgHeader() {
         System.out.println("头像");
-        tag = 0;
-        applyForAlbumAuthority();
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            tag = 0;
+            applyForAlbumAuthority();
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     //姓名
     @OnClick(R.id.setting_name)
     public void settingName(){
-        tag = 1;
-        showInputDialog("输入真实姓名","只有两次修改机会");
+
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            tag = 1;
+            showInputDialog("输入真实姓名","只有两次修改机会");
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     //用户姓名
     @OnClick(R.id.setting_user_name)
     public void settingUserName(){
-        tag = 2;
-        showInputDialog("修改用户名","");
+
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            tag = 2;
+            showInputDialog("修改用户名","");
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     //姓名
     @OnClick(R.id.setting_gender)
     public void setSettingGender(){
+
         System.out.println("性别");
         Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
         intent.putExtra("activity_setting",1);
@@ -149,39 +168,47 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_contacts_us)
     public void contacts() {
         System.out.println("联系我们");
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            new AlertDialog.Builder(ActivitySetting.this)
+                    .setMessage("咨询，建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
+                    .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-        new AlertDialog.Builder(ActivitySetting.this)
-                .setMessage("咨询，建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
-                .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .show();
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
 
-                    }
-                })
-                .show();
     }
 
     //退出
     @OnClick(R.id.setting_exit)
     public void settingExit() {
         System.out.println("退出");
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            new AlertDialog.Builder(ActivitySetting.this)
+                    .setTitle("退出")
+                    .setMessage("确定退出吗？")
+                    .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logout();
+                        }
+                    })
+                    .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-        new AlertDialog.Builder(ActivitySetting.this)
-                .setTitle("退出")
-                .setMessage("确定退出吗？")
-                .setPositiveButton("是", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        logout();
-                    }
-                })
-                .setNegativeButton("否", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .show();
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
 
-                    }
-                })
-                .show();
     }
 
     private static final int REQ_CODE_SEL_IMG = 15;

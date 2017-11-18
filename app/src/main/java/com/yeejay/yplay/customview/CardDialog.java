@@ -33,6 +33,8 @@ public class CardDialog extends Dialog {
 
     private String cardGradeStr;
 
+    private int buttonImg;
+
     private View.OnClickListener addFriendListener;
 
     private View.OnClickListener carDialogRlListener;
@@ -87,6 +89,8 @@ public class CardDialog extends Dialog {
         cardGrade.setText(cardGradeStr);
 
         //加好友按钮
+        cardAddFriends.setImageResource(buttonImg);
+
         cardAddFriends.setOnClickListener(addFriendListener);
 
         cardDialogRl.setOnClickListener(carDialogRlListener);
@@ -118,5 +122,9 @@ public class CardDialog extends Dialog {
 
     public void setCarDialogRlListener(View.OnClickListener carDialogRlListener) {
         this.carDialogRlListener = carDialogRlListener;
+    }
+
+    public void setButtonImg(int buttonImg) {
+        this.buttonImg = buttonImg;
     }
 }

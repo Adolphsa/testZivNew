@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.utils.NetWorkUtil;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<GetAddFriendMsgs.PayloadBean.MsgsBean> contentList;
+    ViewHolder holder;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -40,6 +42,10 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         @Override
         public void onClick(View v) {
             acceptCallback.acceptClick(v);
+            if (NetWorkUtil.isNetWorkAvailable(context)){
+                holder.afBtnHide.setVisibility(View.GONE);
+            }
+
         }
     };
 
@@ -49,6 +55,7 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
 
     public interface acceptCallback {
         void acceptClick(View v);
+
     }
 
     public FriendsDetailAdapter(Context context,
@@ -83,7 +90,7 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.item_add_friends, null);
             holder = new ViewHolder(convertView);
@@ -108,7 +115,6 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
             holder.afBtnAccept.setBackgroundResource(R.drawable.is_friend);
             holder.afBtnAccept.setEnabled(false);
         }else {
-
             holder.afBtnAccept.setBackgroundResource(R.drawable.green_accept);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);

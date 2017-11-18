@@ -24,6 +24,7 @@ import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -93,7 +94,12 @@ public class ActivityFriendsInfo extends AppCompatActivity {
 
     @OnClick(R.id.remove_friend)
     public void removeFriend(View view) {
-        showNormalDialog();
+        if (NetWorkUtil.isNetWorkAvailable(ActivityFriendsInfo.this)){
+            showNormalDialog();
+        }else {
+            Toast.makeText(ActivityFriendsInfo.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @OnClick(R.id.lui_header_img)
@@ -111,6 +117,10 @@ public class ActivityFriendsInfo extends AppCompatActivity {
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
         layoutSetting.setVisibility(View.GONE);
         arrowsImg.setVisibility(View.GONE);
+
+        RelativeLayout rl = (RelativeLayout) findViewById(R.id.layout_my_friend);
+        TextView tv = (TextView) rl.findViewById(R.id.friend_tv1);
+        tv.setText("好友");
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {

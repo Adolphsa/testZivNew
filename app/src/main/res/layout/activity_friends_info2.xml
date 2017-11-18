@@ -17,7 +17,9 @@
         android:layout_height="10dp"
         android:background="@color/feeds_search_color" />
 
-    <include layout="@layout/layout_user_info_friends" />
+    <include layout="@layout/layout_user_info_friends"
+        android:id="@+id/layout_my_friend"
+        />
 
     <View
         android:layout_width="match_parent"

@@ -43,6 +43,7 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         }
     };
 
+
     public interface hideCallback {
         void hideClick(View v);
     }
@@ -52,9 +53,9 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
     }
 
     public SchoolmateAdapter(Context context,
-                           hideCallback hideCallback,
-                           acceptCallback acceptCallback,
-                           List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
+                             hideCallback hideCallback,
+                             acceptCallback acceptCallback,
+                             List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
@@ -88,29 +89,34 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
             convertView = View.inflate(context, R.layout.item_add_friends, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
-        }else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        String url = contentList.get(position).getHeadImgUrl();
-        if (!TextUtils.isEmpty(url)){
+
+        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = contentList.get(position);
+
+        String url = friendsBean.getHeadImgUrl();
+        String nickName = friendsBean.getNickName();
+        int status = friendsBean.getStatus();
+        String str = friendsBean.getRecommendDesc();
+
+
+        if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+        } else {
+            holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }
-        holder.afItemName.setText(contentList.get(position).getNickName());
+        holder.afItemName.setText(nickName);
+        holder.afItemTvSharesFriends.setText(str);
+
 //        holder.afBtnHide.setOnClickListener(hideListener);
 //        holder.afBtnHide.setTag(position);
 //        holder.afBtnHide.setVisibility(View.VISIBLE);
-        int status = contentList.get(position).getStatus();
-        if (status == 2){
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_apply);
-            holder.afBtnAccept.setEnabled(false);
-        }else {
 
-            holder.afBtnAccept.setEnabled(true);
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
-            holder.afBtnAccept.setOnClickListener(acceptListener);
-        }
+        holder.afBtnAccept.setEnabled(true);
+        holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend);
+        holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
-        holder.afBtnAccept2.setVisibility(View.GONE);
         return convertView;
     }
 
@@ -121,10 +127,8 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)
         TextView afItemTvSharesFriends;
-        @BindView(R.id.af_btn_accept)
-        Button afBtnAccept;
         @BindView(R.id.af_btn_accept2)
-        Button afBtnAccept2;
+        Button afBtnAccept;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
@@ -15,6 +16,7 @@ import com.yeejay.yplay.adapter.FriendsDetailAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -73,12 +75,16 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
                     public void hideClick(View v) {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
-                        accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),1);
-                        button.setVisibility(View.INVISIBLE);
-                        if (tempList.size() > 0) {
-                            System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
-                            tempList.remove((int) v.getTag());
-                            friendsDetailAdapter.notifyDataSetChanged();
+                        if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
+                            accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),1);
+                            button.setVisibility(View.INVISIBLE);
+                            if (tempList.size() > 0) {
+                                System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
+                                tempList.remove((int) v.getTag());
+                                friendsDetailAdapter.notifyDataSetChanged();
+                            }
+                        }else {
+                            Toast.makeText(ActivityAddFiendsDetail.this,"网络异常",Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -87,10 +93,16 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
                 Button button = (Button) v;
-                button.setBackgroundResource(R.drawable.green_accept);
-                button.setEnabled(false);
-                //接受加好友的请求
-                accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
+
+                if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
+                    button.setBackgroundResource(R.drawable.is_friend);
+                    button.setEnabled(false);
+                    //接受加好友的请求
+                    accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
+                }else {
+                    Toast.makeText(ActivityAddFiendsDetail.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
             }
         }, tempList);
         aafdListView.setAdapter(friendsDetailAdapter);
@@ -171,6 +183,9 @@ public class ActivityAddFiendsDetail extends AppCompatActivity {
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
                         System.out.println("接受好友请求---" + baseRespond.toString());
+                        if (baseRespond.getCode() == 0){
+                            Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override

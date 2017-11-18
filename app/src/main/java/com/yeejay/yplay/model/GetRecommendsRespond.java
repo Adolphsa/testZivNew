@@ -98,6 +98,7 @@ public class GetRecommendsRespond {
              * recommendType : 1
              * recommendDesc ："同校好友"
              * status : 4
+             * msgId : 6
              */
 
             private int uin;
@@ -112,6 +113,7 @@ public class GetRecommendsRespond {
             private int recommendType;
             private String recommendDesc;
             private int status;
+            private int msgId;
 
             public int getUin() {
                 return uin;
@@ -209,8 +211,16 @@ public class GetRecommendsRespond {
                 this.status = status;
             }
 
+            public int getMsgId() {
+                return msgId;
+            }
+
+            public void setMsgId(int msgId) {
+                this.msgId = msgId;
+            }
+
             @Override
-            public String  toString() {
+            public String toString() {
                 return "FriendsBean{" +
                         "uin=" + uin +
                         ", nickName='" + nickName + '\'' +
@@ -224,6 +234,7 @@ public class GetRecommendsRespond {
                         ", recommendType=" + recommendType +
                         ", recommendDesc='" + recommendDesc + '\'' +
                         ", status=" + status +
+                        ", msgId=" + msgId +
                         '}';
             }
         }

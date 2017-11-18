@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="77dp"
     android:background="@color/white"
+    android:descendantFocusability="blocksDescendants"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <tangxiaolv.com.library.EffectiveShapeView
@@ -73,5 +74,6 @@
         android:layout_toLeftOf="@+id/af_btn_accept2"
         android:layout_centerVertical="true"
         android:textColor="@color/feeds_hight_gray"
+        android:visibility="gone"
         />
 </RelativeLayout>

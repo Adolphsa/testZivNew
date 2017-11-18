@@ -84,7 +84,7 @@ public class ActivitySchoolmate extends AppCompatActivity {
                 Button button = (Button)v;
                 button.setBackgroundResource(R.drawable.feeds_status_apply);
                 button.setEnabled(false);
-                //邀请好友
+                //加好友
                 addFriend(tempList.get((int) button.getTag()).getUin());
             }
         },tempList);

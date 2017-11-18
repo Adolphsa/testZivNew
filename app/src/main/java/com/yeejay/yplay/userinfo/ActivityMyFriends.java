@@ -68,8 +68,18 @@ public class ActivityMyFriends extends AppCompatActivity {
 
         layoutTitle.setText("我的好友");
         mDataList = new ArrayList<>();
-        getMyFriendsList(mPageNum);
+
         loadMore();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mDataList.clear();
+
+        System.out.println("我的好友resume" + mDataList.size());
+        getMyFriendsList(mPageNum);
     }
 
     private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
@@ -92,6 +102,7 @@ public class ActivityMyFriends extends AppCompatActivity {
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
+
                 ViewHolder holder;
                 if (convertView == null){
                     convertView = View.inflate(ActivityMyFriends.this,R.layout.item_my_friend,null);
@@ -104,6 +115,7 @@ public class ActivityMyFriends extends AppCompatActivity {
                 }
 
                 String url = tempList.get(position).getHeadImgUrl();
+                holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
                 if (!TextUtils.isEmpty(url)){
                     Picasso.with(ActivityMyFriends.this).load(url).into(holder.itemMyFriendImg);
                 }else {
@@ -124,8 +136,6 @@ public class ActivityMyFriends extends AppCompatActivity {
                     intent.putExtra("yplay_friend_uin",mDataList.get(position).getUin());
                     startActivity(intent);
                 }
-
-
             }
         });
 

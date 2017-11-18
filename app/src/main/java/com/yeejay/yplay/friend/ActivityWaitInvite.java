@@ -64,7 +64,7 @@ public class ActivityWaitInvite extends AppCompatActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityWaitInvite.this,true);
 
-        layoutTitle.setText("等待邀请");
+        layoutTitle.setText("邀请好友");
         mDataList = new ArrayList<>();
         getRecommends(2,mPageNum);
         loadMore();

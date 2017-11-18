@@ -91,31 +91,37 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
+
         String url = contentList.get(position).getHeadImgUrl();
+        String nickName = contentList.get(position).getNickName();
+        int status = contentList.get(position).getStatus();
+        String str = contentList.get(position).getRecommendDesc();
+
+        holder.afItemName.setText(contentList.get(position).getNickName());
+        holder.afItemTvSharesFriends.setText(str);
         if (!TextUtils.isEmpty(url)){
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+        }else {
+            if (status == 1){ //已开通
+                holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
+                holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend);
+            }else if (status == 2){ //未开通
+                holder.afItemHeaderImg.setVisibility(View.GONE);
+                holder.afItemFamilyName.setVisibility(View.VISIBLE);
+                if (!TextUtils.isEmpty(nickName)){
+                    holder.afItemFamilyName.setText(nickName.substring(0,1));
+                }
+                holder.afBtnAccept.setBackgroundResource(R.drawable.play_invite_no);
+            }
         }
-        holder.afItemName.setText(contentList.get(position).getNickName());
-        String  phone = contentList.get(position).getPhone();
-        holder.afItemTvSharesFriends.setText(phone);
+
 //        holder.afBtnHide.setOnClickListener(hideListener);
 //        holder.afBtnHide.setTag(position);
 //        holder.afBtnHide.setVisibility(View.VISIBLE);
-        holder.afBtnAccept2.setVisibility(View.GONE);
-        int status = contentList.get(position).getStatus();
-        if (status == 1){ //好友
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_is_friend);
-            holder.afBtnAccept.setEnabled(false);
-        }else if (status == 2){ //已申请
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_apply);
-            holder.afBtnAccept.setEnabled(false);
-        }else {
-            holder.afBtnAccept.setEnabled(true);
-            holder.afBtnAccept.setBackgroundResource(R.drawable.feeds_status_add_friend);
-            holder.afBtnAccept.setOnClickListener(acceptListener);
-        }
-        holder.afBtnAccept.setTag(position);
+        //holder.afBtnAccept2.setVisibility(View.GONE);
 
+        holder.afBtnAccept.setOnClickListener(acceptListener);
+        holder.afBtnAccept.setTag(position);
         return convertView;
     }
 
@@ -128,10 +134,10 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         TextView afItemName;
         @BindView(R.id.af_item_tv_shares_friends)
         TextView afItemTvSharesFriends;
-        @BindView(R.id.af_btn_accept)
-        Button afBtnAccept;
         @BindView(R.id.af_btn_accept2)
-        Button afBtnAccept2;
+        Button afBtnAccept;
+//        @BindView(R.id.af_btn_accept2)
+//        Button afBtnAccept2;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
 

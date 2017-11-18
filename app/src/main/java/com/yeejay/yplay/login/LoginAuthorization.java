@@ -106,6 +106,7 @@ public class LoginAuthorization extends AppCompatActivity {
                 //授权成功跳转
                 authorizationSuccess();
             }
+            authorizationSuccess();
         }
     };
 
@@ -125,6 +126,7 @@ public class LoginAuthorization extends AppCompatActivity {
                     System.out.println("地理位置有权限");
                     setLocationBackground();
                 }
+
                 if (numberBookAuthoritySuccess && addressAuthoritySuccess){
                     authorizationSuccess();
                 }
@@ -165,31 +167,31 @@ public class LoginAuthorization extends AppCompatActivity {
         });
 
 
-        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.CONTACTS)) {
-            System.out.println("通讯录有权限");
-            setContactBackground();
-        }
-        getContacts();
-        if (numberBookAuthoritySuccess) {
-            setContactBackground();
-        }
-        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.LOCATION)) {
-            System.out.println("地理位置有权限");
-            setLocationBackground();
-        }
-        getLonLat();
-        if (addressAuthoritySuccess) {
-            setLocationBackground();
-        }
-
-        if (addressAuthoritySuccess && numberBookAuthoritySuccess) {
-            Intent intent = new Intent(LoginAuthorization.this, ClassList.class);
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, mLocation.getLatitude());
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, mLocation.getLongitude());
-            System.out.println("授权页面---latitude" + mLocation.getLatitude() +
-                    "longitude" + mLocation.getLongitude());
-            startActivity(intent);
-        }
+//        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.CONTACTS)) {
+//            System.out.println("通讯录有权限");
+//            setContactBackground();
+//        }
+//        getContacts();
+//        if (numberBookAuthoritySuccess) {
+//            setContactBackground();
+//        }
+//        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.LOCATION)) {
+//            System.out.println("地理位置有权限");
+//            setLocationBackground();
+//        }
+//        getLonLat();
+//        if (addressAuthoritySuccess) {
+//            setLocationBackground();
+//        }
+//
+//        if (addressAuthoritySuccess && numberBookAuthoritySuccess) {
+//            Intent intent = new Intent(LoginAuthorization.this, ClassList.class);
+//            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, mLocation.getLatitude());
+//            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, mLocation.getLongitude());
+//            System.out.println("授权页面---latitude" + mLocation.getLatitude() +
+//                    "longitude" + mLocation.getLongitude());
+//            startActivity(intent);
+//        }
     }
 
     //获取地址位置权限
@@ -299,6 +301,7 @@ public class LoginAuthorization extends AppCompatActivity {
             if (mContactsList.size() > 0) {
                 ContactsInfo testContactInfo = mContactsList.get(0);
                 System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
+                upLoadingContacts();
             }
 
         } catch (Exception e) {
@@ -319,7 +322,7 @@ public class LoginAuthorization extends AppCompatActivity {
 //            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LATITUDE, String.valueOf(mLocation.getLatitude()));
 //            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LONGITUDE, String.valueOf(mLocation.getLongitude()));
             //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
-            upLoadingContacts();
+
             startActivity(intent);
         }
     }

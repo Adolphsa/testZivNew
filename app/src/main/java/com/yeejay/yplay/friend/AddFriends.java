@@ -3,29 +3,34 @@ package com.yeejay.yplay.friend;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.adapter.AddFriendsAdapter;
-import com.yeejay.yplay.adapter.ScoolmateAdapter;
-import com.yeejay.yplay.adapter.ScoolmateAdapter2;
-import com.yeejay.yplay.adapter.ScoolmateAdapter3;
+import com.yeejay.yplay.adapter.ContactsAdapter;
+import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
-import com.yeejay.yplay.model.GetAddFriendMsgs;
-import com.yeejay.yplay.model.GetRecommendAll;
-import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.utils.FriendFeedsUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,14 +52,9 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     TextView layoutTitle;
     @BindView(R.id.searchView)
     TextView searchView;
-    @BindView(R.id.af_lv_add_friends_list_view)
-    MesureListView afLvAddFriends;
-    @BindView(R.id.af_lv_book_friends_list)
-    MesureListView afLvBookFriendsList;
-    @BindView(R.id.af_lv_school_classmate)
-    MesureListView afLvSchoolClassmate;
-    @BindView(R.id.af_lv_wait_invite)
-    MesureListView afLvWaitInvite;
+
+    @BindView(R.id.friend_pll_refresh)
+    PullToRefreshLayout pullToRefreshLayout;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -69,23 +69,70 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     public void btnAddContacts() {
         //通讯录好友
         System.out.println("通讯录好友");
-        startActivity(new Intent(AddFriends.this,ActivityContacts.class));
+
+        mPageNum = 1;
+        mType = 1;
+
+        contactRoot.setVisibility(View.VISIBLE);
+        schoolRoot.setVisibility(View.GONE);
+        maybeRoot.setVisibility(View.GONE);
+
+        if (contactRoot != null && contactRoot.isShown()){
+            getRecommends(1,mPageNum);
+        }
+
     }
+
     @OnClick(R.id.af_btn_add_schoolmate)
     public void btnAddSchool() {
+
         //同校好友
         System.out.println("同校好友");
-        startActivity(new Intent(AddFriends.this,ActivitySchoolmate.class));
+
+        mPageNum = 1;
+        mType = 3;
+
+        contactRoot.setVisibility(View.GONE);
+        schoolRoot.setVisibility(View.VISIBLE);
+        maybeRoot.setVisibility(View.GONE);
+
+        if (schoolRoot != null && schoolRoot.isShown()){
+            getRecommends(3,mPageNum);
+        }
+
     }
     @OnClick(R.id.af_btn_wait_invite)
     public void btnWaitInvite() {
-        //等待邀请
-        System.out.println("等待邀请");
-        startActivity(new Intent(AddFriends.this,ActivityWaitInvite.class));
+        //可能认识的人
+        System.out.println("可能认识的人");
+
+        mPageNum = 1;
+        mType = 7;
+
+        contactRoot.setVisibility(View.GONE);
+        schoolRoot.setVisibility(View.GONE);
+        maybeRoot.setVisibility(View.VISIBLE);
+
+        if (maybeRoot != null && maybeRoot.isShown()){
+            getRecommends(7,mPageNum);
+        }
     }
-    List<GetAddFriendMsgs.PayloadBean.MsgsBean> friendsList;
-    AddFriendsAdapter addFriendsAdapter;
-    ScoolmateAdapter bookFriendsAdapter;
+
+    RelativeLayout contactRoot; //通讯录好友
+    LinearLayout schoolRoot;    //同校同学
+    LinearLayout maybeRoot;     //可能认识的人
+
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> contactDredgeList;
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> sameGradeList;       //同年级
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> boyList;             //男
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> girlList;            //女
+    List<GetRecommendsRespond.PayloadBean.FriendsBean> maybeKnowList;       //可能认识的人
+
+    int mPageNum = 1;
+
+    int mType = 1; //好友类型
+    int buttonDirt = 1; //学校按钮朝向
 
 
     @Override
@@ -98,202 +145,52 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this,true);
         layoutTitle.setText("添加好友");
 
-        //getAddFriendmsgs();
-        getAllTypeRecommends();
+        contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
+        schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
+        maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
+
+
+        contactDredgeList = new ArrayList<>();
+        allSchoolMateList = new ArrayList<>();
+        sameGradeList = new ArrayList<>();
+        boyList = new ArrayList<>();
+        girlList = new ArrayList<>();
+        maybeKnowList = new ArrayList<>();
+
+        initPullRefresh();
+
+        getRecommends(1,1);
     }
 
-//    //加好友请求列表
-//    private void initAddFriendsListView(int total,
-//                                        List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
-//        friendsList = new ArrayList<>();
-//
-//        if (tempList.size() == 1) {
-//            friendsList.add(tempList.get(0));
-//        }
-//        if (tempList.size() == 2) {
-//            friendsList.add(tempList.get(0));
-//            friendsList.add(tempList.get(1));
-//        }
-//        if (tempList.size() >= 3) {
-//            friendsList.add(tempList.get(0));
-//            friendsList.add(tempList.get(1));
-//            friendsList.add(tempList.get(2));
-//        }
-//
-//        final TextView AddFriendsHeaderView = (TextView) View.inflate(AddFriends.this, R.layout.item_af_listview_header, null);
-//        final View AddFriendsFootView = View.inflate(AddFriends.this, R.layout.item_af_listview_foot, null);
-//        TextView footTextSeeMore = (TextView) AddFriendsFootView.findViewById(R.id.af_foot_tv1);
-//        afLvAddFriends.addHeaderView(AddFriendsHeaderView);
-//        if (total > 3) {
-//            afLvAddFriends.addFooterView(AddFriendsFootView);
-//            footTextSeeMore.setText("查看更多" + (total - 3));
-//        }
-//        addFriendsAdapter = new AddFriendsAdapter(AddFriends.this, new AddFriendsAdapter.hideCallback() {
-//            @Override
-//            public void hideClick(View v) {
-//                System.out.println("隐藏按钮被点击");
-//                Button button = (Button) v;
-//                //删除好友
-//                removeFriend(friendsList.get((int) button.getTag()).getUin());
-//                button.setVisibility(View.INVISIBLE);
-//                if (friendsList.size() > 0) {
-//                    friendsList.remove((int) v.getTag());
-//                    addFriendsAdapter.notifyDataSetChanged();
-//                }
-//                if (friendsList.size() < 3) {
-//                    afLvAddFriends.removeFooterView(AddFriendsFootView);
-//                }
-//                if (friendsList.size() <= 0) {
-//                    afLvAddFriends.removeHeaderView(AddFriendsHeaderView);
-//                }
-//            }
-//        }, new AddFriendsAdapter.acceptCallback() {
-//            @Override
-//            public void acceptClick(View v) {
-//                System.out.println("接受按钮被点击");
-//                Button button = (Button) v;
-//                //接受加好友的请求
-//                accepeAddFreind(friendsList.get((int) button.getTag()).getMsgId());
-//                button.setText("已添加");
-//                button.setEnabled(false);
-//            }
-//        }, friendsList);
-//        afLvAddFriends.setAdapter(addFriendsAdapter);
-//        afLvAddFriends.setOnItemClickListener(this);
-//    }
+    private void initPullRefresh(){
 
-    //通讯录好友
-    private void initbooKFriendsList(final List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromAddrBookBean> tempList) {
-
-        final TextView booKFriendsHeaderView = (TextView) View.inflate(AddFriends.this, R.layout.item_af_listview_header, null);
-        if (tempList.size() > 0) {
-            afLvBookFriendsList.addHeaderView(booKFriendsHeaderView);
-            booKFriendsHeaderView.setText("通讯录好友");
-        }
-        bookFriendsAdapter = new ScoolmateAdapter(AddFriends.this, new ScoolmateAdapter.hideCallback() {
+        pullToRefreshLayout.setCanRefresh(false);
+        pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
-            public void hideClick(View v) {
-                System.out.println("隐藏按钮被点击");
-
+            public void refresh() {
+                //刷新
             }
-        }, new ScoolmateAdapter.acceptCallback() {
+
             @Override
-            public void acceptClick(View v) {
-                System.out.println("通讯录好友---加好友被点击");
-                Button button = (Button) v;
-                button.setEnabled(false);
-                button.setBackgroundResource(R.drawable.feeds_status_apply);
-                int uin = tempList.get((int) v.getTag()).getUin();
-                addFriend(uin);
-
+            public void loadMore() {
+                //加载更多
+                if (mType == 1){    //通讯录已开通
+                    getRecommends(1,mPageNum);
+                }else if (mType == 3){
+                    getRecommends(3,mPageNum);
+                }else if (mType == 4){
+                    getRecommends(4,mPageNum);
+                }else if (mType == 5){
+                    getRecommends(5,mPageNum);
+                }else if (mType == 6){
+                    getRecommends(6,mPageNum);
+                }else if (mType == 7){
+                    getRecommends(7,mPageNum);
+                }
             }
-        }, tempList);
-        afLvBookFriendsList.setAdapter(bookFriendsAdapter);
+        });
 
     }
-
-    //同校好友
-    private void initbooKFriendsList3(final List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromSameSchoolBean> tempList) {
-
-        final TextView booKFriendsHeaderView = (TextView) View.inflate(AddFriends.this, R.layout.item_af_listview_header, null);
-        if (tempList.size() > 0) {
-            afLvSchoolClassmate.addHeaderView(booKFriendsHeaderView);
-            booKFriendsHeaderView.setText("同校好友");
-        }
-        ScoolmateAdapter3 bookFriendsAdapter3 = new ScoolmateAdapter3(AddFriends.this,
-                new ScoolmateAdapter3.hideCallback() {
-            @Override
-            public void hideClick(View v) {
-                System.out.println("隐藏按钮被点击");
-
-            }
-        }, new ScoolmateAdapter3.acceptCallback() {
-            @Override
-            public void acceptClick(View v) {
-                System.out.println("同校好友---加好友被点击");
-                Button button = (Button) v;
-                button.setEnabled(false);
-                button.setBackgroundResource(R.drawable.feeds_status_apply);
-                int uin = tempList.get((int) v.getTag()).getUin();
-                addFriend(uin);
-            }
-        }, tempList);
-        afLvSchoolClassmate.setAdapter(bookFriendsAdapter3);
-
-    }
-
-    //等待邀请
-    private void initbooKFriendsList2(final List<GetRecommendAll.PayloadBean.InfoBean.FriendsFromNotRegisterBean> tempList) {
-
-        final TextView booKFriendsHeaderView = (TextView) View.inflate(AddFriends.this, R.layout.item_af_listview_header, null);
-        if (tempList.size() > 0) {
-            afLvWaitInvite.addHeaderView(booKFriendsHeaderView);
-            booKFriendsHeaderView.setText("等待邀请");
-        }
-
-        ScoolmateAdapter2 bookFriendsAdapter2 =
-            new ScoolmateAdapter2(AddFriends.this, new ScoolmateAdapter2.hideCallback() {
-            @Override
-            public void hideClick(View v) {
-                System.out.println("隐藏按钮被点击");
-
-            }
-        }, new ScoolmateAdapter2.acceptCallback() {
-            @Override
-            public void acceptClick(View v) {
-                System.out.println("等待邀请加好友被点击");
-                Button button = (Button) v;
-                button.setEnabled(false);
-                button.setBackgroundResource(R.drawable.play_invite_yes);
-                //短信邀请
-                String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
-                String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
-                invitefriendsbysms(base64phone);
-            }
-        }, tempList);
-        afLvWaitInvite.setAdapter(bookFriendsAdapter2);
-
-    }
-//    //拉取添加好友消息
-//    private void getAddFriendmsgs() {
-//        Map<String, Object> getAddFriendmsgsMap = new HashMap<>();
-//        getAddFriendmsgsMap.put("updateLastReadMsgId", 0);
-//        getAddFriendmsgsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-//        getAddFriendmsgsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        getAddFriendmsgsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .getAddFriendMsg(getAddFriendmsgsMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<GetAddFriendMsgs>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull GetAddFriendMsgs getAddFriendMsgs) {
-//                        System.out.println("拉取添加好友消息---" + getAddFriendMsgs.toString());
-//                        if (getAddFriendMsgs.getCode() == 0) {
-//                            List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
-//                                    = getAddFriendMsgs.getPayload().getMsgs();
-//                            int total = getAddFriendMsgs.getPayload().getTotal();
-//                            initAddFriendsListView(total, tempList);
-//
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("拉取添加好友消息异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
 
     //接受好友请求
     private void accepeAddFreind(int msgId) {
@@ -433,39 +330,66 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                 });
     }
 
+    //拉取同校/通讯录好友
+    private void getRecommends(int type,int pageNum) {
 
-
-    //拉取所有类型的的好友
-    private void getAllTypeRecommends(){
-        Map<String, Object> allRecommendsMap = new HashMap<>();
-        allRecommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        allRecommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        allRecommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+        System.out.println("type---" + type);
+        Map<String, Object> recommendsMap = new HashMap<>();
+        recommendsMap.put("type", type);
+        recommendsMap.put("pageNum",pageNum);
+        recommendsMap.put("pageSize",5);
+        recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
-                .getAllRecommends(allRecommendsMap)
+                .getSchoolmates(recommendsMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendAll>() {
+                .subscribe(new Observer<GetRecommendsRespond>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
+                    public void onSubscribe(@NonNull Disposable d) {
                     }
 
                     @Override
-                    public void onNext(GetRecommendAll getRecommendAll) {
-                        System.out.println("获取所有类型的数据---" + getRecommendAll.toString());
-                        //通讯录好友1
-                        initbooKFriendsList(getRecommendAll.getPayload().getInfo().getFriendsFromAddrBook());
-                        //同校好友3
-                        initbooKFriendsList3(getRecommendAll.getPayload().getInfo().getFriendsFromSameSchool());
-                        //等待邀请2
-                        initbooKFriendsList2(getRecommendAll.getPayload().getInfo().getFriendsFromNotRegister());
+                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
+                        if (getRecommendsRespond.getCode() == 0) {
+                            System.out.println("好友列表---" + getRecommendsRespond.toString());
+                            List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
+                                    getRecommendsRespond.getPayload().getFriends();
+                            if (friendsBeanList != null){
 
+                                if (mType == 1){ //通讯录已开通
+                                    contactDredgeList.addAll(friendsBeanList);
+                                    handleContactDredge(contactDredgeList);
+                                }else if (mType == 3){  //全部
+                                    allSchoolMateList.addAll(friendsBeanList);
+                                    handleSchoolMate(allSchoolMateList);
+                                }else if (mType == 4){  //同年级
+                                    sameGradeList.addAll(friendsBeanList);
+                                    handleSchoolMate(sameGradeList);
+                                }else if (mType == 5){      //男
+                                    boyList.addAll(friendsBeanList);
+                                    handleSchoolMate(boyList);
+                                }else if (mType == 6){      //女
+                                    girlList.addAll(friendsBeanList);
+                                    handleSchoolMate(girlList);
+                                }else if (mType == 7){      //可能认识的人
+                                    maybeKnowList.addAll(friendsBeanList);
+                                    handleMaybeKnowFriend(maybeKnowList);
+                                }
+
+                            }
+
+                        }
+
+                        pullToRefreshLayout.finishLoadMore();
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        System.out.println("获取所有类型的数据---" + e.getMessage());
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("拉取好友异常---" + e.getMessage());
+                        Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        pullToRefreshLayout.finishLoadMore();
                     }
 
                     @Override
@@ -475,61 +399,6 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                 });
     }
 
-
-//    //拉取同校/通讯录好友
-//    private void getRecommends(final int type) {
-//        System.out.println("type---" + type);
-//        Map<String, Object> recommendsMap = new HashMap<>();
-//        recommendsMap.put("type", type);
-//        recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-//        recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .getSchoolmates(recommendsMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<GetRecommendsRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-//                        if (getRecommendsRespond.getCode() == 0) {
-//                            if (type == 1) {
-//                                System.out.println("通讯录好友---" + getRecommendsRespond.toString());
-//                                initbooKFriendsList(type,
-//                                        getRecommendsRespond.getPayload().getTotal(),
-//                                        afLvBookFriendsList,
-//                                        getRecommendsRespond.getPayload().getFriends());
-//                            }else if (type == 2) {
-//                                System.out.println("等待邀请---" + getRecommendsRespond.toString());
-//                                initbooKFriendsList(type,
-//                                        getRecommendsRespond.getPayload().getTotal(),
-//                                        afLvWaitInvite,
-//                                        getRecommendsRespond.getPayload().getFriends());
-//                            } else if (type == 3) {
-//                                System.out.println("同校好友---" + getRecommendsRespond.toString());
-//                                initbooKFriendsList(type,
-//                                        getRecommendsRespond.getPayload().getTotal(),
-//                                        afLvSchoolClassmate,
-//                                        getRecommendsRespond.getPayload().getFriends());
-//                            }
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("拉取好友异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         System.out.println("position---" + position);
@@ -538,5 +407,346 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             startActivity(new Intent(AddFriends.this, ActivityAddFiendsDetail.class));
         }
     }
+
+    //处理通讯录已开通
+    private void handleContactDredge(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
+
+        LinearLayout nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
+        MesureListView dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
+        RelativeLayout dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
+        dredgeNoRl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //跳转到邀请好友界面
+                startActivity(new Intent(AddFriends.this,ActivityWaitInvite.class));
+            }
+        });
+
+        if (friendsBeanList.size() > 0){
+            mPageNum++;
+            nullLl.setVisibility(View.GONE);
+            dredgeListView.setAdapter(new ContactsAdapter(AddFriends.this,
+                    new ContactsAdapter.hideCallback() {
+                        @Override
+                        public void hideClick(View v) {
+
+                        }
+                    },
+                    new ContactsAdapter.acceptCallback() {
+                        @Override
+                        public void acceptClick(View v) {
+                            if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                                Button button = (Button) v;
+                                button.setBackgroundResource(R.drawable.already_apply);
+                                button.setEnabled(false);
+
+                                int position = (int)button.getTag();
+                                addFriend(friendsBeanList.get(position).getUin());
+                            }else {
+                                Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+                    },
+                    friendsBeanList));
+
+            dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    int uin = friendsBeanList.get(position).getUin();
+                    if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                        getFriendInfo(uin);
+                    }else {
+                        Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+            });
+        }
+    }
+
+    //处理同校同学
+    private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
+
+
+        final ImageButton arrowButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_arrow);
+        final LinearLayout llButton = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_button);
+        LinearLayout llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
+        final ImageButton allImgButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_all);
+        final ImageButton sameGradeButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_class);
+        final ImageButton boyButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_boy);
+        final ImageButton girlButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_girl);
+        MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
+
+        if (friendsBeanList.size() > 0){
+            mPageNum++;
+            arrowButton.setVisibility(View.VISIBLE);
+            llNullView.setVisibility(View.GONE);
+        }
+
+        arrowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("箭头被点击");
+                if (buttonDirt == 1){
+                    arrowButton.setImageResource(R.drawable.up_arrow);
+                    buttonDirt = 2;
+                    llButton.setVisibility(View.VISIBLE);
+                }else if (buttonDirt == 2){
+                    arrowButton.setImageResource(R.drawable.down_arrow);
+                    buttonDirt = 1;
+                    llButton.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        //全部
+        allImgButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allImgButton.setImageResource(R.drawable.school_all_select);
+                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
+                boyButton.setImageResource(R.drawable.school_boy_unselect);
+                girlButton.setImageResource(R.drawable.school_girl_unselect);
+
+                mType = 3;
+                mPageNum = 1;
+                getRecommends(3,mPageNum);
+            }
+        });
+
+        //同年级
+        sameGradeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                allImgButton.setImageResource(R.drawable.school_all_unselect);
+                sameGradeButton.setImageResource(R.drawable.school_same_grade_select);
+                boyButton.setImageResource(R.drawable.school_boy_unselect);
+                girlButton.setImageResource(R.drawable.school_girl_unselect);
+
+
+                mType = 4;
+                mPageNum = 1;
+                getRecommends(4,mPageNum);
+            }
+        });
+
+        //男
+        boyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allImgButton.setImageResource(R.drawable.school_all_unselect);
+                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
+                boyButton.setImageResource(R.drawable.school_boy_select);
+                girlButton.setImageResource(R.drawable.school_girl_unselect);
+
+                mType = 5;
+                mPageNum = 1;
+                getRecommends(5,mPageNum);
+            }
+        });
+
+        //女
+        girlButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allImgButton.setImageResource(R.drawable.school_all_unselect);
+                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
+                boyButton.setImageResource(R.drawable.school_boy_unselect);
+                girlButton.setImageResource(R.drawable.school_gril_select);
+
+                mType = 6;
+                mPageNum = 1;
+                getRecommends(6,mPageNum);
+            }
+        });
+
+        allSchoolmateListView.setAdapter(new SchoolmateAdapter(AddFriends.this,
+                new SchoolmateAdapter.hideCallback() {
+                    @Override
+                    public void hideClick(View v) {
+
+                    }
+                },
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.already_apply);
+                            button.setEnabled(false);
+                            int position = (int)button.getTag();
+                            addFriend(friendsBeanList.get(position).getUin());
+                        }else {
+                            Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                friendsBeanList));
+
+        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int uin = friendsBeanList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                    getFriendInfo(uin);
+                }else {
+                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+    }
+
+
+    //处理可能认识的人
+    private void handleMaybeKnowFriend(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
+        maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
+        LinearLayout lmklLlNull = (LinearLayout) maybeRoot.findViewById(R.id.lmk_ll_null);
+        MesureListView lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
+
+        if (friendsBeanList.size() > 0){
+            mPageNum++;
+            lmklLlNull.setVisibility(View.GONE);
+        }
+
+        lmkListView.setAdapter(new SchoolmateAdapter(AddFriends.this,
+                new SchoolmateAdapter.hideCallback() {
+                    @Override
+                    public void hideClick(View v) {
+
+                    }
+                },
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.already_apply);
+                            button.setEnabled(false);
+
+                            int position = (int)button.getTag();
+                            addFriend(friendsBeanList.get(position).getUin());
+                        }else {
+                            Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                friendsBeanList));
+
+        lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("点击事件");
+                int uin = friendsBeanList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                    getFriendInfo(uin);
+                }else {
+                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+    }
+
+    //查询朋友的信息
+    private void getFriendInfo(int friendUin) {
+        Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("userUin", friendUin);
+        friendMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        friendMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserInfo(friendMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
+                        if (userInfoResponde.getCode() == 0) {
+                            UserInfoResponde.PayloadBean.InfoBean infoBean =
+                                    userInfoResponde.getPayload().getInfo();
+                            int status = userInfoResponde.getPayload().getStatus();
+                            if (status == 1){
+                                Intent intent = new Intent(AddFriends.this, ActivityFriendsInfo.class);
+                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
+                                intent.putExtra("yplay_friend_uin",infoBean.getUin());
+                                System.out.println("朋友的uin---" + infoBean.getUin());
+                                startActivity(intent);
+                            }else {
+                                showCardDialog(userInfoResponde.getPayload());
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    //显示名片
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean){
+
+        final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
+
+        //状态
+        int status = payloadBean.getStatus();
+
+        final CardDialog cardDialog = new CardDialog(AddFriends.this,R.style.CustomDialog);
+        cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
+        cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
+        cardDialog.setCardNameStr(infoBean.getNickName());
+        cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
+        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
+
+        if (status == 0){
+            cardDialog.setButtonImg(R.drawable.green_add_friend);
+
+        }else if (status == 2){
+            cardDialog.setButtonImg(R.drawable.already_apply);
+        }
+
+        cardDialog.setAddFriendListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageButton button = (ImageButton )v;
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                    button.setImageResource(R.drawable.already_apply);
+                    addFriend(infoBean.getUin());
+                }else {
+                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        cardDialog.setCarDialogRlListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("哈哈哈");
+                cardDialog.dismiss();
+            }
+        });
+        cardDialog.show();
+    }
+
+
 
 }

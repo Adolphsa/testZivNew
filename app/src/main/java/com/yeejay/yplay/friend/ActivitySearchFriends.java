@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.SearchFriendsAdapter;
@@ -19,6 +20,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -90,15 +92,17 @@ public class ActivitySearchFriends extends AppCompatActivity {
         });
     }
 
-    private void initListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
+    private void initListView(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList,String username) {
 
         if (tempList.size() == 0) {
             asfNoFound.setVisibility(View.VISIBLE);
             asfNoFoundImg.setVisibility(View.INVISIBLE);
+            asfListView.setVisibility(View.INVISIBLE);
             return;
         }
         asfNoFound.setVisibility(View.INVISIBLE);
         asfNoFoundImg.setVisibility(View.INVISIBLE);
+        asfListView.setVisibility(View.VISIBLE);
         searchFriendsAdapter = new SearchFriendsAdapter(ActivitySearchFriends.this,
                 new SearchFriendsAdapter.hideCallback() {
                     @Override
@@ -120,21 +124,30 @@ public class ActivitySearchFriends extends AppCompatActivity {
                 System.out.println("接受按钮被点击");
                 Button button = (Button) v;
                 int status = tempList.get((int) button.getTag()).getStatus();
-                if (status == 0){
-                    button.setBackgroundResource(R.drawable.feeds_status_apply);
-                }else if (status == 3){
-                    button.setBackgroundResource(R.drawable.feeds_status_is_friend);
+                if (NetWorkUtil.isNetWorkAvailable(ActivitySearchFriends.this)){
+                    if (status == 0){
+                        button.setBackgroundResource(R.drawable.already_apply);
+                        //加好友
+                        addFriend(tempList.get((int) button.getTag()).getUin());
+                    }else if (status == 3){
+                        button.setBackgroundResource(R.drawable.is_friend);
+                        //接受
+                        accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
+                    }
+                    button.setEnabled(false);
+                }else {
+                    Toast.makeText(ActivitySearchFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
                 }
-                button.setEnabled(false);
-                //邀请好友
-                addFriend(tempList.get((int) button.getTag()).getUin());
+
+
+
             }
-        }, tempList, myUin);
+        }, tempList, myUin,username);
         asfListView.setAdapter(searchFriendsAdapter);
     }
 
     //搜索好友
-    private void searchFriends(String username) {
+    private void searchFriends(final String username) {
 
         Map<String, Object> searchFriendsMap = new HashMap<>();
         searchFriendsMap.put("username", username);
@@ -155,7 +168,7 @@ public class ActivitySearchFriends extends AppCompatActivity {
                     public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
                         System.out.println("搜索好友---" + getRecommendsRespond.toString());
                         if (getRecommendsRespond.getCode() == 0) {
-                            initListView(getRecommendsRespond.getPayload().getFriends());
+                            initListView(getRecommendsRespond.getPayload().getFriends(),username);
                         }
                     }
 
@@ -240,6 +253,42 @@ public class ActivitySearchFriends extends AppCompatActivity {
                     }
                 });
     }
+
+    //接受好友请求
+    private void accepeAddFreind(int msgId, int act) {
+        Map<String, Object> accepeAddFreindMap = new HashMap<>();
+        accepeAddFreindMap.put("msgId", msgId);
+        accepeAddFreindMap.put("act",act);
+        accepeAddFreindMap.put("uin", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        accepeAddFreindMap.put("token", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        accepeAddFreindMap.put("ver", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .acceptAddFriend(accepeAddFreindMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("接受好友请求---" + baseRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("接受好友请求异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

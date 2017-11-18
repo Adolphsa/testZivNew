@@ -9,11 +9,11 @@
         android:id="@+id/frg_user_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/my_no_number"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/frg_edit"
+        android:layout_marginStart="23dp"
         android:background="@android:color/transparent"
-        android:layout_marginLeft="20dp"
-        android:layout_centerVertical="true"
-        />
+        android:src="@drawable/my_no_number" />
     <TextView
         android:id="@+id/frg_title"
         android:layout_width="wrap_content"

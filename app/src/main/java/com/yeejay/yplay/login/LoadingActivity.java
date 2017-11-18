@@ -54,16 +54,16 @@ public class LoadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
-
         uin = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
         ver = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_VER, (int) 0);
+
+        System.out.println("token---" + token);
 
         if (uin == 0 || TextUtils.isEmpty(token) || ver == 0) {
             handler.sendEmptyMessageDelayed(LOGIN_CODE, 1000);
         } else {
             handler.sendEmptyMessageDelayed(NETWORK_CODE, 1000);
-
         }
     }
 

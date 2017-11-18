@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
@@ -38,6 +39,7 @@ import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -563,6 +565,7 @@ public class FragmentFriend extends BaseFragment {
 
     //发送加好友的请求
     private void addFriend(int toUin) {
+
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
         addFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
@@ -619,7 +622,7 @@ public class FragmentFriend extends BaseFragment {
                             int status = userInfoResponde.getPayload().getStatus();
 
                             if (status == 0){//非好友
-                                showCardDialog(userInfoResponde.getPayload().getInfo());
+                                showCardDialog(userInfoResponde.getPayload());
                             }else if (status == 1){//好友
                                 Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
                                 intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
@@ -650,13 +653,38 @@ public class FragmentFriend extends BaseFragment {
 
 
     //显示名片
-    private void showCardDialog(UserInfoResponde.PayloadBean.InfoBean infoBean){
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean){
+
+        final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
+        int status = payloadBean.getStatus();
+
         final CardDialog cardDialog = new CardDialog(getActivity(),R.style.CustomDialog);
         cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
         cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
         cardDialog.setCardNameStr(infoBean.getNickName());
         cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
         cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
+
+        if (status == 0){
+            cardDialog.setButtonImg(R.drawable.green_add_friend);
+        }else if (status == 2){
+            cardDialog.setButtonImg(R.drawable.already_apply);
+        }
+
+        cardDialog.setAddFriendListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageButton button = (ImageButton )v;
+                if (NetWorkUtil.isNetWorkAvailable(getActivity())){
+                    button.setImageResource(R.drawable.already_apply);
+                    addFriend(infoBean.getUin());
+                }else {
+                    Toast.makeText(getActivity(),"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
