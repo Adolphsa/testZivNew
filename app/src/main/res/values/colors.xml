@@ -29,24 +29,34 @@
     <!--play color-->
     <color name="play_color1">#7785FF</color>
     <color name="play_color2">#52E0AF</color>
-    <color name="play_color3">#FF7A8F</color>
+    <color name="play_color3">#A833DA</color>
     <color name="play_color4">#57A8FF</color>
+    <color name="play_color5">#607D8B</color>
+    <color name="play_color6">#FB7C34</color>
+    <color name="play_color7">#FF5252</color>
     <color name="play_round_background">#ECECEC</color>
     <color name="class_color">#FFB300</color>
+    <color name="loading_color">#FF5252</color>
 
     <color name="class_item_select_color">#1AFFB300</color>
 
     <!--button color 20-->
     <color name="button_color201">#337785FF</color>
     <color name="button_color202">#3352E0AF</color>
-    <color name="button_color203">#33FF7A8F</color>
+    <color name="button_color203">#33A833DA</color>
     <color name="button_color204">#3357A8FF</color>
+    <color name="button_color205">#33607D8B</color>
+    <color name="button_color206">#33FB7C34</color>
+    <color name="button_color207">#33FF5252</color>
 
     <!--button color 70-->
     <color name="button_color701">#B37785FF</color>
     <color name="button_color702">#B352E0AF</color>
-    <color name="button_color703">#B3FF7A8F</color>
+    <color name="button_color703">#B3A833DA</color>
     <color name="button_color704">#B357A8FF</color>
+    <color name="button_color705">#B3607D8B</color>
+    <color name="button_color706">#B3FB7C34</color>
+    <color name="button_color707">#B3FF5252</color>
 
     <!--edit color-->
     <color name="edit_title_text_color">#483DE2</color>
@@ -78,4 +88,7 @@
     <color name="color_transparent">#00000000</color>
     <color name="color_transparent20">#33000000</color>
 
+    <!--contribute-->
+    <color name="contribute_color">#483DE2</color>
+    <color name="contribute_edit_color">#1AFFFFFF</color>
 </resources>

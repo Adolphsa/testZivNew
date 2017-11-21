@@ -13,6 +13,9 @@
         android:textSize="28sp"
         android:layout_marginLeft="42dp"
         android:layout_marginTop="40dp"
+        android:maxEms="5"
+        android:maxLines="1"
+        android:ellipsize="end"
         />
     <ImageView
         android:id="@+id/lui_gender"

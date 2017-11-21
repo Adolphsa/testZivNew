@@ -1,6 +1,7 @@
 package com.yeejay.yplay.login;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -31,6 +32,9 @@ public class ChoiceSex extends AppCompatActivity {
     int gender;
     int isActivitySetting;
 
+    Button boyBtn;
+    Button girlBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,8 +59,8 @@ public class ChoiceSex extends AppCompatActivity {
         });
 
 
-        Button boyBtn = (Button) findViewById(R.id.cs_btn_boy);
-        Button girlBtn = (Button) findViewById(R.id.cs_btn_girl);
+         boyBtn = (Button) findViewById(R.id.cs_btn_boy);
+         girlBtn = (Button) findViewById(R.id.cs_btn_girl);
 
         boyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,6 +68,13 @@ public class ChoiceSex extends AppCompatActivity {
                 gender = 1;
                 if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)){
                     choiceSex(gender);
+                    Drawable navBoy = getResources().getDrawable(R.drawable.boy_unselect);
+                    navBoy.setBounds(0, 0, navBoy.getMinimumWidth(), navBoy.getMinimumHeight());
+                    boyBtn.setCompoundDrawables(null, navBoy, null, null);
+
+                    Drawable navGirl = getResources().getDrawable(R.drawable.girl_select);
+                    navGirl.setBounds(0, 0, navGirl.getMinimumWidth(), navGirl.getMinimumHeight());
+                    girlBtn.setCompoundDrawables(null, navGirl, null, null);
                 }else {
                     Toast.makeText(ChoiceSex.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
@@ -76,11 +87,25 @@ public class ChoiceSex extends AppCompatActivity {
                 gender = 2;
                 if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)){
                     choiceSex(gender);
+
+                    Drawable navBoy = getResources().getDrawable(R.drawable.boy_select);
+                    navBoy.setBounds(0, 0, navBoy.getMinimumWidth(), navBoy.getMinimumHeight());
+                    boyBtn.setCompoundDrawables(null, navBoy, null, null);
+
+                    Drawable navGirl = getResources().getDrawable(R.drawable.girl_unselect);
+                    navGirl.setBounds(0, 0, navGirl.getMinimumWidth(), navGirl.getMinimumHeight());
+                    girlBtn.setCompoundDrawables(null, navGirl, null, null);
                 }else {
                     Toast.makeText(ChoiceSex.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("性别选择");
     }
 
     //选择性别

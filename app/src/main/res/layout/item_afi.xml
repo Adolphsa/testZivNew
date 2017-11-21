@@ -7,14 +7,15 @@
 
     <TextView
         android:id="@+id/afi_item_index"
-        android:layout_width="14dp"
+        android:layout_width="25dp"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="1"
+        android:gravity="right"
+        android:text="10"
         android:layout_centerVertical="true"
         android:layout_marginLeft="25dp"
         android:textSize="22sp"
         android:textColor="@color/feeds_hight_gray"
+
         />
 
     <ImageView

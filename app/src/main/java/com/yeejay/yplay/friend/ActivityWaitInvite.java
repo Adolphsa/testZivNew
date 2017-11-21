@@ -8,15 +8,21 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -90,14 +96,38 @@ public class ActivityWaitInvite extends AppCompatActivity {
             @Override
             public void acceptClick(View v) {
                 System.out.println("邀请按钮被点击");
-                Button button = (Button) v;
-                button.setBackgroundResource(R.drawable.play_invite_yes);
-                button.setEnabled(false);
-                //邀请好友的请求
-                String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
-                System.out.println("邀请的电话---" + phone);
-                String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
-                invitefriendsbysms(base64phone);
+
+                if (NetWorkUtil.isNetWorkAvailable(ActivityWaitInvite.this)){
+                    Button button = (Button) v;
+                    button.setBackgroundResource(R.drawable.play_invite_yes);
+                    button.setEnabled(false);
+
+                    MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+                    int uin = (int) SharePreferenceUtil.get(ActivityWaitInvite.this, YPlayConstant.YPLAY_UIN, (int) 0);
+                    MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                            .build().unique();
+
+                    if (myInfo != null && myInfo.getIsShowInviteDialogInfo() == 1){
+                        //邀请好友的请求
+                        String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
+                        System.out.println("邀请的电话---" + phone);
+                        String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
+                        invitefriendsbysms(base64phone);
+                    }else {
+                        if (myInfo != null){
+                            myInfo.setIsShowInviteDialogInfo(1);
+                            myInfoDao.update(myInfo);
+                        }
+
+                        DialogUtils.showInviteDialogInfo(ActivityWaitInvite.this,
+                                "我们将会发短信，免费为你邀请朋友。请谨慎使用，避免对他人造成骚扰。");
+                    }
+                }else {
+                    Toast.makeText(ActivityWaitInvite.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
+
+
             }
         }, tempList);
         aafdListView.setAdapter(waitInviteAdapter);

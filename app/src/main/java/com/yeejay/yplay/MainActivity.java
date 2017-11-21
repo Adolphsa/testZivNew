@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
     //动态
     private void feedsFragmentStatus(){
+        System.out.println("动态");
         mainNavBarRl.setVisibility(View.INVISIBLE);
         mainnavBar2.setVisibility(View.VISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     //答题
     private void playFragmentStatus(){
+        System.out.println("答题");
         mainNavBarRl.setVisibility(View.VISIBLE);
         mainnavBar2.setVisibility(View.INVISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(mColor));
@@ -157,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
     //消息
     private void messageFragmentStatus(){
+        System.out.println("消息");
         mainNavBarRl.setVisibility(View.INVISIBLE);
         mainnavBar2.setVisibility(View.VISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));

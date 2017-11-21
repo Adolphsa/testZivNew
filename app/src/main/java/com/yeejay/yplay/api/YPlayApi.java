@@ -204,4 +204,9 @@ public interface YPlayApi {
     @POST("/api/user/getmyprofilemodquota")
     Observable<UserUpdateLeftCountRespond> getUserUpdateCount(@FieldMap Map<String,Object> filemap);
 
+    //用户投稿
+    @FormUrlEncoded
+    @POST("/api/vote/submitquestion")
+    Observable<BaseRespond> submiteQuestion(@FieldMap Map<String,Object> filemap);
+
 }

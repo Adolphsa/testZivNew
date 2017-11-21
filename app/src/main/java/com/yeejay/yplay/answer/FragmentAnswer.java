@@ -19,6 +19,7 @@ import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
+import com.yeejay.yplay.contribute.ActivityContribute1;
 import com.yeejay.yplay.customview.ProgressButton;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
@@ -77,7 +78,7 @@ public class FragmentAnswer extends BaseFragment {
     @BindView(R.id.frgans_tv_relieve)
     TextView frgansTvRelieve;
     @BindView(R.id.frgans_btn_invite)
-    Button frgansBtnInvite;
+    ImageButton frgansBtnInvite;
     @BindView(R.id.frg_user_info)
     ImageButton frgUserInfo;
     @BindView(R.id.frgans_count_down_view)
@@ -100,21 +101,31 @@ public class FragmentAnswer extends BaseFragment {
     int serverQuestionNum;
     int titleNum;
     int questionListLength;
+    int colorCount = 7;
 
-    int backgroundColor[] = {R.color.play_color1,
+    int backgroundColor[] = {R.color.play_color7,
                             R.color.play_color2,
                             R.color.play_color3,
-                            R.color.play_color4};
+                            R.color.play_color4,
+                            R.color.play_color5,
+                            R.color.play_color6,
+                            R.color.play_color1,};
 
-    int buttonColor[] = {R.color.button_color201,
-            R.color.button_color202,
-            R.color.button_color203,
-            R.color.button_color204};
+    int buttonColor[] = {R.color.button_color207,
+                    R.color.button_color202,
+                    R.color.button_color203,
+                    R.color.button_color204,
+                    R.color.button_color205,
+                    R.color.button_color206,
+                    R.color.button_color201};
 
-    int selectButtonColor[] = {R.color.button_color701,
+    int selectButtonColor[] = {R.color.button_color707,
             R.color.button_color702,
             R.color.button_color703,
-            R.color.button_color704};
+            R.color.button_color704,
+            R.color.button_color705,
+            R.color.button_color706,
+            R.color.button_color701};
 
 
     List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;
@@ -126,9 +137,15 @@ public class FragmentAnswer extends BaseFragment {
     List<VoteOptionsBean> voteOptionsBeanList;
 
     @OnClick(R.id.frgans_tv_relieve)
-    public void relieve(View view){
+    public void relieve(View view) {
         System.out.println("解除冷冻");
 //        relieve();
+    }
+
+    //投稿
+    @OnClick(R.id.frg_edit)
+    public void contribute(View view) {
+        startActivity(new Intent(getActivity(), ActivityContribute1.class));
     }
 
     @OnClick(R.id.frgans_btn1)
@@ -136,7 +153,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
-                    titleNum+1,
+                    titleNum + 1,
                     optionsList.get(0).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
@@ -149,19 +166,19 @@ public class FragmentAnswer extends BaseFragment {
                     + ",btn3Cnt---" + btn3Cnt
                     + ",btn4Cnt---" + btn4Cnt);
 
-            int width =  frgansBtn1.getWidth();
+            int width = frgansBtn1.getWidth();
             System.out.println("宽度---" + width);
 
-            frgansBtn1.setButtonColor(selectButtonColor[questionNum%3]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
 
             new ProgressTask((1 + btn1Cnt) * 100 / total, 1).execute();
             new ProgressTask(btn2Cnt * 100 / total, 2).execute();
             new ProgressTask(btn3Cnt * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
-        }else {
+        } else {
             System.out.println("返回异常1");
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -173,7 +190,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
-                    titleNum+1,
+                    titleNum + 1,
                     optionsList.get(1).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
@@ -185,16 +202,16 @@ public class FragmentAnswer extends BaseFragment {
                     + ",btn3Cnt---" + btn3Cnt
                     + ",btn4Cnt---" + btn4Cnt);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn2.setButtonColor(selectButtonColor[questionNum%3]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
             new ProgressTask((1 + btn2Cnt) * 100 / total, 2).execute();
             new ProgressTask(btn3Cnt * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
-        }else {
+        } else {
             System.out.println("返回异常2");
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -205,7 +222,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
-                    titleNum+1,
+                    titleNum + 1,
                     optionsList.get(2).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
@@ -217,16 +234,16 @@ public class FragmentAnswer extends BaseFragment {
                     + ",btn3Cnt---" + btn3Cnt
                     + ",btn4Cnt---" + btn4Cnt);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn3.setButtonColor(selectButtonColor[questionNum%3]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum%3]);
+            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
             new ProgressTask((btn2Cnt) * 100 / total, 2).execute();
             new ProgressTask((1 + btn3Cnt) * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
-        }else {
+        } else {
             System.out.println("返回异常3");
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -238,7 +255,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             vote(questionsBean.getQid(),
-                    titleNum+1,
+                    titleNum + 1,
                     optionsList.get(3).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
@@ -250,16 +267,16 @@ public class FragmentAnswer extends BaseFragment {
                     + ",btn3Cnt---" + btn3Cnt
                     + ",btn4Cnt---" + btn4Cnt);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum%3]);
-            frgansBtn4.setButtonColor(selectButtonColor[questionNum%3]);
+            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(selectButtonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
             new ProgressTask((btn2Cnt) * 100 / total, 2).execute();
             new ProgressTask((btn3Cnt) * 100 / total, 3).execute();
             new ProgressTask((1 + btn4Cnt) * 100 / total, 4).execute();
-        }else {
+        } else {
             System.out.println("返回异常4");
             frandProgress.setVisibility(View.VISIBLE);
 
@@ -274,7 +291,7 @@ public class FragmentAnswer extends BaseFragment {
             frandProgress.setVisibility(View.INVISIBLE);
             getQuestionsCandidate(questionsBean.getQid());
             nextPersonCount++;
-        }else {
+        } else {
             frandProgress.setVisibility(View.VISIBLE);
         }
 
@@ -326,7 +343,7 @@ public class FragmentAnswer extends BaseFragment {
         //点击继续
         System.out.println("点击继续");
 
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null){
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             questionNum++;
             titleNum++;
@@ -347,7 +364,7 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn3.setEnabled(true);
             frgansBtn4.setEnabled(true);
 
-        }else {
+        } else {
             System.out.println("返回异常");
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -357,7 +374,7 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn_next_question)
     public void nextQuestion(View view) {
         //过
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null){
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             titleNum++;
             System.out.println("过questionNum----" + questionNum);
@@ -378,13 +395,13 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn3.setEnabled(true);
             frgansBtn4.setEnabled(true);
 
-            doskipQuestion(titleNum,questionsList.get(questionNum).getQid());
+            doskipQuestion(titleNum, questionsList.get(questionNum).getQid());
             System.out.println("当前跳过的编号---" + titleNum + ",qid---" +
                     questionsList.get(questionNum).getQid());
 
             questionNum++;
             nextQuestionUpdate();
-        }else {
+        } else {
             System.out.println("返回异常");
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -429,7 +446,7 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     //修改颜色
-    private void changeColor(int color){
+    private void changeColor(int color) {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setBottomColor(color);
         frgansLinlearLayout.setBackgroundColor(getResources().getColor(color));
@@ -442,11 +459,11 @@ public class FragmentAnswer extends BaseFragment {
         if (isVisibleToUser) {
             System.out.println("FragmentAnswer---答题可见");
             MainActivity mainActivity = (MainActivity) getActivity();
-            System.out.println("queationNum%3 == " + (questionNum%3) + ",queationNum---" + questionNum);
-            mainActivity.setmColor(backgroundColor[questionNum%3]);
-            if (!NetWorkUtil.isNetWorkAvailable(getActivity())){
-             frandProgress.setVisibility(View.VISIBLE);
-            }else {
+            System.out.println("queationNum%7 == " + (questionNum % colorCount) + ",queationNum---" + questionNum);
+            mainActivity.setmColor(backgroundColor[questionNum % colorCount]);
+            if (!NetWorkUtil.isNetWorkAvailable(getActivity())) {
+                frandProgress.setVisibility(View.VISIBLE);
+            } else {
                 frandProgress.setVisibility(View.INVISIBLE);
             }
 
@@ -460,16 +477,16 @@ public class FragmentAnswer extends BaseFragment {
 
             //最后一题打完之后的逻辑
             //重新拉取数据
-            if (questionNum == questionsList.size()){
+            if (questionNum == questionsList.size()) {
                 System.out.println();
-                SystemClock.sleep(1*1000);
+                SystemClock.sleep(1 * 1000);
                 getQuestionsList();
                 return;
             }
 
             questionsBean = questionsList.get(questionNum);
             if (questionsBean != null) {
-                fransTvQuestionCount.setText((titleNum+1) + "/" + serverQuestionNum);
+                fransTvQuestionCount.setText((titleNum + 1) + "/" + serverQuestionNum);
                 String url = questionsBean.getQiconUrl();
                 if (!TextUtils.isEmpty(url)) {
                     Picasso.with(getActivity()).load(url).into(frgansImg);
@@ -477,7 +494,7 @@ public class FragmentAnswer extends BaseFragment {
                 frgansQuestion.setText(questionsBean.getQtext());
                 getQuestionsCandidate(questionsBean.getQid());
 
-                changeColor(backgroundColor[questionNum%3]);
+                changeColor(backgroundColor[questionNum % colorCount]);
             }
 
         }
@@ -527,18 +544,18 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtnNextQuestion.setVisibility(View.INVISIBLE);
         frgansBtnInvite.setVisibility(View.VISIBLE);
 
-        getQuestionsList();
+        //getQuestionsList();
 
     }
 
     //解除冷冻
-    private void relieve(){
+    private void relieve() {
 
         questionNum = 0;
         getQuestionsList();
 
         fransTvQuestionCount.setVisibility(View.VISIBLE);
-        fransTvQuestionCount.setText((titleNum+1) + serverQuestionNum +"");
+        fransTvQuestionCount.setText((titleNum + 1) + serverQuestionNum + "");
 
         frgansTvOr.setVisibility(View.INVISIBLE);
         frgansTvRelieve.setVisibility(View.INVISIBLE);
@@ -578,14 +595,15 @@ public class FragmentAnswer extends BaseFragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<QuestionListRespond>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@NonNull QuestionListRespond questionListRespond) {
                         System.out.println("问题列表---" + questionListRespond.toString());
                         if (questionListRespond.getCode() == 0) {
                             QuestionListRespond.PayloadBean payloadBean = questionListRespond.getPayload();
-                            if (payloadBean != null && payloadBean.getFreezeStatus() == 0){
+                            if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
                                 //非冷冻状态
                                 questionsList = questionListRespond.getPayload().getQuestions();
                                 if (questionsList.size() > 0) {
@@ -597,7 +615,7 @@ public class FragmentAnswer extends BaseFragment {
                                     System.out.println("返回的titleNum---" + titleNum);
                                     nextQuestionUpdate();
                                 }
-                            }else if (payloadBean != null && payloadBean.getFreezeStatus() == 1){
+                            } else if (payloadBean != null && payloadBean.getFreezeStatus() == 1) {
                                 //冷冻状态
 
                                 //进入冷冻的时间点
@@ -607,7 +625,7 @@ public class FragmentAnswer extends BaseFragment {
 
                                 //应该倒计时的时间
                                 int countTime = freezeDuration - (nowTs - freezeTs);
-                                frgansCountDownView.start(countTime*1000);
+                                frgansCountDownView.start(countTime * 1000);
                                 System.out.println("倒计时时间---" + countTime);
                                 questionOut15();
                             }
@@ -692,7 +710,7 @@ public class FragmentAnswer extends BaseFragment {
 
         Map<String, Object> voteMap = new HashMap<>();
         voteMap.put("qid", qid);
-        voteMap.put("index",index);
+        voteMap.put("index", index);
         voteMap.put("voteToUin", voteToUin);
         voteMap.put("options", options);
         voteMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
@@ -732,11 +750,11 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     //跳过下个问题
-    private void doskipQuestion(int index, int qid){
+    private void doskipQuestion(int index, int qid) {
 
         Map<String, Object> doskipMap = new HashMap<>();
         doskipMap.put("qid", qid);
-        doskipMap.put("index",index);
+        doskipMap.put("index", index);
         doskipMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         doskipMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         doskipMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));

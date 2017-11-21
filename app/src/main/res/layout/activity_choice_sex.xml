@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="40dp"
-                android:text="蓝的铝哒"
+                android:text="确认性别"
                 android:textColor="@color/black"
                 android:textSize="26sp" />
 
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
-                android:text="低头好好看 确认性别"
+                android:text="低头好好看"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
@@ -57,11 +57,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="女生"
-                android:drawableTop="@drawable/selector_girl_btn"
+                android:drawableTop="@drawable/girl_select"
                 android:background="@android:color/transparent"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="52dp"
-                android:textColor="@drawable/selector_girl_text_color"
+                android:textColor="@color/feeds_title_color"
                 android:textSize="16sp"
                 android:drawableRight="@drawable/item_arrows"
                 />
@@ -70,11 +70,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="男生"
-                android:drawableTop="@drawable/selector_boy_btn"
+                android:drawableTop="@drawable/boy_select"
                 android:background="@android:color/transparent"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="50dp"
-                android:textColor="@drawable/selector_boy_text_color"
+                android:textColor="@color/play_color4"
                 android:textSize="16sp"
                 android:drawableRight="@drawable/item_arrows"
                 />

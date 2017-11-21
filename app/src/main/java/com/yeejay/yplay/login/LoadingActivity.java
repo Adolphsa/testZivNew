@@ -54,6 +54,8 @@ public class LoadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
+        getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
+
         uin = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
         ver = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_VER, (int) 0);
@@ -89,6 +91,10 @@ public class LoadingActivity extends AppCompatActivity {
                         System.out.println("获取自己的资料---" + userInfoResponde.toString());
                         if (userInfoResponde.getCode() == 0) {
                             UserInfoResponde.PayloadBean.InfoBean infoBean = userInfoResponde.getPayload().getInfo();
+
+                            SharePreferenceUtil.put(LoadingActivity.this,
+                                    YPlayConstant.YPLAY_USER_NAME, userInfoResponde.getPayload().getInfo().getUserName());
+
                             if (infoBean.getAge() == 0 ||
                                     infoBean.getGrade() == 0 ||
                                     infoBean.getSchoolId() == 0 ||

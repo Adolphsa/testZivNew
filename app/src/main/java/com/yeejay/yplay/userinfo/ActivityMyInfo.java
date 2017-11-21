@@ -34,7 +34,6 @@ import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
-import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
@@ -204,7 +203,7 @@ public class ActivityMyInfo extends AppCompatActivity {
     private void initTitle() {
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
         layoutSetting.setVisibility(View.VISIBLE);
-        myTvBack.setBackgroundResource(R.drawable.white_back);
+        myTvBack.setImageResource(R.drawable.white_back);
         myTvTitle.setText("我的");
         myTvTitle.setTextColor(getResources().getColor(R.color.white));
     }
@@ -216,7 +215,7 @@ public class ActivityMyInfo extends AppCompatActivity {
             amiTvSchoolName.setText(infoBean.getSchoolName());
             String url = infoBean.getHeadImgUrl();
             if (!TextUtils.isEmpty(url)) {
-                Picasso.with(ActivityMyInfo.this).load(url).resize(80, 80).into(amiItemHeaderImg);
+                Picasso.with(ActivityMyInfo.this).load(url).into(amiItemHeaderImg);
             }
             amiTvName.setText(infoBean.getNickName());
             amiTvName2.setText(infoBean.getUserName());
@@ -376,13 +375,13 @@ public class ActivityMyInfo extends AppCompatActivity {
                             String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                             invitefriendsbysms(base64phone);
                         } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) {
-                            button.setBackgroundResource(R.drawable.btn_alread_applt);
+                            button.setBackgroundResource(R.drawable.already_apply);
                             int uin = friendsBean.getUin();
                             addFriend(uin);
                         }
                     }
                 },
-                tempList);
+                tempList,2);
         diamondExpansionListView.setAdapter(recommendFriendForNullAdapter);
     }
 
@@ -655,42 +654,6 @@ public class ActivityMyInfo extends AppCompatActivity {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("发送加好友请求异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-
-    }
-
-    //查询用户的修改配额
-    private void queryUserUpdateLeftCount(int field){
-
-        Map<String, Object> leftCountMap = new HashMap<>();
-        leftCountMap.put("field", field);
-        leftCountMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        leftCountMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        leftCountMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserUpdateCount(leftCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
                     }
 
                     @Override

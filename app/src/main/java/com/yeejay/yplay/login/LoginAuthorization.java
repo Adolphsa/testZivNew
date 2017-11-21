@@ -92,8 +92,6 @@ public class LoginAuthorization extends AppCompatActivity {
             }
 
             //检查是否真的获取到联系人和地理位置
-
-
             if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
                 if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
                     AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();

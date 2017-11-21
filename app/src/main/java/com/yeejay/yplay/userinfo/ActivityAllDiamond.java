@@ -16,6 +16,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -45,6 +46,7 @@ public class ActivityAllDiamond extends AppCompatActivity {
     ListView aadListView;
     @BindView(R.id.aad_ptf_refresh)
     PullToRefreshLayout aadPtfRefresh;
+    private LoadMoreView loadMoreView;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -54,6 +56,7 @@ public class ActivityAllDiamond extends AppCompatActivity {
     List<UsersDiamondInfoRespond.PayloadBean.StatsBean> mDataList;
 
     int mPageNum = 1;
+    int mPageSize = 15;
     int uin;
 
     @Override
@@ -68,7 +71,10 @@ public class ActivityAllDiamond extends AppCompatActivity {
         layoutTitle.setText("所有钻石");
         mDataList = new ArrayList<>();
         uin = (int)SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_UIN, 0);
-        getUserDiamondInfo(uin,mPageNum,20);
+        getUserDiamondInfo(uin,mPageNum,mPageSize);
+
+        loadMore();
+
 
     }
 
@@ -120,22 +126,22 @@ public class ActivityAllDiamond extends AppCompatActivity {
                 return convertView;
             }
         });
-        loadMore();
     }
 
     private void loadMore(){
+
         aadPtfRefresh.setCanRefresh(false);
+        loadMoreView = new LoadMoreView(ActivityAllDiamond.this);
+        aadPtfRefresh.setFooterView(loadMoreView);
         aadPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
-            public void refresh() {
-
-            }
+            public void refresh() {}
 
             @Override
             public void loadMore() {
-                mPageNum++;
+
                 System.out.println("mPageNum---" + mPageNum);
-                getUserDiamondInfo(uin,mPageNum,20);
+                getUserDiamondInfo(uin,mPageNum,mPageSize);
             }
         });
     }
@@ -163,11 +169,17 @@ public class ActivityAllDiamond extends AppCompatActivity {
                     public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
                         System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
                         if (usersDiamondInfoRespond.getCode() == 0){
-                            mDataList.addAll(usersDiamondInfoRespond.getPayload().getStats());
-                            if (mDataList.size() > 0){
+                            List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
+                            System.out.println("List<>---" + tempList.size());
+                            if (tempList.size() > 0){
+                                mPageNum++;
+                                mDataList.addAll(tempList);
                                 int total = usersDiamondInfoRespond.getPayload().getTotal();
                                 layoutTitle.setText("所有钻石" + total);
                                 initDiamondList(mDataList);
+                            }else {
+                                System.out.println("数据加载完毕");
+                                loadMoreView.noData();
                             }
 
                         }

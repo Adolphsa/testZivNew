@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
     android:id="@+id/diamond_expansion"
     >
 
@@ -13,76 +12,83 @@
         android:layout_height="20dp"
         android:background="@drawable/feeds_slice"
         />
-    <ImageView
-        android:id="@+id/frf_img1"
-        android:layout_width="19dp"
-        android:layout_height="18dp"
-        android:src="@drawable/expansion"
-        android:scaleType="fitXY"
-        android:layout_marginLeft="20dp"
-        android:layout_below="@+id/frf_tip_img"
-        android:layout_marginTop="13.5dp"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="扩列开启"
-        android:layout_toRightOf="@+id/frf_img1"
-        android:layout_marginLeft="10dp"
-        android:textSize="16sp"
-        android:textColor="@color/play_color2"
-        android:layout_below="@+id/frf_tip_img"
-        android:layout_marginTop="13.5dp"
-        />
-    <ImageButton
-        android:id="@+id/frf_no_more_show"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:layout_below="@+id/frf_tip_img"
-        android:layout_marginTop="13.5dp"
-        android:src="@drawable/feeds_no_more_see"
-        />
-    <View
-        android:id="@+id/frf_line"
-        android:layout_width="match_parent"
-        android:layout_height="0.2dp"
-        android:background="@color/feeds_hight_gray45"
-        android:layout_below="@id/frf_img1"
-        android:layout_marginTop="13.5dp"
-        />
-    <ListView
-        android:id="@+id/frf_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_below="@+id/frf_line"
-        android:layout_marginTop="2dp"
-        android:dividerHeight="0.3dp"
-        android:divider="@color/feeds_hight_gray45"
-        />
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/frf_list_view"
-        android:background="@drawable/feeds_img_bottom"
+        android:layout_below="@+id/frf_tip_img"
+        android:background="@color/white"
         >
 
-        <TextView
-            android:id="@+id/frf_see_more"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:text="查看更多"
-            android:gravity="center_vertical"
-            android:textSize="14sp"
-            android:drawableLeft="@drawable/see_more"
-            android:layout_centerHorizontal="true"
-            android:drawablePadding="4dp"
-            android:textColor="@color/play_color2"
+        <ImageView
+            android:id="@+id/frf_img1"
+            android:layout_width="19dp"
+            android:layout_height="18dp"
+            android:src="@drawable/expansion"
+            android:scaleType="fitXY"
+            android:layout_marginLeft="20dp"
+
+            android:layout_marginTop="13.5dp"
             />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="扩列开启"
+            android:layout_toRightOf="@+id/frf_img1"
+            android:layout_marginLeft="10dp"
+            android:textSize="16sp"
+            android:textColor="@color/play_color2"
+            android:layout_marginTop="13.5dp"
+            />
+        <ImageButton
+            android:id="@+id/frf_no_more_show"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="13.5dp"
+            android:src="@drawable/feeds_no_more_see"
+            />
+        <View
+            android:id="@+id/frf_line"
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:background="@color/feeds_hight_gray45"
+            android:layout_below="@id/frf_img1"
+            android:layout_marginTop="13.5dp"
+            />
+        <ListView
+            android:id="@+id/frf_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_below="@+id/frf_line"
+            android:layout_marginTop="2dp"
+            android:dividerHeight="0.3dp"
+            android:divider="@color/feeds_hight_gray45"
+            />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/frf_list_view"
+            android:background="@drawable/feeds_img_bottom"
+            >
+
+            <TextView
+                android:id="@+id/frf_see_more"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="查看更多"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                android:drawableLeft="@drawable/see_more"
+                android:layout_centerHorizontal="true"
+                android:drawablePadding="4dp"
+                android:textColor="@color/play_color2"
+                />
+        </RelativeLayout>
 
     </RelativeLayout>
+
 
 
 </RelativeLayout>

@@ -3,10 +3,12 @@ package com.yeejay.yplay.friend;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -20,6 +22,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -45,7 +48,7 @@ public class ActivitySearchFriends extends AppCompatActivity {
     @BindView(R.id.asf_list_view)
     ListView asfListView;
     @BindView(R.id.asf_btn_cancel)
-    Button asfBtnCancel;
+    ImageButton asfBtnCancel;
     @BindView(R.id.asf_rl)
     RelativeLayout asfRl;
     @BindView(R.id.asf_tv_result)
@@ -81,7 +84,18 @@ public class ActivitySearchFriends extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 System.out.println("提交---" + query);
-                searchFriends(query);
+
+                String username = (String) SharePreferenceUtil.get(ActivitySearchFriends.this,
+                        YPlayConstant.YPLAY_USER_NAME,
+                        "");
+
+                if (!TextUtils.isEmpty(username) && query.equals(username)){
+                    DialogUtils.showInviteDialogInfo(ActivitySearchFriends.this,"不能搜索自己哦");
+                }else {
+                    searchFriends(query);
+                }
+
+
                 return false;
             }
 

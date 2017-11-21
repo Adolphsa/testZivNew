@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">叮铃</string>
 
+    <string name="login_only_can_input">qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM1234567890</string>
+
     <!--LoginAge-->
     <string name="la_app_name">软件名</string>
     <string name="la_privacy1">输入你的年龄，你自动同意为我们的</string>

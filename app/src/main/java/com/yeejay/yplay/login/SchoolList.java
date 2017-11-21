@@ -277,6 +277,10 @@ public class SchoolList extends AppCompatActivity {
         schoolMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         schoolMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
 
+        if (isActivitySetting == 10){
+            schoolMap.put("flag",1);
+        }
+
         YPlayApiManger.getInstance().getZivApiService()
                 .choiceSchool(schoolMap)
                 .subscribeOn(Schedulers.io())

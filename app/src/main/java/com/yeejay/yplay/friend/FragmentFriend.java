@@ -91,6 +91,7 @@ public class FragmentFriend extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+
         //跳转到我的资料
         jumpToUserInfo();
         mDataList = new ArrayList<>();
@@ -141,6 +142,10 @@ public class FragmentFriend extends BaseFragment {
             }
         });
 
+        long ts = System.currentTimeMillis();
+        System.out.println("ts---" + ts);
+        getFriendFeeds(ts, 10);
+
     }
 
     @Override
@@ -148,9 +153,7 @@ public class FragmentFriend extends BaseFragment {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser) {
             System.out.println("FragmentFriend---可见");
-            long ts = System.currentTimeMillis();
-            System.out.println("ts---" + ts);
-            getFriendFeeds(ts, 10);
+
 
 //            fransFrfLayout.setVisibility(View.VISIBLE);
 //            ffPtfRefreshLayout.setVisibility(View.GONE);
@@ -481,7 +484,7 @@ public class FragmentFriend extends BaseFragment {
                         }
                     }
                 },
-                tempList);
+                tempList,1);
         rfListView.setAdapter(recommendFriendForNullAdapter);
     }
 
@@ -701,5 +704,6 @@ public class FragmentFriend extends BaseFragment {
         });
         cardDialog.show();
     }
+
 
 }

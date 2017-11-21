@@ -24,11 +24,12 @@
             android:queryHint="搜索用户名"
             android:layout_toLeftOf="@+id/asf_btn_cancel"
             />
-        <Button
+        <ImageButton
             android:id="@+id/asf_btn_cancel"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:background="@drawable/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/btn_cancel"
+            android:background="@android:color/transparent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             />

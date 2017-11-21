@@ -15,9 +15,16 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.method.DigitsKeyListener;
+import android.view.KeyEvent;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +43,8 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
+import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -119,7 +128,8 @@ public class ActivitySetting extends AppCompatActivity {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
             tag = 1;
-            showInputDialog("输入真实姓名","只有两次修改机会");
+            queryUserUpdateLeftCount(1);
+
         }else {
             Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
         }
@@ -132,17 +142,16 @@ public class ActivitySetting extends AppCompatActivity {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
             tag = 2;
-            showInputDialog("修改用户名","");
+            showInputDialog("修改门牌号","");
         }else {
             Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    //姓名
+    //性别
     @OnClick(R.id.setting_gender)
     public void setSettingGender(){
-
         System.out.println("性别");
         Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
         intent.putExtra("activity_setting",1);
@@ -153,9 +162,12 @@ public class ActivitySetting extends AppCompatActivity {
     @OnClick(R.id.setting_school)
     public void setSettingSchoolInfo() {
         System.out.println("学校信息");
-        Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-        intent.putExtra("activity_setting_school", 10);
-        startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+            tag = 3;
+            queryUserUpdateLeftCount(3);
+        }else {
+            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        }
     }
 
     //电话号码
@@ -170,7 +182,7 @@ public class ActivitySetting extends AppCompatActivity {
         System.out.println("联系我们");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
             new AlertDialog.Builder(ActivitySetting.this)
-                    .setMessage("咨询，建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
+                    .setMessage("咨询、建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
                     .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -190,8 +202,7 @@ public class ActivitySetting extends AppCompatActivity {
         System.out.println("退出");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
             new AlertDialog.Builder(ActivitySetting.this)
-                    .setTitle("退出")
-                    .setMessage("确定退出吗？")
+                    .setMessage("退出后不会删除任何历史数据，下次登录依然可以使用本账号")
                     .setPositiveButton("是", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -419,8 +430,10 @@ public class ActivitySetting extends AppCompatActivity {
     private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {
 
         Map<String, Object> imgMap = new HashMap<>();
-        if (!TextUtils.isEmpty(nickName))
-            imgMap.put("nickName", nickName);
+        if (!TextUtils.isEmpty(nickName)){
+            imgMap.put("nickName", nickName);imgMap.put("flag",1);
+        }
+
         if (gender == 1 || gender == 2)
             imgMap.put("gender", gender);
         if (!TextUtils.isEmpty(headImgId))
@@ -431,6 +444,7 @@ public class ActivitySetting extends AppCompatActivity {
         imgMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         imgMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         imgMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
+
 
         YPlayApiManger.getInstance().getZivApiService()
                 .updateHeaderImg(imgMap)
@@ -458,7 +472,7 @@ public class ActivitySetting extends AppCompatActivity {
                             }
 
                         } else if (baseRespond.getCode() == 11011) {
-                            Toast.makeText(ActivitySetting.this, "用户名已经存在", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivitySetting.this, "门牌号已经存在", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -511,8 +525,76 @@ public class ActivitySetting extends AppCompatActivity {
                 });
     }
 
+    //查询用户的修改配额
+    private void queryUserUpdateLeftCount(int field){
+
+        Map<String, Object> leftCountMap = new HashMap<>();
+        leftCountMap.put("field", field);
+        leftCountMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
+        leftCountMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        leftCountMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserUpdateCount(leftCountMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
+                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
+                        if (userUpdateLeftCountRespond.getCode() == 0){
+                            int letCount = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+                            int tempField = userUpdateLeftCountRespond.getPayload().getInfo().getField();
+                            System.out.println(tempField + "---编号");
+                            if (tag == 1){
+
+                                if (letCount > 0){
+                                    showInputDialog("输入真实姓名","只有" + letCount + "次修改机会,请珍惜喵~");
+                                }else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this,"姓名修改次数已用完咯");
+                                }
+
+                            }else if (tag == 3){
+                                if (letCount > 0){
+                                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
+                                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
+                                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
+                                                    intent.putExtra("activity_setting_school", 10);
+                                                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+                                                }
+                                            })
+                                            .show();
+                                }else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this,"年级学校修改次数已用完咯");
+                                }
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
     //退出登录
     private void logout() {
+
         Map<String, Object> logoutMap = new HashMap<>();
         logoutMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         logoutMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
@@ -547,14 +629,51 @@ public class ActivitySetting extends AppCompatActivity {
 
     }
 
-
+    EditText editText;
     //展示对话框
     private void showInputDialog(String title, String message) {
 
-        final EditText editText = new EditText(ActivitySetting.this);
+        editText = new EditText(ActivitySetting.this);
+        LinearLayout.LayoutParams etParam = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        etParam.setMargins(20, 0, 20, 0);
+        editText .setLayoutParams(etParam);
+
+        if (tag == 1){
+            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
+            editText.setSingleLine();
+            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (actionId == EditorInfo.IME_ACTION_SEND
+                            || actionId == EditorInfo.IME_ACTION_DONE
+                            || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
+                            && KeyEvent.ACTION_DOWN == event.getAction())){
+                        System.out.println("回车键被点击");
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }else if (tag == 2){
+            editText.setKeyListener(new DigitsKeyListener() {
+                @Override
+                public int getInputType() {
+                    return InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                }
+                @Override
+                protected char[] getAcceptedChars() {
+                    char[] data = getResources().getString(R.string.login_only_can_input).toCharArray();
+                    return data;
+                }
+            });
+            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+        }
+
         AlertDialog.Builder inputDialog =
                 new AlertDialog.Builder(ActivitySetting.this);
         inputDialog.setTitle(title).setView(editText);
+
         if (!TextUtils.isEmpty(message)) {
             inputDialog.setMessage(message);
         }

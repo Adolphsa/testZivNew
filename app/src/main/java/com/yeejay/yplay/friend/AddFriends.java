@@ -62,13 +62,21 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     @OnClick(R.id.searchView)
-    public void clickSearch(View view){
-        startActivity(new Intent(AddFriends.this,ActivitySearchFriends.class));
+    public void clickSearch(View view) {
+        startActivity(new Intent(AddFriends.this, ActivitySearchFriends.class));
     }
+
     @OnClick(R.id.af_btn_add_contacts)
     public void btnAddContacts() {
         //通讯录好友
         System.out.println("通讯录好友");
+
+        if (contactRoot.isShown()) {
+            contactRoot.setEnabled(false);
+            schoolRoot.setEnabled(true);
+            maybeRoot.setEnabled(true);
+            return;
+        }
 
         mPageNum = 1;
         mType = 1;
@@ -77,8 +85,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.GONE);
 
-        if (contactRoot != null && contactRoot.isShown()){
-            getRecommends(1,mPageNum);
+        contactDredgeList.clear();
+
+        if (contactRoot != null && contactRoot.isShown()) {
+            getRecommends(1, mPageNum);
         }
 
     }
@@ -89,6 +99,13 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         //同校好友
         System.out.println("同校好友");
 
+        if (schoolRoot.isShown()) {
+            contactRoot.setEnabled(true);
+            schoolRoot.setEnabled(false);
+            maybeRoot.setEnabled(false);
+            return;
+        }
+
         mPageNum = 1;
         mType = 3;
 
@@ -96,15 +113,25 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         schoolRoot.setVisibility(View.VISIBLE);
         maybeRoot.setVisibility(View.GONE);
 
-        if (schoolRoot != null && schoolRoot.isShown()){
-            getRecommends(3,mPageNum);
+        allSchoolMateList.clear();
+
+        if (schoolRoot != null && schoolRoot.isShown()) {
+            getRecommends(3, mPageNum);
         }
 
     }
+
     @OnClick(R.id.af_btn_wait_invite)
     public void btnWaitInvite() {
         //可能认识的人
         System.out.println("可能认识的人");
+
+        if (maybeRoot.isShown()) {
+            contactRoot.setEnabled(true);
+            schoolRoot.setEnabled(true);
+            maybeRoot.setEnabled(false);
+            return;
+        }
 
         mPageNum = 1;
         mType = 7;
@@ -113,12 +140,14 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.VISIBLE);
 
-        if (maybeRoot != null && maybeRoot.isShown()){
-            getRecommends(7,mPageNum);
+        maybeKnowList.clear();
+
+        if (maybeRoot != null && maybeRoot.isShown()) {
+            getRecommends(7, mPageNum);
         }
     }
 
-    RelativeLayout contactRoot; //通讯录好友
+    LinearLayout contactRoot; //通讯录好友
     LinearLayout schoolRoot;    //同校同学
     LinearLayout maybeRoot;     //可能认识的人
 
@@ -142,10 +171,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
-        StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this,true);
+        StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
 
-        contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
+        contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
         maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
 
@@ -159,10 +188,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
         initPullRefresh();
 
-        getRecommends(1,1);
+        getRecommends(1, 1);
     }
 
-    private void initPullRefresh(){
+    private void initPullRefresh() {
 
         pullToRefreshLayout.setCanRefresh(false);
         pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
@@ -174,18 +203,18 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             @Override
             public void loadMore() {
                 //加载更多
-                if (mType == 1){    //通讯录已开通
-                    getRecommends(1,mPageNum);
-                }else if (mType == 3){
-                    getRecommends(3,mPageNum);
-                }else if (mType == 4){
-                    getRecommends(4,mPageNum);
-                }else if (mType == 5){
-                    getRecommends(5,mPageNum);
-                }else if (mType == 6){
-                    getRecommends(6,mPageNum);
-                }else if (mType == 7){
-                    getRecommends(7,mPageNum);
+                if (mType == 1) {    //通讯录已开通
+                    getRecommends(1, mPageNum);
+                } else if (mType == 3) {
+                    getRecommends(3, mPageNum);
+                } else if (mType == 4) {
+                    getRecommends(4, mPageNum);
+                } else if (mType == 5) {
+                    getRecommends(5, mPageNum);
+                } else if (mType == 6) {
+                    getRecommends(6, mPageNum);
+                } else if (mType == 7) {
+                    getRecommends(7, mPageNum);
                 }
             }
         });
@@ -331,13 +360,13 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     //拉取同校/通讯录好友
-    private void getRecommends(int type,int pageNum) {
+    private void getRecommends(int type, int pageNum) {
 
         System.out.println("type---" + type);
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
-        recommendsMap.put("pageNum",pageNum);
-        recommendsMap.put("pageSize",5);
+        recommendsMap.put("pageNum", pageNum);
+        recommendsMap.put("pageSize", 5);
         recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
@@ -356,24 +385,24 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                             System.out.println("好友列表---" + getRecommendsRespond.toString());
                             List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
                                     getRecommendsRespond.getPayload().getFriends();
-                            if (friendsBeanList != null){
+                            if (friendsBeanList != null) {
 
-                                if (mType == 1){ //通讯录已开通
+                                if (mType == 1) { //通讯录已开通
                                     contactDredgeList.addAll(friendsBeanList);
                                     handleContactDredge(contactDredgeList);
-                                }else if (mType == 3){  //全部
+                                } else if (mType == 3) {  //全部
                                     allSchoolMateList.addAll(friendsBeanList);
                                     handleSchoolMate(allSchoolMateList);
-                                }else if (mType == 4){  //同年级
+                                } else if (mType == 4) {  //同年级
                                     sameGradeList.addAll(friendsBeanList);
                                     handleSchoolMate(sameGradeList);
-                                }else if (mType == 5){      //男
+                                } else if (mType == 5) {      //男
                                     boyList.addAll(friendsBeanList);
                                     handleSchoolMate(boyList);
-                                }else if (mType == 6){      //女
+                                } else if (mType == 6) {      //女
                                     girlList.addAll(friendsBeanList);
                                     handleSchoolMate(girlList);
-                                }else if (mType == 7){      //可能认识的人
+                                } else if (mType == 7) {      //可能认识的人
                                     maybeKnowList.addAll(friendsBeanList);
                                     handleMaybeKnowFriend(maybeKnowList);
                                 }
@@ -388,7 +417,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("拉取好友异常---" + e.getMessage());
-                        Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         pullToRefreshLayout.finishLoadMore();
                     }
 
@@ -409,7 +438,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     //处理通讯录已开通
-    private void handleContactDredge(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
+    private void handleContactDredge(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
 
         LinearLayout nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
         MesureListView dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
@@ -418,11 +447,11 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             @Override
             public void onClick(View v) {
                 //跳转到邀请好友界面
-                startActivity(new Intent(AddFriends.this,ActivityWaitInvite.class));
+                startActivity(new Intent(AddFriends.this, ActivityWaitInvite.class));
             }
         });
 
-        if (friendsBeanList.size() > 0){
+        if (friendsBeanList.size() > 0) {
             mPageNum++;
             nullLl.setVisibility(View.GONE);
             dredgeListView.setAdapter(new ContactsAdapter(AddFriends.this,
@@ -435,15 +464,15 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                     new ContactsAdapter.acceptCallback() {
                         @Override
                         public void acceptClick(View v) {
-                            if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                            if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                                 Button button = (Button) v;
                                 button.setBackgroundResource(R.drawable.already_apply);
                                 button.setEnabled(false);
 
-                                int position = (int)button.getTag();
+                                int position = (int) button.getTag();
                                 addFriend(friendsBeanList.get(position).getUin());
-                            }else {
-                                Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                             }
 
 
@@ -455,10 +484,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     int uin = friendsBeanList.get(position).getUin();
-                    if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                    if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                         getFriendInfo(uin);
-                    }else {
-                        Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }
 
                 }
@@ -468,8 +497,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     //处理同校同学
-    private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
-
+    private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
 
         final ImageButton arrowButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_arrow);
         final LinearLayout llButton = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_button);
@@ -480,7 +508,7 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         final ImageButton girlButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_girl);
         MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
 
-        if (friendsBeanList.size() > 0){
+        if (friendsBeanList.size() > 0) {
             mPageNum++;
             arrowButton.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
@@ -490,11 +518,11 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             @Override
             public void onClick(View v) {
                 System.out.println("箭头被点击");
-                if (buttonDirt == 1){
+                if (buttonDirt == 1) {
                     arrowButton.setImageResource(R.drawable.up_arrow);
                     buttonDirt = 2;
                     llButton.setVisibility(View.VISIBLE);
-                }else if (buttonDirt == 2){
+                } else if (buttonDirt == 2) {
                     arrowButton.setImageResource(R.drawable.down_arrow);
                     buttonDirt = 1;
                     llButton.setVisibility(View.GONE);
@@ -513,7 +541,9 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
                 mType = 3;
                 mPageNum = 1;
-                getRecommends(3,mPageNum);
+
+                allSchoolMateList.clear();
+                getRecommends(3, mPageNum);
             }
         });
 
@@ -530,7 +560,9 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
                 mType = 4;
                 mPageNum = 1;
-                getRecommends(4,mPageNum);
+
+                sameGradeList.clear();
+                getRecommends(4, mPageNum);
             }
         });
 
@@ -545,7 +577,8 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
                 mType = 5;
                 mPageNum = 1;
-                getRecommends(5,mPageNum);
+                boyList.clear();
+                getRecommends(5, mPageNum);
             }
         });
 
@@ -560,7 +593,8 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
                 mType = 6;
                 mPageNum = 1;
-                getRecommends(6,mPageNum);
+                girlList.clear();
+                getRecommends(6, mPageNum);
             }
         });
 
@@ -574,14 +608,14 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                 new SchoolmateAdapter.acceptCallback() {
                     @Override
                     public void acceptClick(View v) {
-                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                             Button button = (Button) v;
                             button.setBackgroundResource(R.drawable.already_apply);
                             button.setEnabled(false);
-                            int position = (int)button.getTag();
+                            int position = (int) button.getTag();
                             addFriend(friendsBeanList.get(position).getUin());
-                        }else {
-                            Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -592,10 +626,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int uin = friendsBeanList.get(position).getUin();
-                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin);
-                }else {
-                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -605,12 +639,12 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
 
 
     //处理可能认识的人
-    private void handleMaybeKnowFriend(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList){
+    private void handleMaybeKnowFriend(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
         maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
         LinearLayout lmklLlNull = (LinearLayout) maybeRoot.findViewById(R.id.lmk_ll_null);
         MesureListView lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
 
-        if (friendsBeanList.size() > 0){
+        if (friendsBeanList.size() > 0) {
             mPageNum++;
             lmklLlNull.setVisibility(View.GONE);
         }
@@ -625,15 +659,15 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                 new SchoolmateAdapter.acceptCallback() {
                     @Override
                     public void acceptClick(View v) {
-                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                             Button button = (Button) v;
                             button.setBackgroundResource(R.drawable.already_apply);
                             button.setEnabled(false);
 
-                            int position = (int)button.getTag();
+                            int position = (int) button.getTag();
                             addFriend(friendsBeanList.get(position).getUin());
-                        }else {
-                            Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -645,10 +679,10 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println("点击事件");
                 int uin = friendsBeanList.get(position).getUin();
-                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin);
-                }else {
-                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -678,13 +712,13 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
                             UserInfoResponde.PayloadBean.InfoBean infoBean =
                                     userInfoResponde.getPayload().getInfo();
                             int status = userInfoResponde.getPayload().getStatus();
-                            if (status == 1){
+                            if (status == 1) {
                                 Intent intent = new Intent(AddFriends.this, ActivityFriendsInfo.class);
                                 intent.putExtra("yplay_friend_name", infoBean.getNickName());
-                                intent.putExtra("yplay_friend_uin",infoBean.getUin());
+                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
                                 System.out.println("朋友的uin---" + infoBean.getUin());
                                 startActivity(intent);
-                            }else {
+                            } else {
                                 showCardDialog(userInfoResponde.getPayload());
                             }
 
@@ -704,36 +738,36 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
     }
 
     //显示名片
-    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean){
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean) {
 
         final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
 
         //状态
         int status = payloadBean.getStatus();
 
-        final CardDialog cardDialog = new CardDialog(AddFriends.this,R.style.CustomDialog);
+        final CardDialog cardDialog = new CardDialog(AddFriends.this, R.style.CustomDialog);
         cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
         cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
         cardDialog.setCardNameStr(infoBean.getNickName());
         cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
-        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
+        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
 
-        if (status == 0){
+        if (status == 0) {
             cardDialog.setButtonImg(R.drawable.green_add_friend);
 
-        }else if (status == 2){
+        } else if (status == 2) {
             cardDialog.setButtonImg(R.drawable.already_apply);
         }
 
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton )v;
-                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)){
+                ImageButton button = (ImageButton) v;
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     button.setImageResource(R.drawable.already_apply);
                     addFriend(infoBean.getUin());
-                }else {
-                    Toast.makeText(AddFriends.this,"网络异常",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -746,7 +780,6 @@ public class AddFriends extends AppCompatActivity implements AdapterView.OnItemC
         });
         cardDialog.show();
     }
-
 
 
 }

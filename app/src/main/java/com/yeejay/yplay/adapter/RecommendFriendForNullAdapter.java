@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class RecommendFriendForNullAdapter extends BaseAdapter implements View.O
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
+    int activityType;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -54,11 +56,13 @@ public class RecommendFriendForNullAdapter extends BaseAdapter implements View.O
     public RecommendFriendForNullAdapter(Context context,
                                          hideCallback hideCallback,
                                          acceptCallback acceptCallback,
-                                         List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
+                                         List<GetRecommendsRespond.PayloadBean.FriendsBean> list,
+                                         int activityType) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
+        this.activityType = activityType;
     }
 
     @Override
@@ -113,21 +117,27 @@ public class RecommendFriendForNullAdapter extends BaseAdapter implements View.O
         String nickName = friendsBean.getNickName();
         holder.afItemName.setText(nickName);
         holder.afItemTvSharesFriends.setText(friendsBean.getRecommendDesc());
-        if (recommendType == 2) { //邀请
-            //holder.afItemTvSharesFriends.setText("通讯录好友");
-            holder.afBtnAccept.setBackgroundResource(R.drawable.red_invite);
-            holder.afBtnAccept.setEnabled(true);
-            holder.afBtnAccept.setOnClickListener(acceptListener);
 
-        } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) { //加好友
-            //holder.afItemTvSharesFriends.setText("同校好友");
-            holder.afBtnAccept.setBackgroundResource(R.drawable.btn_add_friend); //加好友
-            holder.afBtnAccept.setEnabled(true);
-            holder.afBtnAccept.setOnClickListener(acceptListener);
-
-
+        if (YPlayConstant.YPLAY_FEEDS_TYPE == activityType){
+            if (recommendType == 2) { //邀请
+                //holder.afItemTvSharesFriends.setText("通讯录好友");
+                holder.afBtnAccept.setBackgroundResource(R.drawable.red_invite);
+            } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) { //加好友
+                //holder.afItemTvSharesFriends.setText("同校好友");
+                holder.afBtnAccept.setBackgroundResource(R.drawable.btn_add_friend); //加好友
+            }
+        }else {
+            if (recommendType == 2) { //邀请
+                //holder.afItemTvSharesFriends.setText("通讯录好友");
+                holder.afBtnAccept.setBackgroundResource(R.drawable.play_invite_no);
+            } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) { //加好友
+                //holder.afItemTvSharesFriends.setText("同校好友");
+                holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend); //加好友
         }
 
+        }
+        holder.afBtnAccept.setEnabled(true);
+        holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
         return convertView;
     }

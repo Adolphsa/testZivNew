@@ -104,7 +104,7 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
 
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
@@ -413,6 +413,8 @@ public class Login extends AppCompatActivity {
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, loginRespond.getPayload().getToken());
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, loginRespond.getPayload().getVer());
 
+                            SharePreferenceUtil.put(Login.this,YPlayConstant.YPLAY_USER_NAME,loginRespond.getPayload().getInfo().getUserName());
+
                             insertUin(loginRespond.getPayload());
 
                             if (loginRespond.getPayload().getIsNewUser() == 1) {
@@ -451,7 +453,7 @@ public class Login extends AppCompatActivity {
                 .build().unique();
 
         if (myInfo == null){
-            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0);
+            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0,0);
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }

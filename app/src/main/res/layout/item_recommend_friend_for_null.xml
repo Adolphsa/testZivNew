@@ -57,7 +57,7 @@
         android:layout_width="80dp"
         android:layout_height="34sp"
         android:layout_marginRight="20dp"
-        android:background="@drawable/selector_play_invite"
+        android:background="@drawable/green_add_friend"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="21dp" />

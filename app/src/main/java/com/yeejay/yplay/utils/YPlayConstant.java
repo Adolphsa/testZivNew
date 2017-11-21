@@ -11,6 +11,7 @@ public class YPlayConstant {
     public static final String YPLAY_UIN = "yplay_uin";
     public static final String YPLAY_TOKEN = "yplay_token";
     public static final String YPLAY_VER = "yplay_ver";
+    public static final String YPLAY_USER_NAME = "yplay_user_name";
     public static final String YPLAY_FIRST_LATITUDE = "yplay_first_latitude";
     public static final String YPLAY_FIRST_LONGITUDE = "yplay_first_longitude";
     public static final String YPLAY_LATITUDE = "yplay_latitude";
@@ -27,4 +28,8 @@ public class YPlayConstant {
     public static final String TEMP_SCHOOL_ID = "temp_school_id";
 
     public static final String YPLAY_NO_MORE_SHOW = "no_more_show";
+
+    public static final int YPLAY_FEEDS_TYPE = 1;
+    public static final int YPLAY_MY_INFO_TYPE = 2;
+
 }

@@ -111,13 +111,17 @@
         <!-- android:screenOrientation="portrait" -->
         <!-- /> -->
 
-        <activity android:name=".userinfo.ActivityMyFriends"
-            android:screenOrientation="portrait"
-            />
-        <activity android:name=".userinfo.ActivityFriendRequest"
-            android:screenOrientation="portrait"
-            />
-
+        <activity
+            android:name=".userinfo.ActivityMyFriends"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".userinfo.ActivityFriendRequest"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".contribute.ActivityContribute1"
+            android:screenOrientation="portrait" />
+        <activity android:name=".contribute.ActivityContribute2"
+            android:screenOrientation="portrait"/>
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->

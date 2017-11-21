@@ -71,7 +71,9 @@ public class ClassList extends AppCompatActivity {
         if (bundle != null) {
             isActivitySetting = bundle.getInt("activity_setting_school");
             System.out.println("activity_setting_school" + isActivitySetting);
-            System.out.println("年级页面---lat" + mLatitude + ",lon---" + mLongitude);
+            if (isActivitySetting == 10){
+                clBack.setVisibility(View.VISIBLE);
+            }
         }
 
 //        if (mLatitude == 0 || mLongitude == 0) {
