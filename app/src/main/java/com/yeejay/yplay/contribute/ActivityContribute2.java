@@ -3,7 +3,6 @@ package com.yeejay.yplay.contribute;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.GridSpacingItemDecoration;
 import com.yeejay.yplay.model.EmojiImgBean;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -28,7 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityContribute2 extends AppCompatActivity {
+public class ActivityContribute2 extends BaseActivity {
 
     private static final int COLUMN = 5;
 

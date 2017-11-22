@@ -8,6 +8,7 @@ import com.tencent.wns.client.inte.WnsClientFactory;
 import com.tencent.wns.client.inte.WnsService;
 import com.yeejay.yplay.greendao.DaoMaster;
 import com.yeejay.yplay.greendao.DaoSession;
+import com.yeejay.yplay.im.ImConfig;
 
 /**
  *
@@ -41,6 +42,9 @@ public class YplayApplication extends Application {
         wns.initAndStartWns(this, info);
 
         setDatabase();
+
+        ImConfig.getImInstance().imConfig();
+        ImConfig.getImInstance().userConfig();
     }
 
     public static YplayApplication getInstance() {

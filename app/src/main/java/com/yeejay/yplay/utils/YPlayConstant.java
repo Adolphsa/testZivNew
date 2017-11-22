@@ -29,6 +29,8 @@ public class YPlayConstant {
 
     public static final String YPLAY_NO_MORE_SHOW = "no_more_show";
 
+    public static final String YPLAY_IM_SIGNATURE = "im_signature";
+
     public static final int YPLAY_FEEDS_TYPE = 1;
     public static final int YPLAY_MY_INFO_TYPE = 2;
 

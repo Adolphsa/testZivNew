@@ -1,7 +1,6 @@
 package com.yeejay.yplay.friend;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +15,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
@@ -41,7 +41,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityWaitInvite extends AppCompatActivity {
+public class ActivityWaitInvite extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;

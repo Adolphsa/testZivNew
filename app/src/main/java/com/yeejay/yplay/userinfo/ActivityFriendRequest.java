@@ -1,19 +1,19 @@
 package com.yeejay.yplay.userinfo;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.utils.StatuBarUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityFriendRequest extends AppCompatActivity {
+public class ActivityFriendRequest extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;

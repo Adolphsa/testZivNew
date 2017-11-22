@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
@@ -23,6 +22,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.friend.ActivityAddFiendsDetail;
 import com.yeejay.yplay.friend.AddFriends;
@@ -55,7 +55,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import tangxiaolv.com.library.EffectiveShapeView;
 
-public class ActivityMyInfo extends AppCompatActivity {
+public class ActivityMyInfo extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton myTvBack;

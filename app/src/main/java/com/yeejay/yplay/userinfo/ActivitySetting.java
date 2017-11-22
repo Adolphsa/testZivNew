@@ -14,11 +14,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -29,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.tencent.imsdk.TIMCallBack;
+import com.tencent.imsdk.TIMManager;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
@@ -36,6 +38,7 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
@@ -71,7 +74,7 @@ import tangxiaolv.com.library.EffectiveShapeView;
 
 import static com.yeejay.yplay.R.layout.activity_setting;
 
-public class ActivitySetting extends AppCompatActivity {
+public class ActivitySetting extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -207,6 +210,22 @@ public class ActivitySetting extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             logout();
+                            //登出
+                            TIMManager.getInstance().logout(new TIMCallBack() {
+                                @Override
+                                public void onError(int code, String desc) {
+
+                                    //错误码code和错误描述desc，可用于定位请求失败原因
+                                    //错误码code列表请参见错误码表
+                                    Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
+                                }
+
+                                @Override
+                                public void onSuccess() {
+                                    //登出成功
+                                    System.out.println("im退出成功");
+                                }
+                            });
                         }
                     })
                     .setNegativeButton("否", new DialogInterface.OnClickListener() {

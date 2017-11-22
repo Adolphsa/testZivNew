@@ -7,6 +7,7 @@ import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
@@ -208,5 +209,10 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/vote/submitquestion")
     Observable<BaseRespond> submiteQuestion(@FieldMap Map<String,Object> filemap);
+
+    //用户投稿
+    @FormUrlEncoded
+    @POST("/api/im/geneusersig")
+    Observable<ImSignatureRespond> getImSignature(@FieldMap Map<String,Object> filemap);
 
 }

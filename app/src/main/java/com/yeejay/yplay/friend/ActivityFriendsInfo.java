@@ -3,7 +3,6 @@ package com.yeejay.yplay.friend;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
@@ -19,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.model.BaseRespond;
@@ -46,7 +46,7 @@ import tangxiaolv.com.library.EffectiveShapeView;
 
 import static com.yeejay.yplay.utils.FriendFeedsUtil.schoolType;
 
-public class ActivityFriendsInfo extends AppCompatActivity {
+public class ActivityFriendsInfo extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;

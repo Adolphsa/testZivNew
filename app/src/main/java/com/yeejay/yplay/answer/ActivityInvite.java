@@ -1,7 +1,6 @@
 package com.yeejay.yplay.answer;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -11,6 +10,7 @@ import android.widget.SearchView;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.ListButtonAdapter;
+import com.yeejay.yplay.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityInvite extends AppCompatActivity implements AdapterView.OnItemClickListener,ListButtonAdapter.LbCallback{
+public class ActivityInvite extends BaseActivity implements AdapterView.OnItemClickListener,ListButtonAdapter.LbCallback{
 
 
     @BindView(R.id.ai_back)

@@ -2,7 +2,6 @@ package com.yeejay.yplay.friend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -18,6 +17,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.model.AddFriendRespond;
@@ -44,7 +44,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class AddFriends extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;

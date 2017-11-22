@@ -1,18 +1,18 @@
 package com.yeejay.yplay.message;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.base.BaseActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityChatWindow extends AppCompatActivity {
+public class ActivityChatWindow extends BaseActivity {
 
     @BindView(R.id.layout_title_back)
     Button layoutTitleBack;

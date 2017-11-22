@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +29,7 @@ import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
@@ -51,7 +51,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import tangxiaolv.com.library.EffectiveShapeView;
 
-public class UserInfo extends AppCompatActivity {
+public class UserInfo extends BaseActivity {
 
     private static final int REQ_CODE_SEL_IMG = 10;
     private static final int CROP_IMAGE = 11;

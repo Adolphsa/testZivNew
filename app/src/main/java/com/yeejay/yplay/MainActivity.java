@@ -3,25 +3,38 @@ package com.yeejay.yplay;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
+import com.tencent.imsdk.TIMCallBack;
+import com.tencent.imsdk.TIMManager;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
+import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.friend.FragmentFriend;
 import com.yeejay.yplay.message.FragmentMessage;
+import com.yeejay.yplay.model.ImSignatureRespond;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @BindView(R.id.main_view_pager)
     ViewPager viewPager;
@@ -120,6 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        //获取签名
+        getImSignature();
     }
 
     private void addFragment() {
@@ -176,5 +192,78 @@ public class MainActivity extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK)
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
+    }
+
+
+    //获取im签名
+    private void getImSignature(){
+
+        final Map<String, Object> imMap = new HashMap<>();
+        final int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        imMap.put("uin", uin);
+        imMap.put("token",SharePreferenceUtil.get(MainActivity.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        imMap.put("ver",SharePreferenceUtil.get(MainActivity.this,YPlayConstant.YPLAY_VER,0));
+        imMap.put("identifier", uin);
+
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .getImSignature(imMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ImSignatureRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ImSignatureRespond imSignatureRespond) {
+                        if (imSignatureRespond.getCode() == 0){
+                            String imSig = imSignatureRespond.getPayload().getSig();
+                            System.out.println("im签名---" + imSig);
+                            if (!TextUtils.isEmpty(imSig)){
+                                imLogin(String.valueOf(uin),imSig);
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+
+    }
+
+    /**
+     * im登录
+     * @param identifier    用户账号
+     * @param imSig       用户签名
+     */
+    private void imLogin(String identifier, String imSig){
+
+        System.out.println("mainactivity---identifier" + identifier +
+                ",imSig---" + imSig);
+
+        TIMManager.getInstance().login(String.valueOf(identifier),
+                imSig,
+                new TIMCallBack() {
+                    @Override
+                    public void onError(int i, String s) {
+                        System.out.println("登录错误---" + s);
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        System.out.println("登录成功");
+                    }
+                });
     }
 }

@@ -1,7 +1,6 @@
 package com.yeejay.yplay.friend;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -14,6 +13,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.FriendsDetailAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -34,7 +34,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityAddFiendsDetail extends AppCompatActivity {
+public class ActivityAddFiendsDetail extends BaseActivity {
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
