@@ -11,11 +11,11 @@ import android.os.Parcelable;
 public class VoteOptionsBean implements Parcelable {
 
     int uin;
-    String name;
+    String nickName;
 
     public VoteOptionsBean(int uin, String name){
         this.uin = uin;
-        this.name = name;
+        this.nickName = name;
     }
 
     public int getUin() {
@@ -27,11 +27,11 @@ public class VoteOptionsBean implements Parcelable {
     }
 
     public String getName() {
-        return name;
+        return nickName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.nickName = name;
     }
 
 
@@ -39,7 +39,7 @@ public class VoteOptionsBean implements Parcelable {
     public String toString() {
         return "VoteOptionsBean{" +
                 "uin=" + uin +
-                ", name='" + name + '\'' +
+                ", name='" + nickName + '\'' +
                 '}';
     }
 
@@ -51,7 +51,7 @@ public class VoteOptionsBean implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.uin);
-        dest.writeString(this.name);
+        dest.writeString(this.nickName);
     }
 
     public VoteOptionsBean() {
@@ -59,7 +59,7 @@ public class VoteOptionsBean implements Parcelable {
 
     protected VoteOptionsBean(Parcel in) {
         this.uin = in.readInt();
-        this.name = in.readString();
+        this.nickName = in.readString();
     }
 
     public static final Parcelable.Creator<VoteOptionsBean> CREATOR = new Parcelable.Creator<VoteOptionsBean>() {

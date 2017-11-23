@@ -21,7 +21,6 @@
         android:id="@+id/frgans_img"
         android:layout_width="186dp"
         android:layout_height="186dp"
-        android:src="@drawable/app_img"
         android:layout_gravity="center"
         android:scaleType="fitXY"
         android:background="@android:color/transparent"

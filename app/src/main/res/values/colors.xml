@@ -67,6 +67,7 @@
     <color name="text_color_gray">#333333</color>
     <color name="text_color_gray2">#999999</color>
     <color name="text_color_gray3">#555555</color>
+    <color name="text_color_gray4">#D0D0D0</color>
     <color name="text_color_red">#FF0000</color>
 
     <!--feeds-->
@@ -80,6 +81,9 @@
     <color name="feeds_search_color">#F9F9F9</color>
     <color name="feeds_text_color">#52E0AF</color>
     <color name="feeds_text_color50">#8052E0AF</color>
+
+    <color name="boy_color">#91C1EE</color>
+    <color name="girl_color">#DF83B9</color>
 
     <!--message-->
     <color name="message_title_color">#57A8FF</color>

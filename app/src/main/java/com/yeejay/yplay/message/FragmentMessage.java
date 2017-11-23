@@ -11,9 +11,15 @@ import android.widget.TextView;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
+import com.yeejay.yplay.greendao.ImSession;
+import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -31,6 +37,8 @@ public class FragmentMessage extends BaseFragment{
     TextView frgTitle;
     @BindView(R.id.frg_user_info)
     ImageButton frgUserInfo;
+    @BindView(R.id.frg_edit)
+    ImageButton frgEdit;
     @BindView(R.id.message_recyclerView)
     SwipeMenuRecyclerView messageRecyclerView;
 
@@ -40,7 +48,11 @@ public class FragmentMessage extends BaseFragment{
         startActivity(new Intent(getActivity(), ActivityMyInfo.class));
     }
 
+    int dataOffset = 0;
     MessageAdapter messageAdapter;
+    List<ImSession> mDataList;
+    List<ImSession> imSessionList;
+    ImSessionDao imSessionDao;
 
     @Override
     public int getContentViewId() {
@@ -51,11 +63,16 @@ public class FragmentMessage extends BaseFragment{
     protected void initAllMembersView(Bundle savedInstanceState) {
         messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
+
+        imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+        mDataList = new ArrayList<>();
+
+
         initMessageView();
     }
 
     private void initMessageView(){
-        messageAdapter = new MessageAdapter(getActivity());
+        messageAdapter = new MessageAdapter(getActivity(),mDataList);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         messageRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
@@ -74,6 +91,35 @@ public class FragmentMessage extends BaseFragment{
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser){
             System.out.println("FragmentMessage---消息可见");
+            frgEdit.setVisibility(View.GONE);
+            updateUi();
         }
+    }
+
+    //从数据库中查找会话列表
+    private List<ImSession> queryDatabaseForImsession(){
+
+        return imSessionDao.queryBuilder()
+                .orderDesc(ImSessionDao.Properties.MsgTs)
+                .offset(dataOffset * 10)
+                .limit(10)
+                .list();
+    }
+
+    //更新UI
+    private void updateUi(){
+
+        mDataList.clear();
+
+        List<ImSession> tempList = queryDatabaseForImsession();
+        if (tempList == null){
+            System.out.println("数据库中没有查到数据");
+
+        }else{
+            System.out.println("查询到的列表长度---" + tempList.size());
+            mDataList.addAll(tempList);
+            messageAdapter.notifyDataSetChanged();
+        }
+
     }
 }

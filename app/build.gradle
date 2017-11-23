@@ -24,6 +24,8 @@ android {
         ndk {
             abiFilters "armeabi"
         }
+
+        multiDexEnabled true
     }
     buildTypes {
         release {

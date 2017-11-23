@@ -458,6 +458,7 @@ public class FragmentAnswer extends BaseFragment {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser) {
             System.out.println("FragmentAnswer---答题可见");
+            frgEdit.setVisibility(View.VISIBLE);
             MainActivity mainActivity = (MainActivity) getActivity();
             System.out.println("queationNum%7 == " + (questionNum % colorCount) + ",queationNum---" + questionNum);
             mainActivity.setmColor(backgroundColor[questionNum % colorCount]);
@@ -479,7 +480,7 @@ public class FragmentAnswer extends BaseFragment {
             //重新拉取数据
             if (questionNum == questionsList.size()) {
                 System.out.println();
-                SystemClock.sleep(1 * 1000);
+                SystemClock.sleep(1000);
                 getQuestionsList();
                 return;
             }
@@ -545,7 +546,6 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtnInvite.setVisibility(View.VISIBLE);
 
         //getQuestionsList();
-
     }
 
     //解除冷冻

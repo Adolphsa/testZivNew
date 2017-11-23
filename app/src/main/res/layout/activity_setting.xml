@@ -286,17 +286,6 @@
                     android:textColor="@color/play_color2"
                     android:textSize="16sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_toRightOf="@+id/setting_private_info"
-                    android:text="仅自己可见"
-                    android:textColor="@color/feeds_hight_gray"
-                    android:textSize="16sp"
-                    android:visibility="gone"
-                    />
 
                 <TextView
                     android:layout_width="wrap_content"

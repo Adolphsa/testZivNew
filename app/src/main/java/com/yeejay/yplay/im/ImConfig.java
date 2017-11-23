@@ -4,10 +4,13 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.tencent.imcore.SessionType;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMConnListener;
 import com.tencent.imsdk.TIMConversation;
+import com.tencent.imsdk.TIMConversationType;
 import com.tencent.imsdk.TIMCustomElem;
+import com.tencent.imsdk.TIMElemType;
 import com.tencent.imsdk.TIMLogLevel;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
@@ -16,6 +19,9 @@ import com.tencent.imsdk.TIMRefreshListener;
 import com.tencent.imsdk.TIMSdkConfig;
 import com.tencent.imsdk.TIMUserConfig;
 import com.tencent.imsdk.TIMUserStatusListener;
+import com.tencent.imsdk.TIMValueCallBack;
+import com.tencent.imsdk.ext.message.TIMConversationExt;
+import com.tencent.imsdk.ext.message.TIMManagerExt;
 import com.tencent.imsdk.ext.message.TIMUserConfigMsgExt;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -24,12 +30,16 @@ import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.model.ImCustomMsgData;
 import com.yeejay.yplay.model.ImSignatureRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.DialogUtils;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +83,7 @@ public class ImConfig {
         config = new TIMSdkConfig(IM_SDK_APP_ID)
                 .enableCrashReport(false)
                 .enableLogPrint(true)
-                .setLogLevel(TIMLogLevel.DEBUG)
+                .setLogLevel(TIMLogLevel.ERROR)
                 .setLogPath(Environment.getExternalStorageDirectory().getPath() + "/imyplay/");
 
         //初始化SDK
@@ -127,20 +137,59 @@ public class ImConfig {
                     @Override
                     public void onRefresh() {
                         Log.i(tag, "onRefresh");
+                        getOfflineMsgs();
                     }
 
                     @Override
                     public void onRefreshConversation(List<TIMConversation> conversations) {
                         Log.i(tag, "onRefreshConversation, conversation size: " + conversations.size());
+
+
+                        for (TIMConversation timCon : conversations) {
+
+                            TIMConversationExt conExt = new TIMConversationExt(timCon);
+                            conExt.getMessage(YPlayConstant.YPLAY_OFFINE_MSG_COUNT,
+                                    null,
+                                    new TIMValueCallBack<List<TIMMessage>>() {
+                                        @Override
+                                        public void onError(int i, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onSuccess(List<TIMMessage> timMessages) {
+                                            System.out.println("onRefreshConversation拉取离线消息");
+                                            ImConfig.getImInstance().updateSession(timMessages);
+                                        }
+                                    });
+
+                            conExt.setReadMessage(null, new TIMCallBack() {
+                                @Override
+                                public void onError(int i, String s) {
+                                    System.out.println("onRefreshConversation设置会话已读错误---" + s);
+                                }
+
+                                @Override
+                                public void onSuccess() {
+                                    System.out.println("onRefreshConversation设置会话已读成功");
+                                }
+                            });
+
+
+                        }
+
                     }
                 });
 
         //消息扩展用户配置
         userConfig = new TIMUserConfigMsgExt(userConfig)
                 //禁用消息存储
-                .enableStorage(false)
+                .enableStorage(true)
                 //开启消息已读回执
-                .enableReadReceipt(true);
+                .enableReadReceipt(true)
+                .enableRecentContact(false)
+                .enableRecentContactNotify(false);
+
 
         //将用户配置与通讯管理器进行绑定
         TIMManager.getInstance().setUserConfig(userConfig);
@@ -150,58 +199,8 @@ public class ImConfig {
             @Override
             public boolean onNewMessages(List<TIMMessage> list) {//收到新消息
                 //消息的内容解析请参考消息收发文档中的消息解析说明
-                System.out.println("消息数---" + list.size());
-                int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
-                ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
-                ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
-                for (TIMMessage timMessage : list) {
-                    if (timMessage.getElementCount() == 0) {
-                        continue;
-                    }
-                    String sessionId = timMessage.getMsg().session().sid();
-                    long msgId = timMessage.getMsgUniqueId();
-                    String sender = timMessage.getSender();
-                    int msgType = timMessage.getElement(0).getType().ordinal();
-                    String msgContent = ((TIMCustomElem) timMessage.getElement(0)).getData().toString();
-                    long msgTs = timMessage.getMsg().time();
+                updateSession(list);
 
-                    ImMsg imMsg = new ImMsg(null,sessionId,msgId,sender,msgType,msgContent,msgTs);
-                    try {
-                        imMsgDao.insert(imMsg);
-                    }catch (Exception e){
-                        System.out.println("消息插入异常");
-                    }
-
-                    //会话表
-                    String chater = sender;
-                    if (String.valueOf(uin).equals(sender)){
-                        chater = "";
-                    }
-
-                    ImSession imSession = imSessionDao.queryBuilder()
-                            .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                            .build().unique();
-                    if (imSession == null){
-                        ImSession session = new ImSession(null,
-                                sessionId,
-                                chater,
-                                null,
-                                null,
-                                0,
-                                sender,
-                                msgType,
-                                msgContent,
-                                msgTs,
-                                0);
-                        imSessionDao.insert(session);
-                    }else{
-                        //更新会话表
-                        imSession.setLastSender(sender);
-                        imSession.setMsgContent(msgContent);
-                        imSession.setMsgTs(msgTs);
-                        imSessionDao.update(imSession);
-                    }
-                }
                 return true;//返回true将终止回调链，不再调用下一个新消息监听器
             }
         });
@@ -281,5 +280,212 @@ public class ImConfig {
                         System.out.println("登录成功");
                     }
                 });
+    }
+
+    //会话消息插入或更新
+    public void updateSession(List<TIMMessage> list) {
+
+        System.out.println("消息长度---" + list.size());
+        int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
+        ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
+        ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+
+        HashMap<String, Integer> sessions = new HashMap<String, Integer>();
+
+        for (TIMMessage timMessage : list) {
+
+            if (timMessage.getElementCount() == 0) {
+                continue;
+            }
+
+            String sessionId = timMessage.getMsg().session().sid();
+            int sessionType = timMessage.getMsg().session().type().ordinal();
+//            String identifier = timMessage.getMsg().session().identifier();
+//            String peer       =  timMessage.getMsg().session().
+
+            if (sessionType != SessionType.kGroup.ordinal()) {
+                System.out.println("消息会话类型非群会话---" + sessionType);
+                continue;
+            }
+
+            long msgId = timMessage.getMsgUniqueId();
+            String sender = timMessage.getSender();
+            int msgType = timMessage.getElement(0).getType().ordinal();
+            String msgContent = new String(((TIMCustomElem) timMessage.getElement(0)).getData());
+            long msgTs = timMessage.getMsg().time();
+
+            System.out.printf("sessionId:%s, msgId:%d, sender:%s, msgType:%d, msgTs:%d, msgContent:%s\n",
+                    sessionId, msgId, sender, msgType, msgTs, msgContent);
+
+            String headerUrl = "";
+            String nickName = "";
+            int status = -1;
+
+            if (msgType == TIMElemType.Custom.ordinal()) {
+
+                ImCustomMsgData imCustomMsgData = GsonUtil.GsonToBean(msgContent, ImCustomMsgData.class);
+
+                int customType = imCustomMsgData.getDataType();
+                String customData = imCustomMsgData.getData();
+
+                if (customType == 1) {//第一次投票消息
+                    status = 0;
+                }
+
+                if (customType == 2) {//第一次的回复消息
+                    status = 1;
+                }
+
+                if (customType == 1 || customType == 2) {
+                    UserInfoResponde.PayloadBean.InfoBean senderInfo =
+                            GsonUtil.GsonToBean(customData, UserInfoResponde.PayloadBean.InfoBean.class);
+                    headerUrl = senderInfo.getHeadImgUrl();
+                    nickName = senderInfo.getNickName();
+                }
+
+            } else {
+                status = 2;
+            }
+
+            if (status == -1) {
+                System.out.println("im message status -1");
+                continue;
+            }
+
+            sessions.put(sessionId, 1);
+
+            ImMsg imMsg = new ImMsg(null, sessionId, msgId, sender, msgType, msgContent, msgTs);
+            try {
+                imMsgDao.insert(imMsg);
+            } catch (Exception e) {
+                System.out.println("消息插入异常");
+            }
+
+            //会话表
+            String chater = sender;
+            if (String.valueOf(uin).equals(sender)) {    //如果sender是自己
+                chater = "";
+                nickName = "";
+                headerUrl = "";
+            }
+
+            //如果是第一次投票消息并且发送者是自己  不插入会话表
+            if ((status == 0) && (String.valueOf(uin).equals(sender))) {
+                continue;
+            }
+
+            ImSession imSession = imSessionDao.queryBuilder()
+                    .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                    .build().unique();
+
+            if (imSession == null) {
+                ImSession session = new ImSession(null,
+                        sessionId,
+                        chater,
+                        status,
+                        nickName,
+                        headerUrl,
+                        msgId,
+                        sender,
+                        msgType,
+                        msgContent,
+                        msgTs,
+                        0);
+                imSessionDao.insert(session);
+            } else {
+                //更新会话表
+                imSession.setLastMsgId(msgId);
+                imSession.setLastSender(sender);
+                imSession.setMsgContent(msgContent);
+                imSession.setMsgType(msgType);
+                imSession.setMsgTs(msgTs);
+                imSession.setStatus(status);
+
+                if (!TextUtils.isEmpty(chater) && (TextUtils.isEmpty(imSession.getChater()))) {
+                    imSession.setChater(chater);
+                }
+
+                if (!TextUtils.isEmpty(nickName) && (TextUtils.isEmpty(imSession.getNickName()))) {
+                    imSession.setNickName(nickName);
+                }
+
+                if (!TextUtils.isEmpty(headerUrl) && (TextUtils.isEmpty(imSession.getHeaderImgUrl()))) {
+                    imSession.setHeaderImgUrl(headerUrl);
+                }
+
+                imSessionDao.update(imSession);
+            }
+
+
+        }
+
+        Iterator iter = sessions.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            String sid = (String) entry.getKey();
+
+            System.out.println("设置会话已读开始---" + sid);
+
+            TIMConversation conversation = TIMManager.getInstance().getConversation(
+                    TIMConversationType.Group, sid);
+
+            TIMConversationExt conExt = new TIMConversationExt(conversation);
+            conExt.setReadMessage(null, new TIMCallBack() {
+                @Override
+                public void onError(int i, String s) {
+                    System.out.println("设置会话已读错误---" + s);
+                }
+
+                @Override
+                public void onSuccess() {
+                    System.out.println("设置会话已读成功");
+                }
+            });
+
+
+        }
+
+
+    }
+
+    //拉取离线会话消息
+    private void getOfflineMsgs() {
+
+        System.out.println("REFRESH获取离线消息");
+        List<TIMConversation> offlineList = TIMManagerExt.getInstance().getConversationList();
+
+        for (TIMConversation timCon : offlineList) {
+
+            TIMConversationExt conExt = new TIMConversationExt(timCon);
+            conExt.getMessage(YPlayConstant.YPLAY_OFFINE_MSG_COUNT,
+                    null,
+                    new TIMValueCallBack<List<TIMMessage>>() {
+                        @Override
+                        public void onError(int i, String s) {
+
+                        }
+
+                        @Override
+                        public void onSuccess(List<TIMMessage> timMessages) {
+                            System.out.println("IM登录成功，拉取离线消息");
+                            ImConfig.getImInstance().updateSession(timMessages);
+                        }
+                    });
+
+            conExt.setReadMessage(null, new TIMCallBack() {
+                @Override
+                public void onError(int i, String s) {
+                    System.out.println("设置会话已读错误---" + s);
+                }
+
+                @Override
+                public void onSuccess() {
+                    System.out.println("设置会话已读成功");
+                }
+            });
+
+
+        }
     }
 }

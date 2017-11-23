@@ -34,4 +34,6 @@ public class YPlayConstant {
     public static final int YPLAY_FEEDS_TYPE = 1;
     public static final int YPLAY_MY_INFO_TYPE = 2;
 
+    public static final int YPLAY_OFFINE_MSG_COUNT = 1000;
+
 }

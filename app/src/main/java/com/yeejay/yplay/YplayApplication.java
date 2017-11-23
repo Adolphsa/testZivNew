@@ -8,6 +8,7 @@ import com.tencent.wns.client.inte.WnsClientFactory;
 import com.tencent.wns.client.inte.WnsService;
 import com.yeejay.yplay.greendao.DaoMaster;
 import com.yeejay.yplay.greendao.DaoSession;
+import com.yeejay.yplay.greendao.DataBaseHelper;
 import com.yeejay.yplay.im.ImConfig;
 
 /**
@@ -20,6 +21,7 @@ public class YplayApplication extends Application {
     private static YplayApplication instance;
 
     private DaoMaster.DevOpenHelper mHelper;
+    private DataBaseHelper dataBaseHelper;
     private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
@@ -60,10 +62,14 @@ public class YplayApplication extends Application {
 
     private void setDatabase() {
 
+//        dataBaseHelper = new DataBaseHelper(this,"yplay-db");
+
         mHelper = new DaoMaster.DevOpenHelper(this,"yplay-db", null);
-        db =mHelper.getWritableDatabase();
+        db = mHelper.getWritableDatabase();
         mDaoMaster = new DaoMaster(db);
         mDaoSession = mDaoMaster.newSession();
+
+
     }
 
     public DaoSession getDaoSession() {

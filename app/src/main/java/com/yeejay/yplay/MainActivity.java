@@ -10,12 +10,18 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.tencent.imsdk.TIMCallBack;
+import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMManager;
+import com.tencent.imsdk.TIMMessage;
+import com.tencent.imsdk.TIMValueCallBack;
+import com.tencent.imsdk.ext.message.TIMConversationExt;
+import com.tencent.imsdk.ext.message.TIMManagerExt;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.friend.FragmentFriend;
+import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -98,8 +104,6 @@ public class MainActivity extends BaseActivity {
     public void setmColor(int mColor) {
         this.mColor = mColor;
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -263,7 +267,53 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void onSuccess() {
                         System.out.println("登录成功");
+
+                        getOfflineMsgs();
                     }
                 });
     }
+
+    //拉取离线会话消息
+    private void getOfflineMsgs(){
+
+        System.out.println("获取离线消息");
+        List<TIMConversation> offlineList = TIMManagerExt.getInstance().getConversationList();
+
+        for (TIMConversation timCon : offlineList) {
+
+            TIMConversationExt conExt = new TIMConversationExt(timCon);
+            conExt.getMessage(YPlayConstant.YPLAY_OFFINE_MSG_COUNT,
+                    null,
+                    new TIMValueCallBack<List<TIMMessage>>() {
+                        @Override
+                        public void onError(int i, String s) {
+
+                        }
+
+                        @Override
+                        public void onSuccess(List<TIMMessage> timMessages) {
+                            System.out.println("IM登录成功，拉取离线消息");
+                            ImConfig.getImInstance().updateSession(timMessages);
+                        }
+                    });
+
+            conExt.setReadMessage(null, new TIMCallBack() {
+                @Override
+                public void onError(int i, String s) {
+                    System.out.println("设置会话已读错误---" + s);
+                }
+
+                @Override
+                public void onSuccess() {
+                    System.out.println("设置会话已读成功");
+                }
+            });
+
+
+        }
+
+
+
+    }
+
 }

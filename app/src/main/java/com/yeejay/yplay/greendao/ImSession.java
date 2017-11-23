@@ -18,6 +18,7 @@ public class ImSession {
     @Index(unique = true)
     private String sessionId;           //会话ID
     private  String chater;             //聊天对象
+    private int status;
     private String nickName;            //聊天对象昵称
     private String headerImgUrl;        //头像URL
     private long lastMsgId;             //最新消息ID
@@ -26,13 +27,14 @@ public class ImSession {
     private String msgContent;          //消息内容
     private long msgTs;                 //消息时间戳
     private long lastReadMsgId;         //最近已读的消息Id;
-    @Generated(hash = 155607167)
-    public ImSession(Long id, String sessionId, String chater, String nickName,
-            String headerImgUrl, long lastMsgId, String lastSender, int msgType,
-            String msgContent, long msgTs, long lastReadMsgId) {
+    @Generated(hash = 1848677176)
+    public ImSession(Long id, String sessionId, String chater, int status,
+            String nickName, String headerImgUrl, long lastMsgId, String lastSender,
+            int msgType, String msgContent, long msgTs, long lastReadMsgId) {
         this.id = id;
         this.sessionId = sessionId;
         this.chater = chater;
+        this.status = status;
         this.nickName = nickName;
         this.headerImgUrl = headerImgUrl;
         this.lastMsgId = lastMsgId;
@@ -110,5 +112,11 @@ public class ImSession {
     }
     public void setLastReadMsgId(long lastReadMsgId) {
         this.lastReadMsgId = lastReadMsgId;
+    }
+    public int getStatus() {
+        return this.status;
+    }
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
