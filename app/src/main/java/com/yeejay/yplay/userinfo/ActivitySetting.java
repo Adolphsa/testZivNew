@@ -659,7 +659,7 @@ public class ActivitySetting extends BaseActivity {
         editText .setLayoutParams(etParam);
 
         if (tag == 1){
-            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
+            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
             editText.setSingleLine();
             editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override

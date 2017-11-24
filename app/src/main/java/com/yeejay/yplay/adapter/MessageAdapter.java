@@ -107,8 +107,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             String data = jsonObject.getString("Data");
             if (1 == dataType) {
 
-                MsgContent1.DataBean msgContent1 = GsonUtil.GsonToBean(data, MsgContent1.DataBean.class);
-                MsgContent1.DataBean.SenderInfoBean senderInfoBean = msgContent1.getSenderInfo();
+                MsgContent1 msgContent1 = GsonUtil.GsonToBean(data, MsgContent1.class);
+                MsgContent1.SenderInfoBean senderInfoBean = msgContent1.getSenderInfo();
                 int gender = senderInfoBean.getGender();
                 String genderStr = gender == 1 ? "男生" : "女生";
                 int grade = senderInfoBean.getGrade();
@@ -126,7 +126,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
                 holder.msgItemName.setText(gradeAndSchool + genderStr);
                 holder.msgItemCuo.setVisibility(View.VISIBLE);
                 holder.msgItemContent.setText("来自：投票");
-                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()));
+                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
 
             }
         } catch (JSONException e) {
@@ -142,31 +142,25 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             String data = jsonObject.getString("Data");
             if (2 == dataType) {
                 MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-                MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderinfo();
-                String headerUrl = senderInfoBean.getHeadImgUrl();
-                int gender = senderInfoBean.getGender();
-                int grade = senderInfoBean.getGrade();
-                int schoolType = senderInfoBean.getSchoolType();
+                MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+                int gender = receiverInfoBean.getGender();
+                String genderStr = gender == 1 ? "男生" : "女生";
+                int grade = receiverInfoBean.getGrade();
+                int schoolType = receiverInfoBean.getSchoolType();
                 String gradeAndSchool = FriendFeedsUtil.schoolType(schoolType, grade);
-                String nickName = senderInfoBean.getNickName();
-                if (TextUtils.isEmpty(headerUrl)) {
-                    if (gender == 1) {
-                        holder.msgItemHeaderImg.setImageResource(R.drawable.feeds_boy);
-                        holder.msgItemName.setTextColor(context.getResources().getColor(R.color.boy_color));
-                    } else if (gender == 2) {
-                        holder.msgItemHeaderImg.setImageResource(R.drawable.feeds_girl);
-                        holder.msgItemName.setTextColor(context.getResources().getColor(R.color.girl_color));
-                    }
-                    holder.msgItemName.setText(gradeAndSchool);
-                } else {
-                    Picasso.with(context).load(headerUrl).into(holder.msgItemHeaderImg);
-                    holder.msgItemName.setTextColor(context.getResources().getColor(R.color.text_color_gray));
-                    holder.msgItemName.setText(nickName);
+
+                if (gender == 1) {
+                    holder.msgItemHeaderImg.setImageResource(R.drawable.feeds_boy);
+                    holder.msgItemName.setTextColor(context.getResources().getColor(R.color.boy_color));
+                } else if (gender == 2) {
+                    holder.msgItemHeaderImg.setImageResource(R.drawable.feeds_girl);
+                    holder.msgItemName.setTextColor(context.getResources().getColor(R.color.girl_color));
                 }
 
+                holder.msgItemName.setText(gradeAndSchool + genderStr);
                 holder.msgItemCuo.setVisibility(View.VISIBLE);
                 holder.msgItemContent.setText("来自：投票");
-                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()));
+                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
 
             }
         } catch (JSONException e) {
@@ -182,7 +176,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             String data = jsonObject.getString("Data");
             if (2 == dataType) {
                 MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-                MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderinfo();
+                MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
                 String headerUrl = senderInfoBean.getHeadImgUrl();
 //                int gender = senderInfoBean.getGender();
 //                int grade = senderInfoBean.getGrade();
@@ -197,9 +191,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
                 }
                 holder.msgItemName.setText(nickName);
+                holder.msgItemName.setTextColor(context.getResources().getColor(R.color.text_color_gray));
                 holder.msgItemCuo.setVisibility(View.GONE);
                 holder.msgItemContent.setText(content);
-                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()));
+                holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
 
             }
         } catch (JSONException e) {
@@ -213,7 +208,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
         String headerUrl = imSession.getHeaderImgUrl();
         String nickName = imSession.getNickName();
-        String msgTime = YplayTimeUtils.format(imSession.getMsgTs());
+        long msgTime = imSession.getMsgTs();
+        //String msgTime = YplayTimeUtils.format(imSession.getMsgTs());
 
         if (TextUtils.isEmpty(headerUrl)) {
             holder.msgItemHeaderImg.setImageResource(R.drawable.header_deafult);
@@ -224,7 +220,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
         holder.msgItemName.setText(nickName);
         holder.msgItemCuo.setVisibility(View.GONE);
         holder.msgItemContent.setText(msgContent);
-        holder.msgItemTvTime.setText(msgTime);
+        holder.msgItemTvTime.setText(YplayTimeUtils.format(msgTime*1000));
     }
 
 }

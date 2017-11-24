@@ -215,4 +215,10 @@ public interface YPlayApi {
     @POST("/api/im/geneusersig")
     Observable<ImSignatureRespond> getImSignature(@FieldMap Map<String,Object> filemap);
 
+    //投票消息回复
+    @FormUrlEncoded
+    @POST("/api/im/sendvotereplymsg")
+    Observable<BaseRespond> replayImVote(@FieldMap Map<String,Object> filemap);
+
+
 }

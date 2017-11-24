@@ -9,6 +9,14 @@ import java.util.Date;
 
 public class YplayTimeUtils {
 
+    private static final long ONE_MINUTE_SENCOND = 60L;
+    private static final long ONE_HOUR_SENCOND = 3600L;
+    private static final long ONE_DAY_SENCOND = 86400L;
+    private static final long ONE_WEEK_SENCOND = 604800L;
+
+
+
+    //毫秒
     private static final long ONE_MINUTE = 60000L;
     private static final long ONE_HOUR = 3600000L;
     private static final long ONE_DAY = 86400000L;
@@ -21,6 +29,11 @@ public class YplayTimeUtils {
     private static final String ONE_MONTH_AGO = "月前";
     private static final String ONE_YEAR_AGO = "年前";
 
+    /**
+     *
+     * @param time 毫秒
+     * @return 距离现在多长时间
+     */
     public static String format(Long time) {
 //        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Date date = null;

@@ -63,32 +63,32 @@ public class MainActivity extends BaseActivity {
     @OnClick(R.id.main_nav_bar_left)
     public void leftButton(View view) {
         viewPager.setCurrentItem(0);
-        feedsFragmentStatus();
+//        feedsFragmentStatus();
     }
 
     @OnClick(R.id.main_nav_bar_right)
     public void rightButton(View view) {
         viewPager.setCurrentItem(2);
-        messageFragmentStatus();
+//        messageFragmentStatus();
     }
 
     //左二
     @OnClick(R.id.main_nav_bar_left2)
     public void leftButton2(View view){
         viewPager.setCurrentItem(0);
-        feedsFragmentStatus();
+//        feedsFragmentStatus();
     }
 
     @OnClick(R.id.main_nav_center2)
     public void ceneterButton2(View view){
         viewPager.setCurrentItem(1);
-        playFragmentStatus();
+//        playFragmentStatus();
     }
 
     @OnClick(R.id.main_nav_right2)
     public void rightButton2(View view){
         viewPager.setCurrentItem(2);
-        messageFragmentStatus();
+//        messageFragmentStatus();
     }
 
     FragmentAdapter frgAdapter;
@@ -162,7 +162,7 @@ public class MainActivity extends BaseActivity {
 
     //动态
     private void feedsFragmentStatus(){
-        System.out.println("动态");
+        System.out.println("动态---MainActivity");
         mainNavBarRl.setVisibility(View.INVISIBLE);
         mainnavBar2.setVisibility(View.VISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(R.color.feeds_title_color));
@@ -170,7 +170,7 @@ public class MainActivity extends BaseActivity {
 
     //答题
     private void playFragmentStatus(){
-        System.out.println("答题");
+        System.out.println("答题---MainActivity");
         mainNavBarRl.setVisibility(View.VISIBLE);
         mainnavBar2.setVisibility(View.INVISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(mColor));
@@ -179,7 +179,7 @@ public class MainActivity extends BaseActivity {
 
     //消息
     private void messageFragmentStatus(){
-        System.out.println("消息");
+        System.out.println("消息---MainActivity");
         mainNavBarRl.setVisibility(View.INVISIBLE);
         mainnavBar2.setVisibility(View.VISIBLE);
         getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
@@ -251,7 +251,7 @@ public class MainActivity extends BaseActivity {
      * @param identifier    用户账号
      * @param imSig       用户签名
      */
-    private void imLogin(String identifier, String imSig){
+    private void imLogin(final String identifier, final String imSig){
 
         System.out.println("mainactivity---identifier" + identifier +
                 ",imSig---" + imSig);
@@ -261,12 +261,14 @@ public class MainActivity extends BaseActivity {
                 new TIMCallBack() {
                     @Override
                     public void onError(int i, String s) {
-                        System.out.println("登录错误---" + s);
+                        System.out.println("登录错误---" + s + ",错误码---" + i);
+                        YPlayConstant.IM_ERROR_CODE = 6208;
+
                     }
 
                     @Override
                     public void onSuccess() {
-                        System.out.println("登录成功");
+                        System.out.println("mainactivity---登录成功");
 
                         getOfflineMsgs();
                     }

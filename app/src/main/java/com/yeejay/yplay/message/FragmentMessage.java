@@ -79,10 +79,22 @@ public class FragmentMessage extends BaseFragment{
             @Override
             public void onItemClick(View itemView, int position) {
                 //跳转到聊天页面
-                System.out.println("啦啦啦" + position);
-                startActivity(new Intent(getActivity(),ActivityChatWindow.class));
+                Intent intent = new Intent(getActivity(),ActivityNnonymityReply.class);
+                ImSession imSession = mDataList.get(position);
+                String sessionId = imSession.getSessionId();
+                int status = imSession.getStatus();
+                String sender = imSession.getLastSender();
+                String msgContent = imSession.getMsgContent();
+                intent.putExtra("yplay_sessionId",sessionId);
+                intent.putExtra("yplay_session_status",status);
+                intent.putExtra("yplay_sender",sender);
+                intent.putExtra("yplay_msg_content",msgContent);
+
+                System.out.println("message----sessionId---" + sessionId);
+                startActivity(intent);
             }
         });
+
         messageRecyclerView.setAdapter(messageAdapter);
     }
 

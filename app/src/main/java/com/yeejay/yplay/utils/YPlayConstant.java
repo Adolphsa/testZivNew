@@ -36,4 +36,6 @@ public class YPlayConstant {
 
     public static final int YPLAY_OFFINE_MSG_COUNT = 1000;
 
+    public static int IM_ERROR_CODE = 0;
+
 }

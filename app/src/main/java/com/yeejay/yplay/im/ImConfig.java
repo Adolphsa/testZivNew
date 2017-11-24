@@ -102,8 +102,14 @@ public class ImConfig {
                     @Override
                     public void onForceOffline() {
                         //被其他终端踢下线
-                        System.out.println("你的账号已在其他地方登录");
-                        DialogUtils.repeatLoginDialog(AppManager.getAppManager().currentActivity(), "您的账号已在其他地方登录");
+                        System.out.println("你的账号已在其他地方登录---" + YPlayConstant.IM_ERROR_CODE);
+                        if (6208 == YPlayConstant.IM_ERROR_CODE){
+                            System.out.println("错误码为6208，重新登录");
+                            getImSignature();
+                        }else {
+                            DialogUtils.repeatLoginDialog(AppManager.getAppManager().currentActivity(), "您的账号已在其他地方登录");
+                        }
+
                         Log.i(tag, "onForceOffline");
                     }
 
@@ -264,7 +270,7 @@ public class ImConfig {
      */
     private void imLogin(String identifier, String imSig) {
 
-        System.out.println("mainactivity---identifier" + identifier +
+        System.out.println("IMConfig---identifier" + identifier +
                 ",imSig---" + imSig);
 
         TIMManager.getInstance().login(String.valueOf(identifier),
@@ -272,12 +278,12 @@ public class ImConfig {
                 new TIMCallBack() {
                     @Override
                     public void onError(int i, String s) {
-                        System.out.println("登录错误---" + s);
+                        System.out.println("IMConfig登录错误---" + s);
                     }
 
                     @Override
                     public void onSuccess() {
-                        System.out.println("登录成功");
+                        System.out.println("IMConfig登录成功");
                     }
                 });
     }
@@ -439,7 +445,7 @@ public class ImConfig {
 
                 @Override
                 public void onSuccess() {
-                    System.out.println("设置会话已读成功");
+//                    System.out.println("设置会话已读成功");
                 }
             });
 
