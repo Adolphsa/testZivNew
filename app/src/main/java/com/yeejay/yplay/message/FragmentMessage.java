@@ -3,6 +3,7 @@ package com.yeejay.yplay.message;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -17,6 +18,8 @@ import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +70,6 @@ public class FragmentMessage extends BaseFragment{
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         mDataList = new ArrayList<>();
 
-
         initMessageView();
     }
 
@@ -79,16 +81,28 @@ public class FragmentMessage extends BaseFragment{
             @Override
             public void onItemClick(View itemView, int position) {
                 //跳转到聊天页面
-                Intent intent = new Intent(getActivity(),ActivityNnonymityReply.class);
                 ImSession imSession = mDataList.get(position);
-                String sessionId = imSession.getSessionId();
                 int status = imSession.getStatus();
                 String sender = imSession.getLastSender();
+                String sessionId = imSession.getSessionId();
                 String msgContent = imSession.getMsgContent();
+                int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+
+                Intent intent = new Intent();
                 intent.putExtra("yplay_sessionId",sessionId);
                 intent.putExtra("yplay_session_status",status);
                 intent.putExtra("yplay_sender",sender);
                 intent.putExtra("yplay_msg_content",msgContent);
+
+                if (status == 0){
+                    intent.setClass(getActivity(),ActivityNnonymityReply.class);
+                }else if (status == 1 && !TextUtils.isEmpty(sender) && sender.equals(String.valueOf(uin))){
+                    intent.setClass(getActivity(),ActivityNnonymityReply.class);
+                }else if (status == 1 && !TextUtils.isEmpty(sender) && !sender.equals(String.valueOf(uin))){
+                    intent.setClass(getActivity(),ActivityChatWindow.class);
+                }else if (status == 2){
+                    intent.setClass(getActivity(),ActivityChatWindow.class);
+                }
 
                 System.out.println("message----sessionId---" + sessionId);
                 startActivity(intent);
