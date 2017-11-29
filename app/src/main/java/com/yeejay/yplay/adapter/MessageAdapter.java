@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.tencent.imsdk.TIMElemType;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.model.MsgContent1;
@@ -206,6 +207,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
     //status = 2
     private void initItem4(messageHolder holder, String msgContent, ImSession imSession) {
 
+        int msgType = imSession.getMsgType();
+        if (msgType == TIMElemType.Custom.ordinal()){
+
+        }
+
         String headerUrl = imSession.getHeaderImgUrl();
         String nickName = imSession.getNickName();
         long msgTime = imSession.getMsgTs();
@@ -218,6 +224,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
         }
         holder.msgItemName.setText(nickName);
+        holder.msgItemName.setTextColor(context.getResources().getColor(R.color.text_color_gray));
         holder.msgItemCuo.setVisibility(View.GONE);
         holder.msgItemContent.setText(msgContent);
         holder.msgItemTvTime.setText(YplayTimeUtils.format(msgTime*1000));

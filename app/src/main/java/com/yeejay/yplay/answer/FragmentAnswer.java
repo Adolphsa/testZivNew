@@ -545,7 +545,7 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtnNextQuestion.setVisibility(View.INVISIBLE);
         frgansBtnInvite.setVisibility(View.VISIBLE);
 
-        //getQuestionsList();
+        getQuestionsList();
     }
 
     //解除冷冻

@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="com.yeejay.yplay.message.ActivityChatWindow">
 
-    <include layout="@layout/layout_title_bar2"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/acw_recycle_view"
+    <include layout="@layout/layout_title_bar2"
+        android:id="@+id/acw_title"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="38dp"
+        android:layout_alignParentTop="true"
         />
+    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
+        android:id="@+id/acw_pull_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/acw_title"
+        android:layout_above="@+id/acw_input_ll"
+        >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/acw_recycle_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            />
+
+    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
+
     <LinearLayout
         android:id="@+id/acw_input_ll"
         android:layout_width="match_parent"
@@ -50,4 +63,4 @@
             android:clickable="false"
             />
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
@@ -18,6 +22,7 @@ import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -32,7 +37,9 @@ import butterknife.OnClick;
  * Created by Administrator on 2017/10/26.
  */
 
-public class FragmentMessage extends BaseFragment{
+public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.SessionUpdateListener{
+
+    private static final String TAG = "FragmentMessage";
 
     @BindView(R.id.message_title)
     RelativeLayout messageTitle;
@@ -44,6 +51,8 @@ public class FragmentMessage extends BaseFragment{
     ImageButton frgEdit;
     @BindView(R.id.message_recyclerView)
     SwipeMenuRecyclerView messageRecyclerView;
+    @BindView(R.id.message_refresh_view)
+    PullToRefreshLayout messageRefreshView;
 
     @OnClick(R.id.frg_user_info)
     public void userInfo(View view){
@@ -67,6 +76,7 @@ public class FragmentMessage extends BaseFragment{
         messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
 
+        MessageUpdateUtil.getMsgUpdateInstance().setSessionUpdateListener(this);
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         mDataList = new ArrayList<>();
 
@@ -74,6 +84,7 @@ public class FragmentMessage extends BaseFragment{
     }
 
     private void initMessageView(){
+
         messageAdapter = new MessageAdapter(getActivity(),mDataList);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -86,6 +97,7 @@ public class FragmentMessage extends BaseFragment{
                 String sender = imSession.getLastSender();
                 String sessionId = imSession.getSessionId();
                 String msgContent = imSession.getMsgContent();
+                String nickName = imSession.getNickName();
                 int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
 
                 Intent intent = new Intent();
@@ -93,6 +105,9 @@ public class FragmentMessage extends BaseFragment{
                 intent.putExtra("yplay_session_status",status);
                 intent.putExtra("yplay_sender",sender);
                 intent.putExtra("yplay_msg_content",msgContent);
+                intent.putExtra("yplay_nick_name",nickName);
+
+                Log.d(TAG, "sessionId: " + sessionId);
 
                 if (status == 0){
                     intent.setClass(getActivity(),ActivityNnonymityReply.class);
@@ -110,6 +125,27 @@ public class FragmentMessage extends BaseFragment{
         });
 
         messageRecyclerView.setAdapter(messageAdapter);
+
+        messageRefreshView.setCanRefresh(false);
+        messageRefreshView.setRefreshListener(new BaseRefreshListener() {
+            @Override
+            public void refresh() {
+
+            }
+
+            @Override
+            public void loadMore() {
+                dataOffset++;
+                List<ImSession> tempImSessinList = queryDatabaseForImsession();
+                if (tempImSessinList != null && tempImSessinList.size() > 0){
+                    mDataList.addAll(tempImSessinList);
+                    messageAdapter.notifyDataSetChanged();
+                }else {
+                    Toast.makeText(getActivity(),"没有更多数据了",Toast.LENGTH_LONG).show();
+                }
+                messageRefreshView.finishLoadMore();
+            }
+        });
     }
 
     @Override
@@ -118,6 +154,7 @@ public class FragmentMessage extends BaseFragment{
         if (isVisibleToUser){
             System.out.println("FragmentMessage---消息可见");
             frgEdit.setVisibility(View.GONE);
+            dataOffset = 0;
             updateUi();
         }
     }
@@ -145,7 +182,18 @@ public class FragmentMessage extends BaseFragment{
             System.out.println("查询到的列表长度---" + tempList.size());
             mDataList.addAll(tempList);
             messageAdapter.notifyDataSetChanged();
+            messageRecyclerView.scrollToPosition(0);
+            messageRecyclerView.loadMoreFinish(false, true);
         }
 
     }
+
+    @Override
+    public void onSessionUpdate(ImSession imSession) {
+        String sessionId =  imSession.getSessionId();
+        Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId---" + sessionId);
+
+        updateUi();
+    }
+
 }

@@ -23,9 +23,10 @@ public class ImMsg {
     private int msgType;        //消息类型
     private String msgContent;  //消息内容
     private long msgTs;          //消息时间戳
-    @Generated(hash = 1711874305)
+    private int msgSucess;          //消息是否发送成功
+    @Generated(hash = 1162226783)
     public ImMsg(Long id, String sessionId, long msgId, String sender, int msgType,
-            String msgContent, long msgTs) {
+            String msgContent, long msgTs, int msgSucess) {
         this.id = id;
         this.sessionId = sessionId;
         this.msgId = msgId;
@@ -33,6 +34,7 @@ public class ImMsg {
         this.msgType = msgType;
         this.msgContent = msgContent;
         this.msgTs = msgTs;
+        this.msgSucess = msgSucess;
     }
     @Generated(hash = 2125460713)
     public ImMsg() {
@@ -78,6 +80,12 @@ public class ImMsg {
     }
     public void setMsgTs(long msgTs) {
         this.msgTs = msgTs;
+    }
+    public int getMsgSucess() {
+        return this.msgSucess;
+    }
+    public void setMsgSucess(int msgSucess) {
+        this.msgSucess = msgSucess;
     }
 
 
