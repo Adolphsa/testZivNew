@@ -27,4 +27,5 @@
     <string name="laz_btn_get_address_book">获取通讯录</string>
     <string name="laz_tv_tips2">为你推荐在APP内的好友</string>
     <string name="cl_primary_header">现在读年级</string>
+    <string name="contribute_text1">投稿你的问题，让同校同学回答！ \n投稿审核通过后，将匿名展示投票内容～</string>
 </resources>

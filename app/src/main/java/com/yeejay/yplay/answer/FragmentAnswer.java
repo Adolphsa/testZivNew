@@ -474,12 +474,12 @@ public class FragmentAnswer extends BaseFragment {
     private void nextQuestionUpdate() {
 
         if (questionsList != null && questionsList.size() > 0) {
-            System.out.println("啦啦啦啦nextQuestionUpdate---quesionNum---" + questionNum + questionsList.size());
+            System.out.println("啦啦啦啦nextQuestionUpdate---quesionNum---" + questionNum + ",questionsList.size()---" + questionsList.size());
 
             //最后一题打完之后的逻辑
             //重新拉取数据
             if (questionNum == questionsList.size()) {
-                System.out.println();
+                System.out.println("啦啦啦啦nextQuestionUpdate2---quesionNum---" + questionNum + ",questionsList.size()---" + questionsList.size());
                 SystemClock.sleep(1000);
                 getQuestionsList();
                 return;

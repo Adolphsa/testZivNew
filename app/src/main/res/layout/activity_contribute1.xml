@@ -59,8 +59,8 @@
             />
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:text="匿名投稿，同校同级会优先看到"
+            android:layout_height="wrap_content"
+            android:text="@string/contribute_text1"
             android:textSize="14sp"
             android:textColor="@color/feeds_hight_gray"
             android:layout_gravity="center_horizontal"

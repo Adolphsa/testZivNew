@@ -94,8 +94,8 @@ public class MessageUpdateUtil {
             headerUrl = "";
         }
 
-        System.out.printf("sessionId:%s, msgId:%d, sender:%s, msgType:%d, msgTs:%d, msgContent:%s\n",
-                sessionId, msgId, sender, msgType, msgTs, msgContent);
+//        System.out.printf("sessionId:%s, msgId:%d, sender:%s, msgType:%d, msgTs:%d, msgContent:%s\n",
+//                sessionId, msgId, sender, msgType, msgTs, msgContent);
 
         //收到文本消息
         if(msgType == TIMElemType.Text.ordinal()){
@@ -131,25 +131,39 @@ public class MessageUpdateUtil {
                 MsgContent2.SenderInfoBean   senderInfo   = content2.getSenderInfo();
                 MsgContent2.ReceiverInfoBean receiverInfo = content2.getReceiverInfo();
 
-                /*
-                MsgContent2.SenderInfoBean senderInfo =
-                        ;GsonUtil.GsonToBean(customData, MsgContent2.SenderInfoBean.class)
-
-                MsgContent2.ReceiverInfoBean receiverInfo =
-                        GsonUtil.GsonToBean(customData, MsgContent2.ReceiverInfoBean.class);
-                */
-
                 System.out.printf("customData  %s\n", customData);
 
-                System.out.printf("customType sender nickName %s, headImgUrl %s, receiver nickName %s, headImgUrl %s\n",
-                        senderInfo.getNickName(), senderInfo.getHeadImgUrl(), receiverInfo.getNickName(),receiverInfo.getHeadImgUrl());
+                String receiverNickName   = "";
+                String receiverHeadImgUrl = "";
+
+                String senderNickName   = "";
+                String senderHeadImgUrl = "";
+
+                if(receiverInfo == null){
+                    receiverNickName = "";
+                    receiverHeadImgUrl = "";
+                }else{
+                    receiverNickName   = receiverInfo.getNickName();
+                    receiverHeadImgUrl = receiverInfo.getHeadImgUrl();
+                }
+
+                if(senderInfo == null){
+                    senderNickName = "";
+                    senderHeadImgUrl = "";
+                }else{
+                    senderNickName = senderInfo.getNickName();
+                    senderHeadImgUrl = senderInfo.getHeadImgUrl();
+                }
+
+//                System.out.printf("customType sender nickName %s, headImgUrl %s, receiver nickName %s, headImgUrl %s\n",
+//                        senderNickName, senderHeadImgUrl, receiverNickName,receiverHeadImgUrl);
 
                 if (!String.valueOf(uin).equals(sender)){
-                    headerUrl = senderInfo.getHeadImgUrl();
-                    nickName = senderInfo.getNickName();
+                    headerUrl = senderHeadImgUrl;
+                    nickName = senderNickName;
                 }else{
-                    headerUrl = receiverInfo.getHeadImgUrl();
-                    nickName  = receiverInfo.getNickName();
+                    headerUrl = receiverHeadImgUrl;
+                    nickName  = receiverNickName;
                 }
             }
 
@@ -169,7 +183,7 @@ public class MessageUpdateUtil {
         try {
             imMsgDao.insert(imMsg);
         } catch (Exception e) {
-            System.out.println("消息插入异常");
+//            System.out.println("消息插入异常");
         }
 
         //如果是第一次投票消息并且发送者是自己  不插入会话表
@@ -206,8 +220,8 @@ public class MessageUpdateUtil {
 
             //如果数据库的消息更新，不更新数据库的会话信息
             if(imSession.getMsgTs() >= msgTs){
-                System.out.printf("老的消息到达,不更新会话信息, sessionId %s, msgId %d, curSessionMsgTs %d, msgTs %d\n",
-                        sessionId, msgId, imSession.getMsgTs(), msgTs);
+//                System.out.printf("老的消息到达,不更新会话信息, sessionId %s, msgId %d, curSessionMsgTs %d, msgTs %d\n",
+//                        sessionId, msgId, imSession.getMsgTs(), msgTs);
                 return;
             }
 
@@ -218,8 +232,8 @@ public class MessageUpdateUtil {
             imSession.setMsgTs(msgTs);
             imSession.setStatus(status);
 
-            System.out.printf("chater [%s][%s], nickName [%s][%s], headerUrl [%s][%s]",
-                    chater, imSession.getChater(), nickName, imSession.getNickName(), headerUrl, imSession.getHeaderImgUrl());
+//            System.out.printf("chater [%s][%s], nickName [%s][%s], headerUrl [%s][%s]",
+//                    chater, imSession.getChater(), nickName, imSession.getNickName(), headerUrl, imSession.getHeaderImgUrl());
 
             if (!TextUtils.isEmpty(chater) && (TextUtils.isEmpty(imSession.getChater()))) {
                 imSession.setChater(chater);
@@ -239,5 +253,8 @@ public class MessageUpdateUtil {
                 sessionUpdateListener.onSessionUpdate(imSession);
             }
         }
+
+        PushUtil.getInstance().PushNotify(timMessage);
+
     }
 }

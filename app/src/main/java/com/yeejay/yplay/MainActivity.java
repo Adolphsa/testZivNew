@@ -1,27 +1,25 @@
 package com.yeejay.yplay;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.tencent.imsdk.TIMCallBack;
-import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMManager;
-import com.tencent.imsdk.TIMMessage;
-import com.tencent.imsdk.TIMValueCallBack;
-import com.tencent.imsdk.ext.message.TIMConversationExt;
-import com.tencent.imsdk.ext.message.TIMManagerExt;
+import com.xiaomi.mipush.sdk.MiPushClient;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.friend.FragmentFriend;
-import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -90,6 +88,8 @@ public class MainActivity extends BaseActivity {
         viewPager.setCurrentItem(2);
 //        messageFragmentStatus();
     }
+
+    private static final String TAG = "MainActivity";
 
     FragmentAdapter frgAdapter;
     FragmentFriend fragmentFriend;
@@ -270,11 +270,56 @@ public class MainActivity extends BaseActivity {
                     public void onSuccess() {
                         System.out.println("mainactivity---登录成功");
 
-                        getOfflineMsgs();
+                        //GetOfflineMsg.getOfflineMsgs();
+                        //getOfflineMsgs();
+
+                        /*
+                        TIMOfflinePushSettings settings = new TIMOfflinePushSettings();
+                        //开启离线推送
+                        settings.setEnabled(true);
+                        //设置收到群离线消息时的提示声音，这里把声音文件放到了res/raw文件夹下
+                        settings.setGroupMsgRemindSound(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dudulu));
+                        TIMManager.getInstance().setOfflinePushSettings(settings);
+                        */
+
+                        initMiAndHuaPush();
                     }
                 });
     }
 
+    //初始化小米和华为推送
+    private void initMiAndHuaPush(){
+
+        //注册小米和华为推送
+        String deviceMan = android.os.Build.MANUFACTURER;
+        if (deviceMan.equals("Xiaomi") && shouldMiInit()){
+            MiPushClient.registerPush(getApplicationContext(),
+                    YPlayConstant.MI_PUSH_APP_ID,
+                    YPlayConstant.MI_PUSH_APP_KEY);
+        }else if (deviceMan.equals("HUAWEI")){
+
+            Log.i(TAG, "initMiAndHuaPush: ");
+        }
+
+    }
+
+    /**
+     * 判断小米推送是否已经初始化
+     */
+    private boolean shouldMiInit() {
+        ActivityManager am = ((ActivityManager) getSystemService(Context.ACTIVITY_SERVICE));
+        List<ActivityManager.RunningAppProcessInfo> processInfos = am.getRunningAppProcesses();
+        String mainProcessName = getPackageName();
+        int myPid = android.os.Process.myPid();
+        for (ActivityManager.RunningAppProcessInfo info : processInfos) {
+            if (info.pid == myPid && mainProcessName.equals(info.processName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
     //拉取离线会话消息
     private void getOfflineMsgs(){
 
@@ -316,6 +361,6 @@ public class MainActivity extends BaseActivity {
 
 
 
-    }
+    }*/
 
 }

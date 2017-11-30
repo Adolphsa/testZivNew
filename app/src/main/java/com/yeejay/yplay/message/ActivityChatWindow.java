@@ -21,6 +21,7 @@ import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
+import com.tencent.imsdk.TIMMessageOfflinePushSettings;
 import com.tencent.imsdk.TIMTextElem;
 import com.tencent.imsdk.TIMValueCallBack;
 import com.yeejay.yplay.R;
@@ -95,6 +96,22 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     Log.d(TAG, "addElement failed");
                     return;
                 }
+
+                TIMMessageOfflinePushSettings offlineSettings = new TIMMessageOfflinePushSettings();
+                offlineSettings.setDescr(str);
+                offlineSettings.setEnabled(true);
+
+                TIMMessageOfflinePushSettings.AndroidSettings andSetting = new TIMMessageOfflinePushSettings.AndroidSettings();
+                andSetting.setTitle(myselfNickName);
+                andSetting.setNotifyMode(TIMMessageOfflinePushSettings.NotifyMode.Custom);
+
+                TIMMessageOfflinePushSettings.IOSSettings iosSettings = new TIMMessageOfflinePushSettings.IOSSettings();
+                iosSettings.setBadgeEnabled(true);
+
+                offlineSettings.setAndroidSettings(andSetting);
+                offlineSettings.setIosSettings(iosSettings);
+                msg.setOfflinePushSettings(offlineSettings);
+
                 conversation = TIMManager.getInstance().getConversation(
                         TIMConversationType.Group,      //会话类型：群组
                         sessionId);                       //群组Id
@@ -102,7 +119,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 Log.d(TAG, "send: sessionId---" + sessionId);
                 //发送消息
                 conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
-
 
                     @Override
                     public void onError(int code, String desc) {//发送消息失败
@@ -121,14 +137,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     public void onSuccess(TIMMessage msg) {//发送消息成功
                         Log.e(TAG, "SendMsg ok");
                         System.out.println("发送成功");
-//                        ImMsg imMsg = insertMsg(msg,1);  //发送成功为1
-//                        mDataList.add(0,imMsg);
 
                         //更新会话列表
                         MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,1);
-
-//                        chatAdapter.notifyItemInserted(mDataList.size()-1);
-//                        acwRecycleView.scrollToPosition(mDataList.size()-1);
                         acwEdit.setText("");
                     }
                 });
@@ -148,6 +159,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     List<ImMsg> mDataList;
     ChatAdapter chatAdapter;
     String nickName;
+    String myselfNickName;
     int uin;
     String tempNickname;
 
@@ -168,6 +180,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         MessageUpdateUtil.getMsgUpdateInstance().setMessageUpdateListener(this);
         imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
         uin = (int) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        myselfNickName = (String) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_NICK_NAME,"");
 
         receiveBundleData();
 

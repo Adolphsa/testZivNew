@@ -179,7 +179,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             System.out.println("数据库中没有查到数据");
 
         }else{
-            System.out.println("查询到的列表长度---" + tempList.size());
+//            System.out.println("查询到的列表长度---" + tempList.size());
             mDataList.addAll(tempList);
             messageAdapter.notifyDataSetChanged();
             messageRecyclerView.scrollToPosition(0);

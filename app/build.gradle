@@ -81,10 +81,13 @@ dependencies {
     compile 'com.jwenfeng.pulltorefresh:library:1.2.7'
     compile 'com.github.iwgang:countdownview:2.1.6'
     compile 'com.pnikosis:materialish-progress:1.7'
+    compile 'com.huawei.android.hms:push:2.5.2.300'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.4.0'
     compile files('libs/imsdk.jar')
     implementation files('libs/mobilepb.jar')
     implementation files('libs/imsdk_msg_ext.jar')
+    implementation files('libs/MiPush_SDK_Client_3_5_1.jar')
+    implementation files('libs/imsdk_group_ext.jar')
 }

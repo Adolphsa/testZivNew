@@ -22,6 +22,15 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- mi push -->
+    <permission
+        android:name="com.yeejay.yplay.permission.MIPUSH_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.yeejay.yplay.permission.MIPUSH_RECEIVE" />
+
 
     <application
         android:name=".YplayApplication"
@@ -32,6 +41,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
+
+        <!--华为APPID-->
+        <meta-data
+            android:name="com.huawei.hms.client.appid"
+            android:value="100118923" />
+        <activity
+            android:name="com.huawei.hms.activity.BridgeActivity"
+            android:configChanges="orientation|locale|screenSize|layoutDirection|fontScale"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.Translucent">
+            <meta-data
+                android:name="hwc-theme"
+                android:value="androidhwext:style/Theme.Emui.Translucent" />
+        </activity>
+
+        <provider
+            android:name="com.huawei.hms.update.provider.UpdateProvider"
+            android:authorities="com.yeejay.yplay.hms.update.provider"
+            android:exported="false"
+            android:grantUriPermissions="true"/>
+
         <activity
             android:name=".login.LoadingActivity"
             android:screenOrientation="portrait"
@@ -83,8 +115,7 @@
         <activity
             android:name=".message.ActivityChatWindow"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            />
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".userinfo.ActivityMyInfo"
             android:screenOrientation="portrait" />
@@ -130,10 +161,10 @@
         <activity
             android:name=".contribute.ActivityContribute2"
             android:screenOrientation="portrait" />
-        <activity android:name=".message.ActivityNnonymityReply"
+        <activity
+            android:name=".message.ActivityNnonymityReply"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible|adjustResize|stateAlwaysHidden"
-            />
+            android:windowSoftInputMode="stateVisible|adjustResize|stateAlwaysHidden" />
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
@@ -163,11 +194,11 @@
         <service
             android:name="com.tencent.qalsdk.service.QalService"
             android:exported="true"
-            android:process=":QALSERVICE"/>
+            android:process=":QALSERVICE" />
         <service
             android:name="com.tencent.qalsdk.service.QalAssistService"
             android:exported="false"
-            android:process=":QALSERVICE"/>
+            android:process=":QALSERVICE" />
 
         <!-- 【必须】 离线消息广播接收器 -->
         <receiver
@@ -199,6 +230,87 @@
             </intent-filter>
         </receiver>
 
+
+        <!-- mipush -->
+        <service
+            android:name="com.xiaomi.push.service.XMJobService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:process=":MiPushService" />
+        <service
+            android:name="com.xiaomi.push.service.XMPushService"
+            android:enabled="true"
+            android:process=":MiPushService" />
+        <service
+            android:name="com.xiaomi.mipush.sdk.PushMessageHandler"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name="com.xiaomi.mipush.sdk.MessageHandleService"
+            android:enabled="true" />
+
+        <receiver
+            android:name=".utils.MiPushMessageReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.ERROR" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.xiaomi.push.service.receivers.NetworkStatusReceiver"
+            android:exported="true">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.xiaomi.push.service.receivers.PingReceiver"
+            android:exported="false"
+            android:process=":MiPushService">
+            <intent-filter>
+                <action android:name="com.xiaomi.push.PING_TIMER" />
+            </intent-filter>
+        </receiver>
+        <!-- mipush -->
+
+
+        <!-- hwpush -->
+
+        <!-- 第三方相关 :接收Push消息（注册、Push消息、Push连接状态、标签，LBS上报结果）广播 -->
+        <receiver android:name=".utils.HwPushMessageReceiver">
+            <intent-filter>
+
+                <!-- 必须,用于接收token -->
+                <action android:name="com.huawei.android.push.intent.REGISTRATION" />
+                <!-- 必须，用于接收消息 -->
+                <action android:name="com.huawei.android.push.intent.RECEIVE" />
+                <!-- 可选，用于点击通知栏或通知栏上的按钮后触发onEvent回调 -->
+                <action android:name="com.huawei.android.push.intent.CLICK" />
+                <!-- 可选，查看push通道是否连接，不查看则不需要 -->
+                <action android:name="com.huawei.intent.action.PUSH_STATE" />
+                <!-- 可选，标签、地理位置上报回应，不上报则不需要 -->
+                <action android:name="com.huawei.android.push.plugin.RESPONSE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="CS_cloud_ablitity"
+                android:value="successRateAnalytics" />
+        </receiver>
+
+        <receiver android:name="com.huawei.hms.support.api.push.PushEventReceiver" >
+            <intent-filter>
+                <!-- 接收通道发来的通知栏消息，兼容老版本PUSH -->
+                <action android:name="com.huawei.intent.action.PUSH" />
+            </intent-filter>
+        </receiver>
+        <!-- hwpush -->
 
     </application>
 

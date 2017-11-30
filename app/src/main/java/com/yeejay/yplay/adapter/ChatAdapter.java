@@ -55,15 +55,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == ITEM_TYPE.ITEM_TYPE_LEFT.ordinal()) {
-            System.out.println("左边");
+//            System.out.println("左边");
             return new LeftMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_left, parent, false));
 
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal()) {
-            System.out.println("右边");
+//            System.out.println("右边");
             return new RightMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_right, parent, false));
 
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_VOTE_CARD.ordinal()) {
-            System.out.println("投票卡片");
+//            System.out.println("投票卡片");
             return new VoteCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_card, parent, false));
         }
         return null;

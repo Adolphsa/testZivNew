@@ -12,6 +12,7 @@ public class YPlayConstant {
     public static final String YPLAY_TOKEN = "yplay_token";
     public static final String YPLAY_VER = "yplay_ver";
     public static final String YPLAY_USER_NAME = "yplay_user_name";
+    public static final String YPLAY_NICK_NAME = "yplay_nick_name";
     public static final String YPLAY_FIRST_LATITUDE = "yplay_first_latitude";
     public static final String YPLAY_FIRST_LONGITUDE = "yplay_first_longitude";
     public static final String YPLAY_LATITUDE = "yplay_latitude";
@@ -37,5 +38,8 @@ public class YPlayConstant {
     public static final int YPLAY_OFFINE_MSG_COUNT = 1000;
 
     public static int IM_ERROR_CODE = 0;
+
+    public static String MI_PUSH_APP_ID = "2882303761517630988";
+    public static String MI_PUSH_APP_KEY = "5841763037988";
 
 }

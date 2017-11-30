@@ -16,15 +16,15 @@ import com.tencent.imsdk.TIMRefreshListener;
 import com.tencent.imsdk.TIMSdkConfig;
 import com.tencent.imsdk.TIMUserConfig;
 import com.tencent.imsdk.TIMUserStatusListener;
-import com.tencent.imsdk.TIMValueCallBack;
+import com.tencent.imsdk.ext.group.TIMUserConfigGroupExt;
 import com.tencent.imsdk.ext.message.TIMConversationExt;
-import com.tencent.imsdk.ext.message.TIMManagerExt;
 import com.tencent.imsdk.ext.message.TIMUserConfigMsgExt;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.utils.DialogUtils;
+import com.yeejay.yplay.utils.GetOfflineMsg;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -133,47 +133,13 @@ public class ImConfig {
                     @Override
                     public void onRefresh() {
                         Log.i(tag, "onRefresh");
-                        getOfflineMsgs();
+
+                        GetOfflineMsg.getOfflineMsgs();
                     }
 
                     @Override
                     public void onRefreshConversation(List<TIMConversation> conversations) {
                         Log.i(tag, "onRefreshConversation, conversation size: " + conversations.size());
-
-
-                        for (TIMConversation timCon : conversations) {
-
-                            TIMConversationExt conExt = new TIMConversationExt(timCon);
-                            conExt.getMessage(YPlayConstant.YPLAY_OFFINE_MSG_COUNT,
-                                    null,
-                                    new TIMValueCallBack<List<TIMMessage>>() {
-                                        @Override
-                                        public void onError(int i, String s) {
-
-                                        }
-
-                                        @Override
-                                        public void onSuccess(List<TIMMessage> timMessages) {
-                                            System.out.println("onRefreshConversation拉取离线消息");
-                                            ImConfig.getImInstance().updateSession(timMessages);
-                                        }
-                                    });
-
-                            conExt.setReadMessage(null, new TIMCallBack() {
-                                @Override
-                                public void onError(int i, String s) {
-                                    System.out.println("onRefreshConversation设置会话已读错误---" + s);
-                                }
-
-                                @Override
-                                public void onSuccess() {
-                                    System.out.println("onRefreshConversation设置会话已读成功");
-                                }
-                            });
-
-
-                        }
-
                     }
                 });
 
@@ -183,9 +149,12 @@ public class ImConfig {
                 .enableStorage(true)
                 //开启消息已读回执
                 .enableReadReceipt(true)
-                .enableRecentContact(false)
+                .enableRecentContact(true)
                 .enableRecentContactNotify(false);
 
+        //TIMGroupSettings groupSettings = new TIMGroupSettings();
+        userConfig = new TIMUserConfigGroupExt(userConfig)
+                .enableGroupStorage(true);
 
         //将用户配置与通讯管理器进行绑定
         TIMManager.getInstance().setUserConfig(userConfig);
@@ -195,7 +164,7 @@ public class ImConfig {
             @Override
             public boolean onNewMessages(List<TIMMessage> list) {//收到新消息
                 //消息的内容解析请参考消息收发文档中的消息解析说明
-                updateSession(list);
+                onLineUpdateSession(list);
 
                 return true;//返回true将终止回调链，不再调用下一个新消息监听器
             }
@@ -248,8 +217,6 @@ public class ImConfig {
 
                     }
                 });
-
-
     }
 
     /**
@@ -283,82 +250,57 @@ public class ImConfig {
 
         System.out.println("消息长度---" + list.size());
 
-        HashMap<String, Integer> sessions = new HashMap<String, Integer>();
+        for (TIMMessage timMessage : list) {
+            MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(timMessage,1);
+        }
+    }
+
+    public void onLineUpdateSession(List<TIMMessage> list) {
+
+        System.out.println("消息长度---" + list.size());
+
+        if(list == null){
+            return;
+        }
+
+        if(list.size() == 0){
+            return;
+        }
+
+        updateSession(list);
+
+        HashMap<TIMConversationExt, Integer> sessions = new HashMap<>();
 
         for (TIMMessage timMessage : list) {
 
-            MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(timMessage,1);
+            String sid = timMessage.getMsg().session().sid();
+            TIMConversation con = TIMManager.getInstance().getConversation(TIMConversationType.Group, sid);
 
-            String sessionId = timMessage.getMsg().session().sid();
-            sessions.put(sessionId, 1);
+            TIMConversationExt conExt = new TIMConversationExt(con);
+            sessions.put(conExt,1);
         }
 
         Iterator iter = sessions.entrySet().iterator();
 
         while (iter.hasNext()) {
+
             Map.Entry entry = (Map.Entry) iter.next();
-            String sid = (String) entry.getKey();
-
-            System.out.println("设置会话已读开始---" + sid);
-
-            TIMConversation conversation = TIMManager.getInstance().getConversation(
-                    TIMConversationType.Group, sid);
-
-            TIMConversationExt conExt = new TIMConversationExt(conversation);
-            conExt.setReadMessage(null, new TIMCallBack() {
-                @Override
-                public void onError(int i, String s) {
-                    System.out.println("设置会话已读错误---" + s);
-                }
-
-                @Override
-                public void onSuccess() {
-//                    System.out.println("设置会话已读成功");
-                }
-            });
-
-
-        }
-
-    }
-
-    //拉取离线会话消息
-    private void getOfflineMsgs() {
-
-        System.out.println("REFRESH获取离线消息");
-        List<TIMConversation> offlineList = TIMManagerExt.getInstance().getConversationList();
-
-        for (TIMConversation timCon : offlineList) {
-
-            TIMConversationExt conExt = new TIMConversationExt(timCon);
-            conExt.getMessage(YPlayConstant.YPLAY_OFFINE_MSG_COUNT,
-                    null,
-                    new TIMValueCallBack<List<TIMMessage>>() {
-                        @Override
-                        public void onError(int i, String s) {
-
-                        }
-
-                        @Override
-                        public void onSuccess(List<TIMMessage> timMessages) {
-                            System.out.println("IM登录成功，拉取离线消息");
-                            ImConfig.getImInstance().updateSession(timMessages);
-                        }
-                    });
+            TIMConversationExt conExt = (TIMConversationExt) entry.getKey();
 
             conExt.setReadMessage(null, new TIMCallBack() {
                 @Override
                 public void onError(int i, String s) {
-                    System.out.println("设置会话已读错误---" + s);
+                    System.out.println("online 设置会话已读错误---" + s);
                 }
 
                 @Override
                 public void onSuccess() {
-                    System.out.println("设置会话已读成功");
+                    System.out.println("online 设置会话已读成功");
                 }
             });
-
-
         }
     }
+
+
+
 }
