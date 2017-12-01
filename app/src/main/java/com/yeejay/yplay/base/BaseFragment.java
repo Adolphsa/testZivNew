@@ -73,12 +73,10 @@ public abstract class BaseFragment extends Fragment{
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod){
         if(isVisibleToUser){
             if(pageName != null){
-//                MobclickAgent.onPageStart(pageName);
                 Log.i("对用户可见", pageName + " - display - "+(isHappenedInSetUserVisibleHintMethod?"setUserVisibleHint":"onResume"));
             }
         }else{
             if(pageName != null){
-//                MobclickAgent.onPageEnd(pageName);
                 Log.w("对用户不可见", pageName + " - hidden - "+(isHappenedInSetUserVisibleHintMethod?"setUserVisibleHint":"onPause"));
             }
         }

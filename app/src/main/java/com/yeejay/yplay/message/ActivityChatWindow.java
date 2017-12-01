@@ -272,21 +272,23 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             tempNickname = bundle.getString("yplay_nick_name");
             Log.d(TAG, "receiveBundleData: sessionId---" + sessionId);
 
-            try {
-                JSONObject jsonObject = new JSONObject(msgContent);
-                int dataType = jsonObject.getInt("DataType");
-                String data = jsonObject.getString("Data");
-                if (dataType == 1){
-                    MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-                    MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
-                    nickName = receiverInfoBean.getNickName();
-                }else if (dataType == 2){
-                    MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-                    MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
-                    nickName = senderInfoBean.getNickName();
+            if (status == 0 || status == 1){
+                try {
+                    JSONObject jsonObject = new JSONObject(msgContent);
+                    int dataType = jsonObject.getInt("DataType");
+                    String data = jsonObject.getString("Data");
+                    if (dataType == 1){
+                        MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
+                        MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+                        nickName = receiverInfoBean.getNickName();
+                    }else if (dataType == 2){
+                        MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
+                        MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
+                        nickName = senderInfoBean.getNickName();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
         }
         if (!TextUtils.isEmpty(sessionId)){
@@ -356,6 +358,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             chatAdapter.notifyItemInserted(mDataList.size()-1);
             acwRecycleView.scrollToPosition(mDataList.size()-1);
         }
+
+//        MainActivity mainActivity = new MainActivity();
+//        mainActivity.setMessageIcon();
 
 //        acwEdit.setText("");
     }

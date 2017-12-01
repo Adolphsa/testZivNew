@@ -70,6 +70,11 @@ public class MessageUpdateUtil {
         String sessionId = timMessage.getMsg().session().sid();
         int sessionType = timMessage.getMsg().session().type().ordinal();
 
+        if (sessionType == SessionType.kC2C.ordinal()){
+            PushUtil.getInstance().PushNotify(timMessage);
+            return;
+        }
+
         if (sessionType != SessionType.kGroup.ordinal()) {
             System.out.println("消息会话类型非群会话---" + sessionType);
             return;
@@ -207,6 +212,7 @@ public class MessageUpdateUtil {
                     msgType,
                     msgContent,
                     msgTs,
+                    0,
                     0);
 
             imSessionDao.insert(session);
@@ -225,12 +231,18 @@ public class MessageUpdateUtil {
                 return;
             }
 
+            //设置会话未读数目
+            int unreadNum = imSession.getUnreadMsgNum();
+            unreadNum++;
+
+
             imSession.setLastMsgId(msgId);
             imSession.setLastSender(sender);
             imSession.setMsgContent(msgContent);
             imSession.setMsgType(msgType);
             imSession.setMsgTs(msgTs);
             imSession.setStatus(status);
+            imSession.setUnreadMsgNum(unreadNum);
 
 //            System.out.printf("chater [%s][%s], nickName [%s][%s], headerUrl [%s][%s]",
 //                    chater, imSession.getChater(), nickName, imSession.getNickName(), headerUrl, imSession.getHeaderImgUrl());

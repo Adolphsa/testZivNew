@@ -8,6 +8,9 @@ import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMValueCallBack;
 import com.tencent.imsdk.ext.message.TIMConversationExt;
 import com.tencent.imsdk.ext.message.TIMManagerExt;
+import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.greendao.ImSession;
+import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.im.ImConfig;
 
 import java.util.HashMap;
@@ -27,10 +30,11 @@ public class GetOfflineMsg {
     //拉取离线会话消息
     public static void getOfflineMsgs() {
 
+        final ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         List<TIMConversation> offlineList = TIMManagerExt.getInstance().getConversationList();
-        if (offlineList != null){
+        if (offlineList != null) {
             Log.i(TAG, "getOfflineMsgs: 获取会话数目---" + offlineList.size());
-        }else {
+        } else {
             Log.i(TAG, "getOfflineMsgs: 获取会话数目无");
         }
 
@@ -43,11 +47,11 @@ public class GetOfflineMsg {
 
             Log.i(TAG, "getOfflineMsgs: 未读消息数目---" + num);
 
-            if(num == 0){
+            if (num == 0) {
                 continue;
             }
 
-            conExt.getMessage((int)num, null,new TIMValueCallBack<List<TIMMessage>>(){
+            conExt.getMessage((int) num, null, new TIMValueCallBack<List<TIMMessage>>() {
 
                 @Override
                 public void onError(int i, String s) {
@@ -56,12 +60,28 @@ public class GetOfflineMsg {
 
                 @Override
                 public void onSuccess(List<TIMMessage> timMessages) {
-                    if(timMessages == null){
+                    if (timMessages == null) {
                         return;
                     }
 
+                    //设置会话未读数目
                     Log.i(TAG, "getMessages return size: ---" + timMessages.size());
+                    String sessionId = timMessages.get(0).getMsg().session().sid();
+                    Log.i(TAG, "sessionId: ---" + sessionId);
+                    ImSession imSession = imSessionDao.queryBuilder()
+                            .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                            .build().unique();
+                    if (imSession != null){
+                        int unreadNum = imSession.getUnreadMsgNum();
+                        unreadNum = unreadNum + timMessages.size();
+
+                        imSession.setUnreadMsgNum(unreadNum);
+                        imSessionDao.update(imSession);
+                    }
+
                     ImConfig.getImInstance().updateSession(timMessages);
+
+
                 }
             });
 

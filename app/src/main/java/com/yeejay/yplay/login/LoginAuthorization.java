@@ -52,6 +52,7 @@ public class LoginAuthorization extends BaseActivity {
     Button mBtnGetNumberBookAuthority;
     boolean addressAuthoritySuccess = false;
     boolean numberBookAuthoritySuccess = false;
+    boolean isSuccess = false;
 
     String mProvider;//位置提供器
     LocationManager mLocationManager;//位置服务
@@ -118,16 +119,24 @@ public class LoginAuthorization extends BaseActivity {
                 //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
                 if (AndPermission.hasPermission(LoginAuthorization.this, Permission.CONTACTS)) {
                     System.out.println("通讯录有权限");
-                    setContactBackground();
+//                    setContactBackground();
                 }
                 if (AndPermission.hasPermission(LoginAuthorization.this, Permission.LOCATION)) {
                     System.out.println("地理位置有权限");
-                    setLocationBackground();
+
+//                    setLocationBackground();
                 }
+
+                getLonLat();
+                getContacts();
+
+                System.out.println("回调numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                System.out.println("回调addressAuthoritySuccess---" + addressAuthoritySuccess);
 
                 if (numberBookAuthoritySuccess && addressAuthoritySuccess){
                     authorizationSuccess();
                 }
+
                 break;
             }
         }
@@ -139,6 +148,8 @@ public class LoginAuthorization extends BaseActivity {
         setContentView(R.layout.activity_login_authorization);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_title_text_color));
+
+        System.out.println("LoginAuthorization  onCreate");
 
         mBtnGetAddressAuthority = (Button) findViewById(R.id.laz_btn_address);
         mBtnGetNumberBookAuthority = (Button) findViewById(R.id.laz_btn_address_book);
@@ -160,6 +171,7 @@ public class LoginAuthorization extends BaseActivity {
         mBtnGetNumberBookAuthority.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println("获取通讯录被点击");
                 getNumberBookAuthority();
             }
         });
@@ -296,10 +308,15 @@ public class LoginAuthorization extends BaseActivity {
 
             setContactBackground();
 
+            System.out.println("通讯录长度2---" + mContactsList.size());
+
             if (mContactsList.size() > 0) {
                 ContactsInfo testContactInfo = mContactsList.get(0);
                 System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
-                upLoadingContacts();
+                if (!isSuccess){
+                    upLoadingContacts();
+                }
+
             }
 
         } catch (Exception e) {
@@ -351,6 +368,7 @@ public class LoginAuthorization extends BaseActivity {
 
                         if (baseRespond.getCode() == 0) {
                             System.out.println("上传通讯录成功---" + baseRespond.toString());
+                            isSuccess = true;
                         } else {
                             System.out.println("上传通讯录失败---" + baseRespond.toString());
                         }

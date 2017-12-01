@@ -11,6 +11,7 @@ import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
+import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
@@ -220,5 +221,9 @@ public interface YPlayApi {
     @POST("/api/im/sendvotereplymsg")
     Observable<BaseRespond> replayImVote(@FieldMap Map<String,Object> filemap);
 
+    //获取用户新通知
+    @FormUrlEncoded
+    @POST("/api/notify/getnewnotifystat")
+    Observable<PushNotifyRespond> getNewNotify(@FieldMap Map<String,Object> filemap);
 
 }

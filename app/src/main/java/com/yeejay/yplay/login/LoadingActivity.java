@@ -7,15 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.huawei.hms.api.ConnectionResult;
-import com.huawei.hms.api.HuaweiApiClient;
-import com.huawei.hms.support.api.client.PendingResult;
-import com.huawei.hms.support.api.client.ResultCallback;
-import com.huawei.hms.support.api.push.HuaweiPush;
-import com.huawei.hms.support.api.push.TokenResult;
 import com.tencent.imsdk.TIMCallBack;
 import com.xiaomi.mipush.sdk.MiPushClient;
 import com.yeejay.yplay.MainActivity;
@@ -27,7 +20,9 @@ import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observer;
@@ -36,9 +31,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class LoadingActivity extends BaseActivity implements TIMCallBack,
-        HuaweiApiClient.ConnectionCallbacks,
-        HuaweiApiClient.OnConnectionFailedListener {
+public class LoadingActivity extends BaseActivity implements TIMCallBack{
 
     private static final String TAG = "LoadingActivity";
     private static final int LOGIN_CODE = 100;
@@ -48,7 +41,8 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack,
     private String token;
     private int ver;
 
-    private HuaweiApiClient huaWeiClient;
+
+    private final int REQUEST_PHONE_PERMISSIONS = 0;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -75,10 +69,28 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
-
+        final List<String> permissionsList = new ArrayList<>();
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
 
         clearNotification();
+
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+//            if ((checkSelfPermission(Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED)) permissionsList.add(Manifest.permission.READ_PHONE_STATE);
+//            if ((checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)) permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//            if (permissionsList.size() == 0){
+//                init();
+//            }else{
+//                requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
+//                        REQUEST_PHONE_PERMISSIONS);
+//            }
+//        }else{
+//            init();
+//        }
+
+        init();
+    }
+
+    private void init(){
 
         uin = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
@@ -92,13 +104,23 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack,
             handler.sendEmptyMessageDelayed(NETWORK_CODE, 1000);
         }
 
-        huaWeiClient = new HuaweiApiClient.Builder(this)
-                .addApi(HuaweiPush.PUSH_API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        huaWeiClient.connect();
     }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        switch (requestCode) {
+//            case REQUEST_PHONE_PERMISSIONS:
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    init();
+//                } else {
+//                    Toast.makeText(this, getString(R.string.need_permission),Toast.LENGTH_SHORT).show();
+//                    finish();
+//                }
+//                break;
+//            default:
+//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        }
+//    }
 
     //获取自己的资料
     private void getMyInfo(int uin, String token, int ver) {
@@ -166,25 +188,6 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack,
         System.out.println("im回调成功---");
     }
 
-    @Override
-    public void onConnected() {
-        Log.i(TAG, "HuaweiApiClient 连接成功");
-        getTokenAsyn();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        if (!this.isDestroyed() && !this.isFinishing()) {
-            huaWeiClient.connect();
-        }
-        Log.i(TAG, "HuaweiApiClient 连接断开");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(TAG, "HuaweiApiClient连接失败，错误码：" + connectionResult.getErrorCode());
-    }
-
     /**
      * 清楚所有通知栏通知
      */
@@ -198,25 +201,6 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack,
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        huaWeiClient.disconnect();
-    }
-
-
-    private void getTokenAsyn() {
-        if(!huaWeiClient.isConnected()) {
-            Log.i(TAG, "获取token失败，原因：HuaweiApiClient未连接");
-            huaWeiClient.connect();
-            return;
-        }
-
-        Log.i(TAG, "异步接口获取push token");
-        PendingResult<TokenResult> tokenResult = HuaweiPush.HuaweiPushApi.getToken(huaWeiClient);
-        tokenResult.setResultCallback(new ResultCallback<TokenResult>() {
-            @Override
-            public void onResult(TokenResult result) {
-                Log.i(TAG, "onResult: 华为token---" + result.toString());
-            }
-        });
     }
 
 }

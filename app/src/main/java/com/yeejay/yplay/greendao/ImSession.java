@@ -27,10 +27,12 @@ public class ImSession {
     private String msgContent;          //消息内容
     private long msgTs;                 //消息时间戳
     private long lastReadMsgId;         //最近已读的消息Id;
-    @Generated(hash = 1848677176)
+    private int unreadMsgNum;           //未读消息数
+    @Generated(hash = 1760695481)
     public ImSession(Long id, String sessionId, String chater, int status,
             String nickName, String headerImgUrl, long lastMsgId, String lastSender,
-            int msgType, String msgContent, long msgTs, long lastReadMsgId) {
+            int msgType, String msgContent, long msgTs, long lastReadMsgId,
+            int unreadMsgNum) {
         this.id = id;
         this.sessionId = sessionId;
         this.chater = chater;
@@ -43,6 +45,7 @@ public class ImSession {
         this.msgContent = msgContent;
         this.msgTs = msgTs;
         this.lastReadMsgId = lastReadMsgId;
+        this.unreadMsgNum = unreadMsgNum;
     }
     @Generated(hash = 1305805177)
     public ImSession() {
@@ -118,5 +121,11 @@ public class ImSession {
     }
     public void setStatus(int status) {
         this.status = status;
+    }
+    public int getUnreadMsgNum() {
+        return this.unreadMsgNum;
+    }
+    public void setUnreadMsgNum(int unreadMsgNum) {
+        this.unreadMsgNum = unreadMsgNum;
     }
 }

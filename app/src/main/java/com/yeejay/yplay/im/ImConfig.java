@@ -49,7 +49,6 @@ public class ImConfig {
     private static final String tag = "ImConfig";
     private static final int IM_SDK_APP_ID = 1400046572;
 
-
     private TIMManager timManager = TIMManager.getInstance();
     private TIMSdkConfig config;
     //    private TIMUserConfig userConfig;
@@ -164,6 +163,7 @@ public class ImConfig {
             @Override
             public boolean onNewMessages(List<TIMMessage> list) {//收到新消息
                 //消息的内容解析请参考消息收发文档中的消息解析说明
+                Log.i(tag, "onNewMessages: 收到新消息");
                 onLineUpdateSession(list);
 
                 return true;//返回true将终止回调链，不再调用下一个新消息监听器

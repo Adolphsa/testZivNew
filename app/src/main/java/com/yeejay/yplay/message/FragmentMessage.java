@@ -15,6 +15,7 @@ import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MessageAdapter;
@@ -98,6 +99,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 String sessionId = imSession.getSessionId();
                 String msgContent = imSession.getMsgContent();
                 String nickName = imSession.getNickName();
+                imSession.setUnreadMsgNum(0);
+                imSessionDao.update(imSession);
                 int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
 
                 Intent intent = new Intent();
@@ -156,6 +159,9 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             frgEdit.setVisibility(View.GONE);
             dataOffset = 0;
             updateUi();
+
+            MainActivity mainActivity = (MainActivity)getActivity();
+            mainActivity.setMessageClear();
         }
     }
 
@@ -182,8 +188,11 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 //            System.out.println("查询到的列表长度---" + tempList.size());
             mDataList.addAll(tempList);
             messageAdapter.notifyDataSetChanged();
-            messageRecyclerView.scrollToPosition(0);
-            messageRecyclerView.loadMoreFinish(false, true);
+            if (messageRecyclerView != null){
+                messageRecyclerView.scrollToPosition(0);
+                messageRecyclerView.loadMoreFinish(false, true);
+            }
+
         }
 
     }

@@ -3,6 +3,9 @@
 
     <string name="login_only_can_input">qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM1234567890</string>
 
+    <!--LoadingActivity-->
+    <string name="need_permission">您需要开启权限,并重启应用</string>
+
     <!--LoginAge-->
     <string name="la_app_name">软件名</string>
     <string name="la_privacy1">输入你的年龄，你自动同意为我们的</string>
@@ -27,5 +30,7 @@
     <string name="laz_btn_get_address_book">获取通讯录</string>
     <string name="laz_tv_tips2">为你推荐在APP内的好友</string>
     <string name="cl_primary_header">现在读年级</string>
+
+    <!--Contribute-->
     <string name="contribute_text1">投稿你的问题，让同校同学回答！ \n投稿审核通过后，将匿名展示投票内容～</string>
 </resources>

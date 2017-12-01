@@ -24,6 +24,10 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-permission
+        android:name="com.huawei.android.launcher.permission.CHANGE_BADGE "/>
+
+
     <!-- mi push -->
     <permission
         android:name="com.yeejay.yplay.permission.MIPUSH_RECEIVE"
@@ -208,6 +212,7 @@
                 <action android:name="com.tencent.qalsdk.broadcast.qal" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name="com.tencent.qalsdk.core.NetConnInfoCenter"
             android:process=":QALSERVICE">
@@ -282,7 +287,6 @@
 
 
         <!-- hwpush -->
-
         <!-- 第三方相关 :接收Push消息（注册、Push消息、Push连接状态、标签，LBS上报结果）广播 -->
         <receiver android:name=".utils.HwPushMessageReceiver">
             <intent-filter>
@@ -299,9 +303,6 @@
                 <action android:name="com.huawei.android.push.plugin.RESPONSE" />
             </intent-filter>
 
-            <meta-data
-                android:name="CS_cloud_ablitity"
-                android:value="successRateAnalytics" />
         </receiver>
 
         <receiver android:name="com.huawei.hms.support.api.push.PushEventReceiver" >
