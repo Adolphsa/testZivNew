@@ -17,10 +17,13 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.contribute.ActivityContribute1;
 import com.yeejay.yplay.customview.ProgressButton;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
@@ -57,6 +60,8 @@ public class FragmentAnswer extends BaseFragment {
     TextView fransTvQuestionCount;
     @BindView(R.id.frgans_img)
     ImageView frgansImg;
+    @BindView(R.id.frg_message_count)
+    TextView addFriendCount;
     @BindView(R.id.frgans_question)
     TextView frgansQuestion;
     @BindView(R.id.frgans_btn1)
@@ -467,7 +472,7 @@ public class FragmentAnswer extends BaseFragment {
             } else {
                 frandProgress.setVisibility(View.INVISIBLE);
             }
-
+            setFriendCount();
         }
     }
 
@@ -786,6 +791,24 @@ public class FragmentAnswer extends BaseFragment {
                     }
                 });
 
+    }
+
+
+    public void setFriendCount(){
+
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null){
+            int addFriendNum = myInfo.getAddFriendNum();
+            if (addFriendNum == 0){
+                addFriendCount.setText("");
+            }else {
+                addFriendCount.setText(addFriendNum + "");
+            }
+
+        }
     }
 
     @Override

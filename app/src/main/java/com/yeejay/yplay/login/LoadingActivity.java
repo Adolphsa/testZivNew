@@ -31,7 +31,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class LoadingActivity extends BaseActivity implements TIMCallBack{
+public class LoadingActivity extends BaseActivity implements TIMCallBack {
 
     private static final String TAG = "LoadingActivity";
     private static final int LOGIN_CODE = 100;
@@ -90,7 +90,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack{
         init();
     }
 
-    private void init(){
+    private void init() {
 
         uin = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
@@ -191,7 +191,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack{
     /**
      * 清楚所有通知栏通知
      */
-    private void clearNotification(){
+    private void clearNotification() {
         NotificationManager notificationManager = (NotificationManager) this
                 .getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();

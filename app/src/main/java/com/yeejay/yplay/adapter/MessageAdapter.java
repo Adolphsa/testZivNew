@@ -56,6 +56,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
         ImSession imSession = imSessionList.get(position);
         String msgContent = imSession.getMsgContent();
         int status = imSession.getStatus();
+        int unreadMsgNum = imSession.getUnreadMsgNum();
+        if (unreadMsgNum > 0){
+            holder.msgItemNewMsg.setVisibility(View.VISIBLE);
+        }else {
+            holder.msgItemNewMsg.setVisibility(View.GONE);
+        }
         if (0 == status) {   //投票
             setStatusIs0View(holder, msgContent, imSession);
         } else if (status == 1) {
@@ -92,6 +98,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
         ImageView msgItemStatusImg;
         @BindView(R.id.msg_item_content)
         TextView msgItemContent;
+        @BindView(R.id.msg_item_new_msg)
+        View msgItemNewMsg;
 
         public messageHolder(View itemView) {
             super(itemView);

@@ -42,6 +42,15 @@ public class PushNotifyRespond {
         this.payload = payload;
     }
 
+    @Override
+    public String toString() {
+        return "PushNotifyRespond{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", payload=" + payload +
+                '}';
+    }
+
     public static class PayloadBean {
         /**
          * newFeedCnt : 0
@@ -65,6 +74,14 @@ public class PushNotifyRespond {
 
         public void setNewAddFriendMsgCnt(int newAddFriendMsgCnt) {
             this.newAddFriendMsgCnt = newAddFriendMsgCnt;
+        }
+
+        @Override
+        public String toString() {
+            return "PayloadBean{" +
+                    "newFeedCnt=" + newFeedCnt +
+                    ", newAddFriendMsgCnt=" + newAddFriendMsgCnt +
+                    '}';
         }
     }
 }

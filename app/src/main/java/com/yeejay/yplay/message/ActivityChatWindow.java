@@ -130,7 +130,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         mDataList.add(0,imMsg);
 
                         //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,0);
+                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,0,false);
                     }
 
                     @Override
@@ -139,7 +139,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         System.out.println("发送成功");
 
                         //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,1);
+                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,1,false);
                         acwEdit.setText("");
                     }
                 });

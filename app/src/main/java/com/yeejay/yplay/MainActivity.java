@@ -1,7 +1,10 @@
 package com.yeejay.yplay;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,12 +30,13 @@ import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.friend.FragmentFriend;
-import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.model.ImSignatureRespond;
-import com.yeejay.yplay.utils.MessageUpdateUtil;
+import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -50,7 +54,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity implements HuaweiApiClient.ConnectionCallbacks,
-        HuaweiApiClient.OnConnectionFailedListener, MessageUpdateUtil.MessageUpdateListener {
+        HuaweiApiClient.OnConnectionFailedListener {
 
     @BindView(R.id.main_view_pager)
     ViewPager viewPager;
@@ -114,6 +118,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     FragmentMessage fragmentMessage;
     private HuaweiApiClient huaWeiClient;
     ImSessionDao imSessionDao;
+    MyInfoDao myInfoDao;
 
     private int mColor;
 
@@ -125,6 +130,23 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         this.mColor = mColor;
     }
 
+    BroadcastReceiver messageBr = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            int brType = intent.getIntExtra("broadcast_type", 0);
+            if (1 == brType) {   //消息广播
+                setMessageIcon();
+            } else if (3 == brType) { //加好友
+                Log.i(TAG, "onReceive: 加好友");
+                setFriendCount();
+            } else if (5 == brType) { //动态
+                setFeedIcon();
+            }
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,7 +154,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         ButterKnife.bind(this);
 
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
-        MessageUpdateUtil.getMsgUpdateInstance().setMessageUpdateListener(this);
+        myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
         initMainView();
         addFragment();
@@ -159,18 +181,24 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             }
 
             @Override
-            public void onPageScrollStateChanged(int i) {
-
-            }
+            public void onPageScrollStateChanged(int i) {}
         });
 
         setMessageIcon();
 
+        IntentFilter filter = new IntentFilter("messageService");
+        registerReceiver(messageBr, filter);
+
         //获取签名
         getImSignature();
+        //获取加好友的人数
+        getAddFreindCount();
+        setMessageIcon();
+        setFeedIcon();
     }
 
     private void addFragment() {
+
         //构造适配器
         List<Fragment> fragments = new ArrayList<Fragment>();
         fragmentFriend = new FragmentFriend();
@@ -185,7 +213,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     private void initMainView() {
         mainNavBarRl.setVisibility(View.VISIBLE);
         mainnavBar2.setVisibility(View.GONE);
-
     }
 
     //动态
@@ -341,6 +368,62 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         return false;
     }
 
+    //获取请求加好友的人数
+    public void getAddFreindCount() {
+
+        Map<String, Object> tempMap = new HashMap<>();
+        final int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        tempMap.put("uin", uin);
+        tempMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        tempMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .getNewNotify(tempMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<PushNotifyRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(PushNotifyRespond pushNotifyRespond) {
+                        Log.i(TAG, "onNext: pushNotifyRespond---" + pushNotifyRespond.toString());
+                        if (0 == pushNotifyRespond.getCode()) {
+                            int newCount = pushNotifyRespond.getPayload().getNewAddFriendMsgCnt();
+                            MyInfo myInfo = myInfoDao.queryBuilder()
+                                    .where(MyInfoDao.Properties.Uin.eq(uin))
+                                    .build().unique();
+                            if (myInfo != null){
+
+                                int addFriendNum = myInfo.getAddFriendNum();
+                                Log.i(TAG, "onNext: addFriendNum---" + addFriendNum);
+                                if (addFriendNum != newCount)
+                                addFriendNum = newCount;
+
+                                myInfo.setAddFriendNum(addFriendNum);
+                                myInfoDao.update(myInfo);
+                                setFriendCount();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+
+    }
+
+
     @Override
     public void onConnected() {
         Log.i(TAG, "HuaweiApiClient 连接成功");
@@ -379,18 +462,16 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     }
 
     @Override
-    public void onMessageUpdate(ImMsg imMsg) {
-        Log.i(TAG, "onMessageUpdate: 有消息更新");
-        setMessageIcon();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        huaWeiClient.disconnect();
+        if (huaWeiClient != null){
+            huaWeiClient.disconnect();
+        }
+
+        unregisterReceiver(messageBr);
     }
 
-    //设置消息图标的点亮
+    //设置消息icon的点亮
     public void setMessageIcon() {
         Log.i(TAG, "setMessageClear: 消息ICON点亮");
 
@@ -403,7 +484,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             mainNavBarRight.setCompoundDrawables(null, nav_up, null, null);
             mainNavBarRight.setTextColor(getResources().getColor(R.color.message_title_color));
 
-
             Drawable nav_up2 = getResources().getDrawable(R.drawable.message_yes);
             nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
             mainNavRight2.setCompoundDrawables(null, nav_up2, null, null);
@@ -415,7 +495,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         Log.i(TAG, "setMessageClear: 消息ICON清除");
 
-
         List<ImSession> imSessionList = imSessionDao.queryBuilder()
                 .where(ImSessionDao.Properties.UnreadMsgNum.gt(0))
                 .build().list();
@@ -426,7 +505,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             mainNavBarRight.setCompoundDrawables(null, nav_up, null, null);
             mainNavBarRight.setTextColor(getResources().getColor(R.color.text_color_gray));
 
-
             Drawable nav_up2 = getResources().getDrawable(R.drawable.message_no);
             nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
             mainNavRight2.setCompoundDrawables(null, nav_up2, null, null);
@@ -434,6 +512,39 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         }
     }
 
+    //动态图标点亮
+    public void setFeedIcon() {
+        Log.i(TAG, "setFeedIcon: 动态图标点亮");
+        Drawable nav_up = getResources().getDrawable(R.drawable.feeds_icon_yes);
+        nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+        mainNavBarLeft.setCompoundDrawables(null, nav_up, null, null);
+        mainNavBarLeft.setTextColor(getResources().getColor(R.color.feeds_title_color));
+
+        Drawable nav_up2 = getResources().getDrawable(R.drawable.feeds_icon_yes);
+        nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
+        mainNavBarLeft2.setCompoundDrawables(null, nav_up2, null, null);
+    }
+
+    //动态图标清除
+    public void setFeedClear() {
+        Log.i(TAG, "setFeedClear: 动态图标清除");
+        Drawable nav_up = getResources().getDrawable(R.drawable.feeds_icon_no);
+        nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+        mainNavBarLeft.setCompoundDrawables(null, nav_up, null, null);
+        mainNavBarLeft.setTextColor(getResources().getColor(R.color.text_color_gray));
+
+        Drawable nav_up2 = getResources().getDrawable(R.drawable.feeds_icon_no);
+        nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
+        mainNavBarLeft2.setCompoundDrawables(null, nav_up2, null, null);
+    }
+
+
+    //设置加好友的个数
+    public void setFriendCount(){
+        fragmentAnswer.setFriendCount();
+        fragmentFriend.setFriendCount();
+        fragmentFriend.setFriendCount();
+    }
 
     /*
     //拉取离线会话消息

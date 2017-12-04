@@ -22,6 +22,8 @@ import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -48,6 +50,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     TextView frgTitle;
     @BindView(R.id.frg_user_info)
     ImageButton frgUserInfo;
+    @BindView(R.id.frg_message_count)
+    TextView addFriendCount;
     @BindView(R.id.frg_edit)
     ImageButton frgEdit;
     @BindView(R.id.message_recyclerView)
@@ -162,6 +166,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
             MainActivity mainActivity = (MainActivity)getActivity();
             mainActivity.setMessageClear();
+
+            setFriendCount();
         }
     }
 
@@ -203,6 +209,23 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId---" + sessionId);
 
         updateUi();
+    }
+
+    public void setFriendCount(){
+
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null){
+            int addFriendNum = myInfo.getAddFriendNum();
+            if (addFriendNum == 0){
+                addFriendCount.setText("");
+            }else {
+                addFriendCount.setText(addFriendNum + "");
+            }
+
+        }
     }
 
 }

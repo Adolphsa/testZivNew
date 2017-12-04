@@ -1,5 +1,7 @@
 package com.yeejay.yplay.im;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -48,12 +50,15 @@ public class ImConfig {
 
     private static final String tag = "ImConfig";
     private static final int IM_SDK_APP_ID = 1400046572;
+    private boolean isOffline = false;
 
     private TIMManager timManager = TIMManager.getInstance();
     private TIMSdkConfig config;
     //    private TIMUserConfig userConfig;
+    private Context context;
 
     private ImConfig() {
+
     }
 
     public static synchronized ImConfig getImInstance() {
@@ -132,7 +137,7 @@ public class ImConfig {
                     @Override
                     public void onRefresh() {
                         Log.i(tag, "onRefresh");
-
+                        isOffline = true;
                         GetOfflineMsg.getOfflineMsgs();
                     }
 
@@ -165,7 +170,7 @@ public class ImConfig {
                 //消息的内容解析请参考消息收发文档中的消息解析说明
                 Log.i(tag, "onNewMessages: 收到新消息");
                 onLineUpdateSession(list);
-
+                sendBroadcast();
                 return true;//返回true将终止回调链，不再调用下一个新消息监听器
             }
         });
@@ -251,13 +256,13 @@ public class ImConfig {
         System.out.println("消息长度---" + list.size());
 
         for (TIMMessage timMessage : list) {
-            MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(timMessage,1);
+            MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(timMessage,1,false);
         }
     }
 
     public void onLineUpdateSession(List<TIMMessage> list) {
 
-        System.out.println("消息长度---" + list.size());
+        System.out.println("在线消息长度---" + list.size());
 
         if(list == null){
             return;
@@ -290,17 +295,21 @@ public class ImConfig {
             conExt.setReadMessage(null, new TIMCallBack() {
                 @Override
                 public void onError(int i, String s) {
-                    System.out.println("online 设置会话已读错误---" + s);
+                    Log.i(tag, "onError: 群聊设置已读错误---" + s);
                 }
 
                 @Override
                 public void onSuccess() {
-                    System.out.println("online 设置会话已读成功");
+                    Log.i(tag, "onSuccess: 群聊设置已读正确");
                 }
             });
         }
     }
 
-
-
+    //发送广播
+    private void sendBroadcast(){
+        Intent intent = new Intent("messageService");
+        intent.putExtra("broadcast_type",1);
+        YplayApplication.getInstance().sendBroadcast(intent);
+    }
 }

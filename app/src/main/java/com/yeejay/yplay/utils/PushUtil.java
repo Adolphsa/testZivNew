@@ -60,7 +60,6 @@ public class PushUtil implements Observer {
             return;
         }
 
-
         String senderStr, contentStr = null, title = null;
         senderStr = msg.getSender();
         String sessionId = msg.getMsg().session().sid();
@@ -87,10 +86,16 @@ public class PushUtil implements Observer {
             String msgContent = new String(((TIMCustomElem) msg.getElement(0)).getData());
             ImCustomMsgData imCustomMsgData = GsonUtil.GsonToBean(msgContent, ImCustomMsgData.class);
             int dataType = imCustomMsgData.getDataType();
-            if (4 == dataType){
+            if (3 == dataType){
+                Log.i(TAG, "PushNotify: 加好友");
+                contentStr = "同学～加个好友呗(*/ω＼*)";
+            }else if (4 == dataType){
                 title = "冷却解除";
                 contentStr = "开始新一轮投票吧(๑‾ ꇴ ‾๑)";
+            }else if (5 == dataType){
+                Log.i(TAG, "PushNotify: 动态");
             }
+
 
         }
 

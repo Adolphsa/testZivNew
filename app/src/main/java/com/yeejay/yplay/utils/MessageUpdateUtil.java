@@ -1,17 +1,26 @@
 package com.yeejay.yplay.utils;
 
+import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.tencent.imcore.SessionType;
+import com.tencent.imsdk.TIMCallBack;
+import com.tencent.imsdk.TIMConversation;
+import com.tencent.imsdk.TIMConversationType;
 import com.tencent.imsdk.TIMCustomElem;
 import com.tencent.imsdk.TIMElemType;
+import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMTextElem;
+import com.tencent.imsdk.ext.message.TIMConversationExt;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.ImCustomMsgData;
 import com.yeejay.yplay.model.MsgContent2;
 
@@ -21,6 +30,8 @@ import com.yeejay.yplay.model.MsgContent2;
  */
 
 public class MessageUpdateUtil {
+
+    private static final String TAG = "MessageUpdateUtil";
 
     MessageUpdateListener messageUpdateListener;
     SessionUpdateListener sessionUpdateListener;
@@ -36,17 +47,14 @@ public class MessageUpdateUtil {
     //消息更新接口
     public interface MessageUpdateListener {
         void onMessageUpdate(ImMsg imMsg);
-
     }
 
     //会话列表更新接口
     public interface SessionUpdateListener {
         void onSessionUpdate(ImSession imSession);
-
     }
 
-    private MessageUpdateUtil() {
-    }
+    private MessageUpdateUtil() {}
 
     public static synchronized MessageUpdateUtil getMsgUpdateInstance() {
         return MessageUpdateUtilSingletonHolder.instance;
@@ -57,10 +65,12 @@ public class MessageUpdateUtil {
     }
 
     //会话列表更新
-    public void updateSessionAndMessage(TIMMessage timMessage,int msgSuccess){
+    public void updateSessionAndMessage(TIMMessage timMessage,int msgSuccess,boolean isOffline){
 
         ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
         ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+
         int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
 
         if (timMessage.getElementCount() == 0) {
@@ -70,8 +80,61 @@ public class MessageUpdateUtil {
         String sessionId = timMessage.getMsg().session().sid();
         int sessionType = timMessage.getMsg().session().type().ordinal();
 
+
         if (sessionType == SessionType.kC2C.ordinal()){
+
+            String msgContent = new String(((TIMCustomElem) timMessage.getElement(0)).getData());
+            ImCustomMsgData imCustomMsgData = GsonUtil.GsonToBean(msgContent, ImCustomMsgData.class);
+            int customType = imCustomMsgData.getDataType();
+            if (3 == customType){   //加好友
+
+                MyInfo myInfo = myInfoDao.queryBuilder()
+                        .where(MyInfoDao.Properties.Uin.eq(uin))
+                        .build().unique();
+                if (myInfo != null){
+                    int addFriendNum = myInfo.getAddFriendNum();
+                    Log.i(TAG, "updateSessionAndMessage: addFriendNum---" + addFriendNum);
+                    if (!isOffline){
+                        addFriendNum++;
+                        Log.i(TAG, "updateSessionAndMessage: addFriendNum2---" + addFriendNum);
+                    }
+
+                    myInfo.setAddFriendNum(addFriendNum);
+                    myInfoDao.update(myInfo);
+                }
+
+                Intent intent = new Intent("messageService");
+                intent.putExtra("broadcast_type",3);
+                YplayApplication.getInstance().sendBroadcast(intent);
+            }else if (4 == customType){ //冷却
+                //冷却
+            }else if (5 == customType){ //动态
+                Intent intent = new Intent("messageService");
+                intent.putExtra("broadcast_type",5);
+                YplayApplication.getInstance().sendBroadcast(intent);
+            }
+
             PushUtil.getInstance().PushNotify(timMessage);
+
+            TIMConversation conversation = TIMManager.getInstance().getConversation(
+                    TIMConversationType.C2C,    //会话类型：单聊
+                    sessionId);                      //会话对方用户帐号
+            Log.i(TAG, "updateSessionAndMessage: 单聊sessionId---" + sessionId);
+            //获取会话扩展实例
+            TIMConversationExt conExt = new TIMConversationExt(conversation);
+            //将此会话的所有消息标记为已读
+            conExt.setReadMessage(timMessage, new TIMCallBack() {
+                @Override
+                public void onError(int code, String desc) {
+                    Log.e(TAG, "onError: 单聊错误---" + desc);
+                }
+
+                @Override
+                public void onSuccess() {
+                    Log.i(TAG, "onSuccess: 单聊设置已读成功");
+                }
+            });
+
             return;
         }
 
@@ -184,7 +247,6 @@ public class MessageUpdateUtil {
             messageUpdateListener.onMessageUpdate(imMsg);
         }
 
-
         try {
             imMsgDao.insert(imMsg);
         } catch (Exception e) {
@@ -213,7 +275,7 @@ public class MessageUpdateUtil {
                     msgContent,
                     msgTs,
                     0,
-                    0);
+                    1);
 
             imSessionDao.insert(session);
 
@@ -234,7 +296,6 @@ public class MessageUpdateUtil {
             //设置会话未读数目
             int unreadNum = imSession.getUnreadMsgNum();
             unreadNum++;
-
 
             imSession.setLastMsgId(msgId);
             imSession.setLastSender(sender);

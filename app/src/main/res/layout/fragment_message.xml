@@ -6,7 +6,7 @@
 
     <include
         android:id="@+id/message_title"
-        layout="@layout/layouot_frag_title_bar" />
+        layout="@layout/layout_frag_title_bar" />
 
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:id="@+id/message_refresh_view"

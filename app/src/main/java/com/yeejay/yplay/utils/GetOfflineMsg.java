@@ -63,7 +63,6 @@ public class GetOfflineMsg {
                     if (timMessages == null) {
                         return;
                     }
-
                     //设置会话未读数目
                     Log.i(TAG, "getMessages return size: ---" + timMessages.size());
                     String sessionId = timMessages.get(0).getMsg().session().sid();
@@ -80,8 +79,6 @@ public class GetOfflineMsg {
                     }
 
                     ImConfig.getImInstance().updateSession(timMessages);
-
-
                 }
             });
 
@@ -98,12 +95,12 @@ public class GetOfflineMsg {
             conExt.setReadMessage(null, new TIMCallBack() {
                 @Override
                 public void onError(int i, String s) {
-                    System.out.println("offline 设置会话已读错误---" + s);
+                    Log.i(TAG, "onError: 设置会话已读错误---" + s);
                 }
 
                 @Override
                 public void onSuccess() {
-                    System.out.println("offline 设置会话已读成功");
+                    Log.i(TAG, "onSuccess: 设置会话已读成功");
                 }
             });
         }

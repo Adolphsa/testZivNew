@@ -14,6 +14,18 @@
         android:layout_marginStart="23dp"
         android:background="@android:color/transparent"
         android:src="@drawable/my_no_number" />
+
+    <TextView
+        android:id="@+id/frg_message_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/frg_user_info"
+        android:layout_alignBottom="@+id/frg_user_info"
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:text=""
+        android:background="@android:color/transparent"
+        />
     <TextView
         android:id="@+id/frg_title"
         android:layout_width="wrap_content"

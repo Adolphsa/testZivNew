@@ -133,6 +133,14 @@ public class ActivityMyInfo extends BaseActivity {
     @OnClick(R.id.ami_include_friend_request)
     public void friendsRequest(){
         System.out.println("好友请求");
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null){
+            myInfo.setAddFriendNum(0);
+            myInfoDao.update(myInfo);
+        }
         startActivity(new Intent(ActivityMyInfo.this,ActivityAddFiendsDetail.class));
     }
 

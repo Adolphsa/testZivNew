@@ -18,6 +18,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.widget.DefaultItemDecoration;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendFeedsAdapter;
@@ -64,6 +65,8 @@ public class FragmentFriend extends BaseFragment {
 
     @BindView(R.id.ff_user_info)
     ImageButton ffUserInfo;
+    @BindView(R.id.ff_message_count)
+    TextView addFriendTextView;
     @BindView(R.id.ff_swipe_recycler_view)
     SwipeMenuRecyclerView ffSwipeRecyclerView;
     @BindView(R.id.ff_ptf)
@@ -75,6 +78,7 @@ public class FragmentFriend extends BaseFragment {
     FriendFeedsAdapter feedsAdapter;
     DaoFriendFeedsDao mDaoFriendFeedsDao;
     List<DaoFriendFeeds> mDataList;
+    MainActivity mainActivity;
 
     int refreshOffset = 0;
     private RelativeLayout rl;
@@ -95,6 +99,7 @@ public class FragmentFriend extends BaseFragment {
         //跳转到我的资料
         jumpToUserInfo();
         mDataList = new ArrayList<>();
+        mainActivity = (MainActivity) getActivity();
 
         mDaoFriendFeedsDao = YplayApplication.getInstance().getDaoSession().getDaoFriendFeedsDao();
 
@@ -125,6 +130,7 @@ public class FragmentFriend extends BaseFragment {
 
                 refreshOffset = 0;
                 getFriendFeeds(ts, 10);
+                mainActivity.setFeedClear();
             }
 
             @Override
@@ -142,10 +148,9 @@ public class FragmentFriend extends BaseFragment {
             }
         });
 
-        long ts = System.currentTimeMillis();
-        System.out.println("ts---" + ts);
-        getFriendFeeds(ts, 10);
-
+//        long ts = System.currentTimeMillis();
+//        System.out.println("ts---" + ts);
+//        getFriendFeeds(ts, 10);
     }
 
     @Override
@@ -154,7 +159,10 @@ public class FragmentFriend extends BaseFragment {
         if (isVisibleToUser) {
             System.out.println("FragmentFriend---可见");
 
+            refreshOffset = 0;
+            updateUiData();
 
+            setFriendCount();
 //            fransFrfLayout.setVisibility(View.VISIBLE);
 //            ffPtfRefreshLayout.setVisibility(View.GONE);
 //            initRecommentFriends();
@@ -237,13 +245,17 @@ public class FragmentFriend extends BaseFragment {
         if (0 == refreshOffset && mDataList != null) {
             mDataList.clear();
         }
+
         List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset);
-        System.out.println("刷新----refreshOffser---" + refreshOffset);
+        System.out.println("刷新----refreshOffset---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
         if (refreshList.size() != 0){
             refreshOffset++;
             mDataList.addAll(refreshList);
+        }else {
+            List<DaoFriendFeeds> tempList = refreshQuery(0);
+            mDataList.addAll(tempList);
         }
 
         if (mDataList.size() == 0){
@@ -321,9 +333,7 @@ public class FragmentFriend extends BaseFragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<FriendFeedsMakesureRespond>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
+                    public void onSubscribe(@NonNull Disposable d) {}
 
                     @Override
                     public void onNext(@NonNull FriendFeedsMakesureRespond friendFeedsMakesureRespond) {
@@ -534,6 +544,7 @@ public class FragmentFriend extends BaseFragment {
 
     //通过短信邀请好友
     private void invitefriendsbysms(String friends) {
+
         Map<String, Object> removeFreindMap = new HashMap<>();
         removeFreindMap.put("friends", friends);
         removeFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
@@ -703,6 +714,24 @@ public class FragmentFriend extends BaseFragment {
             }
         });
         cardDialog.show();
+    }
+
+    //设置添加好友的数量
+    public void setFriendCount(){
+
+        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        if (myInfo != null){
+            int addFriendNum = myInfo.getAddFriendNum();
+            if (addFriendNum == 0){
+                addFriendTextView.setText("");
+            }else {
+                addFriendTextView.setText(addFriendNum + "");
+            }
+
+        }
     }
 
 

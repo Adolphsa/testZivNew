@@ -23,10 +23,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <uses-permission
-        android:name="com.huawei.android.launcher.permission.CHANGE_BADGE "/>
-
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE " />
 
     <!-- mi push -->
     <permission
@@ -34,7 +32,6 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.yeejay.yplay.permission.MIPUSH_RECEIVE" />
-
 
     <application
         android:name=".YplayApplication"
@@ -46,10 +43,11 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
 
-        <!--华为APPID-->
+        <!-- 华为APPID -->
         <meta-data
             android:name="com.huawei.hms.client.appid"
             android:value="100118923" />
+
         <activity
             android:name="com.huawei.hms.activity.BridgeActivity"
             android:configChanges="orientation|locale|screenSize|layoutDirection|fontScale"
@@ -66,7 +64,7 @@
             android:name="com.huawei.hms.update.provider.UpdateProvider"
             android:authorities="com.yeejay.yplay.hms.update.provider"
             android:exported="false"
-            android:grantUriPermissions="true"/>
+            android:grantUriPermissions="true" />
 
         <activity
             android:name=".login.LoadingActivity"
@@ -212,7 +210,6 @@
                 <action android:name="com.tencent.qalsdk.broadcast.qal" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name="com.tencent.qalsdk.core.NetConnInfoCenter"
             android:process=":QALSERVICE">
@@ -234,7 +231,6 @@
                 <action android:name="com.tencent.qalsdk.service.TASK_REMOVED" />
             </intent-filter>
         </receiver>
-
 
         <!-- mipush -->
         <service
@@ -302,17 +298,14 @@
                 <!-- 可选，标签、地理位置上报回应，不上报则不需要 -->
                 <action android:name="com.huawei.android.push.plugin.RESPONSE" />
             </intent-filter>
-
         </receiver>
-
-        <receiver android:name="com.huawei.hms.support.api.push.PushEventReceiver" >
+        <receiver android:name="com.huawei.hms.support.api.push.PushEventReceiver">
             <intent-filter>
                 <!-- 接收通道发来的通知栏消息，兼容老版本PUSH -->
                 <action android:name="com.huawei.intent.action.PUSH" />
             </intent-filter>
         </receiver>
         <!-- hwpush -->
-
     </application>
 
 </manifest>
