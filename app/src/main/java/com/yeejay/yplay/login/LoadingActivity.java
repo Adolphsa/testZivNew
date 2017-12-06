@@ -74,16 +74,20 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
 
         clearNotification();
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-//            if ((checkSelfPermission(Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED)) permissionsList.add(Manifest.permission.READ_PHONE_STATE);
-//            if ((checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)) permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//            if (permissionsList.size() == 0){
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if ((checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED))
+//                permissionsList.add(Manifest.permission.READ_PHONE_STATE);
+//            if ((checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
+//                permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//            if ((checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED))
+//                permissionsList.add(Manifest.permission.READ_CONTACTS);
+//            if (permissionsList.size() == 0) {
 //                init();
-//            }else{
+//            } else {
 //                requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
 //                        REQUEST_PHONE_PERMISSIONS);
 //            }
-//        }else{
+//        } else {
 //            init();
 //        }
 
@@ -111,9 +115,10 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
 //        switch (requestCode) {
 //            case REQUEST_PHONE_PERMISSIONS:
 //                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+////                    upLoadingContacts();
 //                    init();
 //                } else {
-//                    Toast.makeText(this, getString(R.string.need_permission),Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, getString(R.string.need_permission), Toast.LENGTH_SHORT).show();
 //                    finish();
 //                }
 //                break;
@@ -197,6 +202,87 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         notificationManager.cancelAll();
         MiPushClient.clearNotification(getApplicationContext());
     }
+
+//    //获取通讯录联系人
+//    private List<ContactsInfo> getContacts() {
+//
+//        List<ContactsInfo> mContactsList = new ArrayList<ContactsInfo>();
+//        try {
+//            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+//
+//            if (contactUri != null) {
+//                System.out.println("通讯录长度---" + mContactsList.size());
+//            }
+//            Cursor cursor = getContentResolver().query(contactUri,
+//                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
+//                    null, null, "sort_key");
+//            String contactName;
+//            String contactNumber;
+//
+//            while (cursor != null && cursor.moveToNext()) {
+//                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+//                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//
+//                ContactsInfo contactsInfo = new ContactsInfo(contactName, contactNumber);
+//                if (contactName != null)
+//                    mContactsList.add(contactsInfo);
+//            }
+//            cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
+//
+//            if (mContactsList.size() > 0) {
+//                ContactsInfo testContactInfo = mContactsList.get(0);
+//                System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
+//            }
+//
+//            return mContactsList;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return mContactsList;
+//    }
+//
+//    //上传通讯录
+//    private void upLoadingContacts() {
+//
+//        Map<String, Object> contactsMap = new HashMap<>();
+//        String contactString = GsonUtil.GsonString(getContacts());
+//        String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
+//        contactsMap.put("data", encodedString);
+//        contactsMap.put("uin", SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_UIN, 0));
+//        contactsMap.put("token", SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        contactsMap.put("ver", SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_VER, 0));
+//
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .updateContacts(contactsMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+//
+//                        if (baseRespond.getCode() == 0) {
+//                            System.out.println("上传通讯录成功---" + baseRespond.toString());
+//                        } else {
+//                            System.out.println("上传通讯录失败---" + baseRespond.toString());
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+//                        System.out.println("上传通讯录失败---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
     @Override
     protected void onDestroy() {

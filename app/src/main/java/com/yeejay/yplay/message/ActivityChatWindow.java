@@ -32,6 +32,8 @@ import com.yeejay.yplay.customview.HeadRefreshView;
 import com.yeejay.yplay.customview.NoDataView;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
+import com.yeejay.yplay.greendao.ImSession;
+import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
@@ -72,6 +74,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
+        ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+        ImSession imSession = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                .build().unique();
+        imSession.setUnreadMsgNum(0);
+        imSessionDao.update(imSession);
         finish();
     }
 

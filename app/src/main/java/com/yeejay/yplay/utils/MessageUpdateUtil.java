@@ -300,6 +300,10 @@ public class MessageUpdateUtil {
                 unreadNum++;
             }
 
+            Log.i(TAG, "updateSessionAndMessage: unreadNum---" + unreadNum
+                    + ",sender---" + sender
+                    + ",uin---" + uin);
+
             imSession.setLastMsgId(msgId);
             imSession.setLastSender(sender);
             imSession.setMsgContent(msgContent);

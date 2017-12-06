@@ -124,12 +124,22 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     private int mColor;
 
+    private boolean isNewFeeds = false;
+
     public int getmColor() {
         return mColor;
     }
 
     public void setmColor(int mColor) {
         this.mColor = mColor;
+    }
+
+    public boolean isNewFeeds() {
+        return isNewFeeds;
+    }
+
+    public void setNewFeeds(boolean newFeeds) {
+        isNewFeeds = newFeeds;
     }
 
     BroadcastReceiver messageBr = new BroadcastReceiver() {
@@ -144,6 +154,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                 setFriendCount();
             } else if (5 == brType) { //动态
                 setFeedIcon();
+                setNewFeeds(true);
             }
 
         }
@@ -186,8 +197,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             public void onPageScrollStateChanged(int i) {}
         });
 
-        setMessageIcon();
-
         IntentFilter filter = new IntentFilter("messageService");
         registerReceiver(messageBr, filter);
 
@@ -196,15 +205,12 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         //获取加好友的人数
         getAddFreindCount();
         setMessageIcon();
-        setFeedIcon();
-
-        Log.i(TAG, "onCreate: MainActivity");
+//        setFeedIcon();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume: MainActivity");
         clearNotification();
     }
 
@@ -434,7 +440,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     }
 
-
     @Override
     public void onConnected() {
         Log.i(TAG, "HuaweiApiClient 连接成功");
@@ -484,12 +489,13 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     //设置消息icon的点亮
     public void setMessageIcon() {
-        Log.i(TAG, "setMessageClear: 消息ICON点亮");
 
         List<ImSession> imSessionList = imSessionDao.queryBuilder()
                 .where(ImSessionDao.Properties.UnreadMsgNum.gt(0))
                 .build().list();
+
         if (imSessionList != null && imSessionList.size() > 0) {
+            Log.i(TAG, "setMessageIcon: 消息ICON点亮---" + imSessionList.size());
             Drawable nav_up = getResources().getDrawable(R.drawable.message_yes);
             nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
             mainNavBarRight.setCompoundDrawables(null, nav_up, null, null);
@@ -525,6 +531,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     //动态图标点亮
     public void setFeedIcon() {
+
         Log.i(TAG, "setFeedIcon: 动态图标点亮");
         Drawable nav_up = getResources().getDrawable(R.drawable.feeds_icon_yes);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());

@@ -69,7 +69,6 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     int dataOffset = 0;
     MessageAdapter messageAdapter;
     List<ImSession> mDataList;
-    List<ImSession> imSessionList;
     ImSessionDao imSessionDao;
 
     @Override

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -75,6 +76,8 @@ public class FragmentFriend extends BaseFragment {
     @BindView(R.id.frans_frf_layout)
     LinearLayout fransFrfLayout;
 
+    private static final String TAG = "FragmentFriend";
+
     FriendFeedsAdapter feedsAdapter;
     DaoFriendFeedsDao mDaoFriendFeedsDao;
     List<DaoFriendFeeds> mDataList;
@@ -96,6 +99,8 @@ public class FragmentFriend extends BaseFragment {
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
 
+        Log.i(TAG, "initAllMembersView: ------");
+
         //跳转到我的资料
         jumpToUserInfo();
         mDataList = new ArrayList<>();
@@ -113,7 +118,7 @@ public class FragmentFriend extends BaseFragment {
                 DaoFriendFeeds tempFeeds = mDataList.get(position);
 
                 //查询关系之后再跳转
-                getFriendInfo(tempFeeds.getFriendUin(),tempFeeds);
+                getFriendInfo(tempFeeds.getFriendUin(), tempFeeds);
             }
         });
 
@@ -130,27 +135,20 @@ public class FragmentFriend extends BaseFragment {
 
                 refreshOffset = 0;
                 getFriendFeeds(ts, 10);
+                updateUiData();
                 mainActivity.setFeedClear();
             }
 
             @Override
             public void loadMore() {
-                if (mDataList.size() > 0) {
+                refreshOffset++;
+                updateUiData();
 
-                    long ts = mDataList.get(mDataList.size() - 1).getTs();
-                    System.out.println("向下翻页----" + refreshOffset + ts);
-                    getFriendFeeds(ts, 10);
-                } else {
-                    System.out.println("无数据");
-                    ffPtfRefreshLayout.finishLoadMore();
-                }
-
+                ffPtfRefreshLayout.finishLoadMore();
             }
         });
 
-//        long ts = System.currentTimeMillis();
-//        System.out.println("ts---" + ts);
-//        getFriendFeeds(ts, 10);
+        Log.i(TAG, "initAllMembersView: ------222");
     }
 
     @Override
@@ -159,14 +157,16 @@ public class FragmentFriend extends BaseFragment {
         if (isVisibleToUser) {
             System.out.println("FragmentFriend---可见");
 
-            refreshOffset = 0;
-            updateUiData();
+            if (mainActivity.isNewFeeds() && refreshOffset == 0) {
+                long ts = System.currentTimeMillis();
+                Log.i(TAG, "onVisibilityChangedToUser: ts---" + ts);
+                getFriendFeeds(ts, 10);
 
+            }else {
+                refreshOffset = 0;
+                updateUiData();
+            }
             setFriendCount();
-//            fransFrfLayout.setVisibility(View.VISIBLE);
-//            ffPtfRefreshLayout.setVisibility(View.GONE);
-//            initRecommentFriends();
-
         }
 
     }
@@ -182,6 +182,7 @@ public class FragmentFriend extends BaseFragment {
 
     //获取好友动态
     public void getFriendFeeds(long ts, int cnt) {
+
         System.out.println("拉取好友动态----" + ts);
         Map<String, Object> friendFeedsMap = new HashMap<>();
         friendFeedsMap.put("ts", ts);
@@ -216,8 +217,13 @@ public class FragmentFriend extends BaseFragment {
                                         feedsBeanList.get(0).getTs());
                             }
                         }
-                        //从数据库取数据更新到UI
-                        updateUiData();
+
+                        if (mainActivity.isNewFeeds() && refreshOffset == 0){
+                            updateUiData();
+                            mainActivity.setNewFeeds(false);
+                            mainActivity.setFeedClear();
+                        }
+
                     }
 
                     @Override
@@ -225,8 +231,6 @@ public class FragmentFriend extends BaseFragment {
                         System.out.println("获取好友动态异常---" + e.getMessage());
                         ffPtfRefreshLayout.finishRefresh();
                         ffPtfRefreshLayout.finishLoadMore();
-                        //从数据库取数据更新到UI
-                        updateUiData();
                     }
 
                     @Override
@@ -250,20 +254,16 @@ public class FragmentFriend extends BaseFragment {
         System.out.println("刷新----refreshOffset---" + refreshOffset);
         System.out.println("刷新----refreshList---" + refreshList.size());
 
-        if (refreshList.size() != 0){
-            refreshOffset++;
+        if (refreshList.size() != 0) {
             mDataList.addAll(refreshList);
-        }else {
-            List<DaoFriendFeeds> tempList = refreshQuery(0);
-            mDataList.addAll(tempList);
         }
 
-        if (mDataList.size() == 0){
+        if (mDataList.size() == 0 && refreshOffset == 0) {
             System.out.println("无动态");
             fransFrfLayout.setVisibility(View.VISIBLE);
             ffPtfRefreshLayout.setVisibility(View.GONE);
             initRecommentFriends();
-        }else {
+        } else {
             System.out.println("有动态");
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
@@ -333,7 +333,8 @@ public class FragmentFriend extends BaseFragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<FriendFeedsMakesureRespond>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@NonNull FriendFeedsMakesureRespond friendFeedsMakesureRespond) {
@@ -414,14 +415,14 @@ public class FragmentFriend extends BaseFragment {
                     System.out.println("不再显示");
                     rl.setVisibility(View.INVISIBLE);
 
-                    SharePreferenceUtil.put(getActivity(),YPlayConstant.YPLAY_NO_MORE_SHOW,true);
+                    SharePreferenceUtil.put(getActivity(), YPlayConstant.YPLAY_NO_MORE_SHOW, true);
 
                     //将数据库中的值变为1
                     MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
                     int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
                     MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                             .build().unique();
-                    if (myInfo != null){
+                    if (myInfo != null) {
                         myInfo.setIsNoMoreShow(1);
                         myInfoDao.update(myInfo);
                     }
@@ -457,7 +458,7 @@ public class FragmentFriend extends BaseFragment {
             int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
             MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                     .build().unique();
-            if (myInfo != null && myInfo.getIsNoMoreShow() == 1){
+            if (myInfo != null && myInfo.getIsNoMoreShow() == 1) {
                 rl.setVisibility(View.GONE);
             }
 
@@ -487,14 +488,14 @@ public class FragmentFriend extends BaseFragment {
                             System.out.println("邀请的电话---" + phone);
                             String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                             invitefriendsbysms(base64phone);
-                        } else if(recommendType == 1 || recommendType == 3 || recommendType == 4){
+                        } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) {
                             button.setBackgroundResource(R.drawable.btn_alread_applt);
                             int uin = friendsBean.getUin();
                             addFriend(uin);
                         }
                     }
                 },
-                tempList,1);
+                tempList, 1);
         rfListView.setAdapter(recommendFriendForNullAdapter);
     }
 
@@ -521,9 +522,9 @@ public class FragmentFriend extends BaseFragment {
                         if (getRecommendsRespond.getCode() == 0) {
 
                             if (getRecommendsRespond.getPayload().getFriends() != null
-                                    && getRecommendsRespond.getPayload().getFriends().size() > 0){
+                                    && getRecommendsRespond.getPayload().getFriends().size() > 0) {
                                 initRecommendList(getRecommendsRespond.getPayload().getFriends());
-                            }else {
+                            } else {
                                 rl.setVisibility(View.GONE);
                             }
 
@@ -614,7 +615,7 @@ public class FragmentFriend extends BaseFragment {
     }
 
     //查询我和好友的关系
-    private void getFriendInfo(int friendUin,final DaoFriendFeeds tempFeeds) {
+    private void getFriendInfo(int friendUin, final DaoFriendFeeds tempFeeds) {
         Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("userUin", friendUin);
         friendMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
@@ -635,12 +636,12 @@ public class FragmentFriend extends BaseFragment {
                         if (userInfoResponde.getCode() == 0) {
                             int status = userInfoResponde.getPayload().getStatus();
 
-                            if (status == 0){//非好友
+                            if (status == 0) {//非好友
                                 showCardDialog(userInfoResponde.getPayload());
-                            }else if (status == 1){//好友
+                            } else if (status == 1) {//好友
                                 Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
                                 intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
-                                intent.putExtra("yplay_friend_uin",tempFeeds.getFriendUin());
+                                intent.putExtra("yplay_friend_uin", tempFeeds.getFriendUin());
                                 System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
                                 //将被点击的item设置为已读
                                 DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
@@ -667,33 +668,33 @@ public class FragmentFriend extends BaseFragment {
 
 
     //显示名片
-    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean){
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean) {
 
         final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
         int status = payloadBean.getStatus();
 
-        final CardDialog cardDialog = new CardDialog(getActivity(),R.style.CustomDialog);
+        final CardDialog cardDialog = new CardDialog(getActivity(), R.style.CustomDialog);
         cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
         cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
         cardDialog.setCardNameStr(infoBean.getNickName());
         cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
-        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(),infoBean.getGrade()));
+        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
 
-        if (status == 0){
+        if (status == 0) {
             cardDialog.setButtonImg(R.drawable.green_add_friend);
-        }else if (status == 2){
+        } else if (status == 2) {
             cardDialog.setButtonImg(R.drawable.already_apply);
         }
 
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton )v;
-                if (NetWorkUtil.isNetWorkAvailable(getActivity())){
+                ImageButton button = (ImageButton) v;
+                if (NetWorkUtil.isNetWorkAvailable(getActivity())) {
                     button.setImageResource(R.drawable.already_apply);
                     addFriend(infoBean.getUin());
-                }else {
-                    Toast.makeText(getActivity(),"网络异常",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -702,7 +703,7 @@ public class FragmentFriend extends BaseFragment {
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton )v;
+                ImageButton button = (ImageButton) v;
                 button.setImageResource(R.drawable.already_apply);
             }
         });
@@ -717,17 +718,17 @@ public class FragmentFriend extends BaseFragment {
     }
 
     //设置添加好友的数量
-    public void setFriendCount(){
+    public void setFriendCount() {
 
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
-        if (myInfo != null){
+        if (myInfo != null) {
             int addFriendNum = myInfo.getAddFriendNum();
-            if (addFriendNum == 0){
+            if (addFriendNum == 0) {
                 addFriendTextView.setText("");
-            }else {
+            } else {
                 addFriendTextView.setText(addFriendNum + "");
             }
 

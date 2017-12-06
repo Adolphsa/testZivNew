@@ -107,6 +107,7 @@ public class FragmentAnswer extends BaseFragment {
     int titleNum;
     int questionListLength;
     int colorCount = 7;
+    boolean isOut15 = false;
 
     int backgroundColor[] = {R.color.play_color7,
                             R.color.play_color2,
@@ -473,6 +474,10 @@ public class FragmentAnswer extends BaseFragment {
                 frandProgress.setVisibility(View.INVISIBLE);
             }
             setFriendCount();
+
+            if (isOut15){
+                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+            }
         }
     }
 
@@ -530,6 +535,8 @@ public class FragmentAnswer extends BaseFragment {
     //点击继续15次
     private void questionOut15() {
 
+        isOut15 = true;
+
         //修改背景颜色
         changeColor(R.color.play_color2);
 
@@ -549,13 +556,12 @@ public class FragmentAnswer extends BaseFragment {
         frgansTnNextPerson.setVisibility(View.INVISIBLE);
         frgansBtnNextQuestion.setVisibility(View.INVISIBLE);
         frgansBtnInvite.setVisibility(View.VISIBLE);
-
-        getQuestionsList();
     }
 
     //解除冷冻
     private void relieve() {
 
+        isOut15 = false;
         questionNum = 0;
         getQuestionsList();
 
@@ -605,7 +611,7 @@ public class FragmentAnswer extends BaseFragment {
 
                     @Override
                     public void onNext(@NonNull QuestionListRespond questionListRespond) {
-                        System.out.println("问题列表---" + questionListRespond.toString());
+//                        System.out.println("问题列表---" + questionListRespond.toString());
                         if (questionListRespond.getCode() == 0) {
                             QuestionListRespond.PayloadBean payloadBean = questionListRespond.getPayload();
                             if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {

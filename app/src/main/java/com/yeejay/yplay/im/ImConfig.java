@@ -1,6 +1,5 @@
 package com.yeejay.yplay.im;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -55,7 +54,6 @@ public class ImConfig {
     private TIMManager timManager = TIMManager.getInstance();
     private TIMSdkConfig config;
     //    private TIMUserConfig userConfig;
-    private Context context;
 
     private ImConfig() {
 

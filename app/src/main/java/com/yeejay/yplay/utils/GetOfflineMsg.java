@@ -1,5 +1,6 @@
 package com.yeejay.yplay.utils;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.tencent.imsdk.TIMCallBack;
@@ -64,7 +65,8 @@ public class GetOfflineMsg {
                         return;
                     }
                     //设置会话未读数目
-                    Log.i(TAG, "getMessages return size: ---" + timMessages.size());
+                    int size = timMessages.size();
+                    Log.i(TAG, "getMessages return size: ---" + size);
                     String sessionId = timMessages.get(0).getMsg().session().sid();
                     Log.i(TAG, "sessionId: ---" + sessionId);
                     ImSession imSession = imSessionDao.queryBuilder()
@@ -76,6 +78,13 @@ public class GetOfflineMsg {
 
                         imSession.setUnreadMsgNum(unreadNum);
                         imSessionDao.update(imSession);
+                    }
+
+                    //发送收到离线消息广播  点亮消息ICON
+                    if (size > 0){
+                        Intent intent = new Intent("messageService");
+                        intent.putExtra("broadcast_type",1);
+                        YplayApplication.getInstance().sendBroadcast(intent);
                     }
 
                     ImConfig.getImInstance().updateSession(timMessages);

@@ -99,9 +99,6 @@ public class PushUtil implements Observer {
 //            String sessionId = imSession.getSessionId();
             String msgContent = imSession.getMsgContent();
             String nickName = imSession.getNickName();
-            imSession.setUnreadMsgNum(0);
-            imSessionDao.update(imSession);
-//            int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
 
             notificationIntent.putExtra("yplay_sessionId",sessionId);
             notificationIntent.putExtra("yplay_session_status",status);
