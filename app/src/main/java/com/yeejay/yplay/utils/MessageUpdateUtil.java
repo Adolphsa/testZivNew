@@ -35,6 +35,7 @@ public class MessageUpdateUtil {
 
     MessageUpdateListener messageUpdateListener;
     SessionUpdateListener sessionUpdateListener;
+    int uin;
 
     public void setMessageUpdateListener(MessageUpdateListener messageUpdateListener) {
         this.messageUpdateListener = messageUpdateListener;
@@ -71,7 +72,7 @@ public class MessageUpdateUtil {
         ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
-        int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
+        uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
 
         if (timMessage.getElementCount() == 0) {
             return;
@@ -295,7 +296,9 @@ public class MessageUpdateUtil {
 
             //设置会话未读数目
             int unreadNum = imSession.getUnreadMsgNum();
-            unreadNum++;
+            if (!sender.isEmpty() && !sender.equals(String.valueOf(uin))){
+                unreadNum++;
+            }
 
             imSession.setLastMsgId(msgId);
             imSession.setLastSender(sender);

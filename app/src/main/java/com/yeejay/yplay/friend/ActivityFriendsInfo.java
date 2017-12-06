@@ -129,7 +129,7 @@ public class ActivityFriendsInfo extends BaseActivity {
 
             layoutTitle.setText(friendName);
             layoutTitle.setTextColor(getResources().getColor(R.color.white));
-            layoutTitleBack.setBackgroundResource(R.drawable.back_white);
+            layoutTitleBack.setImageResource(R.drawable.back_white);
 
             getFriendInfo(friendUin);
         }

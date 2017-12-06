@@ -23,7 +23,7 @@ public class ProgressButton extends android.support.v7.widget.AppCompatButton {
     private Paint mPaint = new Paint();
     private int mProgress;
     //private int currentType = TYPE_FILL;
-    private int buttonColor = R.color.green_yellow;
+    private int buttonColor = R.color.white;
 
     public int getButtonColor() {
         return buttonColor;

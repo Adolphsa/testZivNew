@@ -285,55 +285,61 @@ public class ActivityNnonymityReply extends AppCompatActivity {
         nonButton4.setText(nickName4);
 
         if (selectIndex == 1) {
-            nonButton1.setButtonColor(R.color.message_button__selcet70);
-            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+            nonButton1.setBackground(getDrawable(R.drawable.nonymity_reply_select));
+//            nonButton1.setButtonColor(R.color.message_button__selcet70);
+//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+//
+//            nonButton1.updateProgress((bsc1 + 1) * 100 / total);
+//            nonButton2.updateProgress(bsc2 * 100 / total);
+//            nonButton3.updateProgress(bsc3 * 100 / total);
+//            nonButton4.updateProgress(bsc4 * 100 / total);
 
-            nonButton1.updateProgress((bsc1 + 1) * 100 / total);
-            nonButton2.updateProgress(bsc2 * 100 / total);
-            nonButton3.updateProgress(bsc3 * 100 / total);
-            nonButton4.updateProgress(bsc4 * 100 / total);
-
-            System.out.println("被选中的是1");
+//            System.out.println("被选中的是1");
 
         } else if (selectIndex == 2) {
-            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton2.setButtonColor(R.color.message_button__selcet70);
-            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+            nonButton2.setBackground(getDrawable(R.drawable.nonymity_reply_select));
 
-            nonButton1.updateProgress(bsc1 * 100 / total);
-            nonButton2.updateProgress((bsc2 + 1) * 100 / total);
-            nonButton3.updateProgress(bsc3 * 100 / total);
-            nonButton4.updateProgress(bsc4 * 100 / total);
+//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton2.setButtonColor(R.color.message_button__selcet70);
+//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+//
+//            nonButton1.updateProgress(bsc1 * 100 / total);
+//            nonButton2.updateProgress((bsc2 + 1) * 100 / total);
+//            nonButton3.updateProgress(bsc3 * 100 / total);
+//            nonButton4.updateProgress(bsc4 * 100 / total);
 
-            System.out.println("被选中的是2");
+//            System.out.println("被选中的是2");
 
         } else if (selectIndex == 3) {
-            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton3.setButtonColor(R.color.message_button__selcet70);
-            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+            nonButton3.setBackground(getDrawable(R.drawable.nonymity_reply_select));
+//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton3.setButtonColor(R.color.message_button__selcet70);
+//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
+//
+//            nonButton1.updateProgress(bsc1 * 100 / total);
+//            nonButton2.updateProgress(bsc2 * 100 / total);
+//            nonButton3.updateProgress((bsc3 + 1) * 100 / total);
+//            nonButton4.updateProgress(bsc4 * 100 / total);
 
-            nonButton1.updateProgress(bsc1 * 100 / total);
-            nonButton2.updateProgress(bsc2 * 100 / total);
-            nonButton3.updateProgress((bsc3 + 1) * 100 / total);
-            nonButton4.updateProgress(bsc4 * 100 / total);
-
-            System.out.println("被选中的是3");
+//            System.out.println("被选中的是3");
         } else if (selectIndex == 4) {
-            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-            nonButton4.setButtonColor(R.color.message_button__selcet70);
+            nonButton4.setBackground(getDrawable(R.drawable.nonymity_reply_select));
 
-            nonButton1.updateProgress(bsc1 * 100 / total);
-            nonButton2.updateProgress(bsc2 * 100 / total);
-            nonButton3.updateProgress(bsc3 * 100 / total);
-            nonButton4.updateProgress((bsc4 + 1) * 100 / total);
-
-            System.out.println("被选中的是41");
+//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
+//            nonButton4.setButtonColor(R.color.message_button__selcet70);
+//
+//            nonButton1.updateProgress(bsc1 * 100 / total);
+//            nonButton2.updateProgress(bsc2 * 100 / total);
+//            nonButton3.updateProgress(bsc3 * 100 / total);
+//            nonButton4.updateProgress((bsc4 + 1) * 100 / total);
+//
+//            System.out.println("被选中的是41");
         }
 
     }

@@ -17,7 +17,7 @@
         >
         <ImageView
             android:layout_width="200dp"
-            android:layout_height="95dp"
+            android:layout_height="80dp"
             android:src="@drawable/envelope_bottom"
             android:layout_alignParentBottom="true"
             android:scaleType="fitXY"
@@ -62,7 +62,7 @@
                 android:layout_below="@+id/lmc_ques_text"
                 android:layout_marginTop="20dp"
                 >
-                <com.yeejay.yplay.customview.ProgressButton
+                <Button
                     android:id="@+id/lmc_button1"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
@@ -71,10 +71,14 @@
                     android:layout_weight="1"
                     android:textSize="12sp"
                     android:textColor="@color/black50"
-                    android:background="@drawable/play_button_background"
-
+                    android:background="@drawable/button_white_background"
+                    android:ellipsize="end"
+                    android:maxEms="6"
+                    android:singleLine="true"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
                     />
-                <com.yeejay.yplay.customview.ProgressButton
+                <Button
                     android:id="@+id/lmc_button2"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
@@ -84,7 +88,12 @@
                     android:layout_weight="1"
                     android:textSize="12sp"
                     android:textColor="@color/black50"
-                    android:background="@drawable/play_button_background"
+                    android:background="@drawable/button_white_background"
+                    android:ellipsize="end"
+                    android:maxEms="6"
+                    android:singleLine="true"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
                     />
             </LinearLayout>
 
@@ -98,7 +107,7 @@
                 android:layout_below="@+id/lmc_button12_ll"
                 android:layout_marginTop="10dp"
                 >
-                <com.yeejay.yplay.customview.ProgressButton
+                <Button
                     android:id="@+id/lmc_button3"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
@@ -107,9 +116,14 @@
                     android:layout_weight="1"
                     android:textSize="12sp"
                     android:textColor="@color/black50"
-                    android:background="@drawable/play_button_background"
+                    android:background="@drawable/button_white_background"
+                    android:ellipsize="end"
+                    android:maxEms="6"
+                    android:singleLine="true"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
                     />
-                <com.yeejay.yplay.customview.ProgressButton
+                <Button
                     android:id="@+id/lmc_button4"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
@@ -119,13 +133,18 @@
                     android:layout_weight="1"
                     android:textSize="12sp"
                     android:textColor="@color/black50"
-                    android:background="@drawable/play_button_background"
+                    android:background="@drawable/button_white_background"
+                    android:ellipsize="end"
+                    android:maxEms="6"
+                    android:singleLine="true"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
                     />
             </LinearLayout>
         </RelativeLayout>
         <ImageView
             android:layout_width="200dp"
-            android:layout_height="95dp"
+            android:layout_height="80dp"
             android:layout_alignParentBottom="true"
             android:src="@drawable/envelope_top"
             android:scaleType="fitXY"

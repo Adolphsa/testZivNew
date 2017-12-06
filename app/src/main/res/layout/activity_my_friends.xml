@@ -16,13 +16,20 @@
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
         >
-
         <ListView
             android:id="@+id/amf_list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@color/feeds_search_color"
             android:dividerHeight="0.3dp"
+            />
+        <ImageView
+            android:id="@+id/amf_friend_null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/friend_null"
+            android:layout_gravity="center"
+            android:visibility="gone"
             />
     </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 

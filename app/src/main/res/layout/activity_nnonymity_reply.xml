@@ -67,7 +67,7 @@
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textColor="@color/black50"
-                android:background="@drawable/play_button_background"
+                android:background="@drawable/button_white_background"
 
                 />
             <com.yeejay.yplay.customview.ProgressButton
@@ -80,7 +80,7 @@
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textColor="@color/black50"
-                android:background="@drawable/play_button_background"
+                android:background="@drawable/button_white_background"
                 />
         </LinearLayout>
 
@@ -103,7 +103,7 @@
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textColor="@color/black50"
-                android:background="@drawable/play_button_background"
+                android:background="@drawable/button_white_background"
                 />
             <com.yeejay.yplay.customview.ProgressButton
                 android:id="@+id/non_button4"
@@ -115,7 +115,7 @@
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textColor="@color/black50"
-                android:background="@drawable/play_button_background"
+                android:background="@drawable/button_white_background"
                 />
         </LinearLayout>
     </RelativeLayout>

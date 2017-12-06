@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -44,6 +45,8 @@ public class ActivityMyFriends extends BaseActivity {
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
     TextView layoutTitle;
+    @BindView(R.id.amf_friend_null)
+    ImageView friendNull;
     @BindView(R.id.amf_list_view)
     ListView amfListView;
     @BindView(R.id.amf_ptf_refresh)
@@ -83,6 +86,12 @@ public class ActivityMyFriends extends BaseActivity {
     }
 
     private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
+
+        if (tempList.size() > 0){
+            friendNull.setVisibility(View.GONE);
+        }else {
+            friendNull.setVisibility(View.VISIBLE);
+        }
 
         amfListView.setAdapter(new BaseAdapter() {
             @Override

@@ -15,6 +15,7 @@ import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
+import com.yanzhenjie.recyclerview.swipe.widget.DefaultItemDecoration;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
@@ -80,6 +81,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     protected void initAllMembersView(Bundle savedInstanceState) {
         messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
+        frgTitle.setTextColor(getResources().getColor(R.color.white));
 
         MessageUpdateUtil.getMsgUpdateInstance().setSessionUpdateListener(this);
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
@@ -92,6 +94,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         messageAdapter = new MessageAdapter(getActivity(),mDataList);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        messageRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
 
         messageRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override

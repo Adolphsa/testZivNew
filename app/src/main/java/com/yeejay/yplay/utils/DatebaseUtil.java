@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 public class DatebaseUtil {
 
+    static String title;
 
     public static String getNotificationTitle(ImSession imSession) {
 
@@ -37,9 +38,10 @@ public class DatebaseUtil {
                     int grade = senderInfoBean.getGrade();
                     int schoolType = senderInfoBean.getSchoolType();
                     String gradeAndSchool = FriendFeedsUtil.schoolType(schoolType, grade);
-                    notificationTitle = "@" + myselfNickName + ",神秘" +
+                    notificationTitle = "@" + myselfNickName + "，神秘" +
                             gradeAndSchool + genderStr +
                             "对你说了真心话( ⁼̴̀ .̫ ⁼̴́ )✧";
+                    title = "神秘信件";
                 }
 
             } catch (JSONException e) {
@@ -47,11 +49,12 @@ public class DatebaseUtil {
             }
 
         } else if (status == 1) {
-            notificationTitle = "@" + myselfNickName + "你投的人回复了你！( ⁼̴̀ .̫ ⁼̴́ )✧";
+            notificationTitle = "@" + myselfNickName + "，你投的人回复了你！( ⁼̴̀ .̫ ⁼̴́ )✧";
+            title = "神秘信件";
         } else if (status == 2) {
+            title = imSession.getNickName();
             notificationTitle = imSession.getNickName();
         }
         return notificationTitle;
     }
-
 }

@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -15,7 +16,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMElemType;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.customview.ProgressButton;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.GsonUtil;
@@ -205,11 +205,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             if (optionsBeanList != null && optionsBeanList.size() == 4) {
 
-                int beSelectCnt1 = optionsBeanList.get(0).getBeSelCnt();
-                int beSelectCnt2 = optionsBeanList.get(1).getBeSelCnt();
-                int beSelectCnt3 = optionsBeanList.get(2).getBeSelCnt();
-                int beSelectCnt4 = optionsBeanList.get(3).getBeSelCnt();
-
                 String nickName1 = optionsBeanList.get(0).getNickName();
                 String nickName2 = optionsBeanList.get(1).getNickName();
                 String nickName3 = optionsBeanList.get(2).getNickName();
@@ -217,7 +212,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 initButton(selectIndex,
                         holder,
-                        beSelectCnt1, beSelectCnt2, beSelectCnt3, beSelectCnt4,
                         nickName1, nickName2, nickName3, nickName4);
             }
 
@@ -231,11 +225,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //button ui
     private void initButton(int selectIndex,
                             VoteCardViewHolder holder,
-                            int bsc1, int bsc2, int bsc3, int bsc4,
                             String nickName1, String nickName2, String nickName3, String nickName4) {
 
-        int total = bsc1 + bsc2 + bsc3 + bsc4 + 1;
-//        System.out.println("non---total---" + total);
 
         holder.msgBtn1.setText(nickName1);
         holder.msgBtn2.setText(nickName2);
@@ -243,48 +234,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.msgBtn4.setText(nickName4);
 
         if (selectIndex == 1) {
-            holder.msgBtn1.setButtonColor(R.color.message_button__selcet70);
-            holder.msgBtn2.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn3.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn4.setButtonColor(R.color.message_button_no_selcet20);
-
-            holder.msgBtn1.updateProgress((bsc1 + 1) * 100 / total);
-            holder.msgBtn2.updateProgress(bsc2 * 100 / total);
-            holder.msgBtn3.updateProgress(bsc3 * 100 / total);
-            holder.msgBtn4.updateProgress(bsc4 * 100 / total);
+            holder.msgBtn1.setBackground(context.getDrawable(R.drawable.nonymity_reply_select));
 
         } else if (selectIndex == 2) {
-            holder.msgBtn1.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn2.setButtonColor(R.color.message_button__selcet70);
-            holder.msgBtn3.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn4.setButtonColor(R.color.message_button_no_selcet20);
 
-            holder.msgBtn1.updateProgress(bsc1 * 100 / total);
-            holder.msgBtn2.updateProgress((bsc2 + 1) * 100 / total);
-            holder.msgBtn3.updateProgress(bsc3 * 100 / total);
-            holder.msgBtn4.updateProgress(bsc4 * 100 / total);
+            holder.msgBtn2.setBackground(context.getDrawable(R.drawable.nonymity_reply_select));
 
         } else if (selectIndex == 3) {
-            holder.msgBtn1.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn2.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn3.setButtonColor(R.color.message_button__selcet70);
-            holder.msgBtn4.setButtonColor(R.color.message_button_no_selcet20);
-
-            holder.msgBtn1.updateProgress(bsc1 * 100 / total);
-            holder.msgBtn2.updateProgress(bsc2 * 100 / total);
-            holder.msgBtn3.updateProgress((bsc3 + 1) * 100 / total);
-            holder.msgBtn4.updateProgress(bsc4 * 100 / total);
+            holder.msgBtn3.setBackground(context.getDrawable(R.drawable.nonymity_reply_select));
 
         } else if (selectIndex == 4) {
-            holder.msgBtn1.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn2.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn3.setButtonColor(R.color.message_button_no_selcet20);
-            holder.msgBtn4.setButtonColor(R.color.message_button__selcet70);
-
-            holder.msgBtn1.updateProgress(bsc1 * 100 / total);
-            holder.msgBtn2.updateProgress(bsc2 * 100 / total);
-            holder.msgBtn3.updateProgress(bsc3 * 100 / total);
-            holder.msgBtn4.updateProgress((bsc4 + 1) * 100 / total);
+            holder.msgBtn4.setBackground(context.getDrawable(R.drawable.nonymity_reply_select));
         }
 
     }
@@ -318,13 +278,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @BindView(R.id.lmc_ques_text)
         TextView msgText;
         @BindView(R.id.lmc_button1)
-        ProgressButton msgBtn1;
+        Button msgBtn1;
         @BindView(R.id.lmc_button2)
-        ProgressButton msgBtn2;
+        Button msgBtn2;
         @BindView(R.id.lmc_button3)
-        ProgressButton msgBtn3;
+        Button msgBtn3;
         @BindView(R.id.lmc_button4)
-        ProgressButton msgBtn4;
+        Button msgBtn4;
         @BindView(R.id.lmc_root_rl)
         RelativeLayout msgRootRl;
         @BindView(R.id.lmc_root_ll)

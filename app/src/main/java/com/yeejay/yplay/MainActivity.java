@@ -1,6 +1,7 @@
 package com.yeejay.yplay;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
+import com.yeejay.yplay.utils.PushUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -195,6 +197,15 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         getAddFreindCount();
         setMessageIcon();
         setFeedIcon();
+
+        Log.i(TAG, "onCreate: MainActivity");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume: MainActivity");
+        clearNotification();
     }
 
     private void addFragment() {
@@ -503,7 +514,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             Drawable nav_up = getResources().getDrawable(R.drawable.message_no);
             nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
             mainNavBarRight.setCompoundDrawables(null, nav_up, null, null);
-            mainNavBarRight.setTextColor(getResources().getColor(R.color.text_color_gray));
+            mainNavBarRight.setTextColor(getResources().getColor(R.color.white));
 
             Drawable nav_up2 = getResources().getDrawable(R.drawable.message_no);
             nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
@@ -531,7 +542,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         Drawable nav_up = getResources().getDrawable(R.drawable.feeds_icon_no);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
         mainNavBarLeft.setCompoundDrawables(null, nav_up, null, null);
-        mainNavBarLeft.setTextColor(getResources().getColor(R.color.text_color_gray));
+        mainNavBarLeft.setTextColor(getResources().getColor(R.color.white));
 
         Drawable nav_up2 = getResources().getDrawable(R.drawable.feeds_icon_no);
         nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
@@ -544,6 +555,17 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         fragmentAnswer.setFriendCount();
         fragmentFriend.setFriendCount();
         fragmentFriend.setFriendCount();
+    }
+
+    private void clearNotification() {
+        NotificationManager notificationManager = (NotificationManager) this
+                .getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+        MiPushClient.clearNotification(getApplicationContext());
+
+        //设置华为角标为0
+        PushUtil.setHuaWeiBadgenumber(0);
+        PushUtil.resetPushNum();
     }
 
     /*
