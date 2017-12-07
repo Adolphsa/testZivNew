@@ -1,5 +1,7 @@
 package com.yeejay.yplay.message;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,7 +10,11 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -30,11 +36,13 @@ import com.yeejay.yplay.adapter.ChatAdapter;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.HeadRefreshView;
 import com.yeejay.yplay.customview.NoDataView;
+import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.model.MsgContent2;
+import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -42,6 +50,7 @@ import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import org.greenrobot.greendao.query.DeleteQuery;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -85,6 +94,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @OnClick(R.id.layout_setting)
     public void megMore() {
+        showBottomDialog();
         System.out.println("聊天对象资料");
     }
 
@@ -163,12 +173,14 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     String sessionId;
     ImMsgDao imMsgDao;
+    ImSessionDao imSessionDao;
     int dataOffset = 0;
     List<ImMsg> mDataList;
     ChatAdapter chatAdapter;
     String nickName;
     String myselfNickName;
     int uin;
+    int mSender;
     String tempNickname;
 
     TIMConversation conversation;
@@ -182,11 +194,14 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         setContentView(R.layout.activity_chat_window);
         ButterKnife.bind(this);
 
+        Log.i(TAG, "onCreate:");
+
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityChatWindow.this, true);
 
         MessageUpdateUtil.getMsgUpdateInstance().setMessageUpdateListener(this);
         imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
+        imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         uin = (int) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, (int) 0);
         myselfNickName = (String) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_NICK_NAME,"");
 
@@ -270,12 +285,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     //接受从FragmentMessage传过来的数据
     private void receiveBundleData(){
-
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
             sessionId = bundle.getString("yplay_sessionId");
             int status = bundle.getInt("yplay_session_status");
             String sender = bundle.getString("yplay_sender");
+            mSender = Integer.valueOf(sender);
             String msgContent = bundle.getString("yplay_msg_content");
             tempNickname = bundle.getString("yplay_nick_name");
             Log.d(TAG, "receiveBundleData: sessionId---" + sessionId);
@@ -304,7 +319,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             mDataList = queryDatabaseForImsession(sessionId);
             System.out.println("消息列表的长度---" + mDataList.size());
         }
-
     }
 
     private ImMsg insertMsg(TIMMessage msg, int MsgSucess){
@@ -339,6 +353,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     protected void onResume() {
         super.onResume();
 
+        Log.i(TAG, "onResume: ");
         getWindow().getDecorView().addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -366,10 +381,70 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             chatAdapter.notifyItemInserted(mDataList.size()-1);
             acwRecycleView.scrollToPosition(mDataList.size()-1);
         }
-
-//        MainActivity mainActivity = new MainActivity();
-//        mainActivity.setMessageIcon();
-
-//        acwEdit.setText("");
     }
+
+
+    //显示底部对话框
+    private void showBottomDialog(){
+        final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
+        View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
+        bottomDialog.setContentView(contentView);
+
+        Button msgProBt = (Button) contentView.findViewById(R.id.message_profile);
+        Button msgDeleteBt = (Button) contentView.findViewById(R.id.message_delete);
+        Button msgCancelBt = (Button) contentView.findViewById(R.id.message_cancel);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()){
+                    case R.id.message_profile:
+                        Log.i(TAG, "onClick: 查看资料");
+                        Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
+                        intent.putExtra("yplay_friend_name", nickName);
+                        intent.putExtra("yplay_friend_uin", mSender);
+                        bottomDialog.dismiss();
+                        startActivity(intent);
+                        break;
+                    case R.id.message_delete:
+                        Log.i(TAG, "onClick: 删除对话");
+                        deleteSession();
+                        bottomDialog.dismiss();
+                        finish();
+                        break;
+                    case R.id.message_cancel:
+                        Log.i(TAG, "onClick: 取消");
+                        bottomDialog.dismiss();
+                        break;
+                }
+            }
+        };
+
+        msgProBt.setOnClickListener(onClickListener);
+        msgDeleteBt.setOnClickListener(onClickListener);
+        msgCancelBt.setOnClickListener(onClickListener);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentView.getLayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels - DensityUtil.dp2px(this, 16f);
+        params.bottomMargin = DensityUtil.dp2px(this, 8f);
+        contentView.setLayoutParams(params);
+        bottomDialog.setCanceledOnTouchOutside(true);
+        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        bottomDialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
+        bottomDialog.show();
+    }
+
+    private void deleteSession(){
+
+        DeleteQuery imgDeleteQuery = imMsgDao.queryBuilder()
+                .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                .buildDelete();
+        imgDeleteQuery.executeDeleteWithoutDetachingEntities();
+
+        DeleteQuery sessionDelete = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                .buildDelete();
+        sessionDelete.executeDeleteWithoutDetachingEntities();
+    }
+
 }

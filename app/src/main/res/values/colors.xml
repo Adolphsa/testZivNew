@@ -90,6 +90,8 @@
     <color name="message_title_color">#57A8FF</color>
     <color name="message_button_no_selcet20">#33D2E8FF</color>
     <color name="message_button__selcet70">#B357A8FF</color>
+    <color name="message_profile_blue">#007AFF</color>
+    <color name="message_profile_red">#FF3B30</color>
     
     <color name="color_transparent">#00000000</color>
     <color name="color_transparent20">#33000000</color>

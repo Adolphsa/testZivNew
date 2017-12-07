@@ -36,7 +36,6 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
-import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
@@ -84,6 +83,7 @@ public class FragmentFriend extends BaseFragment {
     MainActivity mainActivity;
 
     int refreshOffset = 0;
+
     private RelativeLayout rl;
 
     @Override
@@ -99,7 +99,7 @@ public class FragmentFriend extends BaseFragment {
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
 
-        Log.i(TAG, "initAllMembersView: ------");
+        Log.i(TAG, "initAllMembersView: ");
 
         //跳转到我的资料
         jumpToUserInfo();
@@ -148,7 +148,7 @@ public class FragmentFriend extends BaseFragment {
             }
         });
 
-        Log.i(TAG, "initAllMembersView: ------222");
+
     }
 
     @Override
@@ -162,7 +162,7 @@ public class FragmentFriend extends BaseFragment {
                 Log.i(TAG, "onVisibilityChangedToUser: ts---" + ts);
                 getFriendFeeds(ts, 10);
 
-            }else {
+            } else {
                 refreshOffset = 0;
                 updateUiData();
             }
@@ -218,7 +218,7 @@ public class FragmentFriend extends BaseFragment {
                             }
                         }
 
-                        if (mainActivity.isNewFeeds() && refreshOffset == 0){
+                        if (mainActivity.isNewFeeds() && refreshOffset == 0) {
                             updateUiData();
                             mainActivity.setNewFeeds(false);
                             mainActivity.setFeedClear();
@@ -355,38 +355,38 @@ public class FragmentFriend extends BaseFragment {
                 });
     }
 
-    private void getAddFriendMessageCount() {
-
-        Map<String, Object> unreadFriendMsgCountMap = new HashMap<>();
-        unreadFriendMsgCountMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        unreadFriendMsgCountMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        unreadFriendMsgCountMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUnreadMessageCount(unreadFriendMsgCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UnReadMsgCountRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull UnReadMsgCountRespond unReadMsgCountRespond) {
-                        System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("未读好友消息数异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
+//    private void getAddFriendMessageCount() {
+//
+//        Map<String, Object> unreadFriendMsgCountMap = new HashMap<>();
+//        unreadFriendMsgCountMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+//        unreadFriendMsgCountMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        unreadFriendMsgCountMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .getUnreadMessageCount(unreadFriendMsgCountMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<UnReadMsgCountRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull UnReadMsgCountRespond unReadMsgCountRespond) {
+//                        System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("未读好友消息数异常---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
     RecommendFriendForNullAdapter recommendFriendForNullAdapter;
     ListView rfListView;

@@ -29,8 +29,6 @@ import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import java.util.Observable;
 import java.util.Observer;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-
 /**
  * 在线消息通知展示
  */
@@ -40,7 +38,10 @@ public class PushUtil implements Observer {
 
     private static int pushNum = 0;
 
-    private  int pushId = 1;
+    private  static int pushId = 0;
+    private static int requestCode = 0;
+    Intent notificationIntent;
+    int uin;
 
     private static PushUtil instance = new PushUtil();
 
@@ -66,7 +67,7 @@ public class PushUtil implements Observer {
         if (msg.getElementCount() == 0) {
             return;
         }
-        Intent notificationIntent = null;
+        uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
         String senderStr, contentStr = null, title = null;
         senderStr = msg.getSender();
         String sessionId = msg.getMsg().session().sid();
@@ -83,8 +84,16 @@ public class PushUtil implements Observer {
             System.out.println("PushUtil senderStr---" + senderStr + ",title---" + title);
             int msgType = msg.getElement(0).getType().ordinal();
 
+            int status = imSession.getStatus();
+            String sender = imSession.getLastSender();
+
             if (msgType == TIMElemType.Custom.ordinal()){
-                notificationIntent = new Intent(YplayApplication.getContext(), ActivityNnonymityReply.class);
+                if (status == 1 && !sender.isEmpty() && !sender.equals(String.valueOf(uin))){
+                    notificationIntent = new Intent(YplayApplication.getContext(), ActivityChatWindow.class);
+                }else {
+                    notificationIntent = new Intent(YplayApplication.getContext(), ActivityNnonymityReply.class);
+                }
+
             }else if (msgType == TIMElemType.Text.ordinal()) {
 
                 String text = ((TIMTextElem) msg.getElement(0)).getText();
@@ -94,8 +103,8 @@ public class PushUtil implements Observer {
                 notificationIntent = new Intent(YplayApplication.getContext(), ActivityChatWindow.class);
             }
 
-            int status = imSession.getStatus();
-            String sender = imSession.getLastSender();
+
+
 //            String sessionId = imSession.getSessionId();
             String msgContent = imSession.getMsgContent();
             String nickName = imSession.getNickName();
@@ -131,10 +140,14 @@ public class PushUtil implements Observer {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(YplayApplication.getContext());
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        PendingIntent intent = PendingIntent.getActivity(YplayApplication.getContext(), 0,
-                notificationIntent, FLAG_UPDATE_CURRENT);
+
+        PendingIntent intent = PendingIntent.getActivity(YplayApplication.getContext(), ++requestCode,
+                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Log.i(TAG, "PushNotify: requestCode---" + requestCode);
+
         mBuilder.setContentTitle(title)//设置通知栏标题
                 .setContentText(contentStr)
                 .setContentIntent(intent) //设置通知栏点击意图
@@ -145,8 +158,8 @@ public class PushUtil implements Observer {
                 .setSmallIcon(R.mipmap.ic_launcher_yplay);//设置通知小ICON
         Notification notify = mBuilder.build();
         notify.flags |= Notification.FLAG_AUTO_CANCEL;
-        mNotificationManager.notify(pushId, notify);
-        pushId++;
+        mNotificationManager.notify(++pushId, notify);
+        Log.i(TAG, "PushNotify: pushID---" + pushId);
 
         setHuaWeiBadgenumber(pushNum);
     }
@@ -156,6 +169,7 @@ public class PushUtil implements Observer {
     }
 
     public void reset() {
+        Log.i(TAG, "reset: push---" + pushId);
         NotificationManager notificationManager = (NotificationManager) YplayApplication.getContext().getSystemService(YplayApplication.getContext().NOTIFICATION_SERVICE);
         notificationManager.cancel(pushId);
     }

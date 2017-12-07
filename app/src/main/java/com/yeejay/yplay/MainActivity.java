@@ -80,21 +80,18 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     @OnClick(R.id.main_nav_bar_left)
     public void leftButton(View view) {
         viewPager.setCurrentItem(0);
-//        feedsFragmentStatus();
     }
 
     //右一
     @OnClick(R.id.main_nav_bar_right)
     public void rightButton(View view) {
         viewPager.setCurrentItem(2);
-//        messageFragmentStatus();
     }
 
     //左二
     @OnClick(R.id.main_nav_bar_left2)
     public void leftButton2(View view) {
         viewPager.setCurrentItem(0);
-//        feedsFragmentStatus();
     }
 
 
@@ -102,14 +99,12 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     @OnClick(R.id.main_nav_center2)
     public void ceneterButton2(View view) {
         viewPager.setCurrentItem(1);
-//        playFragmentStatus();
     }
 
     //右二
     @OnClick(R.id.main_nav_right2)
     public void rightButton2(View view) {
         viewPager.setCurrentItem(2);
-//        messageFragmentStatus();
     }
 
     private static final String TAG = "MainActivity";
@@ -173,6 +168,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         addFragment();
         viewPager.setAdapter(frgAdapter);
         viewPager.setCurrentItem(1);
+
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -206,6 +202,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         getAddFreindCount();
         setMessageIcon();
 //        setFeedIcon();
+
+        Log.i(TAG, "onCreate: mainActivity");
     }
 
     @Override

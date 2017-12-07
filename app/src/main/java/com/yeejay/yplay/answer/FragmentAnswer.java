@@ -354,9 +354,10 @@ public class FragmentAnswer extends BaseFragment {
             questionNum++;
             titleNum++;
             hideKeep();
-            System.out.println("继续questionNumber---" + questionNum);
+            System.out.println("继续questionNumber---" + questionNum + ",questionListLength" + questionListLength);
             if (questionNum >= questionListLength) {
-                questionOut15();
+//                questionOut15();
+                nextQuestionUpdate();
                 return;
             }
             nextQuestionUpdate();
@@ -387,7 +388,8 @@ public class FragmentAnswer extends BaseFragment {
 
             if (questionNum >= questionListLength) {
                 System.out.println("哈哈哈哈---" + questionListLength);
-                questionOut15();
+//                questionOut15();
+                nextQuestionUpdate();
                 return;
             }
 
