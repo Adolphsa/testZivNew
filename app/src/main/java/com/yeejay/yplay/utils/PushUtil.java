@@ -19,12 +19,19 @@ import com.tencent.imsdk.TIMTextElem;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.message.ActivityChatWindow;
 import com.yeejay.yplay.message.ActivityNnonymityReply;
 import com.yeejay.yplay.model.ImCustomMsgData;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -122,8 +129,11 @@ public class PushUtil implements Observer {
             String msgContent = new String(((TIMCustomElem) msg.getElement(0)).getData());
             ImCustomMsgData imCustomMsgData = GsonUtil.GsonToBean(msgContent, ImCustomMsgData.class);
             int dataType = imCustomMsgData.getDataType();
+
             if (3 == dataType){
                 Log.i(TAG, "PushNotify: 加好友");
+                String data = imCustomMsgData.getData();
+                title = data;
                 contentStr = "同学～加个好友呗(*/ω＼*)";
                 notificationIntent = new Intent(YplayApplication.getContext(), ActivityMyInfo.class);
             }else if (4 == dataType){
@@ -133,6 +143,39 @@ public class PushUtil implements Observer {
             }else if (5 == dataType){
                 Log.i(TAG, "PushNotify: 动态");
                 return;
+            }else if (6 == dataType){ //解除好友的推送
+                String data = imCustomMsgData.getData();
+                try {
+                    JSONObject jsonObject = new JSONObject(data);
+                    int friendUin = jsonObject.getInt("uin");
+                    int ts = jsonObject.getInt("ts");
+                    Log.i(TAG, "PushNotify: jsonObject friendUin---" + friendUin + ",ts---" + ts);
+                    DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                    FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
+                    dbHelper.deleteFriendInfo(friendInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else if (7 == dataType){
+
+                try{
+                    String data = imCustomMsgData.getData();
+                    UserInfoResponde.PayloadBean.InfoBean msgsBean = GsonUtil.GsonToBean(data,UserInfoResponde.PayloadBean.InfoBean.class);
+                    DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                    dbHelper.insertFriendInfo(new FriendInfo(null,
+                            msgsBean.getUin(),
+                            msgsBean.getNickName(),
+                            msgsBean.getHeadImgUrl(),
+                            msgsBean.getGender(),
+                            msgsBean.getGrade(),
+                            msgsBean.getSchoolId(),
+                            msgsBean.getSchoolType(),
+                            msgsBean.getSchoolName(),
+                            msgsBean.getTs()));
+                }catch (Exception e){
+                    Log.i(TAG, "PushNotify: 7---" + e.getMessage());
+                }
+
             }
         }
 

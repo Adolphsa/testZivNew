@@ -36,7 +36,10 @@ import com.yeejay.yplay.adapter.ChatAdapter;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.HeadRefreshView;
 import com.yeejay.yplay.customview.NoDataView;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
@@ -60,7 +63,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityChatWindow extends BaseActivity implements MessageUpdateUtil.MessageUpdateListener{
+public class ActivityChatWindow extends BaseActivity implements MessageUpdateUtil.MessageUpdateListener {
 
     private static final String TAG = "ActivityChatWindow";
 
@@ -101,16 +104,16 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     @OnClick(R.id.acw_send)
     public void send() {
         System.out.println("发送消息");
-        if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             String str = acwEdit.getText().toString().trim();
-            if (!TextUtils.isEmpty(str)){
+            if (!TextUtils.isEmpty(str)) {
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
                 //添加文本内容
                 TIMTextElem elem = new TIMTextElem();
                 elem.setText(str);
                 //将elem添加到消息
-                if(msg.addElement(elem) != 0) {
+                if (msg.addElement(elem) != 0) {
                     Log.d(TAG, "addElement failed");
                     return;
                 }
@@ -134,7 +137,21 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         TIMConversationType.Group,      //会话类型：群组
                         sessionId);                       //群组Id
 
-                Log.d(TAG, "send: sessionId---" + sessionId);
+                Log.i(TAG, "send: sessionId---" + sessionId);
+
+                ImSession imSession = imSessionDao.queryBuilder()
+                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                        .build().unique();
+                String chater = imSession.getChater();
+                Log.i(TAG, "send: chater---" + chater);
+
+                //判断是否是好友关系
+                FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
+                if (friendInfo == null){
+                    Toast.makeText(ActivityChatWindow.this, "发送失败，非好友", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 //发送消息
                 conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
 
@@ -144,11 +161,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         //错误码code含义请参见错误码表
                         Log.d(TAG, "send message failed. code: " + code + " errmsg: " + desc);
                         System.out.println("发送失败");
-                        ImMsg imMsg = insertMsg(msg,0); //发送失败为0
-                        mDataList.add(0,imMsg);
+                        ImMsg imMsg = insertMsg(msg, 0); //发送失败为0
+                        mDataList.add(0, imMsg);
 
                         //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,0,false);
+                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 0, false);
                     }
 
                     @Override
@@ -157,16 +174,16 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         System.out.println("发送成功");
 
                         //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg,1,false);
+                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 1, false);
                         acwEdit.setText("");
                     }
                 });
-            }else {
-                Toast.makeText(ActivityChatWindow.this,"发送内容不能为空",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(ActivityChatWindow.this, "发送内容不能为空", Toast.LENGTH_SHORT).show();
             }
 
-        }else {
-            Toast.makeText(ActivityChatWindow.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -187,6 +204,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     HeadRefreshView headRefreshView;
     NoDataView noDataView;
+    DbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,10 +218,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityChatWindow.this, true);
 
         MessageUpdateUtil.getMsgUpdateInstance().setMessageUpdateListener(this);
+        mDbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         uin = (int) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, (int) 0);
-        myselfNickName = (String) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_NICK_NAME,"");
+        myselfNickName = (String) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_NICK_NAME, "");
 
         receiveBundleData();
 
@@ -212,10 +231,10 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         acwRecycleView.setLayoutManager(linearLayoutManager);
 
-        chatAdapter = new ChatAdapter(ActivityChatWindow.this,mDataList);
+        chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
         acwRecycleView.setAdapter(chatAdapter);
-        if (mDataList != null && mDataList.size() >0){
-            acwRecycleView.scrollToPosition(mDataList.size()-1);
+        if (mDataList != null && mDataList.size() > 0) {
+            acwRecycleView.scrollToPosition(mDataList.size() - 1);
         }
 
         acwRefreshView.setCanLoadMore(false);
@@ -226,15 +245,15 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             @Override
             public void refresh() {
                 dataOffset++;
-                List<ImMsg> tempList =  queryDatabaseForImsession(sessionId);
-                if (tempList != null && tempList.size() > 0){
+                List<ImMsg> tempList = queryDatabaseForImsession(sessionId);
+                if (tempList != null && tempList.size() > 0) {
                     mDataList.addAll(tempList);
                     chatAdapter.notifyDataSetChanged();
                     acwRecycleView.scrollToPosition(0);
                     System.out.println("滚动---" + dataOffset);
-                }else {
+                } else {
                     System.out.println("tempList无数据");
-                    Toast.makeText(ActivityChatWindow.this,"没有更多数据了",Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActivityChatWindow.this, "没有更多数据了", Toast.LENGTH_LONG).show();
                 }
                 acwRefreshView.finishRefresh();
             }
@@ -251,7 +270,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         layoutTitleBack2.setImageResource(R.drawable.meaage_back);
         layoutTitle2.setTextColor(getResources().getColor(R.color.message_title_color));
-        if (TextUtils.isEmpty(nickName) && !TextUtils.isEmpty(tempNickname)){
+        if (TextUtils.isEmpty(nickName) && !TextUtils.isEmpty(tempNickname)) {
             nickName = tempNickname;
         }
         layoutTitle2.setText(nickName);
@@ -284,9 +303,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     }
 
     //接受从FragmentMessage传过来的数据
-    private void receiveBundleData(){
+    private void receiveBundleData() {
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null){
+        if (bundle != null) {
             sessionId = bundle.getString("yplay_sessionId");
             int status = bundle.getInt("yplay_session_status");
             String sender = bundle.getString("yplay_sender");
@@ -295,16 +314,16 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             tempNickname = bundle.getString("yplay_nick_name");
             Log.d(TAG, "receiveBundleData: sessionId---" + sessionId);
 
-            if (status == 0 || status == 1){
+            if (status == 0 || status == 1) {
                 try {
                     JSONObject jsonObject = new JSONObject(msgContent);
                     int dataType = jsonObject.getInt("DataType");
                     String data = jsonObject.getString("Data");
-                    if (dataType == 1){
+                    if (dataType == 1) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
                         nickName = receiverInfoBean.getNickName();
-                    }else if (dataType == 2){
+                    } else if (dataType == 2) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
                         nickName = senderInfoBean.getNickName();
@@ -314,14 +333,14 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 }
             }
         }
-        if (!TextUtils.isEmpty(sessionId)){
+        if (!TextUtils.isEmpty(sessionId)) {
             //查询消息表
             mDataList = queryDatabaseForImsession(sessionId);
             System.out.println("消息列表的长度---" + mDataList.size());
         }
     }
 
-    private ImMsg insertMsg(TIMMessage msg, int MsgSucess){
+    private ImMsg insertMsg(TIMMessage msg, int MsgSucess) {
 
         long msgId = msg.getMsgUniqueId();
         int msgType = msg.getElement(0).getType().ordinal();
@@ -339,7 +358,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     }
 
     //从数据库中查找消息列表
-    private List<ImMsg> queryDatabaseForImsession(String sessionId){
+    private List<ImMsg> queryDatabaseForImsession(String sessionId) {
 
         return imMsgDao.queryBuilder()
                 .where(ImMsgDao.Properties.SessionId.eq(sessionId))
@@ -376,16 +395,16 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         System.out.println("聊天窗口收到了contenty---" + content);
         String tempSessionId = imMsg.getSessionId();
 
-        if (!TextUtils.isEmpty(tempSessionId) && sessionId.equals(tempSessionId)){
-            mDataList.add(0,imMsg);
-            chatAdapter.notifyItemInserted(mDataList.size()-1);
-            acwRecycleView.scrollToPosition(mDataList.size()-1);
+        if (!TextUtils.isEmpty(tempSessionId) && sessionId.equals(tempSessionId)) {
+            mDataList.add(0, imMsg);
+            chatAdapter.notifyItemInserted(mDataList.size() - 1);
+            acwRecycleView.scrollToPosition(mDataList.size() - 1);
         }
     }
 
 
     //显示底部对话框
-    private void showBottomDialog(){
+    private void showBottomDialog() {
         final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
         View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
         bottomDialog.setContentView(contentView);
@@ -397,7 +416,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (v.getId()){
+                switch (v.getId()) {
                     case R.id.message_profile:
                         Log.i(TAG, "onClick: 查看资料");
                         Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
@@ -434,7 +453,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         bottomDialog.show();
     }
 
-    private void deleteSession(){
+    private void deleteSession() {
 
         DeleteQuery imgDeleteQuery = imMsgDao.queryBuilder()
                 .where(ImMsgDao.Properties.SessionId.eq(sessionId))

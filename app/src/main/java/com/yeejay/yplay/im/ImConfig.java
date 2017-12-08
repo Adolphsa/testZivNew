@@ -49,7 +49,7 @@ public class ImConfig {
 
     private static final String tag = "ImConfig";
     private static final int IM_SDK_APP_ID = 1400046572;
-    private boolean isOffline = false;
+    public boolean isOffline = true;
 
     private TIMManager timManager = TIMManager.getInstance();
     private TIMSdkConfig config;
@@ -135,7 +135,7 @@ public class ImConfig {
                     @Override
                     public void onRefresh() {
                         Log.i(tag, "onRefresh");
-                        isOffline = true;
+                        isOffline = false;
                         GetOfflineMsg.getOfflineMsgs();
                     }
 

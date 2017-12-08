@@ -20,7 +20,10 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
@@ -86,6 +89,7 @@ public class ActivityFriendsInfo extends BaseActivity {
     ImageView arrowsImg;
 
     int friendUin;
+    private DbHelper dbHelper;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -117,6 +121,8 @@ public class ActivityFriendsInfo extends BaseActivity {
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
         layoutSetting.setVisibility(View.GONE);
         arrowsImg.setVisibility(View.GONE);
+
+        dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
 
         RelativeLayout rl = (RelativeLayout) findViewById(R.id.layout_my_friend);
         TextView tv = (TextView) rl.findViewById(R.id.friend_tv1);
@@ -157,6 +163,24 @@ public class ActivityFriendsInfo extends BaseActivity {
             luiSchoolName.setText(infoBean.getSchoolName());
             friendTvNum.setText(infoBean.getFriendCnt() + "");
             diamondTvNum.setText(infoBean.getGemCnt() + "");
+
+            //更新朋友数据
+            FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
+            if (friendInfo == null){
+                dbHelper.insertFriendInfo(new FriendInfo(null,infoBean.getUin(),infoBean.getNickName(),infoBean.getHeadImgUrl(),infoBean.getGender(),infoBean.getGrade(),infoBean.getSchoolId(),infoBean.getSchoolType(),infoBean.getSchoolName(),infoBean.getTs()));
+            }else {
+                friendInfo.setFriendUin(infoBean.getUin());
+                friendInfo.setFriendName(infoBean.getNickName());
+                friendInfo.setFriendHeadUrl(infoBean.getHeadImgUrl());
+                friendInfo.setFriendGender(infoBean.getGender());
+                friendInfo.setFriendGrade(infoBean.getGrade());
+                friendInfo.setFriendSchoolId(infoBean.getSchoolId());
+                friendInfo.setFriendSchoolType(infoBean.getSchoolType());
+                friendInfo.setFriendSchoolName(infoBean.getSchoolName());
+                friendInfo.setTs(infoBean.getTs());
+                dbHelper.updateFriendInfo(friendInfo);
+            }
+
         }
     }
 
@@ -397,6 +421,11 @@ public class ActivityFriendsInfo extends BaseActivity {
                 .where(DaoFriendFeedsDao.Properties.FriendUin.eq(friendUin))
                 .buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
+
+        //删除好友列表中的好友
+        FriendInfo friendInfo =  dbHelper.queryFriendInfo(friendUin);
+        dbHelper.deleteFriendInfo(friendInfo);
+
         finish();
     }
 

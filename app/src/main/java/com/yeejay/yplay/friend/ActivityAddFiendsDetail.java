@@ -1,6 +1,7 @@
 package com.yeejay.yplay.friend;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -11,9 +12,13 @@ import android.widget.Toast;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendsDetailAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -35,6 +40,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ActivityAddFiendsDetail extends BaseActivity {
+
+    private static final String TAG = "ActivityAddFiendsDetail";
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -76,7 +83,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
                         if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
-                            accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),1);
+                            accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),
+                                    1,
+                                    tempList.get((int) button.getTag()));
                             button.setVisibility(View.INVISIBLE);
                             if (tempList.size() > 0) {
                                 System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
@@ -98,7 +107,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                     button.setBackgroundResource(R.drawable.is_friend);
                     button.setEnabled(false);
                     //接受加好友的请求
-                    accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
+                    accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),
+                            0,
+                            tempList.get((int) button.getTag()));
                 }else {
                     Toast.makeText(ActivityAddFiendsDetail.this,"网络异常",Toast.LENGTH_SHORT).show();
                 }
@@ -163,7 +174,8 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     }
 
     //接受好友请求
-    private void accepeAddFreind(int msgId, int act) {
+    private void accepeAddFreind(int msgId, int act, final GetAddFriendMsgs.PayloadBean.MsgsBean msgsBean) {
+
         Map<String, Object> accepeAddFreindMap = new HashMap<>();
         accepeAddFreindMap.put("msgId", msgId);
         accepeAddFreindMap.put("act",act);
@@ -185,6 +197,19 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         System.out.println("接受好友请求---" + baseRespond.toString());
                         if (baseRespond.getCode() == 0){
                             Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
+                            DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                            dbHelper.insertFriendInfo(new FriendInfo(null,
+                                    msgsBean.getFromUin(),
+                                    msgsBean.getFromNickName(),
+                                    msgsBean.getFromHeadImgUrl(),
+                                    msgsBean.getFromGender(),
+                                    msgsBean.getFromGrade(),
+                                    msgsBean.getSchoolId(),
+                                    msgsBean.getSchoolType(),
+                                    msgsBean.getSchoolName(),
+                                    msgsBean.getTs()));
+                            Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
+
                         }
                     }
 

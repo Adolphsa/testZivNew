@@ -30,12 +30,16 @@ import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.friend.FragmentFriend;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.message.FragmentMessage;
+import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.utils.PushUtil;
@@ -52,6 +56,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -118,8 +123,11 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     MyInfoDao myInfoDao;
 
     private int mColor;
-
     private boolean isNewFeeds = false;
+
+    private DbHelper dbHelper;
+    private int insertFriendInfoNum = 0;
+    private int mPageNum = 1;
 
     public int getmColor() {
         return mColor;
@@ -161,6 +169,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
@@ -203,6 +212,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         setMessageIcon();
 //        setFeedIcon();
 
+        getMyFriendsList();
         Log.i(TAG, "onCreate: mainActivity");
     }
 
@@ -437,6 +447,77 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
 
     }
+
+    //插入我的好友列表到数据库
+    private void getMyFriendsList() {
+
+        Log.i(TAG, "getMyFriendsList---mPageNum=" + mPageNum);
+        if (mPageNum == 1){
+            dbHelper.deleteFriendInfoAll();
+        }
+
+        Map<String, Object> myFriendsMap = new HashMap<>();
+        myFriendsMap.put("pageNum", mPageNum);
+        myFriendsMap.put("uin", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, 0));
+        myFriendsMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        myFriendsMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getMyFriendsList(myFriendsMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<FriendsListRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull FriendsListRespond friendsListRespond) {
+                        Log.i(TAG, "onNext: friendsListRespond---" + friendsListRespond.toString());
+                        if (friendsListRespond.getCode() != 0) {
+                            return;
+                        }
+                        int total = friendsListRespond.getPayload().getTotal();
+                        List<FriendsListRespond.PayloadBean.FriendsBean> tempList
+                                = friendsListRespond.getPayload().getFriends();
+                        if (tempList == null || tempList.size() == 0){
+                            return;
+                        }
+
+                        FriendInfo dataBaseFriendInfo;
+                        insertFriendInfoNum += tempList.size();
+                        for (FriendsListRespond.PayloadBean.FriendsBean friendInfo : tempList) {
+                            dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin());
+                            if (dataBaseFriendInfo == null){
+                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
+                                dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));
+                            }else {
+                                Log.i(TAG, "onNext: updateFriendInfo---" + dataBaseFriendInfo);
+
+                                dbHelper.updateFriendInfo(dataBaseFriendInfo,friendInfo);
+                            }
+                        }
+                        if (insertFriendInfoNum >= total){
+                            return;
+                        }else {
+                            mPageNum++;
+                            getMyFriendsList();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.i(TAG, "onError: " + e.getMessage());
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+
 
     @Override
     public void onConnected() {

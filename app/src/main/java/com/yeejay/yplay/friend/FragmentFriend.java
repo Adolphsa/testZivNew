@@ -729,7 +729,10 @@ public class FragmentFriend extends BaseFragment {
             if (addFriendNum == 0) {
                 addFriendTextView.setText("");
             } else {
-                addFriendTextView.setText(addFriendNum + "");
+                if (addFriendTextView != null){
+                    addFriendTextView.setText(addFriendNum + "");
+                }
+
             }
 
         }

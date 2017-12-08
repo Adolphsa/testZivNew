@@ -15,14 +15,22 @@ import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMTextElem;
 import com.tencent.imsdk.ext.message.TIMConversationExt;
 import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.data.db.DbHelper;
+import com.yeejay.yplay.data.db.ImpDbHelper;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
+import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.model.ImCustomMsgData;
 import com.yeejay.yplay.model.MsgContent2;
+import com.yeejay.yplay.model.UserInfoResponde;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * 会话消息更新
@@ -55,7 +63,8 @@ public class MessageUpdateUtil {
         void onSessionUpdate(ImSession imSession);
     }
 
-    private MessageUpdateUtil() {}
+    private MessageUpdateUtil() {
+    }
 
     public static synchronized MessageUpdateUtil getMsgUpdateInstance() {
         return MessageUpdateUtilSingletonHolder.instance;
@@ -66,7 +75,7 @@ public class MessageUpdateUtil {
     }
 
     //会话列表更新
-    public void updateSessionAndMessage(TIMMessage timMessage,int msgSuccess,boolean isOffline){
+    public void updateSessionAndMessage(TIMMessage timMessage, int msgSuccess, boolean isOffline) {
 
         ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
         ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
@@ -82,20 +91,21 @@ public class MessageUpdateUtil {
         int sessionType = timMessage.getMsg().session().type().ordinal();
 
 
-        if (sessionType == SessionType.kC2C.ordinal()){
+        if (sessionType == SessionType.kC2C.ordinal()) {
 
             String msgContent = new String(((TIMCustomElem) timMessage.getElement(0)).getData());
+
             ImCustomMsgData imCustomMsgData = GsonUtil.GsonToBean(msgContent, ImCustomMsgData.class);
             int customType = imCustomMsgData.getDataType();
-            if (3 == customType){   //加好友
+            if (3 == customType) {   //加好友
 
                 MyInfo myInfo = myInfoDao.queryBuilder()
                         .where(MyInfoDao.Properties.Uin.eq(uin))
                         .build().unique();
-                if (myInfo != null){
+                if (myInfo != null) {
                     int addFriendNum = myInfo.getAddFriendNum();
                     Log.i(TAG, "updateSessionAndMessage: addFriendNum---" + addFriendNum);
-                    if (!isOffline){
+                    if (!isOffline) {
                         addFriendNum++;
                         Log.i(TAG, "updateSessionAndMessage: addFriendNum2---" + addFriendNum);
                     }
@@ -105,14 +115,50 @@ public class MessageUpdateUtil {
                 }
 
                 Intent intent = new Intent("messageService");
-                intent.putExtra("broadcast_type",3);
+                intent.putExtra("broadcast_type", 3);
                 YplayApplication.getInstance().sendBroadcast(intent);
-            }else if (4 == customType){ //冷却
+            } else if (4 == customType) { //冷却
                 //冷却
-            }else if (5 == customType){ //动态
+            } else if (5 == customType) { //动态
                 Intent intent = new Intent("messageService");
-                intent.putExtra("broadcast_type",5);
+                intent.putExtra("broadcast_type", 5);
                 YplayApplication.getInstance().sendBroadcast(intent);
+            } else if (6 == customType) { //解除好友的离线通知
+                Log.i(TAG, "updateSessionAndMessage: 6");
+                if (!ImConfig.getImInstance().isOffline) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(imCustomMsgData.getData());
+                        int friendUin = jsonObject.getInt("uin");
+                        int ts = jsonObject.getInt("ts");
+                        Log.i(TAG, "PushNotify: jsonObject friendUin---" + friendUin + ",ts---" + ts);
+                        DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                        FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
+                        dbHelper.deleteFriendInfo(friendInfo);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else if (7 == customType) {
+                Log.i(TAG, "updateSessionAndMessage: 7");
+                if (!ImConfig.getImInstance().isOffline) {
+                    try {
+                        String data = imCustomMsgData.getData();
+                        UserInfoResponde.PayloadBean.InfoBean msgsBean = GsonUtil.GsonToBean(data, UserInfoResponde.PayloadBean.InfoBean.class);
+                        DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                        dbHelper.insertFriendInfo(new FriendInfo(null,
+                                msgsBean.getUin(),
+                                msgsBean.getNickName(),
+                                msgsBean.getHeadImgUrl(),
+                                msgsBean.getGender(),
+                                msgsBean.getGrade(),
+                                msgsBean.getSchoolId(),
+                                msgsBean.getSchoolType(),
+                                msgsBean.getSchoolName(),
+                                msgsBean.getTs()));
+                    } catch (Exception e) {
+                        Log.i(TAG, "PushNotify: 7---" + e.getMessage());
+                    }
+                }
             }
 
             PushUtil.getInstance().PushNotify(timMessage);
@@ -167,9 +213,9 @@ public class MessageUpdateUtil {
 //                sessionId, msgId, sender, msgType, msgTs, msgContent);
 
         //收到文本消息
-        if(msgType == TIMElemType.Text.ordinal()){
+        if (msgType == TIMElemType.Text.ordinal()) {
 
-            String text = ((TIMTextElem)timMessage.getElement(0)).getText();
+            String text = ((TIMTextElem) timMessage.getElement(0)).getText();
             System.out.println("收到的文本消息---" + text);
 
             status = 2;
@@ -197,29 +243,29 @@ public class MessageUpdateUtil {
 
                 MsgContent2 content2 = GsonUtil.GsonToBean(customData, MsgContent2.class);
 
-                MsgContent2.SenderInfoBean   senderInfo   = content2.getSenderInfo();
+                MsgContent2.SenderInfoBean senderInfo = content2.getSenderInfo();
                 MsgContent2.ReceiverInfoBean receiverInfo = content2.getReceiverInfo();
 
                 System.out.printf("customData  %s\n", customData);
 
-                String receiverNickName   = "";
+                String receiverNickName = "";
                 String receiverHeadImgUrl = "";
 
-                String senderNickName   = "";
+                String senderNickName = "";
                 String senderHeadImgUrl = "";
 
-                if(receiverInfo == null){
+                if (receiverInfo == null) {
                     receiverNickName = "";
                     receiverHeadImgUrl = "";
-                }else{
-                    receiverNickName   = receiverInfo.getNickName();
+                } else {
+                    receiverNickName = receiverInfo.getNickName();
                     receiverHeadImgUrl = receiverInfo.getHeadImgUrl();
                 }
 
-                if(senderInfo == null){
+                if (senderInfo == null) {
                     senderNickName = "";
                     senderHeadImgUrl = "";
-                }else{
+                } else {
                     senderNickName = senderInfo.getNickName();
                     senderHeadImgUrl = senderInfo.getHeadImgUrl();
                 }
@@ -227,12 +273,12 @@ public class MessageUpdateUtil {
 //                System.out.printf("customType sender nickName %s, headImgUrl %s, receiver nickName %s, headImgUrl %s\n",
 //                        senderNickName, senderHeadImgUrl, receiverNickName,receiverHeadImgUrl);
 
-                if (!String.valueOf(uin).equals(sender)){
+                if (!String.valueOf(uin).equals(sender)) {
                     headerUrl = senderHeadImgUrl;
                     nickName = senderNickName;
-                }else{
+                } else {
                     headerUrl = receiverHeadImgUrl;
-                    nickName  = receiverNickName;
+                    nickName = receiverNickName;
                 }
             }
 
@@ -243,8 +289,8 @@ public class MessageUpdateUtil {
             return;
         }
 
-        ImMsg imMsg = new ImMsg(null, sessionId, msgId, sender, msgType, msgContent, msgTs,msgSuccess);
-        if (messageUpdateListener != null){
+        ImMsg imMsg = new ImMsg(null, sessionId, msgId, sender, msgType, msgContent, msgTs, msgSuccess);
+        if (messageUpdateListener != null) {
             messageUpdateListener.onMessageUpdate(imMsg);
         }
 
@@ -288,7 +334,7 @@ public class MessageUpdateUtil {
             //更新会话表
 
             //如果数据库的消息更新，不更新数据库的会话信息
-            if(imSession.getMsgTs() >= msgTs){
+            if (imSession.getMsgTs() >= msgTs) {
 //                System.out.printf("老的消息到达,不更新会话信息, sessionId %s, msgId %d, curSessionMsgTs %d, msgTs %d\n",
 //                        sessionId, msgId, imSession.getMsgTs(), msgTs);
                 return;
@@ -296,7 +342,7 @@ public class MessageUpdateUtil {
 
             //设置会话未读数目
             int unreadNum = imSession.getUnreadMsgNum();
-            if (!sender.isEmpty() && !sender.equals(String.valueOf(uin))){
+            if (!sender.isEmpty() && !sender.equals(String.valueOf(uin))) {
                 unreadNum++;
             }
 
@@ -329,7 +375,7 @@ public class MessageUpdateUtil {
 
             imSessionDao.update(imSession);
 
-            if (sessionUpdateListener != null){
+            if (sessionUpdateListener != null) {
                 sessionUpdateListener.onSessionUpdate(imSession);
             }
         }

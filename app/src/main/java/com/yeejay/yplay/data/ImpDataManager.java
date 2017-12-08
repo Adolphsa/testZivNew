@@ -5,6 +5,10 @@ import android.content.Context;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.network.ApiHelper;
 import com.yeejay.yplay.data.prefs.PreferencesHelper;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.model.FriendsListRespond;
+
+import java.util.List;
 
 /**
  * DataManager实现类
@@ -28,4 +32,44 @@ public class ImpDataManager implements DataManager{
         mPreferencesHelper = preferencesHelper;
     }
 
+    //-----------------------DbHelper-----------------------------
+    @Override
+    public long insertFriendInfo(FriendInfo friendInfo) {
+        return mDbHelper.insertFriendInfo(friendInfo);
+    }
+
+    @Override
+    public FriendInfo NetworkFriendInfo2DbFriendInfo(FriendsListRespond.PayloadBean.FriendsBean friendInfo) {
+        return mDbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo);
+    }
+
+    @Override
+    public FriendInfo queryFriendInfo(int friendUin) {
+        return mDbHelper.queryFriendInfo(friendUin);
+    }
+
+    @Override
+    public void updateFriendInfo(FriendInfo friendInfo) {
+        mDbHelper.updateFriendInfo(friendInfo);
+    }
+
+    @Override
+    public void updateFriendInfo(FriendInfo dataBaseFriendInfo, FriendsListRespond.PayloadBean.FriendsBean friendInfo) {
+        mDbHelper.updateFriendInfo(dataBaseFriendInfo,friendInfo);
+    }
+
+    @Override
+    public void deleteFriendInfo(FriendInfo friendInfo) {
+        mDbHelper.deleteFriendInfo(friendInfo);
+    }
+
+    @Override
+    public void deleteFriendInfoAll() {
+        mDbHelper.deleteFriendInfoAll();
+    }
+
+    @Override
+    public List<FriendInfo> getAllFriends() {
+        return mDbHelper.getAllFriends();
+    }
 }

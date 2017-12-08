@@ -96,6 +96,7 @@ public class FriendsListRespond {
              * schoolId : 1
              * schoolType : 1
              * schoolName : 南山第二外国语学校
+             * int ts : 好友的时间
              */
 
             private int uin;
@@ -106,6 +107,7 @@ public class FriendsListRespond {
             private int schoolId;
             private int schoolType;
             private String schoolName;
+            private int ts;
 
             public int getUin() {
                 return uin;
@@ -171,6 +173,15 @@ public class FriendsListRespond {
                 this.schoolName = schoolName;
             }
 
+            public int getTs() {
+                return ts;
+            }
+
+            public void setTs(int ts) {
+                this.ts = ts;
+            }
+
+
             @Override
             public String toString() {
                 return "FriendsBean{" +
@@ -182,6 +193,7 @@ public class FriendsListRespond {
                         ", schoolId=" + schoolId +
                         ", schoolType=" + schoolType +
                         ", schoolName='" + schoolName + '\'' +
+                        ", ts=" + ts +
                         '}';
             }
         }

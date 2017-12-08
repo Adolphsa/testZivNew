@@ -41,7 +41,6 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
     private String token;
     private int ver;
 
-
     private final int REQUEST_PHONE_PERMISSIONS = 0;
 
     @SuppressLint("HandlerLeak")
@@ -71,6 +70,8 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         setContentView(R.layout.activity_loading);
         final List<String> permissionsList = new ArrayList<>();
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
+
+
 
         clearNotification();
 
@@ -202,6 +203,8 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         notificationManager.cancelAll();
         MiPushClient.clearNotification(getApplicationContext());
     }
+
+
 
 //    //获取通讯录联系人
 //    private List<ContactsInfo> getContacts() {
