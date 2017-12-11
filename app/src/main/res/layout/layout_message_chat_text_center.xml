@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    >
+
+    <TextView
+        android:id="@+id/msg_item_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="中间的"
+        android:textSize="12sp"
+        android:textColor="@color/feeds_hight_gray"
+        android:layout_gravity="center"
+        />
+
+</LinearLayout>

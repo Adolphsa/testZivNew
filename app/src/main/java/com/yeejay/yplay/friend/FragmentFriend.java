@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.widget.DefaultItemDecoration;
 import com.yeejay.yplay.MainActivity;
@@ -61,7 +60,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Administrator on 2017/10/26.
  */
 
-public class FragmentFriend extends BaseFragment {
+public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.OnRecycleImageListener{
 
     @BindView(R.id.ff_user_info)
     ImageButton ffUserInfo;
@@ -111,22 +110,19 @@ public class FragmentFriend extends BaseFragment {
         ffSwipeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ffSwipeRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
 
-        ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int position) {
-                System.out.println("被点击的item---" + position);
-                DaoFriendFeeds tempFeeds = mDataList.get(position);
-
-                //查询关系之后再跳转
-                getFriendInfo(tempFeeds.getFriendUin(), tempFeeds);
-            }
-        });
+//        ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
+//            @Override
+//            public void onItemClick(View itemView, int position) {
+//                System.out.println("被点击的item---" + position);
+//
+//            }
+//        });
 
         feedsAdapter = new FriendFeedsAdapter(getActivity(),
                 mDataList,
                 mDaoFriendFeedsDao);
         ffSwipeRecyclerView.setAdapter(feedsAdapter);
-
+        feedsAdapter.addRecycleImageListener(this);
         ffPtfRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
@@ -739,4 +735,17 @@ public class FragmentFriend extends BaseFragment {
     }
 
 
+    @Override
+    public void OnRecycleImageClick(View v, Object o) {
+        switch (v.getId()){
+            case R.id.ff_item_header_img:
+
+                int position = (int)o;
+                DaoFriendFeeds tempFeeds = mDataList.get(position);
+                Log.i(TAG, "OnRecycleImageClick: 头像被点击---" + position);
+                //查询关系之后再跳转
+                getFriendInfo(tempFeeds.getFriendUin(), tempFeeds);
+                break;
+        }
+    }
 }

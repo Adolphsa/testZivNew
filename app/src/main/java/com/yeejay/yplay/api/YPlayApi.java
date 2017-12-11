@@ -14,6 +14,7 @@ import com.yeejay.yplay.model.NearestSchoolsRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
+import com.yeejay.yplay.model.QuestionRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
@@ -100,6 +101,16 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/vote/getrandomquestions2")
     Observable<QuestionListRespond> getQuestionsList(@FieldMap Map<String,Object> filemap);
+
+    //拉取问题
+    @FormUrlEncoded
+    @POST("/api/vote/getquestionandoptions")
+    Observable<QuestionRespond> getQuestion(@FieldMap Map<String,Object> filemap);
+
+    //某个问题的拉取候选者---新
+    @FormUrlEncoded
+    @POST("/api/vote/getoptions")
+    Observable<QuestionCandidateRespond> getQuestionsCandidateNew(@FieldMap Map<String,Object> filemap);
 
     //跳过下个问题
     @FormUrlEncoded

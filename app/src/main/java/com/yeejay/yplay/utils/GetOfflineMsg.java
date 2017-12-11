@@ -46,7 +46,7 @@ public class GetOfflineMsg {
             final TIMConversationExt conExt = new TIMConversationExt(timCon);
             final long num = conExt.getUnreadMessageNum();
 
-            Log.i(TAG, "getOfflineMsgs: 未读消息数目---" + num);
+//            Log.i(TAG, "getOfflineMsgs: 未读消息数目---" + num);
 
             if (num == 0) {
                 continue;

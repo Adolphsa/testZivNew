@@ -3,6 +3,7 @@ package com.yeejay.yplay.message;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -46,6 +47,7 @@ import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.DensityUtil;
+import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -198,7 +200,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     String myselfNickName;
     int uin;
     int mSender;
+    int status;
     String tempNickname;
+    StringBuilder gradeAndGenderStr;
 
     TIMConversation conversation;
 
@@ -231,8 +235,23 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         acwRecycleView.setLayoutManager(linearLayoutManager);
 
+        if (1 == status && (uin == mSender)){
+            ImMsg imMsg1 = new ImMsg();
+            imMsg1.setMsgType(100);
+            imMsg1.setMsgContent("对方已看到你的姓名");
+
+            ImMsg imMsg2 = new ImMsg();
+            imMsg2.setMsgType(100);
+            imMsg2.setMsgContent("对方回复后，双方互相实名，能够继续聊天 ");
+            mDataList.add(0,imMsg1);
+            mDataList.add(0,imMsg2);
+
+            Log.i(TAG, "onCreate: mDataList-size" + mDataList.size());
+        }
+
         chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
         acwRecycleView.setAdapter(chatAdapter);
+
         if (mDataList != null && mDataList.size() > 0) {
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
         }
@@ -277,7 +296,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         layoutSetting.setVisibility(View.VISIBLE);
         layoutSetting.setImageResource(R.drawable.message_more);
 
-
         acwEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -300,6 +318,19 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             }
         });
+
+        //状态为1  发送者是自己
+        if (1 == status && (uin == mSender)){
+            layoutTitle2.setText(gradeAndGenderStr);
+            layoutSetting.setVisibility(View.INVISIBLE);
+            acwEdit.setHint("等待回复");
+            Drawable nav_up = getResources().getDrawable(R.drawable.wait_repeat);
+            nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+            acwEdit.setCompoundDrawables(nav_up,null,null,null);
+            acwEdit.setCompoundDrawablePadding(25);
+            acwEdit.setEnabled(false);
+            acwSend.setEnabled(false);
+        }
     }
 
     //接受从FragmentMessage传过来的数据
@@ -307,7 +338,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             sessionId = bundle.getString("yplay_sessionId");
-            int status = bundle.getInt("yplay_session_status");
+            status = bundle.getInt("yplay_session_status");
             String sender = bundle.getString("yplay_sender");
             mSender = Integer.valueOf(sender);
             String msgContent = bundle.getString("yplay_msg_content");
@@ -319,20 +350,38 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     JSONObject jsonObject = new JSONObject(msgContent);
                     int dataType = jsonObject.getInt("DataType");
                     String data = jsonObject.getString("Data");
+
+                    Log.i(TAG, "receiveBundleData: dataType---" + dataType);
+
                     if (dataType == 1) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
                         nickName = receiverInfoBean.getNickName();
+
                     } else if (dataType == 2) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
                         nickName = senderInfoBean.getNickName();
+
+                        int gender = senderInfoBean.getGender();
+                        String genderStr = gender == 1 ? "男生" : "女生";
+                        Log.i(TAG, "receiveBundleData: genderStr---" + genderStr);
+                        int grade = senderInfoBean.getGrade();
+                        int schoolType = senderInfoBean.getSchoolType();
+                        Log.i(TAG, "receiveBundleData: grade---" + grade);
+                        String gradeAndSchool = FriendFeedsUtil.schoolType(schoolType, grade);
+                        gradeAndGenderStr = new StringBuilder(gradeAndSchool);
+//                        gradeAndGenderStr.append(gradeAndSchool);
+                        gradeAndGenderStr.append(genderStr);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+
+
         if (!TextUtils.isEmpty(sessionId)) {
             //查询消息表
             mDataList = queryDatabaseForImsession(sessionId);
@@ -453,6 +502,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         bottomDialog.show();
     }
 
+    //删除对话
     private void deleteSession() {
 
         DeleteQuery imgDeleteQuery = imMsgDao.queryBuilder()

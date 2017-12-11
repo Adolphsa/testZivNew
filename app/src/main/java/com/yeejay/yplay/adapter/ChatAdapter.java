@@ -40,7 +40,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public enum ITEM_TYPE {
         ITEM_TYPE_LEFT,
         ITEM_TYPE_RIGHT,
-        ITEM_TYPE_VOTE_CARD
+        ITEM_TYPE_VOTE_CARD,
+        ITEM_TYPE_CENTER
     }
 
     private Context context;
@@ -65,6 +66,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_VOTE_CARD.ordinal()) {
 //            System.out.println("投票卡片");
             return new VoteCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_card, parent, false));
+        }else if (viewType == ITEM_TYPE.ITEM_TYPE_CENTER.ordinal()){    //中间
+            return new CenterMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_center, parent, false));
         }
         return null;
     }
@@ -133,6 +136,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((RightMsgViewHolder) holder).msgRight.setText(msgContent);
                 }
             }
+        }else if (immsgType == 100){    //中间的提示
+            ((CenterMsgViewHolder)holder).msgCenter.setText(msgContent);
         }
 
     }
@@ -176,6 +181,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } else if (sender.equals(String.valueOf(uin))) {  //发送者是自己
                 return ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal();
             }
+        }else if (immsgType == 100){    //中间的提示
+            return ITEM_TYPE.ITEM_TYPE_CENTER.ordinal();
         }
 
         return -1;
@@ -215,7 +222,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         nickName1, nickName2, nickName3, nickName4);
             }
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -226,7 +232,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void initButton(int selectIndex,
                             VoteCardViewHolder holder,
                             String nickName1, String nickName2, String nickName3, String nickName4) {
-
 
         holder.msgBtn1.setText(nickName1);
         holder.msgBtn2.setText(nickName2);
@@ -291,6 +296,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LinearLayout msgRootLl;
 
         public VoteCardViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public static class CenterMsgViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.msg_item_center)
+        TextView msgCenter;
+
+        public CenterMsgViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

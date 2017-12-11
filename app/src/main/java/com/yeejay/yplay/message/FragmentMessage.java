@@ -121,7 +121,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 if (status == 0){
                     intent.setClass(getActivity(),ActivityNnonymityReply.class);
                 }else if (status == 1 && !TextUtils.isEmpty(sender) && sender.equals(String.valueOf(uin))){
-                    intent.setClass(getActivity(),ActivityNnonymityReply.class);
+                    intent.setClass(getActivity(),ActivityChatWindow.class);
                 }else if (status == 1 && !TextUtils.isEmpty(sender) && !sender.equals(String.valueOf(uin))){
                     intent.setClass(getActivity(),ActivityChatWindow.class);
                 }else if (status == 2){

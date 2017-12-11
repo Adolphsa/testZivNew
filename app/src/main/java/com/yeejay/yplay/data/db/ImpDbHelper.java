@@ -1,7 +1,5 @@
 package com.yeejay.yplay.data.db;
 
-import android.util.Log;
-
 import com.yeejay.yplay.greendao.DaoSession;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.FriendInfoDao;
@@ -32,7 +30,7 @@ public class ImpDbHelper implements DbHelper{
 
     @Override
     public FriendInfo NetworkFriendInfo2DbFriendInfo(FriendsListRespond.PayloadBean.FriendsBean friendInfo) {
-        Log.i(TAG, "NetworkFriendInfo2DbFriendInfo: ---" + friendInfo.toString());
+//        Log.i(TAG, "NetworkFriendInfo2DbFriendInfo: ---" + friendInfo.toString());
         return new FriendInfo(null,
                 friendInfo.getUin(),
                 friendInfo.getNickName(),

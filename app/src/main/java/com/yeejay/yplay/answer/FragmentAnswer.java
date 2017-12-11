@@ -3,8 +3,8 @@ package com.yeejay.yplay.answer;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -26,7 +26,7 @@ import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
-import com.yeejay.yplay.model.QuestionListRespond;
+import com.yeejay.yplay.model.QuestionRespond;
 import com.yeejay.yplay.model.VoteOptionsBean;
 import com.yeejay.yplay.model.VoteRespond;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
@@ -55,6 +55,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 public class FragmentAnswer extends BaseFragment {
+
+    private static final String TAG = "FragmentAnswer";
 
     @BindView(R.id.frans_question_number)
     TextView fransTvQuestionCount;
@@ -99,31 +101,26 @@ public class FragmentAnswer extends BaseFragment {
     @BindView(R.id.frans_progress)
     ProgressBar frandProgress;
 
-    int questionNum = 0;
-    int nextPersonCount = 1;
+    int questionNum = 1;
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
-    int serverQuestionNum;
-    int titleNum;
-    int questionListLength;
     int colorCount = 7;
-    boolean isOut15 = false;
 
     int backgroundColor[] = {R.color.play_color7,
-                            R.color.play_color2,
-                            R.color.play_color3,
-                            R.color.play_color4,
-                            R.color.play_color5,
-                            R.color.play_color6,
-                            R.color.play_color1,};
+            R.color.play_color2,
+            R.color.play_color3,
+            R.color.play_color4,
+            R.color.play_color5,
+            R.color.play_color6,
+            R.color.play_color1,};
 
     int buttonColor[] = {R.color.button_color207,
-                    R.color.button_color202,
-                    R.color.button_color203,
-                    R.color.button_color204,
-                    R.color.button_color205,
-                    R.color.button_color206,
-                    R.color.button_color201};
+            R.color.button_color202,
+            R.color.button_color203,
+            R.color.button_color204,
+            R.color.button_color205,
+            R.color.button_color206,
+            R.color.button_color201};
 
     int selectButtonColor[] = {R.color.button_color707,
             R.color.button_color702,
@@ -133,13 +130,7 @@ public class FragmentAnswer extends BaseFragment {
             R.color.button_color706,
             R.color.button_color701};
 
-
-    List<QuestionListRespond.PayloadBean.QuestionsBean> questionsList;
-    QuestionListRespond.PayloadBean.QuestionsBean questionsBean;
-
-    List<QuestionCandidateRespond.PayloadBean.OptionsBean> optionsList;
-    QuestionCandidateRespond.PayloadBean.OptionsBean optionsBean;
-
+    QuestionRespond.PayloadBean.QuestionBean questionBean;
     List<VoteOptionsBean> voteOptionsBeanList;
 
     @OnClick(R.id.frgans_tv_relieve)
@@ -156,11 +147,11 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
-            vote(questionsBean.getQid(),
-                    titleNum + 1,
-                    optionsList.get(0).getUin(),
+            vote(questionBean.getQid(),
+                    questionNum,
+                    voteOptionsBeanList.get(0).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
             frgansBtn1.setClickable(false);
@@ -193,11 +184,11 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn2)
     public void btn2(View view) {
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
-            vote(questionsBean.getQid(),
-                    titleNum + 1,
-                    optionsList.get(1).getUin(),
+            vote(questionBean.getQid(),
+                    questionNum,
+                    voteOptionsBeanList.get(1).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
@@ -225,11 +216,11 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn3)
     public void btn3(View view) {
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
-            vote(questionsBean.getQid(),
-                    titleNum + 1,
-                    optionsList.get(2).getUin(),
+            vote(questionBean.getQid(),
+                    questionNum,
+                    voteOptionsBeanList.get(2).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
@@ -258,11 +249,12 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_btn4)
     public void btn4(View view) {
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
-            vote(questionsBean.getQid(),
-                    titleNum + 1,
-                    optionsList.get(3).getUin(),
+            vote(questionBean.getQid(),
+                    questionNum,
+                    voteOptionsBeanList.get(3).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
@@ -293,10 +285,12 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_tn_next_person)
     public void nextPersons(View view) {
         //换批人
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
+
             frandProgress.setVisibility(View.INVISIBLE);
-            getQuestionsCandidate(questionsBean.getQid());
-            nextPersonCount++;
+            Log.i(TAG, "nextPersons: 换一换--" + questionNum);
+            getQuestionsCandidate(questionBean.getQid(), questionNum);
+
         } else {
             frandProgress.setVisibility(View.VISIBLE);
         }
@@ -349,18 +343,13 @@ public class FragmentAnswer extends BaseFragment {
         //点击继续
         System.out.println("点击继续");
 
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             questionNum++;
-            titleNum++;
+
             hideKeep();
-            System.out.println("继续questionNumber---" + questionNum + ",questionListLength" + questionListLength);
-            if (questionNum >= questionListLength) {
-//                questionOut15();
-                nextQuestionUpdate();
-                return;
-            }
-            nextQuestionUpdate();
+            getQuestion();
+
             frgansBtn1.updateProgress(0);
             frgansBtn2.updateProgress(0);
             frgansBtn3.updateProgress(0);
@@ -378,20 +367,14 @@ public class FragmentAnswer extends BaseFragment {
 
     }
 
+    //下一题
     @OnClick(R.id.frgans_btn_next_question)
     public void nextQuestion(View view) {
-        //过
-        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionsBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
-            titleNum++;
-            System.out.println("过questionNum----" + questionNum);
 
-            if (questionNum >= questionListLength) {
-                System.out.println("哈哈哈哈---" + questionListLength);
-//                questionOut15();
-                nextQuestionUpdate();
-                return;
-            }
+        if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
+            frandProgress.setVisibility(View.INVISIBLE);
+
+            System.out.println("过questionNum----" + questionNum);
 
             frgansBtn1.updateProgress(0);
             frgansBtn2.updateProgress(0);
@@ -403,12 +386,11 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn3.setEnabled(true);
             frgansBtn4.setEnabled(true);
 
-            doskipQuestion(titleNum, questionsList.get(questionNum).getQid());
-            System.out.println("当前跳过的编号---" + titleNum + ",qid---" +
-                    questionsList.get(questionNum).getQid());
+            doskipQuestion(questionNum, questionBean.getQid());
+            System.out.println("当前跳过的编号---" + questionNum + ",qid---" +
+                    questionBean.getQid());
 
-            questionNum++;
-            nextQuestionUpdate();
+
         } else {
             System.out.println("返回异常");
             frandProgress.setVisibility(View.VISIBLE);
@@ -434,6 +416,8 @@ public class FragmentAnswer extends BaseFragment {
         frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color4));
         baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color4));
 
+        voteOptionsBeanList = new ArrayList<VoteOptionsBean>();
+
         frgTitle.setVisibility(View.INVISIBLE);
 
         frgUserInfo.setOnClickListener(new View.OnClickListener() {
@@ -443,7 +427,7 @@ public class FragmentAnswer extends BaseFragment {
                 startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
-        getQuestionsList();
+        getQuestion();
         frgansCountDownView.setOnCountdownEndListener(new CountdownView.OnCountdownEndListener() {
             @Override
             public void onEnd(CountdownView cv) {
@@ -476,41 +460,31 @@ public class FragmentAnswer extends BaseFragment {
                 frandProgress.setVisibility(View.INVISIBLE);
             }
             setFriendCount();
-
-            if (isOut15){
-                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
-            }
         }
     }
 
     private void nextQuestionUpdate() {
 
-        if (questionsList != null && questionsList.size() > 0) {
-            System.out.println("啦啦啦啦nextQuestionUpdate---quesionNum---" + questionNum + ",questionsList.size()---" + questionsList.size());
-
-            //最后一题打完之后的逻辑
-            //重新拉取数据
-            if (questionNum == questionsList.size()) {
-                System.out.println("啦啦啦啦nextQuestionUpdate2---quesionNum---" + questionNum + ",questionsList.size()---" + questionsList.size());
-                SystemClock.sleep(1000);
-                getQuestionsList();
-                return;
-            }
-
-            questionsBean = questionsList.get(questionNum);
-            if (questionsBean != null) {
-                fransTvQuestionCount.setText((titleNum + 1) + "/" + serverQuestionNum);
-                String url = questionsBean.getQiconUrl();
-                if (!TextUtils.isEmpty(url)) {
-                    Picasso.with(getActivity()).load(url).into(frgansImg);
-                }
-                frgansQuestion.setText(questionsBean.getQtext());
-                getQuestionsCandidate(questionsBean.getQid());
-
-                changeColor(backgroundColor[questionNum % colorCount]);
-            }
-
+        fransTvQuestionCount.setText(questionNum + "/15");
+        String url = questionBean.getQiconUrl();
+        if (!TextUtils.isEmpty(url)) {
+            Picasso.with(getActivity()).load(url).into(frgansImg);
         }
+        frgansQuestion.setText(questionBean.getQtext());
+
+        changeName(voteOptionsBeanList.get(0).getNickName(),
+                voteOptionsBeanList.get(1).getNickName(),
+                voteOptionsBeanList.get(2).getNickName(),
+                voteOptionsBeanList.get(3).getNickName());
+
+        //获取被投票的次数
+        btn1Cnt = voteOptionsBeanList.get(0).getBeSelCnt();
+        btn2Cnt = voteOptionsBeanList.get(1).getBeSelCnt();
+        btn3Cnt = voteOptionsBeanList.get(2).getBeSelCnt();
+        btn4Cnt = voteOptionsBeanList.get(3).getBeSelCnt();
+
+        changeColor(backgroundColor[questionNum % colorCount]);
+
 
     }
 
@@ -537,8 +511,6 @@ public class FragmentAnswer extends BaseFragment {
     //点击继续15次
     private void questionOut15() {
 
-        isOut15 = true;
-
         //修改背景颜色
         changeColor(R.color.play_color2);
 
@@ -562,13 +534,11 @@ public class FragmentAnswer extends BaseFragment {
 
     //解除冷冻
     private void relieve() {
-
-        isOut15 = false;
-        questionNum = 0;
-        getQuestionsList();
+        questionNum = 1;
+        getQuestion();
 
         fransTvQuestionCount.setVisibility(View.VISIBLE);
-        fransTvQuestionCount.setText((titleNum + 1) + serverQuestionNum + "");
+        fransTvQuestionCount.setText(questionNum + "");
 
         frgansTvOr.setVisibility(View.INVISIBLE);
         frgansTvRelieve.setVisibility(View.INVISIBLE);
@@ -594,8 +564,8 @@ public class FragmentAnswer extends BaseFragment {
         frgansBtn4.setEnabled(true);
     }
 
-    //拉取问题列表
-    private void getQuestionsList() {
+    //拉取问题
+    private void getQuestion() {
 
         Map<String, Object> questionsListMap = new HashMap<>();
         questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
@@ -603,34 +573,42 @@ public class FragmentAnswer extends BaseFragment {
         questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
-                .getQuestionsList(questionsListMap)
+                .getQuestion(questionsListMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<QuestionListRespond>() {
+                .subscribe(new Observer<QuestionRespond>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                     }
 
                     @Override
-                    public void onNext(@NonNull QuestionListRespond questionListRespond) {
+                    public void onNext(@NonNull QuestionRespond questionRespond) {
 //                        System.out.println("问题列表---" + questionListRespond.toString());
-                        if (questionListRespond.getCode() == 0) {
-                            QuestionListRespond.PayloadBean payloadBean = questionListRespond.getPayload();
+                        if (questionRespond.getCode() == 0) {
+                            QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
                             if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
                                 //非冷冻状态
-                                questionsList = questionListRespond.getPayload().getQuestions();
-                                if (questionsList.size() > 0) {
-                                    int serverTotal = questionListRespond.getPayload().getTotal();
-                                    serverQuestionNum = serverTotal;
-                                    titleNum = serverTotal - questionsList.size();
-                                    questionListLength = questionsList.size();
-                                    System.out.println("返回的questionList.size()---" + questionsList.size());
-                                    System.out.println("返回的titleNum---" + titleNum);
+                                questionBean = questionRespond.getPayload().getQuestion();
+                                List<QuestionRespond.PayloadBean.OptionsBean> optionsList = questionRespond.getPayload().getOptions();
+                                questionNum = questionRespond.getPayload().getIndex();
+
+                                if (voteOptionsBeanList.size() > 0) {
+                                    voteOptionsBeanList.clear();
+                                }
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
+                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
+
+
+                                if (questionBean != null) {
                                     nextQuestionUpdate();
                                 }
+
+
                             } else if (payloadBean != null && payloadBean.getFreezeStatus() == 1) {
                                 //冷冻状态
-
+                                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
                                 //进入冷冻的时间点
                                 int freezeTs = payloadBean.getFreezeTs();
                                 int nowTs = payloadBean.getNowTs();
@@ -661,16 +639,17 @@ public class FragmentAnswer extends BaseFragment {
     }
 
     //某个问题的候选人
-    private void getQuestionsCandidate(int qid) {
+    private void getQuestionsCandidate(int qid, int index) {
 
         Map<String, Object> questionsCandidateMap = new HashMap<>();
         questionsCandidateMap.put("qid", qid);
+        questionsCandidateMap.put("index", index);
         questionsCandidateMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         questionsCandidateMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         questionsCandidateMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
-                .getQuestionsCandidate(questionsCandidateMap)
+                .getQuestionsCandidateNew(questionsCandidateMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<QuestionCandidateRespond>() {
@@ -683,16 +662,16 @@ public class FragmentAnswer extends BaseFragment {
                     public void onNext(@NonNull QuestionCandidateRespond questionCandidateRespond) {
                         System.out.println("某个问题的候选者---" + questionCandidateRespond.toString());
                         if (questionCandidateRespond.getCode() == 0) {
-                            optionsList = questionCandidateRespond.getPayload().getOptions();
-                            voteOptionsBeanList = new ArrayList<VoteOptionsBean>();
+                            List<QuestionCandidateRespond.PayloadBean.OptionsBean> optionsList = questionCandidateRespond.getPayload().getOptions();
+
                             if (voteOptionsBeanList.size() > 0) {
                                 voteOptionsBeanList.clear();
-                            } else {
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName()));
                             }
+                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
+                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
+                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
+                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
+
                             changeName(optionsList.get(0).getNickName(),
                                     optionsList.get(1).getNickName(),
                                     optionsList.get(2).getNickName(),
@@ -785,6 +764,10 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(BaseRespond baseRespond) {
                         System.out.println("跳过下个问题---" + baseRespond);
+                        if (baseRespond.getCode() == 0){
+                            questionNum++;
+                            getQuestion();
+                        }
 
                     }
 
@@ -802,17 +785,17 @@ public class FragmentAnswer extends BaseFragment {
     }
 
 
-    public void setFriendCount(){
+    public void setFriendCount() {
 
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
-        if (myInfo != null){
+        if (myInfo != null) {
             int addFriendNum = myInfo.getAddFriendNum();
-            if (addFriendNum == 0){
+            if (addFriendNum == 0) {
                 addFriendCount.setText("");
-            }else {
+            } else {
                 addFriendCount.setText(addFriendNum + "");
             }
 

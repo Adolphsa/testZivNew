@@ -99,7 +99,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         viewPager.setCurrentItem(0);
     }
 
-
     //中间
     @OnClick(R.id.main_nav_center2)
     public void ceneterButton2(View view) {
@@ -126,8 +125,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     private boolean isNewFeeds = false;
 
     private DbHelper dbHelper;
-    private int insertFriendInfoNum = 0;
+
     private int mPageNum = 1;
+    private int mPageSize = 10;
 
     public int getmColor() {
         return mColor;
@@ -458,6 +458,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         Map<String, Object> myFriendsMap = new HashMap<>();
         myFriendsMap.put("pageNum", mPageNum);
+        myFriendsMap.put("pageSize", mPageSize);
         myFriendsMap.put("uin", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, 0));
         myFriendsMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myFriendsMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
@@ -485,11 +486,11 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                         }
 
                         FriendInfo dataBaseFriendInfo;
-                        insertFriendInfoNum += tempList.size();
+//                        insertFriendInfoNum += tempList.size();
                         for (FriendsListRespond.PayloadBean.FriendsBean friendInfo : tempList) {
                             dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin());
                             if (dataBaseFriendInfo == null){
-                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
+//                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
                                 dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));
                             }else {
                                 Log.i(TAG, "onNext: updateFriendInfo---" + dataBaseFriendInfo);
@@ -497,7 +498,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                                 dbHelper.updateFriendInfo(dataBaseFriendInfo,friendInfo);
                             }
                         }
-                        if (insertFriendInfoNum >= total){
+                        if ((mPageNum*mPageSize) >= total){
                             return;
                         }else {
                             mPageNum++;

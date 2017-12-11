@@ -3,6 +3,7 @@ package com.yeejay.yplay.adapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,8 @@ import tangxiaolv.com.library.EffectiveShapeView;
  */
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageHolder> {
+
+    private static final String TAG = "MessageAdapter";
 
     Context context;
     List<ImSession> imSessionList;
@@ -152,6 +155,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             if (2 == dataType) {
                 MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                 MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+                String content = msgContent2.getContent();
+                Log.i(TAG, "initItem2: ---content" + content);
                 int gender = receiverInfoBean.getGender();
                 String genderStr = gender == 1 ? "男生" : "女生";
                 int grade = receiverInfoBean.getGrade();
@@ -168,7 +173,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
                 holder.msgItemName.setText(gradeAndSchool + genderStr);
                 holder.msgItemCuo.setVisibility(View.VISIBLE);
-                holder.msgItemContent.setText("来自：投票");
+                holder.msgItemContent.setText(content);
                 holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
 
             }

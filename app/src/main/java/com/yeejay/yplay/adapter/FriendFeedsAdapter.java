@@ -16,7 +16,6 @@ import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.utils.YplayTimeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -33,11 +32,17 @@ import static com.yeejay.yplay.utils.FriendFeedsUtil.schoolType;
 
 public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.FeedsViewHolder> {
 
+    public interface OnRecycleImageListener <T>{
+        void OnRecycleImageClick(View v,T o);
+    }
+
+    private OnRecycleImageListener listener;
     private Context mContext;
     private DaoFriendFeedsDao mDaoFriendFeedsDao;
     private List<DaoFriendFeeds> daoFriendFeedsList;
     private DaoFriendFeeds daoFriendFeeds;
-    private List<Integer> listCb = new ArrayList<>();//用于记录位置
+
+
 
     public FriendFeedsAdapter(Context context,
                               List<DaoFriendFeeds> daoFriendFeedsList,
@@ -54,7 +59,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     }
 
     @Override
-    public void onBindViewHolder(FeedsViewHolder holder, int position) {
+    public void onBindViewHolder(FeedsViewHolder holder, final int position) {
 
         daoFriendFeeds = daoFriendFeedsList.get(position);
 //        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
@@ -68,6 +73,14 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         }else {
             holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }
+
+        holder.ffItemHeaderImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.OnRecycleImageClick(v,position);
+            }
+        });
+
 
         holder.ffItemName.setText(daoFriendFeeds.getFriendNickName());
         holder.ffItemTvTime.setText(YplayTimeUtils.format(daoFriendFeeds.getTs()));
@@ -87,6 +100,10 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     @Override
     public int getItemCount() {
         return daoFriendFeedsList == null ? 0 : daoFriendFeedsList.size();
+    }
+
+    public void addRecycleImageListener(OnRecycleImageListener listener){
+        this.listener = listener;
     }
 
     class FeedsViewHolder extends RecyclerView.ViewHolder {
