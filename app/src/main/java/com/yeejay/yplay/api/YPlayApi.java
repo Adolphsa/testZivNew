@@ -49,10 +49,15 @@ public interface YPlayApi {
 
     //登录
     @FormUrlEncoded
-    @POST("/api/account/login")
+    @POST("/api/account/login2")
     Observable<LoginRespond> login(@Field("phone") String phone,
                                    @Field("code") String code,
                                    @Field("uuid") long uuid);
+
+    //校验邀请码
+    @FormUrlEncoded
+    @POST("/api/account/checkinvitecode")
+    Observable<BaseRespond> checkInviteCode(@FieldMap Map<String,Object> filemap);
 
     //通讯录上传或更新
     @FormUrlEncoded

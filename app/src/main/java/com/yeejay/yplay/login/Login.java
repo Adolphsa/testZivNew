@@ -396,7 +396,7 @@ public class Login extends BaseActivity {
     }
 
     //登录
-    private void login(String phoneNumber, String code, long uuid) {
+    private void login(final String phoneNumber, String code, long uuid) {
 
         YPlayApiManger.getInstance().getZivApiService()
                 .login(phoneNumber, code, uuid)
@@ -410,12 +410,24 @@ public class Login extends BaseActivity {
                     public void onNext(@NonNull LoginRespond loginRespond) {
                         System.out.println("登录返回---" + loginRespond.toString());
                         if (loginRespond.getCode() == 0) {
+
+                            int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
+
+                            if (hasCheckInviteCode == 0){ //0表示邀请码验证未通过
+                                Intent intent = new Intent(Login.this, ActivityInviteCode.class);
+                                intent.putExtra("phone_number",phoneNumber);
+                                intent.putExtra("uin",loginRespond.getPayload().getUin());
+                                intent.putExtra("ver",loginRespond.getPayload().getVer());
+                                intent.putExtra("token",loginRespond.getPayload().getToken());
+                                intent.putExtra("nick_name",loginRespond.getPayload().getInfo().getUserName());
+                                startActivity(intent);
+                                return;
+                            }
+
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, loginRespond.getPayload().getUin());
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, loginRespond.getPayload().getToken());
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, loginRespond.getPayload().getVer());
-
                             SharePreferenceUtil.put(Login.this,YPlayConstant.YPLAY_USER_NAME,loginRespond.getPayload().getInfo().getUserName());
-
                             insertUin(loginRespond.getPayload());
 
                             if (loginRespond.getPayload().getIsNewUser() == 1) {

@@ -53,6 +53,7 @@ public class LoginRespond {
 
     public static class PayloadBean {
         /**
+         * hasCheckInviteCode 是否验证过邀请码, 0表示未验证，1表示已经验证
          * uin : 100008
          * token : oZ9vc6nmkfC4yPqF/PdikvI9oP9wN7e5uZABqGVtjjTg5KMlcXHk/QsDfw8n35GwjRD7rArOlOpqyR8zhb00yay80oiG/VEELvfq1s/LkShu4fa+3Tew7zhM7OsJAp8KDxKikHrDjsjpxvfnaPWfUiDPQaMnLnbtIBd6pODeltXINzF5Kg==
          * ver : 1
@@ -60,11 +61,20 @@ public class LoginRespond {
          * info : {"uin":100008,"userName":"adolph","phone":"13480995624","nickName":"拉卡","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509953589095.jpg","gender":2,"grade":3,"schoolId":54404,"schoolType":1,"schoolName":"荔香中学","country":"中国","province":"广东","city":"深圳市","ts":0}
          */
 
+        private int hasCheckInviteCode;
         private int uin;
         private String token;
         private int ver;
         private int isNewUser;
         private InfoBean info;
+
+        public int getHasCheckInviteCode() {
+            return hasCheckInviteCode;
+        }
+
+        public void setHasCheckInviteCode(int hasCheckInviteCode) {
+            this.hasCheckInviteCode = hasCheckInviteCode;
+        }
 
         public int getUin() {
             return uin;
@@ -109,13 +119,15 @@ public class LoginRespond {
         @Override
         public String toString() {
             return "PayloadBean{" +
-                    "uin=" + uin +
+                    "hasCheckInviteCode=" + hasCheckInviteCode +
+                    ", uin=" + uin +
                     ", token='" + token + '\'' +
                     ", ver=" + ver +
                     ", isNewUser=" + isNewUser +
                     ", info=" + info +
                     '}';
         }
+
 
         public static class InfoBean {
             /**

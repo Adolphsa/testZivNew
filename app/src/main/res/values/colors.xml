@@ -7,6 +7,7 @@
     <color name="la_blue">#2196F3</color>
     <color name="divider_color">#FFB7B2B2</color>
     <color name="white">#FFFFFF</color>
+    <color name="white20">#33FFFFFF</color>
     <color name="white40">#66FFFFFF</color>
     <color name="white50">#80FFFFFF</color>
     <color name="black">#000000</color>
@@ -26,6 +27,10 @@
     <color name="purple_progress">#03a9f4</color>
 
     <color name="green_yellow">#ADFF2F</color>
+
+    <!--invite code-->
+    <color name="invite_background">#FFB300</color>
+    <color name="invite_invalid_code">#F05151</color>
 
     <!--play color-->
     <color name="play_color1">#A2C5DA</color>

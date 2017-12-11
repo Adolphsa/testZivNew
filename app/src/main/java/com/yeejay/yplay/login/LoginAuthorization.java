@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.util.Base64;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +46,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class LoginAuthorization extends BaseActivity {
 
+    private static final String TAG = "LoginAuthorization";
+
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 100;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
 
@@ -54,8 +57,6 @@ public class LoginAuthorization extends BaseActivity {
     boolean numberBookAuthoritySuccess = false;
     boolean isSuccess = false;
 
-    String mProvider;//位置提供器
-    LocationManager mLocationManager;//位置服务
     Location mLocation;
 
     List<ContactsInfo> mContactsList;
@@ -66,13 +67,9 @@ public class LoginAuthorization extends BaseActivity {
             switch (requestCode) {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     getLonLat();
-                    //addressAuthoritySuccess = true;
-                    //System.out.println("地理位置权限申请成功");
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     getContacts();
-//                    numberBookAuthoritySuccess = true;
-                    //System.out.println("通讯库权限申请成功");
                     break;
             }
             //授权成功跳转
@@ -92,20 +89,30 @@ public class LoginAuthorization extends BaseActivity {
                     break;
             }
 
-            //检查是否真的获取到联系人和地理位置
-            if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
-                    AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                } else {
-                    AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+            if (numberBookAuthoritySuccess){
+                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+            }else {
+                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
+                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                    }
+
                 }
-                // 第一种：用AndPermission默认的提示语。
-                System.out.println("权限拒绝提示");
-            } else {
-                //授权成功跳转
-                authorizationSuccess();
             }
+
+            if(addressAuthoritySuccess){
+                Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
+            }else {
+                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                    }
+
+                }
+            }
+
             authorizationSuccess();
+
         }
     };
 
@@ -116,27 +123,13 @@ public class LoginAuthorization extends BaseActivity {
             case 400: { // 这个400就是上面defineSettingDialog()的第二个参数。
                 // 你可以在这里检查你需要的权限是否被允许，并做相应的操作。
                 System.out.println("回调了");
-                //startActivity(new Intent(LoginAuthorization.this,ClassList.class));
-                if (AndPermission.hasPermission(LoginAuthorization.this, Permission.CONTACTS)) {
-                    System.out.println("通讯录有权限");
-//                    setContactBackground();
-                }
-                if (AndPermission.hasPermission(LoginAuthorization.this, Permission.LOCATION)) {
-                    System.out.println("地理位置有权限");
-
-//                    setLocationBackground();
-                }
 
                 getLonLat();
                 getContacts();
 
                 System.out.println("回调numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
                 System.out.println("回调addressAuthoritySuccess---" + addressAuthoritySuccess);
-
-                if (numberBookAuthoritySuccess && addressAuthoritySuccess){
-                    authorizationSuccess();
-                }
-
+                authorizationSuccess();
                 break;
             }
         }
@@ -239,8 +232,8 @@ public class LoginAuthorization extends BaseActivity {
     //获取当前经纬度
     private void getLonLat() {
 
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
-        mProvider = judgeProvider(mLocationManager);
+        LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
+        String mProvider = judgeProvider(mLocationManager);
         if (Build.VERSION.SDK_INT >= 23 &&
                 LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

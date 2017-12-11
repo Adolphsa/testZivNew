@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     SwipeMenuRecyclerView messageRecyclerView;
     @BindView(R.id.message_refresh_view)
     PullToRefreshLayout messageRefreshView;
+    @BindView(R.id.message_null)
+    ImageView messageNull;
 
     @OnClick(R.id.frg_user_info)
     public void userInfo(View view){
@@ -191,7 +194,6 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         List<ImSession> tempList = queryDatabaseForImsession();
         if (tempList == null){
             System.out.println("数据库中没有查到数据");
-
         }else{
 //            System.out.println("查询到的列表长度---" + tempList.size());
             mDataList.addAll(tempList);
@@ -201,6 +203,12 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 messageRecyclerView.loadMoreFinish(false, true);
             }
 
+        }
+
+        if (mDataList.size() > 0){
+            messageNull.setVisibility(View.GONE);
+        }else {
+            messageNull.setVisibility(View.VISIBLE);
         }
 
     }
