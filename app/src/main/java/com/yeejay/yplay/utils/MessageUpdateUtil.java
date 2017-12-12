@@ -311,6 +311,7 @@ public class MessageUpdateUtil {
 
         if (imSession == null) {
             ImSession session = new ImSession(null,
+                    uin,
                     sessionId,
                     chater,
                     status,

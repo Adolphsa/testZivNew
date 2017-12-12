@@ -1,19 +1,16 @@
 package com.yeejay.yplay.login;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,6 +52,10 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Login extends BaseActivity {
 
+    private static final String TAG = "Login";
+    private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 100;
+
+
 //    @BindView(R.id.login_scroll_view)
 //    ScrollView loginScrollView;
 //    @BindView(R.id.login_root_view)
@@ -71,6 +72,7 @@ public class Login extends BaseActivity {
     TextView testTv1;
 
 
+
     @OnClick(R.id.login_edt_number)
     public void loginPhone(){
     }
@@ -80,6 +82,12 @@ public class Login extends BaseActivity {
 
     MyInfoDao myInfoDao;
 
+    List<ContactsInfo> mContactsList;
+    boolean uuidIsNull = false;
+    long uuid;
+    private int uin;
+    private int ver;
+    private String token;
 
     CountDownTimer countDownTimer = new CountDownTimer(60000, 1000) {  //按钮倒计时
         @Override
@@ -96,7 +104,7 @@ public class Login extends BaseActivity {
         }
     };
 
-    boolean numberBookAuthoritySuccess = false;
+
     boolean addressAuthoritySuccess = false;
 
     @Override
@@ -107,11 +115,15 @@ public class Login extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
 
+        mContactsList = new ArrayList<>();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
+        uuid = System.currentTimeMillis();
+
         if ((long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0) == 0) {
-            System.out.println("第一次为零");
-            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UUID, System.currentTimeMillis());
+            uuidIsNull = true;
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UUID, uuid);
+            Log.i(TAG, "onCreate: uuid---" + uuid);
         }
 
         //监听手机号输入栏的变化
@@ -192,7 +204,7 @@ public class Login extends BaseActivity {
             public void onClick(View v) {
                 if (NetWorkUtil.isNetWorkAvailable(Login.this)) {
                     long uuid = (long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0);
-                    System.out.println("uuid---" + uuid);
+                    Log.i(TAG, "onClick: uuid---" + uuid);
                     login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid);
                 } else {
                     Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
@@ -228,6 +240,10 @@ public class Login extends BaseActivity {
             //重新登录检查权限
             return;
         }
+
+        Intent intent = new Intent(Login.this, MainActivity.class);
+        intent.putExtra("uuid_is_null",true);
+        startActivity(intent);
 
 //        //年龄
 //        if (age == 0 ) {
@@ -265,55 +281,7 @@ public class Login extends BaseActivity {
 //            return;
 //        }
 
-        startActivity(new Intent(Login.this, MainActivity.class));
-    }
 
-
-    private void getContacts() {
-        List<ContactsInfo> mContactsList = new ArrayList<ContactsInfo>();
-        if (Build.VERSION.SDK_INT >= 23
-                && Login.this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-                && Login.this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("无读取联系人权限");
-            return;
-        }
-
-        try {
-            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-            System.out.println("contactUri---" + contactUri);
-            if (contactUri != null) {
-                numberBookAuthoritySuccess = true;
-                System.out.println("通讯录权限申请成功");
-
-            }
-            Cursor cursor = getContentResolver().query(contactUri,
-                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
-                    null, null, "sort_key");
-            String contactName;
-            String contactNumber;
-            //String contactSortKey;
-            //int contactId;
-            while (cursor != null && cursor.moveToNext()) {
-                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                //contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-                //contactSortKey =getSortkey(cursor.getString(1));
-                ContactsInfo contactsInfo = new ContactsInfo(contactName, contactNumber);
-                if (contactName != null)
-                    mContactsList.add(contactsInfo);
-            }
-            cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
-
-            if (mContactsList.size() > 0) {
-                ContactsInfo testContactInfo = mContactsList.get(0);
-                System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-
-        }
     }
 
     String mProvider;//位置提供器
@@ -412,23 +380,27 @@ public class Login extends BaseActivity {
                         if (loginRespond.getCode() == 0) {
 
                             int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
+                            uin = loginRespond.getPayload().getUin();
+                            ver = loginRespond.getPayload().getVer();
+                            token = loginRespond.getPayload().getToken();
 
                             if (hasCheckInviteCode == 0){ //0表示邀请码验证未通过
                                 Intent intent = new Intent(Login.this, ActivityInviteCode.class);
                                 intent.putExtra("phone_number",phoneNumber);
-                                intent.putExtra("uin",loginRespond.getPayload().getUin());
-                                intent.putExtra("ver",loginRespond.getPayload().getVer());
-                                intent.putExtra("token",loginRespond.getPayload().getToken());
+                                intent.putExtra("uin", uin);
+                                intent.putExtra("ver", ver);
+                                intent.putExtra("token", token);
                                 intent.putExtra("nick_name",loginRespond.getPayload().getInfo().getUserName());
                                 startActivity(intent);
                                 return;
                             }
 
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, loginRespond.getPayload().getUin());
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, loginRespond.getPayload().getToken());
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, loginRespond.getPayload().getVer());
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
                             SharePreferenceUtil.put(Login.this,YPlayConstant.YPLAY_USER_NAME,loginRespond.getPayload().getInfo().getUserName());
                             insertUin(loginRespond.getPayload());
+
 
                             if (loginRespond.getPayload().getIsNewUser() == 1) {
                                 startActivity(new Intent(Login.this, LoginAge.class));
@@ -466,7 +438,7 @@ public class Login extends BaseActivity {
                 .build().unique();
 
         if (myInfo == null){
-            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0,0,0);
+            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0,0,0,0);
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }

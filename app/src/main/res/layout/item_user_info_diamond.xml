@@ -22,7 +22,6 @@
         android:layout_toRightOf="@+id/item_diamond_top_img"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
-        android:scaleType="fitXY"
         />
     <TextView
         android:id="@+id/item_diamond_text"

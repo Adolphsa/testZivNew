@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,23 +25,13 @@ import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.base.BaseActivity;
-import com.yeejay.yplay.model.BaseRespond;
-import com.yeejay.yplay.model.ContactsInfo;
-import com.yeejay.yplay.utils.GsonUtil;
-import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.greendao.ContactsInfoDao;
+import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.YPlayConstant;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class LoginAuthorization extends BaseActivity {
 
@@ -59,7 +48,7 @@ public class LoginAuthorization extends BaseActivity {
 
     Location mLocation;
 
-    List<ContactsInfo> mContactsList;
+    ContactsInfoDao contactsInfoDao;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -82,33 +71,30 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
+                    if(addressAuthoritySuccess){
+                        Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
+                    }else {
+                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                            }
+
+                        }
+                    }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     System.out.println("回调失败的通讯录权限申请失败");
                     getContacts();
+                    if (numberBookAuthoritySuccess){
+                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                    }else {
+                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
+                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                            }
+                        }
+                    }
                     break;
-            }
-
-            if (numberBookAuthoritySuccess){
-                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-            }else {
-                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
-                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                    }
-
-                }
-            }
-
-            if(addressAuthoritySuccess){
-                Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-            }else {
-                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
-                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                    }
-
-                }
             }
 
             authorizationSuccess();
@@ -143,6 +129,8 @@ public class LoginAuthorization extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_title_text_color));
 
         System.out.println("LoginAuthorization  onCreate");
+
+        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
         mBtnGetAddressAuthority = (Button) findViewById(R.id.laz_btn_address);
         mBtnGetNumberBookAuthority = (Button) findViewById(R.id.laz_btn_address_book);
@@ -265,7 +253,7 @@ public class LoginAuthorization extends BaseActivity {
 
     //获取通讯录联系人
     private void getContacts() {
-        mContactsList = new ArrayList<ContactsInfo>();
+
         if (Build.VERSION.SDK_INT >= 23
                 && LoginAuthorization.this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
                 && LoginAuthorization.this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -279,7 +267,6 @@ public class LoginAuthorization extends BaseActivity {
             if (contactUri != null) {
                 numberBookAuthoritySuccess = true;
                 System.out.println("通讯录权限申请成功");
-                System.out.println("通讯录长度---" + mContactsList.size());
             }
             Cursor cursor = getContentResolver().query(contactUri,
                     new String[]{"display_name", "sort_key", "contact_id", "data1"},
@@ -293,24 +280,15 @@ public class LoginAuthorization extends BaseActivity {
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 //contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
                 //contactSortKey =getSortkey(cursor.getString(1));
-                ContactsInfo contactsInfo = new ContactsInfo(contactName, contactNumber);
-                if (contactName != null)
-                    mContactsList.add(contactsInfo);
+                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
+                contactsInfoDao.insert(contactsInfo);
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
 
             setContactBackground();
 
-            System.out.println("通讯录长度2---" + mContactsList.size());
-
-            if (mContactsList.size() > 0) {
-                ContactsInfo testContactInfo = mContactsList.get(0);
-                System.out.println("姓名---" + testContactInfo.getName() + "号码---" + testContactInfo.getNumber());
-                if (!isSuccess){
-                    upLoadingContacts();
-                }
-
-            }
+            //开启服务上传通讯录
+            startService(new Intent(LoginAuthorization.this, ContactsService.class));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -335,49 +313,50 @@ public class LoginAuthorization extends BaseActivity {
         }
     }
 
-    //上传通讯录
-    private void upLoadingContacts() {
-
-        Map<String, Object> contactsMap = new HashMap<>();
-        String contactString = GsonUtil.GsonString(mContactsList);
-        String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
-        contactsMap.put("data", encodedString);
-        contactsMap.put("uin", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_UIN, 0));
-        contactsMap.put("token", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        contactsMap.put("ver", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_VER, 0));
-
-        YPlayApiManger.getInstance().getZivApiService()
-                .updateContacts(contactsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
-
-                        if (baseRespond.getCode() == 0) {
-                            System.out.println("上传通讯录成功---" + baseRespond.toString());
-                            isSuccess = true;
-                        } else {
-                            System.out.println("上传通讯录失败---" + baseRespond.toString());
-                        }
-                    }
-
-                    @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("上传通讯录失败---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
+//    //上传通讯录
+//    private void upLoadingContacts() {
+//
+//        Map<String, Object> contactsMap = new HashMap<>();
+//        String contactString = GsonUtil.GsonString(tempContactsList);
+//        String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
+//        contactsMap.put("data", encodedString);
+//        contactsMap.put("uin", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_UIN, 0));
+//        contactsMap.put("token", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        contactsMap.put("ver", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_VER, 0));
+//
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .updateContacts(contactsMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull BaseRespond baseRespond) {
+//
+//                        if (baseRespond.getCode() == 0) {
+//                            System.out.println("上传通讯录成功---" + baseRespond.toString());
+//                            isSuccess = true;
+//
+//                        } else {
+//                            System.out.println("上传通讯录失败---" + baseRespond.toString());
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("上传通讯录失败---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
     //设置通讯录的背景
     private void setContactBackground() {

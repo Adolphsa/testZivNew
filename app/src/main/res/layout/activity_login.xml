@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
-                android:text="这是一个啥啥啥的App"
+                android:text="校园匿名投票社交"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 

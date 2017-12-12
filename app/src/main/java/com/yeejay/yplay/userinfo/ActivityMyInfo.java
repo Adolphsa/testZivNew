@@ -310,7 +310,7 @@ public class ActivityMyInfo extends BaseActivity {
                 if (!TextUtils.isEmpty(url)) {
                     Picasso.with(ActivityMyInfo.this).load(url).into(holder.itemAmiImg2);
                 } else {
-                    holder.itemAmiImg2.setImageDrawable(getDrawable(R.drawable.diamond));
+                    holder.itemAmiImg2.setVisibility(View.GONE);
                 }
                 holder.itemAmiText.setText(statsBean.getQtext());
                 return convertView;

@@ -2,6 +2,7 @@ package com.yeejay.yplay.friend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -13,9 +14,11 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
+import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardDialog;
@@ -58,6 +61,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
+
+        if (isFromAddFriend){
+            startActivity(new Intent(AddFriends.this, MainActivity.class));
+        }
+
         finish();
     }
 
@@ -162,6 +170,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     int mType = 1; //好友类型
     int buttonDirt = 1; //学校按钮朝向
+    boolean isFromAddFriend;
 
 
     @Override
@@ -173,6 +182,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null){
+            isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
+        }
+
 
         contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
@@ -447,7 +462,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             @Override
             public void onClick(View v) {
                 //跳转到邀请好友界面
-                startActivity(new Intent(AddFriends.this, ActivityWaitInvite.class));
+                startActivity(new Intent(AddFriends.this, ActivityInviteFriend.class));
             }
         });
 
@@ -781,5 +796,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         cardDialog.show();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend){
 
+            startActivity(new Intent(AddFriends.this, MainActivity.class));
+            return true;//不执行父类点击事件
+        }
+
+        return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
+    }
 }

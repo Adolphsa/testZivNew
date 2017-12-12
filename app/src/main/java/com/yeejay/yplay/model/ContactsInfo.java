@@ -6,6 +6,7 @@ package com.yeejay.yplay.model;
  */
 
 public class ContactsInfo {
+
     private String name;
     private String phone;
 

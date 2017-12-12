@@ -26,7 +26,6 @@ import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
-import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
@@ -341,7 +340,7 @@ public class UserInfo extends BaseActivity {
                     public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
                         System.out.println("设置名字---" + baseRespond.toString());
                         if (baseRespond.getCode() == 0){
-                            startActivity(new Intent(UserInfo.this, MainActivity.class));
+                            startActivity(new Intent(UserInfo.this, AddFriendGuide.class));
                         }
                     }
 

@@ -49,6 +49,7 @@
             android:textCursorDrawable="@drawable/shape_cursor_drawable"
             android:textSize="16sp"
             android:gravity="center"
+            android:textColor="@color/white"
             />
         <ImageView
             android:layout_width="wrap_content"
@@ -75,7 +76,7 @@
             android:layout_marginLeft="45dp"
             android:layout_marginRight="40dp"
             android:layout_gravity="center"
-            android:text="亲爱的同学们：\n真诚邀请你们全宇宙领先试玩产品!欢迎各位指出产\n品的不足，我们会认真对待~\n如果你没有邀请码，不要失落。产品对你开放时，\n我们会第一时间告诉你。每一位用户的感受，我们都很重视。感谢支持！\n联系我们：2137930181（QQ）\n\n                                                            xx团队敬上\n                                                    2017年12月12日"
+            android:text="亲爱的同学们：\n真诚邀请你们全宇宙领先试玩产品!欢迎各位指出产\n品的不足，我们会认真对待~\n如果你没有邀请码，不要失落。产品对你开放时，\n我们会第一时间告诉你。每一位用户的感受，我们都很重视。感谢支持！\n联系我们：2137930181（QQ）\n\n                                                            产品团队敬上\n                                                    2017年12月12日"
             android:textColor="@color/white"/>
         
         <Button

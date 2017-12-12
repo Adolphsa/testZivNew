@@ -63,6 +63,8 @@ public class LoginAge extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
 
+        laBack.setVisibility(View.GONE);
+
         ageList = new ArrayList<String>();
         //添加年龄数据
         for (int i = 0; i < 112; i++) {

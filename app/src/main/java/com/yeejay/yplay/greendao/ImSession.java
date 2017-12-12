@@ -15,6 +15,7 @@ public class ImSession {
 
     @Id(autoincrement = true)
     private Long id;
+    private int uin;
     @Index(unique = true)
     private String sessionId;           //会话ID
     private  String chater;             //聊天对象
@@ -28,12 +29,13 @@ public class ImSession {
     private long msgTs;                 //消息时间戳
     private long lastReadMsgId;         //最近已读的消息Id;
     private int unreadMsgNum;           //未读消息数
-    @Generated(hash = 1760695481)
-    public ImSession(Long id, String sessionId, String chater, int status,
+    @Generated(hash = 1824960706)
+    public ImSession(Long id, int uin, String sessionId, String chater, int status,
             String nickName, String headerImgUrl, long lastMsgId, String lastSender,
             int msgType, String msgContent, long msgTs, long lastReadMsgId,
             int unreadMsgNum) {
         this.id = id;
+        this.uin = uin;
         this.sessionId = sessionId;
         this.chater = chater;
         this.status = status;
@@ -127,5 +129,11 @@ public class ImSession {
     }
     public void setUnreadMsgNum(int unreadMsgNum) {
         this.unreadMsgNum = unreadMsgNum;
+    }
+    public int getUin() {
+        return this.uin;
+    }
+    public void setUin(int uin) {
+        this.uin = uin;
     }
 }

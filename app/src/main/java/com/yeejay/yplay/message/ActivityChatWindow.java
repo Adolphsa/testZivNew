@@ -202,6 +202,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     int mSender;
     int status;
     String tempNickname;
+    String tempNickname2;
     StringBuilder gradeAndGenderStr;
 
     TIMConversation conversation;
@@ -361,6 +362,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     } else if (dataType == 2) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
+                        MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+                        tempNickname2=  receiverInfoBean.getNickName();
                         nickName = senderInfoBean.getNickName();
 
                         int gender = senderInfoBean.getGender();
@@ -449,6 +452,24 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             chatAdapter.notifyItemInserted(mDataList.size() - 1);
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
         }
+        if (!acwEdit.isEnabled()){
+            acwEdit.setEnabled(true);
+            acwEdit.setHint("回复");
+            acwEdit.setCompoundDrawables(null,null,null,null);
+        }
+        if (!acwSend.isEnabled()){
+            acwSend.setEnabled(true);
+        }
+        if (!layoutSetting.isShown()){
+            layoutSetting.setVisibility(View.VISIBLE);
+        }
+
+        if (status == 1 && uin != Integer.valueOf(imMsg.getSender())){
+            layoutTitle2.setText(tempNickname2);
+        }
+
+
+        Log.i(TAG, "onMessageUpdate: status---" + status + ",sender---" + imMsg.getSender());
     }
 
 

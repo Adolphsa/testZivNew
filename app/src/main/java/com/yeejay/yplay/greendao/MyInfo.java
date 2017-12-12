@@ -20,16 +20,18 @@ public class MyInfo {
     private int isNoMoreShow2;
     private int isShowInviteDialogInfo;
     private int addFriendNum;
+    private int isInviteTipShow;
 
-    @Generated(hash = 785225458)
+    @Generated(hash = 1493227262)
     public MyInfo(Long id, int uin, int isNoMoreShow, int isNoMoreShow2,
-            int isShowInviteDialogInfo, int addFriendNum) {
+            int isShowInviteDialogInfo, int addFriendNum, int isInviteTipShow) {
         this.id = id;
         this.uin = uin;
         this.isNoMoreShow = isNoMoreShow;
         this.isNoMoreShow2 = isNoMoreShow2;
         this.isShowInviteDialogInfo = isShowInviteDialogInfo;
         this.addFriendNum = addFriendNum;
+        this.isInviteTipShow = isInviteTipShow;
     }
     @Generated(hash = 980896312)
     public MyInfo() {
@@ -69,5 +71,11 @@ public class MyInfo {
     }
     public void setAddFriendNum(int addFriendNum) {
         this.addFriendNum = addFriendNum;
+    }
+    public int getIsInviteTipShow() {
+        return this.isInviteTipShow;
+    }
+    public void setIsInviteTipShow(int isInviteTipShow) {
+        this.isInviteTipShow = isInviteTipShow;
     }
 }

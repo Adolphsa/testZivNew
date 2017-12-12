@@ -70,6 +70,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     }
 
     int dataOffset = 0;
+    int uin;
     MessageAdapter messageAdapter;
     List<ImSession> mDataList;
     ImSessionDao imSessionDao;
@@ -84,6 +85,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
         frgTitle.setTextColor(getResources().getColor(R.color.white));
+
+        uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
 
         MessageUpdateUtil.getMsgUpdateInstance().setSessionUpdateListener(this);
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
@@ -180,6 +183,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     private List<ImSession> queryDatabaseForImsession(){
 
         return imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.Uin.eq(uin))
                 .orderDesc(ImSessionDao.Properties.MsgTs)
                 .offset(dataOffset * 10)
                 .limit(10)

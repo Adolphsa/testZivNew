@@ -6,8 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -26,6 +31,11 @@ import com.huawei.hms.support.api.push.TokenResult;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMManager;
 import com.xiaomi.mipush.sdk.MiPushClient;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
+import com.yanzhenjie.permission.PermissionListener;
+import com.yanzhenjie.permission.Rationale;
+import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -33,6 +43,7 @@ import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.friend.FragmentFriend;
+import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
@@ -42,6 +53,7 @@ import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
+import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.PushUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -112,6 +124,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     }
 
     private static final String TAG = "MainActivity";
+    private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
 
     FragmentAdapter frgAdapter;
     FragmentFriend fragmentFriend;
@@ -128,6 +141,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     private int mPageNum = 1;
     private int mPageSize = 10;
+
+    boolean numberBookAuthoritySuccess = false;
+    ContactsInfoDao contactsInfoDao;
 
     public int getmColor() {
         return mColor;
@@ -168,6 +184,16 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null){
+            boolean uuidIsNull = bundle.getBoolean("uuid_is_null");
+            if (uuidIsNull){
+                getNumberBookAuthority();
+            }
+        }
 
         dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
@@ -655,6 +681,111 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         PushUtil.resetPushNum();
     }
 
+    //获取通讯录权限
+    private void getNumberBookAuthority() {
+
+        AndPermission.with(MainActivity.this)
+                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_CONTACTS)
+                .permission(Permission.CONTACTS)
+                .callback(mPermissionListener)
+                .rationale(new RationaleListener() {
+                    @Override
+                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
+                        AndPermission.rationaleDialog(MainActivity.this, rationale).show();
+                    }
+                })
+                .start();
+    }
+
+    PermissionListener mPermissionListener = new PermissionListener() {
+        @Override
+        public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
+                    Log.i(TAG, "onSucceed: 通讯录权限成功");
+                    getContacts();
+                    break;
+            }
+
+        }
+
+        @Override
+        public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
+                    Log.i(TAG, "onFailed: 通讯录权限失败");
+                    getContacts();
+                    break;
+            }
+
+            if (numberBookAuthoritySuccess){
+                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+            }else {
+                if (AndPermission.hasAlwaysDeniedPermission(MainActivity.this, deniedPermissions)) {
+                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+                        AndPermission.defaultSettingDialog(MainActivity.this, 400).show();
+                    }
+
+                }
+            }
+        }
+    };
+
+    private void getContacts() {
+
+        if (Build.VERSION.SDK_INT >= 23
+                && MainActivity.this.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                && MainActivity.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("无读取联系人权限");
+            return;
+        }
+
+        try {
+            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            System.out.println("contactUri---" + contactUri);
+            if (contactUri != null) {
+                numberBookAuthoritySuccess = true;
+                Log.i(TAG, "getContacts: 通讯录权限申请成功");
+
+            }
+            Cursor cursor = getContentResolver().query(contactUri,
+                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
+                    null, null, "sort_key");
+            String contactName;
+            String contactNumber;
+            //String contactSortKey;
+            //int contactId;
+            while (cursor != null && cursor.moveToNext()) {
+                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
+                contactsInfoDao.insert(contactsInfo);
+            }
+            cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
+
+            //开启服务上传通讯录
+            startService(new Intent(MainActivity.this, ContactsService.class));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case 400: { // 这个400就是上面defineSettingDialog()的第二个参数。
+                // 你可以在这里检查你需要的权限是否被允许，并做相应的操作。
+                getContacts();
+                break;
+            }
+        }
+    }
     /*
     //拉取离线会话消息
     private void getOfflineMsgs(){

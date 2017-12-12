@@ -5,14 +5,18 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.greendao.MyInfo;
+import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
@@ -38,16 +42,32 @@ public class ActivityInviteFriend extends BaseActivity {
 
     @BindView(R.id.aif_back)
     ImageButton aifBack;
-//    @BindView(R.id.aif_tv_search_view)
+    //    @BindView(R.id.aif_tv_search_view)
 //    TextView aifTvSearchView;
     @BindView(R.id.aif_list_view)
     ListView aifListView;
     @BindView(R.id.aif_ptf_refresh)
     PullToRefreshLayout aifPtfRefresh;
+    @BindView(R.id.aif_tip_close)
+    ImageButton aifTipClose;
+    @BindView(R.id.aif_tip_ll)
+    LinearLayout aifTipLl;
 
     WaitInviteAdapter waitInviteAdapter;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> mDataList;
     int mPageNum = 1;
+    private int uin;
+    private MyInfoDao myInfoDao;
+    private MyInfo myInfo;
+
+
+    @OnClick(R.id.aif_tip_close)
+    public void tipClose() {
+        aifTipLl.setVisibility(View.GONE);
+        myInfo.setIsInviteTipShow(1);
+        myInfoDao.update(myInfo);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,15 +76,25 @@ public class ActivityInviteFriend extends BaseActivity {
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
-        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityInviteFriend.this,true);
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityInviteFriend.this, true);
+        myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
 
-        mDataList = new ArrayList<>();
-        getRecommends(2,mPageNum);
+        uin = (int) SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        myInfo = myInfoDao.queryBuilder()
+                .where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+        int isInviteTipShow = myInfo.getIsInviteTipShow();
+        if (0 == isInviteTipShow){
+            aifTipLl.setVisibility(View.VISIBLE);
+        }
+
+            mDataList = new ArrayList<>();
+        getRecommends(2, mPageNum);
         loadMore();
     }
 
     @OnClick(R.id.aif_back)
-    public void back(View view){
+    public void back(View view) {
         finish();
     }
 
@@ -105,7 +135,7 @@ public class ActivityInviteFriend extends BaseActivity {
     }
 
     //加载更多
-    private void loadMore(){
+    private void loadMore() {
         aifPtfRefresh.setCanRefresh(false);
         aifPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
@@ -117,13 +147,13 @@ public class ActivityInviteFriend extends BaseActivity {
             public void loadMore() {
                 mPageNum++;
                 System.out.println("pageNum---" + mPageNum);
-                getRecommends(2,mPageNum);
+                getRecommends(2, mPageNum);
             }
         });
     }
 
     //拉取等待邀请
-    private void getRecommends(final int type,int pageNum) {
+    private void getRecommends(final int type, int pageNum) {
 
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);

@@ -222,7 +222,7 @@ public class ActivityInviteCode extends BaseActivity {
                 .build().unique();
 
         if (myInfo == null){
-            MyInfo insert = new MyInfo(null,tempUin,0,0,0,0);
+            MyInfo insert = new MyInfo(null,tempUin,0,0,0,0,0);
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }

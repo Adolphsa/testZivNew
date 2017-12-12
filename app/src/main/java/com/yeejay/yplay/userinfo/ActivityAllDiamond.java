@@ -118,7 +118,7 @@ public class ActivityAllDiamond extends BaseActivity {
                 if (!TextUtils.isEmpty(url)){
                     Picasso.with(ActivityAllDiamond.this).load(url).into(holder.itemAmiImg);
                 }else {
-                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond));
+                    holder.itemAmiImg.setVisibility(View.GONE);
                 }
                 holder.itemAmiText.setText(statsBean.getQtext());
 
