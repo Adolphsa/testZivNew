@@ -1,7 +1,13 @@
 package com.yeejay.yplay.friend;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,8 +20,14 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
+import com.yanzhenjie.permission.PermissionListener;
+import com.yanzhenjie.permission.Rationale;
+import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.answer.ActivityInviteFriend;
@@ -23,6 +35,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
@@ -48,6 +61,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener {
+
+    private static final String TAG = "AddFriends";
+    private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -172,6 +188,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     int buttonDirt = 1; //学校按钮朝向
     boolean isFromAddFriend;
 
+    boolean numberBookAuthoritySuccess = false;
+    ContactsInfoDao contactsInfoDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,6 +200,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
+
+        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
@@ -461,8 +481,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //跳转到邀请好友界面
-                startActivity(new Intent(AddFriends.this, ActivityInviteFriend.class));
+                //跳转到邀请好友界面 判断权限
+                getNumberBookAuthority();
             }
         });
 
@@ -795,6 +815,104 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         });
         cardDialog.show();
     }
+
+    //获取通讯录权限
+    private void getNumberBookAuthority() {
+
+        AndPermission.with(AddFriends.this)
+                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_CONTACTS)
+                .permission(Permission.CONTACTS)
+                .callback(mPermissionListener)
+                .rationale(new RationaleListener() {
+                    @Override
+                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
+                        AndPermission.rationaleDialog(AddFriends.this, rationale).show();
+                    }
+                })
+                .start();
+    }
+
+    PermissionListener mPermissionListener = new PermissionListener() {
+        @Override
+        public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
+                    Log.i(TAG, "onSucceed: 通讯录权限成功");
+                    getContacts();
+                    break;
+            }
+
+        }
+
+        @Override
+        public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
+                    Log.i(TAG, "onFailed: 通讯录权限失败");
+                    getContacts();
+                    break;
+            }
+
+            if (numberBookAuthoritySuccess){
+                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+            }else {
+                if (AndPermission.hasAlwaysDeniedPermission(AddFriends.this, deniedPermissions)) {
+                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+                        AndPermission.defaultSettingDialog(AddFriends.this, 400).show();
+                    }
+
+                }
+            }
+        }
+    };
+
+    private void getContacts() {
+
+        if (Build.VERSION.SDK_INT >= 23
+                && AddFriends.this.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                && AddFriends.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("无读取联系人权限");
+            return;
+        }
+
+        try {
+            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            System.out.println("contactUri---" + contactUri);
+            if (contactUri != null) {
+                numberBookAuthoritySuccess = true;
+                Log.i(TAG, "getContacts: 通讯录权限申请成功");
+
+            }
+            Cursor cursor = getContentResolver().query(contactUri,
+                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
+                    null, null, "sort_key");
+            String contactName;
+            String contactNumber;
+            //String contactSortKey;
+            //int contactId;
+            while (cursor != null && cursor.moveToNext()) {
+                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
+                contactsInfoDao.insert(contactsInfo);
+            }
+            cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
+
+            //开启服务上传通讯录
+//            startService(new Intent(AddFriends.this, ContactsService.class));
+
+            //跳转到邀请好友界面
+            Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
+            startActivity(intent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+    }
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

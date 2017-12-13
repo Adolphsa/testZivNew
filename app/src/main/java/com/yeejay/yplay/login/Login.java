@@ -3,6 +3,7 @@ package com.yeejay.yplay.login;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -56,7 +57,7 @@ public class Login extends BaseActivity {
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 100;
 
 
-//    @BindView(R.id.login_scroll_view)
+    //    @BindView(R.id.login_scroll_view)
 //    ScrollView loginScrollView;
 //    @BindView(R.id.login_root_view)
 //    LinearLayout rootView;
@@ -70,14 +71,23 @@ public class Login extends BaseActivity {
     Button mBtnNext;
     @BindView(R.id.test_tv1)
     TextView testTv1;
-
+    @BindView(R.id.test_tv2)
+    TextView testTv2;
 
 
     @OnClick(R.id.login_edt_number)
-    public void loginPhone(){
+    public void loginPhone() {
     }
+
     @OnClick(R.id.login_edt_auth_code)
-    public void loginAuthCode(){
+    public void loginAuthCode() {
+    }
+
+    //用户协议和隐私政策
+    @OnClick(R.id.test_tv2)
+    public void userPrivacy() {
+        startActivity(new Intent(Login.this,UserPrivacy.class));
+
     }
 
     MyInfoDao myInfoDao;
@@ -117,6 +127,7 @@ public class Login extends BaseActivity {
 
         mContactsList = new ArrayList<>();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        testTv2.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
 
         uuid = System.currentTimeMillis();
 
@@ -129,10 +140,12 @@ public class Login extends BaseActivity {
         //监听手机号输入栏的变化
         mEdtPhoneNumber.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -146,7 +159,7 @@ public class Login extends BaseActivity {
 
                     //判断验证码的长度
                     String authCode = mEdtAuthCode.getText().toString();
-                    if (!TextUtils.isEmpty(authCode) && authCode.length() == 4){
+                    if (!TextUtils.isEmpty(authCode) && authCode.length() == 4) {
                         mBtnNext.setEnabled(true);
                         mBtnNext.setTextColor(getResources().getColor(R.color.white));
                     }
@@ -169,7 +182,8 @@ public class Login extends BaseActivity {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -242,7 +256,7 @@ public class Login extends BaseActivity {
         }
 
         Intent intent = new Intent(Login.this, MainActivity.class);
-        intent.putExtra("uuid_is_null",true);
+        intent.putExtra("uuid_is_null", true);
         startActivity(intent);
 
 //        //年龄
@@ -372,7 +386,8 @@ public class Login extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<LoginRespond>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@NonNull LoginRespond loginRespond) {
@@ -384,13 +399,13 @@ public class Login extends BaseActivity {
                             ver = loginRespond.getPayload().getVer();
                             token = loginRespond.getPayload().getToken();
 
-                            if (hasCheckInviteCode == 0){ //0表示邀请码验证未通过
+                            if (hasCheckInviteCode == 0) { //0表示邀请码验证未通过
                                 Intent intent = new Intent(Login.this, ActivityInviteCode.class);
-                                intent.putExtra("phone_number",phoneNumber);
+                                intent.putExtra("phone_number", phoneNumber);
                                 intent.putExtra("uin", uin);
                                 intent.putExtra("ver", ver);
                                 intent.putExtra("token", token);
-                                intent.putExtra("nick_name",loginRespond.getPayload().getInfo().getUserName());
+                                intent.putExtra("nick_name", loginRespond.getPayload().getInfo().getUserName());
                                 startActivity(intent);
                                 return;
                             }
@@ -398,7 +413,7 @@ public class Login extends BaseActivity {
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
-                            SharePreferenceUtil.put(Login.this,YPlayConstant.YPLAY_USER_NAME,loginRespond.getPayload().getInfo().getUserName());
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
                             insertUin(loginRespond.getPayload());
 
 
@@ -411,7 +426,7 @@ public class Login extends BaseActivity {
                                         loginRespond.getPayload().getInfo().getSchoolId(),
                                         loginRespond.getPayload().getInfo().getGender(),
                                         loginRespond.getPayload().getInfo().getNickName()
-                                        );
+                                );
                                 //startActivity(new Intent(Login.this, LoginAge.class));
                             }
                         } else {
@@ -432,13 +447,13 @@ public class Login extends BaseActivity {
     }
 
     //插入uin到数据库
-    private void insertUin(LoginRespond.PayloadBean payloadBean){
+    private void insertUin(LoginRespond.PayloadBean payloadBean) {
 
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(payloadBean.getUin()))
                 .build().unique();
 
-        if (myInfo == null){
-            MyInfo insert = new MyInfo(null,payloadBean.getUin(),0,0,0,0,0);
+        if (myInfo == null) {
+            MyInfo insert = new MyInfo(null, payloadBean.getUin(), 0, 0, 0, 0, 0);
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }
@@ -446,7 +461,7 @@ public class Login extends BaseActivity {
 
 
     //获取自己的资料
-    private void getMyInfo(int uin,String token,int ver){
+    private void getMyInfo(int uin, String token, int ver) {
 
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", uin);
@@ -458,18 +473,19 @@ public class Login extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
 
                     @Override
                     public void onNext(@NonNull UserInfoResponde userInfoResponde) {
                         System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0){
+                        if (userInfoResponde.getCode() == 0) {
                             jumpToWhere(userInfoResponde.getPayload().getInfo().getAge(),
                                     userInfoResponde.getPayload().getInfo().getGrade(),
                                     userInfoResponde.getPayload().getInfo().getSchoolId(),
                                     userInfoResponde.getPayload().getInfo().getGender(),
                                     userInfoResponde.getPayload().getInfo().getNickName()
-                                    );
+                            );
                         }
                     }
 

@@ -128,16 +128,35 @@
                     android:layout_marginTop="5.5dp"
                     android:src="@drawable/login_line" />
 
-                <TextView
-                    android:id="@+id/test_tv1"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:layout_marginTop="19.5dp"
-                    android:text="注册代表你已阅读并同意用户协议与隐私条款"
-                    android:textColor="@color/feeds_hight_gray50"
-                    android:textSize="10sp"
-                    />
+                    android:layout_gravity="center_horizontal"
+                    >
+                    <TextView
+                        android:id="@+id/test_tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="注册代表你已阅读并同意"
+                        android:textColor="@color/feeds_hight_gray50"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        />
+                    <TextView
+                        android:id="@+id/test_tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="用户协议和隐私条款"
+                        android:textColor="@color/feeds_hight_gray50"
+                        android:textSize="10sp"
+                        android:gravity="center"
+
+                        />
+                </LinearLayout>
+
+
 
                 <Button
                     android:id="@+id/login_btn_next"

@@ -83,6 +83,8 @@
             android:name=".login.Login"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity android:name=".login.UserPrivacy"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".login.ActivityInviteCode"
             android:screenOrientation="portrait"
@@ -103,9 +105,9 @@
             android:name=".login.UserInfo"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".login.AddFriendGuide"
-            android:screenOrientation="portrait"
-            />
+        <activity
+            android:name=".login.AddFriendGuide"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".answer.ActivityInviteFriend"
             android:screenOrientation="portrait" />
@@ -176,13 +178,11 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible|adjustResize|stateAlwaysHidden" />
 
-        <!--上传通讯录的服务-->
+        <!-- 上传通讯录的服务 -->
         <service
             android:name=".service.ContactsService"
             android:enabled="true"
             android:exported="true" />
-
-
 
         <!-- service -->
         <!-- WNS service,注意进程名为:wns ，其它组件请不要使用这个进程名 -->
@@ -323,7 +323,6 @@
             </intent-filter>
         </receiver>
         <!-- hwpush -->
-
 
     </application>
 

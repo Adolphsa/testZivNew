@@ -104,9 +104,9 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         System.out.println("token---" + token);
 
         if (uin == 0 || TextUtils.isEmpty(token) || ver == 0) {
-            handler.sendEmptyMessageDelayed(LOGIN_CODE, 1000);
+            handler.sendEmptyMessageDelayed(LOGIN_CODE, 500);
         } else {
-            handler.sendEmptyMessageDelayed(NETWORK_CODE, 1000);
+            handler.sendEmptyMessageDelayed(NETWORK_CODE, 500);
         }
 
     }

@@ -195,7 +195,10 @@ public class ActivityInviteCode extends BaseActivity {
                                     infoBean.getSchoolId() == 0 ||
                                     infoBean.getGender() == 0 ||
                                     TextUtils.isEmpty(infoBean.getNickName())) {
-                                startActivity(new Intent(ActivityInviteCode.this, LoginAge.class));
+
+                                Intent intent = new Intent(ActivityInviteCode.this, LoginAge.class);
+                                intent.putExtra("is_from_invite_code",true);
+                                startActivity(intent);
 
                             } else {
                                 startActivity(new Intent(ActivityInviteCode.this, MainActivity.class));

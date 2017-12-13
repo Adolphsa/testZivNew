@@ -182,6 +182,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     //从数据库中查找会话列表
     private List<ImSession> queryDatabaseForImsession(){
 
+        Log.i(TAG, "queryDatabaseForImsession: uin---" + uin);
+
         return imSessionDao.queryBuilder()
                 .where(ImSessionDao.Properties.Uin.eq(uin))
                 .orderDesc(ImSessionDao.Properties.MsgTs)

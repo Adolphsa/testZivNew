@@ -182,9 +182,10 @@ public class PushUtil implements Observer {
         NotificationManager mNotificationManager = (NotificationManager) YplayApplication.getContext().getSystemService(YplayApplication.getContext().NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(YplayApplication.getContext());
 
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_NEW_TASK);
-
+        if (notificationIntent != null){
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
 
         PendingIntent intent = PendingIntent.getActivity(YplayApplication.getContext(), ++requestCode,
                 notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);

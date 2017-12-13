@@ -236,6 +236,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         acwRecycleView.setLayoutManager(linearLayoutManager);
 
+        Log.i(TAG, "onCreate: status---" + status + ",uin---" + uin + ",mSender---" + mSender);
+
         if (1 == status && (uin == mSender)){
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
@@ -248,6 +250,20 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             mDataList.add(0,imMsg2);
 
             Log.i(TAG, "onCreate: mDataList-size" + mDataList.size());
+        }
+
+        if (1 == status && (uin != mSender) && mDataList.size() == 2){
+            ImMsg imMsg1 = new ImMsg();
+            imMsg1.setMsgType(100);
+            imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
+            mDataList.add(0,imMsg1);
+        }
+
+        if (1 == status && (uin != mSender) && mDataList.size() == 4){
+            ImMsg imMsg1 = new ImMsg();
+            imMsg1.setMsgType(100);
+            imMsg1.setMsgContent("对方已看到你的真实姓名");
+            mDataList.add(0,imMsg1);
         }
 
         chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
@@ -279,9 +295,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
 
             @Override
-            public void loadMore() {
-
-            }
+            public void loadMore() {}
         });
 
     }
@@ -468,7 +482,19 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             layoutTitle2.setText(tempNickname2);
         }
 
+        if (1 == status && (uin != Integer.valueOf(imMsg.getSender())) && mDataList.size() == 2){
+            ImMsg imMsg1 = new ImMsg();
+            imMsg1.setMsgType(100);
+            imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
+            mDataList.add(0,imMsg1);
+        }
 
+        if (1 == status && (uin == Integer.valueOf(imMsg.getSender())) && mDataList.size() == 4){
+            ImMsg imMsg1 = new ImMsg();
+            imMsg1.setMsgType(100);
+            imMsg1.setMsgContent("对方已看到你的真实姓名");
+            mDataList.add(0,imMsg1);
+        }
         Log.i(TAG, "onMessageUpdate: status---" + status + ",sender---" + imMsg.getSender());
     }
 

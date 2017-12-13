@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -54,6 +55,7 @@ public class LoginAge extends BaseActivity {
     Handler mHandler = new Handler();
     ArrayList<String> ageList;
     String mAge;
+    boolean isFromInviteCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +64,14 @@ public class LoginAge extends BaseActivity {
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.message_title_color));
-
         laBack.setVisibility(View.GONE);
+
+        Bundle bundle = getIntent().getExtras();
+
+        if (bundle != null){
+            isFromInviteCode = bundle.getBoolean("is_from_invite_code");
+        }
+
 
         ageList = new ArrayList<String>();
         //添加年龄数据
@@ -199,6 +207,13 @@ public class LoginAge extends BaseActivity {
         }
 
         startActivity(new Intent(LoginAge.this, MainActivity.class));
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && isFromInviteCode) {
+            return true;
+        }
+        return false;
     }
 
 }
