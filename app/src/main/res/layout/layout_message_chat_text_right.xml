@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="20dp"
     >
-
+    <ImageView
+        android:id="@+id/msg_item_right_not_friend"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:src="@drawable/msg_not_friend"
+        android:layout_toLeftOf="@+id/msg_item_right"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="3dp"
+        android:visibility="gone"
+        />
     <TextView
         android:id="@+id/msg_item_right"
         android:layout_width="wrap_content"
@@ -15,7 +24,7 @@
         android:textColor="@color/white"
         android:layout_marginRight="21dp"
         android:background="@drawable/right_chat"
-        android:layout_gravity="right"
+        android:layout_alignParentRight="true"
         />
 
-</LinearLayout>
+</RelativeLayout>

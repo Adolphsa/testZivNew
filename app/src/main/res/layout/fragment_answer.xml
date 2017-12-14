@@ -74,20 +74,19 @@
             android:layout_width="126.8dp"
             android:layout_height="56.8dp"
             android:gravity="center"
-            android:text="faker"
             android:textSize="18sp"
             android:textColor="@color/black50"
             android:background="@drawable/play_button_background"
             android:ellipsize="end"
             android:maxEms="7"
             android:singleLine="true"
+            android:textAllCaps="false"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn2"
             android:layout_width="126.8dp"
             android:layout_height="56.8dp"
             android:gravity="center"
-            android:text="孙亚龙"
             android:textSize="18sp"
             android:textColor="@color/black50"
             android:layout_toRightOf="@+id/frgans_btn1"
@@ -96,13 +95,13 @@
             android:maxEms="7"
             android:singleLine="true"
             android:background="@drawable/play_button_background"
+            android:textAllCaps="false"
             />
         <com.yeejay.yplay.customview.ProgressButton
             android:id="@+id/frgans_btn3"
             android:layout_width="126.8dp"
             android:layout_height="56.8dp"
             android:gravity="center"
-            android:text="笑笑"
             android:textSize="18sp"
             android:textColor="@color/black50"
             android:layout_below="@+id/frgans_btn1"
@@ -111,6 +110,7 @@
             android:ellipsize="end"
             android:maxEms="7"
             android:singleLine="true"
+            android:textAllCaps="false"
             />
 
         <com.yeejay.yplay.customview.ProgressButton
@@ -122,12 +122,12 @@
             android:layout_alignStart="@+id/frgans_btn2"
             android:background="@drawable/play_button_background"
             android:gravity="center"
-            android:text="五五开"
             android:textColor="@color/black50"
             android:textSize="18sp"
             android:ellipsize="end"
             android:maxEms="7"
             android:singleLine="true"
+            android:textAllCaps="false"
             />
         <TextView
             android:id="@+id/frgans_tv_or"

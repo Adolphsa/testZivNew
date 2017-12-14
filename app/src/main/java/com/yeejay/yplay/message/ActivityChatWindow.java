@@ -108,6 +108,58 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         System.out.println("发送消息");
         if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             String str = acwEdit.getText().toString().trim();
+
+            ImSession imSession = imSessionDao.queryBuilder()
+                    .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                    .build().unique();
+            String chater = imSession.getChater();
+            Log.i(TAG, "send: chater---" + chater);
+
+            //判断是否是好友关系
+            FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
+            if (friendInfo == null){
+
+                ImMsg imMsg0 = new ImMsg(null,
+                        sessionId,
+                        System.currentTimeMillis(),
+                        String.valueOf(uin),
+                        101,
+                        str,
+                        (System.currentTimeMillis()/1000),
+                        1);
+                imMsgDao.insert(imMsg0);
+
+                ImMsg imMsg1 = new ImMsg(null,
+                        sessionId,
+                        System.currentTimeMillis(),
+                        String.valueOf(uin),
+                        100,
+                        "对方已不是你的好友",
+                        (System.currentTimeMillis()/1000),
+                        1);
+                imMsgDao.insert(imMsg1);
+
+                ImMsg imMsg2 = new ImMsg(null,
+                        sessionId,
+                        System.currentTimeMillis(),
+                        String.valueOf(uin),
+                        100,
+                        "先和对方成为好友，才能聊天哦~",
+                        (System.currentTimeMillis()/1000),
+                        1);
+                imMsgDao.insert(imMsg2);
+
+
+                mDataList.add(0,imMsg0);
+                mDataList.add(0,imMsg1);
+                mDataList.add(0,imMsg2);
+                chatAdapter.notifyDataSetChanged();
+                acwEdit.setText("");
+                acwRecycleView.scrollToPosition(mDataList.size()-1);
+                return;
+            }
+
+            Log.i(TAG, "send: 编辑框的内容---" + str);
             if (!TextUtils.isEmpty(str)) {
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
@@ -140,19 +192,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         sessionId);                       //群组Id
 
                 Log.i(TAG, "send: sessionId---" + sessionId);
-
-                ImSession imSession = imSessionDao.queryBuilder()
-                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                        .build().unique();
-                String chater = imSession.getChater();
-                Log.i(TAG, "send: chater---" + chater);
-
-                //判断是否是好友关系
-                FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
-                if (friendInfo == null){
-                    Toast.makeText(ActivityChatWindow.this, "发送失败，非好友", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
                 //发送消息
                 conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调

@@ -49,7 +49,7 @@ public class ImConfig {
 
     private static final String tag = "ImConfig";
     private static final int IM_SDK_APP_ID = 1400046572;
-    public boolean isOffline = true;
+    public static boolean isOffline = true;
 
     private TIMManager timManager = TIMManager.getInstance();
     private TIMSdkConfig config;

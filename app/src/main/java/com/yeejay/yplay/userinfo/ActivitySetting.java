@@ -38,6 +38,7 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
+import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
@@ -185,7 +186,7 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("联系我们");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
             new AlertDialog.Builder(ActivitySetting.this)
-                    .setMessage("咨询、建议，欢迎联系:" + "\n" + "chenyu@yeejay.com")
+                    .setMessage("咨询、建议，欢迎联系QQ:" + "\n" + "2137930181（^-^）")
                     .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -210,22 +211,7 @@ public class ActivitySetting extends BaseActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             logout();
-                            //登出
-                            TIMManager.getInstance().logout(new TIMCallBack() {
-                                @Override
-                                public void onError(int code, String desc) {
 
-                                    //错误码code和错误描述desc，可用于定位请求失败原因
-                                    //错误码code列表请参见错误码表
-                                    Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
-                                }
-
-                                @Override
-                                public void onSuccess() {
-                                    //登出成功
-                                    System.out.println("im退出成功");
-                                }
-                            });
                         }
                     })
                     .setNegativeButton("否", new DialogInterface.OnClickListener() {
@@ -629,9 +615,29 @@ public class ActivitySetting extends BaseActivity {
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
                         System.out.println("退出登录---" + userInfoResponde.toString());
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
+
+                        //登出
+                        TIMManager.getInstance().logout(new TIMCallBack() {
+                            @Override
+                            public void onError(int code, String desc) {
+
+                                //错误码code和错误描述desc，可用于定位请求失败原因
+                                //错误码code列表请参见错误码表
+                                Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
+                            }
+
+                            @Override
+                            public void onSuccess() {
+                                //登出成功
+                                System.out.println("im退出成功");
+                            }
+                        });
+
+                        SharePreferenceUtil.clear(ActivitySetting.this);
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
+                        AppManager.getAppManager().AppExit(ActivitySetting.this);
                         startActivity(new Intent(ActivitySetting.this, Login.class));
                     }
 
@@ -710,7 +716,7 @@ public class ActivitySetting extends BaseActivity {
                                 updateHeaderImg(null, null, 0, name);
                             }
                         } else {
-                            Toast.makeText(ActivitySetting.this, "字符长度不能为0", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivitySetting.this, "昵称不能为空哦", Toast.LENGTH_SHORT).show();
                         }
 
                     }

@@ -105,7 +105,7 @@ public class MessageUpdateUtil {
                 if (myInfo != null) {
                     int addFriendNum = myInfo.getAddFriendNum();
                     Log.i(TAG, "updateSessionAndMessage: addFriendNum---" + addFriendNum);
-                    if (!isOffline) {
+                    if (!ImConfig.isOffline) {
                         addFriendNum++;
                         Log.i(TAG, "updateSessionAndMessage: addFriendNum2---" + addFriendNum);
                     }

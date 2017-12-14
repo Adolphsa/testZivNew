@@ -79,7 +79,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         int immsgType = imMsg.getMsgType();
         String msgContent = imMsg.getMsgContent();
         String sender = imMsg.getSender();
-        if (immsgType == 6) {
+        if (immsgType == 101){
+            if (!TextUtils.isEmpty(msgContent)){
+                ((RightMsgViewHolder) holder).msgRight.setText(msgContent);
+                ((RightMsgViewHolder) holder).msgNotFriend.setVisibility(View.VISIBLE);
+            }
+        }else if (immsgType == 6) {
             try {
                 JSONObject jsonObject = new JSONObject(msgContent);
                 int dataType = jsonObject.getInt("DataType");
@@ -183,6 +188,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }else if (immsgType == 100){    //中间的提示
             return ITEM_TYPE.ITEM_TYPE_CENTER.ordinal();
+        }else if (immsgType == 101){
+            return ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal();
         }
 
         return -1;
@@ -269,6 +276,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         @BindView(R.id.msg_item_right)
         TextView msgRight;
+        @BindView(R.id.msg_item_right_not_friend)
+        ImageView msgNotFriend;
 
         public RightMsgViewHolder(View itemView) {
             super(itemView);

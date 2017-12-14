@@ -50,6 +50,7 @@
             android:layout_marginBottom="6dp"
             android:cursorVisible="false"
             android:layout_marginLeft="10dp"
+            android:maxLength="5000"
             />
         <ImageButton
             android:id="@+id/acw_send"

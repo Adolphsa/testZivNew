@@ -3,8 +3,12 @@ package com.yeejay.yplay.api;
 import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.tencent.wns.client.inte.WnsClientFactory;
+import com.tencent.wns.client.inte.WnsService;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.utils.NetWorkUtil;
+
+import org.apache.http.client.HttpClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +32,8 @@ public class YPlayApiManger {
     public static final String BASE_URL = "http://yplay.vivacampus.com";
 
     //URL u = YplayApplication.getWnsInstance().getWnsHttpUrl(BASE_URL);
+    private final WnsService wns = WnsClientFactory.getThirdPartyWnsService();
+    HttpClient wnsclient = wns.getWnsHttpClient();
 
     //缓存策略  有网时获取网络数据   没网时获取缓存
     private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
