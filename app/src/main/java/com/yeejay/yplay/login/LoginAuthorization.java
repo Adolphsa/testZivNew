@@ -59,19 +59,19 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     Log.i(TAG, "onSucceed: getLonlat");
                     getLonLat();
-                    if (addressAuthoritySuccess){
+                    if (addressAuthoritySuccess) {
                         Log.i(TAG, "onSucceed: 地理位置有权限");
 
-                    }else {
+                    } else {
                         Log.i(TAG, "onSucceed: 地理位置无权限");
                         AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
                     }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     getContacts();
-                    if (numberBookAuthoritySuccess){
+                    if (numberBookAuthoritySuccess) {
                         Log.i(TAG, "onSucceed: 通讯录有权限");
-                    }else {
+                    } else {
                         Log.i(TAG, "onSucceed: 通讯录无权限");
                         AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
                     }
@@ -88,13 +88,13 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
-                    if(addressAuthoritySuccess){
+                    if (addressAuthoritySuccess) {
                         Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-                    }else {
+                    } else {
                         if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_LOCATION) {
-                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                            }
+
+                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+
 
                         }
                     }
@@ -102,13 +102,13 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     System.out.println("回调失败的通讯录权限申请失败");
                     getContacts();
-                    if (numberBookAuthoritySuccess){
+                    if (numberBookAuthoritySuccess) {
                         Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-                    }else {
+                    } else {
                         if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
-                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
-                            }
+
+                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
+
                         }
                     }
                     break;
@@ -126,14 +126,14 @@ public class LoginAuthorization extends BaseActivity {
             case 400: { // 这个400就是上面defineSettingDialog()的第二个参数。
                 // 你可以在这里检查你需要的权限是否被允许，并做相应的操作。
                 System.out.println("回调了");
-                if (!addressAuthoritySuccess){
+                if (!addressAuthoritySuccess) {
                     getLonLat();
                 }
                 System.out.println("回调addressAuthoritySuccess---" + addressAuthoritySuccess);
                 break;
             }
             case 401:
-                if (!numberBookAuthoritySuccess){
+                if (!numberBookAuthoritySuccess) {
                     getContacts();
                 }
                 System.out.println("回调numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
@@ -298,12 +298,12 @@ public class LoginAuthorization extends BaseActivity {
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 //contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
                 //contactSortKey =getSortkey(cursor.getString(1));
-                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
+                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, contactNumber);
                 contactsInfoDao.insert(contactsInfo);
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
             List<ContactsInfo> tempList = contactsInfoDao.loadAll();
-            if (tempList != null && tempList.size() > 0){
+            if (tempList != null && tempList.size() > 0) {
                 numberBookAuthoritySuccess = true;
                 setContactBackground();
             }

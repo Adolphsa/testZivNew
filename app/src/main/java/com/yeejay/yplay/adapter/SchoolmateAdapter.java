@@ -2,6 +2,7 @@ package com.yeejay.yplay.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -25,10 +26,14 @@ import tangxiaolv.com.library.EffectiveShapeView;
 
 public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListener {
 
+    private static final String TAG = "SchoolmateAdapter";
+
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
+    List<Integer> positionList;
+
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -55,11 +60,13 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
     public SchoolmateAdapter(Context context,
                              hideCallback hideCallback,
                              acceptCallback acceptCallback,
-                             List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
+                             List<GetRecommendsRespond.PayloadBean.FriendsBean> list,
+                             List positionList) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
+        this.positionList = positionList;
     }
 
     @Override
@@ -100,6 +107,7 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         int status = friendsBean.getStatus();
         String str = friendsBean.getRecommendDesc();
 
+        Log.i(TAG, "getView: status---" + status);
 
         if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);
@@ -116,6 +124,15 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         holder.afBtnAccept.setEnabled(true);
         holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend);
         holder.afBtnAccept.setOnClickListener(acceptListener);
+
+        for (Integer temp : positionList){
+            if (temp == position){
+                Log.i(TAG, "getView: 已经接受的item---" + temp);
+                holder.afBtnAccept.setBackgroundResource(R.drawable.already_apply);
+                holder.afBtnAccept.setOnClickListener(acceptListener);
+            }
+        }
+
         holder.afBtnAccept.setTag(position);
         return convertView;
     }
@@ -131,7 +148,6 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         Button afBtnAccept;
         @BindView(R.id.af_btn_hide)
         Button afBtnHide;
-
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);

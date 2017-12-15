@@ -2,6 +2,7 @@ package com.yeejay.yplay.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -25,10 +26,13 @@ import tangxiaolv.com.library.EffectiveShapeView;
 
 public class ContactsAdapter extends BaseAdapter implements View.OnClickListener {
 
+    private static final String TAG = "ContactsAdapter";
+
     private Context context;
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
+    List<Integer> positionList;
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -54,11 +58,13 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
     public ContactsAdapter(Context context,
                            hideCallback hideCallback,
                            acceptCallback acceptCallback,
-                           List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
+                           List<GetRecommendsRespond.PayloadBean.FriendsBean> list,
+                           List positionList) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
+        this.positionList = positionList;
     }
 
     @Override
@@ -97,6 +103,8 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         int status = contentList.get(position).getStatus();
         String str = contentList.get(position).getRecommendDesc();
 
+        Log.i(TAG, "getView: status---" + status);
+
         holder.afItemName.setText(contentList.get(position).getNickName());
         holder.afItemTvSharesFriends.setText(str);
         if (!TextUtils.isEmpty(url)){
@@ -122,6 +130,14 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
 
         holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
+
+        for (Integer temp : positionList){
+            if (temp == position){
+                Log.i(TAG, "getView: 已经接受的item---" + temp);
+                holder.afBtnAccept.setBackgroundResource(R.drawable.already_apply);
+                holder.afBtnAccept.setOnClickListener(acceptListener);
+            }
+        }
         return convertView;
     }
 

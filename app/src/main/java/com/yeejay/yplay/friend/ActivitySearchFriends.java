@@ -202,6 +202,7 @@ public class ActivitySearchFriends extends BaseActivity {
     private void addFriend(int toUin) {
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
+        addFreindMap.put("srcType",8);
         addFreindMap.put("uin", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(ActivitySearchFriends.this, YPlayConstant.YPLAY_VER, 0));

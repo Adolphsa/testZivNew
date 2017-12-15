@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -117,60 +119,60 @@ public class ActivitySetting extends BaseActivity {
     @OnClick(R.id.setting_img_header)
     public void settingImgHeader() {
         System.out.println("头像");
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
             applyForAlbumAuthority();
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
 
     //姓名
     @OnClick(R.id.setting_name)
-    public void settingName(){
+    public void settingName() {
 
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 1;
             queryUserUpdateLeftCount(1);
 
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
 
     //用户姓名
     @OnClick(R.id.setting_user_name)
-    public void settingUserName(){
+    public void settingUserName() {
 
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 2;
-            showInputDialog("修改门牌号","");
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+            showInputDialog("修改门牌号", "");
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
 
     //性别
     @OnClick(R.id.setting_gender)
-    public void setSettingGender(){
+    public void setSettingGender() {
         System.out.println("性别");
         Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-        intent.putExtra("activity_setting",1);
-        startActivityForResult(intent,REQUEST_CODE_CHOICE_GENDER);
+        intent.putExtra("activity_setting", 1);
+        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
     }
 
     //修改学校信息
     @OnClick(R.id.setting_school)
     public void setSettingSchoolInfo() {
         System.out.println("学校信息");
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 3;
             queryUserUpdateLeftCount(3);
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -184,7 +186,7 @@ public class ActivitySetting extends BaseActivity {
     @OnClick(R.id.setting_contacts_us)
     public void contacts() {
         System.out.println("联系我们");
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             new AlertDialog.Builder(ActivitySetting.this)
                     .setMessage("咨询、建议，欢迎联系QQ:" + "\n" + "2137930181（^-^）")
                     .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
@@ -194,8 +196,8 @@ public class ActivitySetting extends BaseActivity {
                         }
                     })
                     .show();
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -204,7 +206,7 @@ public class ActivitySetting extends BaseActivity {
     @OnClick(R.id.setting_exit)
     public void settingExit() {
         System.out.println("退出");
-        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)){
+        if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             new AlertDialog.Builder(ActivitySetting.this)
                     .setMessage("退出后不会删除任何历史数据，下次登录依然可以使用本账号")
                     .setPositiveButton("是", new DialogInterface.OnClickListener() {
@@ -221,15 +223,17 @@ public class ActivitySetting extends BaseActivity {
                         }
                     })
                     .show();
-        }else {
-            Toast.makeText(ActivitySetting.this,"网络异常",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
 
     }
 
+    private static final String TAG = "ActivitySetting";
     private static final int REQ_CODE_SEL_IMG = 15;
     private static final int CROP_IMAGE = 11;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 200;
+    private static final int REQUEST_CODE_PERMISSION_SINGLE_IMAGE = 201;
     private static final int REQUEST_CODE_CHOICE_GENDER = 201;
     private static final int REQUEST_CODE_SCHOOL = 202;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
@@ -239,23 +243,50 @@ public class ActivitySetting extends BaseActivity {
     private File tempFile;
     private Uri tempUri;
     String dirStr;
+    boolean addressAuthoritySuccess = false;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
         public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
-            System.out.println("相册权限申请成功");
-            if (Build.VERSION.SDK_INT >= 23 && ActivitySetting.this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                    PackageManager.PERMISSION_GRANTED) {
-                ActivitySetting.this.requestPermissions(new String[]{
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            } else {
-                selectImage();
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_IMAGE:
+                    System.out.println("相册权限申请成功");
+                    if (Build.VERSION.SDK_INT >= 23 && ActivitySetting.this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        ActivitySetting.this.requestPermissions(new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    } else {
+                        selectImage();
+                    }
+                    break;
+                case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
+                    getLonLat();
+                    if (addressAuthoritySuccess) {
+                        Log.i(TAG, "onSucceed: 地理位置有权限");
+
+                    } else {
+                        Log.i(TAG, "onSucceed: 地理位置无权限");
+                        AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                    }
+                    break;
             }
+
         }
 
         @Override
         public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
             System.out.println("相册权限申请失败");
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
+                    System.out.println("回调失败的地理位置权限申请失败");
+                    getLonLat();
+                    if (addressAuthoritySuccess) {
+                        Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
+                    } else {
+                        AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                    }
+                    break;
+            }
         }
     };
 
@@ -330,13 +361,19 @@ public class ActivitySetting extends BaseActivity {
             }
         } else if (requestCode == REQUEST_CODE_SCHOOL) {
             getMyInfo();
+        }else if (requestCode == 400){
+            Log.i(TAG, "onActivityResult: requestCode == 400");
+            if (!addressAuthoritySuccess) {
+                getLonLat();
+            }
+
         }
     }
 
     //跳转到系统相册
     private void applyForAlbumAuthority() {
         AndPermission.with(ActivitySetting.this)
-                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_LOCATION)
+                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_IMAGE)
                 .permission(Permission.STORAGE)
                 .callback(mPermissionListener)
                 .rationale(new RationaleListener() {
@@ -435,8 +472,9 @@ public class ActivitySetting extends BaseActivity {
     private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {
 
         Map<String, Object> imgMap = new HashMap<>();
-        if (!TextUtils.isEmpty(nickName)){
-            imgMap.put("nickName", nickName);imgMap.put("flag",1);
+        if (!TextUtils.isEmpty(nickName)) {
+            imgMap.put("nickName", nickName);
+            imgMap.put("flag", 1);
         }
 
         if (gender == 1 || gender == 2)
@@ -531,7 +569,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //查询用户的修改配额
-    private void queryUserUpdateLeftCount(int field){
+    private void queryUserUpdateLeftCount(int field) {
 
         Map<String, Object> leftCountMap = new HashMap<>();
         leftCountMap.put("field", field);
@@ -551,33 +589,38 @@ public class ActivitySetting extends BaseActivity {
                     @Override
                     public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
                         System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
-                        if (userUpdateLeftCountRespond.getCode() == 0){
+                        if (userUpdateLeftCountRespond.getCode() == 0) {
                             int letCount = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
                             int tempField = userUpdateLeftCountRespond.getPayload().getInfo().getField();
                             System.out.println(tempField + "---编号");
-                            if (tag == 1){
+                            if (tag == 1) {
 
-                                if (letCount > 0){
-                                    showInputDialog("输入真实姓名","只有" + letCount + "次修改机会,请珍惜喵~");
-                                }else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this,"姓名修改次数已用完咯");
+                                if (letCount > 0) {
+                                    showInputDialog("输入真实姓名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
                                 }
 
-                            }else if (tag == 3){
-                                if (letCount > 0){
+                            } else if (tag == 3) {
+                                if (letCount > 0) {
                                     AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
                                             .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
                                             .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-                                                    intent.putExtra("activity_setting_school", 10);
-                                                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+
+                                                    //查看地理位置权限
+                                                    getLonLat();
+                                                    if (!addressAuthoritySuccess) { //无权限
+                                                        getAddressAuthority();
+                                                    }
+
+
                                                 }
                                             })
                                             .show();
-                                }else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this,"年级学校修改次数已用完咯");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
                                 }
                             }
 
@@ -610,7 +653,8 @@ public class ActivitySetting extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {}
+                    public void onSubscribe(Disposable d) {
+                    }
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
@@ -655,6 +699,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     EditText editText;
+
     //展示对话框
     private void showInputDialog(String title, String message) {
 
@@ -662,9 +707,9 @@ public class ActivitySetting extends BaseActivity {
         LinearLayout.LayoutParams etParam = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         etParam.setMargins(20, 0, 20, 0);
-        editText .setLayoutParams(etParam);
+        editText.setLayoutParams(etParam);
 
-        if (tag == 1){
+        if (tag == 1) {
             editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
             editText.setSingleLine();
             editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -673,19 +718,20 @@ public class ActivitySetting extends BaseActivity {
                     if (actionId == EditorInfo.IME_ACTION_SEND
                             || actionId == EditorInfo.IME_ACTION_DONE
                             || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
-                            && KeyEvent.ACTION_DOWN == event.getAction())){
+                            && KeyEvent.ACTION_DOWN == event.getAction())) {
                         System.out.println("回车键被点击");
                         return true;
                     }
                     return false;
                 }
             });
-        }else if (tag == 2){
+        } else if (tag == 2) {
             editText.setKeyListener(new DigitsKeyListener() {
                 @Override
                 public int getInputType() {
                     return InputType.TYPE_TEXT_VARIATION_PASSWORD;
                 }
+
                 @Override
                 protected char[] getAcceptedChars() {
                     char[] data = getResources().getString(R.string.login_only_can_input).toCharArray();
@@ -730,4 +776,59 @@ public class ActivitySetting extends BaseActivity {
                 });
         inputDialog.show();
     }
+
+    //获取地址位置权限
+    private void getAddressAuthority() {
+
+        AndPermission.with(ActivitySetting.this)
+                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_LOCATION)
+                .permission(Permission.LOCATION)
+                .callback(mPermissionListener)
+                .rationale(new RationaleListener() {
+                    @Override
+                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
+                        AndPermission.rationaleDialog(ActivitySetting.this, rationale).show();
+                    }
+                })
+                .start();
+        Log.i(TAG, "getAddressAuthority: 申请地理位置");
+    }
+
+    //获取当前经纬度
+    private void getLonLat() {
+
+        LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
+        String mProvider = judgeProvider(mLocationManager);
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Location mLocation = mLocationManager.getLastKnownLocation(mProvider);
+        if (mLocation != null) {
+
+            Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+            if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
+                addressAuthoritySuccess = true;
+                Intent intent = new Intent(ActivitySetting.this, ClassList.class);
+                intent.putExtra("activity_setting_school", 10);
+                startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+            }
+
+        }
+    }
+
+    //判断是否有可用的内容提供者
+    private String judgeProvider(LocationManager locationManager) {
+        List<String> prodiverlist = locationManager.getProviders(true);
+        if (prodiverlist.contains(LocationManager.NETWORK_PROVIDER)) {
+            return LocationManager.NETWORK_PROVIDER;
+        } else if (prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
+            return LocationManager.GPS_PROVIDER;
+        } else {
+            Toast.makeText(ActivitySetting.this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+        }
+        return null;
+    }
+
 }

@@ -639,6 +639,7 @@ public class ActivityMyInfo extends BaseActivity {
 
     //发送加好友的请求
     private void addFriend(int toUin) {
+
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
         addFreindMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));

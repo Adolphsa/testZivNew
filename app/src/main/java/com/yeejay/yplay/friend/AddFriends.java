@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -35,9 +36,9 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
-import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
@@ -109,6 +110,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.GONE);
 
+        positionList.clear();
         contactDredgeList.clear();
 
         if (contactRoot != null && contactRoot.isShown()) {
@@ -137,6 +139,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         schoolRoot.setVisibility(View.VISIBLE);
         maybeRoot.setVisibility(View.GONE);
 
+        positionList.clear();
         allSchoolMateList.clear();
 
         if (schoolRoot != null && schoolRoot.isShown()) {
@@ -164,6 +167,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.VISIBLE);
 
+        positionList.clear();
         maybeKnowList.clear();
 
         if (maybeRoot != null && maybeRoot.isShown()) {
@@ -190,6 +194,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     boolean numberBookAuthoritySuccess = false;
     ContactsInfoDao contactsInfoDao;
+    ContactsAdapter contactsAdapter;
+    SchoolmateAdapter schoolmateAdapter;
+    List<Integer> positionList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,11 +215,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
         }
 
-
         contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
         maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
-
 
         contactDredgeList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
@@ -220,6 +225,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         boyList = new ArrayList<>();
         girlList = new ArrayList<>();
         maybeKnowList = new ArrayList<>();
+        positionList = new ArrayList();
 
         initPullRefresh();
 
@@ -238,17 +244,19 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             @Override
             public void loadMore() {
                 //加载更多
+                mPageNum++;
+
                 if (mType == 1) {    //通讯录已开通
                     getRecommends(1, mPageNum);
-                } else if (mType == 3) {
+                } else if (mType == 3) {    //同校所有
                     getRecommends(3, mPageNum);
-                } else if (mType == 4) {
+                } else if (mType == 4) {    //同校同年级
                     getRecommends(4, mPageNum);
-                } else if (mType == 5) {
+                } else if (mType == 5) {    //同校男生
                     getRecommends(5, mPageNum);
-                } else if (mType == 6) {
+                } else if (mType == 6) {    //同校女生
                     getRecommends(6, mPageNum);
-                } else if (mType == 7) {
+                } else if (mType == 7) {    //共同好友
                     getRecommends(7, mPageNum);
                 }
             }
@@ -256,44 +264,45 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     }
 
-    //接受好友请求
-    private void accepeAddFreind(int msgId) {
-        Map<String, Object> accepeAddFreindMap = new HashMap<>();
-        accepeAddFreindMap.put("msgId", msgId);
-        accepeAddFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        accepeAddFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        accepeAddFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .acceptAddFriend(accepeAddFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("接受好友请求---" + baseRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("接受好友请求异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
+//    //接受好友请求
+//    private void accepeAddFreind(int msgId) {
+//        Map<String, Object> accepeAddFreindMap = new HashMap<>();
+//        accepeAddFreindMap.put("msgId", msgId);
+//        accepeAddFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+//        accepeAddFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        accepeAddFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .acceptAddFriend(accepeAddFreindMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull BaseRespond baseRespond) {
+//                        System.out.println("接受好友请求---" + baseRespond.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("接受好友请求异常---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
     //发送加好友的请求
-    private void addFriend(int toUin) {
+    private void addFriend(int toUin,int srcType) {
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
+        addFreindMap.put("srcType",srcType);
         addFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
@@ -325,74 +334,74 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     }
 
-    //删除好友
-    private void removeFriend(int toUin) {
+//    //删除好友
+//    private void removeFriend(int toUin) {
+//
+//        Map<String, Object> removeFreindMap = new HashMap<>();
+//        removeFreindMap.put("toUin", toUin);
+//        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+//        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .removeFriend(removeFreindMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull BaseRespond baseRespond) {
+//                        System.out.println("删除好友---" + baseRespond.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("删除好友异常---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("toUin", toUin);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("删除好友---" + baseRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("删除好友异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
-
-    //通过短信邀请好友
-    private void invitefriendsbysms(String friends) {
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("friends", friends);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("短信邀请好友---" + baseRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("短信邀请好友异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
+//    //通过短信邀请好友
+//    private void invitefriendsbysms(String friends) {
+//        Map<String, Object> removeFreindMap = new HashMap<>();
+//        removeFreindMap.put("friends", friends);
+//        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+//        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .removeFriend(removeFreindMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull BaseRespond baseRespond) {
+//                        System.out.println("短信邀请好友---" + baseRespond.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("短信邀请好友异常---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
     //拉取同校/通讯录好友
     private void getRecommends(int type, int pageNum) {
@@ -445,7 +454,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             }
 
                         }
-
                         pullToRefreshLayout.finishLoadMore();
                     }
 
@@ -481,15 +489,19 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //跳转到邀请好友界面 判断权限
-                getNumberBookAuthority();
+
+               getContacts();
+               if (!numberBookAuthoritySuccess){    //如果没有权限  就申请权限
+                   getNumberBookAuthority();
+               }
+
             }
         });
 
         if (friendsBeanList.size() > 0) {
-            mPageNum++;
+
             nullLl.setVisibility(View.GONE);
-            dredgeListView.setAdapter(new ContactsAdapter(AddFriends.this,
+            contactsAdapter = new ContactsAdapter(AddFriends.this,
                     new ContactsAdapter.hideCallback() {
                         @Override
                         public void hideClick(View v) {
@@ -505,7 +517,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                                 button.setEnabled(false);
 
                                 int position = (int) button.getTag();
-                                addFriend(friendsBeanList.get(position).getUin());
+                                positionList.add(position);
+                                addFriend(friendsBeanList.get(position).getUin(),mType);
                             } else {
                                 Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                             }
@@ -513,7 +526,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                         }
                     },
-                    friendsBeanList));
+                    friendsBeanList,positionList);
 
             dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -528,6 +541,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 }
 
             });
+
+            dredgeListView.setAdapter(contactsAdapter);
         }
     }
 
@@ -544,7 +559,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
 
         if (friendsBeanList.size() > 0) {
-            mPageNum++;
             arrowButton.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
@@ -577,6 +591,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 mType = 3;
                 mPageNum = 1;
 
+                positionList.clear();
                 allSchoolMateList.clear();
                 getRecommends(3, mPageNum);
             }
@@ -592,10 +607,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 boyButton.setImageResource(R.drawable.school_boy_unselect);
                 girlButton.setImageResource(R.drawable.school_girl_unselect);
 
-
                 mType = 4;
                 mPageNum = 1;
 
+                positionList.clear();
                 sameGradeList.clear();
                 getRecommends(4, mPageNum);
             }
@@ -612,6 +627,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                 mType = 5;
                 mPageNum = 1;
+                positionList.clear();
                 boyList.clear();
                 getRecommends(5, mPageNum);
             }
@@ -628,12 +644,13 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                 mType = 6;
                 mPageNum = 1;
+                positionList.clear();
                 girlList.clear();
                 getRecommends(6, mPageNum);
             }
         });
 
-        allSchoolmateListView.setAdapter(new SchoolmateAdapter(AddFriends.this,
+        schoolmateAdapter = new SchoolmateAdapter(AddFriends.this,
                 new SchoolmateAdapter.hideCallback() {
                     @Override
                     public void hideClick(View v) {
@@ -648,14 +665,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             button.setBackgroundResource(R.drawable.already_apply);
                             button.setEnabled(false);
                             int position = (int) button.getTag();
-                            addFriend(friendsBeanList.get(position).getUin());
+                            Log.i(TAG, "acceptClick: mType---" + mType);
+                            positionList.add(position);
+                            addFriend(friendsBeanList.get(position).getUin(),mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                friendsBeanList));
+                friendsBeanList,positionList);
 
         allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -670,6 +689,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             }
 
         });
+
+        allSchoolmateListView.setAdapter(schoolmateAdapter);
     }
 
 
@@ -680,7 +701,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         MesureListView lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
 
         if (friendsBeanList.size() > 0) {
-            mPageNum++;
             lmklLlNull.setVisibility(View.GONE);
         }
 
@@ -700,14 +720,15 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             button.setEnabled(false);
 
                             int position = (int) button.getTag();
-                            addFriend(friendsBeanList.get(position).getUin());
+                            positionList.add(position);
+                            addFriend(friendsBeanList.get(position).getUin(),mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                friendsBeanList));
+                friendsBeanList,positionList));
 
         lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -737,8 +758,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-                    }
+                    public void onSubscribe(Disposable d) {}
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
@@ -800,7 +820,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 ImageButton button = (ImageButton) v;
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     button.setImageResource(R.drawable.already_apply);
-                    addFriend(infoBean.getUin());
+                    addFriend(infoBean.getUin(),mType);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
@@ -839,6 +859,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     Log.i(TAG, "onSucceed: 通讯录权限成功");
                     getContacts();
+                    if (numberBookAuthoritySuccess){
+                        Log.i(TAG, "onSucceed: 通讯录有权限");
+                    }else {
+                        Log.i(TAG, "onSucceed: 通讯录无权限");
+                        AndPermission.defaultSettingDialog(AddFriends.this, 401).show();
+                    }
                     break;
             }
 
@@ -850,18 +876,17 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     Log.i(TAG, "onFailed: 通讯录权限失败");
                     getContacts();
-                    break;
-            }
+                    if (numberBookAuthoritySuccess){
+                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                    }else {
+                        if (AndPermission.hasAlwaysDeniedPermission(AddFriends.this, deniedPermissions)) {
+                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+                                AndPermission.defaultSettingDialog(AddFriends.this, 400).show();
+                            }
 
-            if (numberBookAuthoritySuccess){
-                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-            }else {
-                if (AndPermission.hasAlwaysDeniedPermission(AddFriends.this, deniedPermissions)) {
-                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
-                        AndPermission.defaultSettingDialog(AddFriends.this, 400).show();
+                        }
                     }
-
-                }
+                    break;
             }
         }
     };
@@ -879,15 +904,15 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
             System.out.println("contactUri---" + contactUri);
             if (contactUri != null) {
-                numberBookAuthoritySuccess = true;
+
                 Log.i(TAG, "getContacts: 通讯录权限申请成功");
 
             }
             Cursor cursor = getContentResolver().query(contactUri,
                     new String[]{"display_name", "sort_key", "contact_id", "data1"},
                     null, null, "sort_key");
-            String contactName;
-            String contactNumber;
+            String contactName = "";
+            String contactNumber = "";
             //String contactSortKey;
             //int contactId;
             while (cursor != null && cursor.moveToNext()) {
@@ -895,17 +920,22 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
                 com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
-                contactsInfoDao.insert(contactsInfo);
+                ContactsInfo tempContactsInfo = contactsInfoDao.queryBuilder()
+                        .where(ContactsInfoDao.Properties.Phone.eq(contactName))
+                        .build().unique();
+                if (tempContactsInfo == null){
+                    contactsInfoDao.insert(contactsInfo);
+                }
+
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
 
-            //开启服务上传通讯录
-//            startService(new Intent(AddFriends.this, ContactsService.class));
-
-            //跳转到邀请好友界面
-            Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
-            startActivity(intent);
-
+            if (!TextUtils.isEmpty(contactNumber)){
+                numberBookAuthoritySuccess = true;
+                //跳转到邀请好友界面
+                Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
+                startActivity(intent);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -913,6 +943,18 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 400:
+                if (!numberBookAuthoritySuccess){
+                    getContacts();
+                }
+                Log.i(TAG, "onActivityResult: numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                break;
+        }
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -921,7 +963,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             startActivity(new Intent(AddFriends.this, MainActivity.class));
             return true;//不执行父类点击事件
         }
-
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
 }

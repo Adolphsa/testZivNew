@@ -52,6 +52,7 @@ public class ActivityContacts extends BaseActivity {
 
     ContactsAdapter contactsAdapter;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> mDataList;
+    List<Integer> positionList;
     int mPageNum = 1;
 
     @Override
@@ -62,6 +63,7 @@ public class ActivityContacts extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContacts.this,true);
+        positionList = new ArrayList<>();
 
         layoutTitle.setText("通讯录好友");
         mDataList = new ArrayList<>();
@@ -83,12 +85,14 @@ public class ActivityContacts extends BaseActivity {
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
                 Button button = (Button)v;
+                int position = (int)v.getTag();
                 button.setBackgroundResource(R.drawable.feeds_status_apply);
                 button.setEnabled(false);
+                positionList.add(position);
                //邀请好友
                 addFriend(tempList.get((int) button.getTag()).getUin());
             }
-        },tempList);
+        },tempList,positionList);
         aafdListView.setAdapter(contactsAdapter);
     }
 
