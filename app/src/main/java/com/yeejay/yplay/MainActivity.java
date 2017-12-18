@@ -299,8 +299,16 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK)
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            Log.i(TAG, "onKeyDown: 返回键");
+//            moveTaskToBack(true);
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
             return true;//不执行父类点击事件
+        }
+
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
 
@@ -786,6 +794,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             }
         }
     }
+
     /*
     //拉取离线会话消息
     private void getOfflineMsgs(){
