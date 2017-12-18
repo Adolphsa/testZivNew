@@ -148,7 +148,7 @@ public class ActivitySetting extends BaseActivity {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 2;
-            showInputDialog("修改门牌号", "");
+            showInputDialog("修改用户名", "");
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
