@@ -78,6 +78,7 @@ import tangxiaolv.com.library.EffectiveShapeView;
 import static com.yeejay.yplay.R.layout.activity_setting;
 
 public class ActivitySetting extends BaseActivity {
+    private static final int INVALID_NUM = 100000;
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -148,7 +149,8 @@ public class ActivitySetting extends BaseActivity {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 2;
-            showInputDialog("修改用户名", "");
+            queryUserUpdateLeftCount(2);
+//            showInputDialog("修改用户名", "");
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
@@ -159,9 +161,11 @@ public class ActivitySetting extends BaseActivity {
     @OnClick(R.id.setting_gender)
     public void setSettingGender() {
         System.out.println("性别");
-        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-        intent.putExtra("activity_setting", 1);
-        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
+        tag = 4;
+        queryUserUpdateLeftCount(4);
+//        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+//        intent.putExtra("activity_setting", 1);
+//        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
     }
 
     //修改学校信息
@@ -595,14 +599,24 @@ public class ActivitySetting extends BaseActivity {
                             System.out.println(tempField + "---编号");
                             if (tag == 1) {
 
-                                if (letCount > 0) {
+                                if (letCount > 0 && letCount != INVALID_NUM) {
                                     showInputDialog("输入真实姓名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
                                 } else {
                                     DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
                                 }
 
+                            } else if (tag == 2) {
+                                if (letCount > 0 && letCount != INVALID_NUM) {
+                                    showInputDialog("修改用户名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                                }
                             } else if (tag == 3) {
-                                if (letCount > 0) {
+                                if (letCount > 0 && letCount != INVALID_NUM) {
                                     AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
                                             .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
                                             .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
@@ -619,8 +633,28 @@ public class ActivitySetting extends BaseActivity {
                                                 }
                                             })
                                             .show();
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
                                 } else {
                                     DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
+                                }
+                            } else if (tag == 4) {//gender modifer;
+                                if (letCount > 0 && letCount != INVALID_NUM) {
+                                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
+                                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
+                                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+                                                    intent.putExtra("activity_setting", 1);
+                                                    startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
+                                                }
+                                            })
+                                            .show();
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
                                 }
                             }
 
