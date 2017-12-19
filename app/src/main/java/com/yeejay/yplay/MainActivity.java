@@ -344,6 +344,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                             }
 
                         }
+
                     }
 
                     @Override

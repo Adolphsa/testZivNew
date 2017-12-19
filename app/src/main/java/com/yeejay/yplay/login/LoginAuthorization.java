@@ -1,6 +1,8 @@
 package com.yeejay.yplay.login;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -11,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,7 +48,7 @@ public class LoginAuthorization extends BaseActivity {
     Button mBtnGetNumberBookAuthority;
     boolean addressAuthoritySuccess = false;
     boolean numberBookAuthoritySuccess = false;
-    boolean isSuccess = false;
+    boolean locationServiceSuccess = false;
 
     Location mLocation;
 
@@ -59,12 +62,14 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     Log.i(TAG, "onSucceed: getLonlat");
                     getLonLat();
-                    if (addressAuthoritySuccess) {
-                        Log.i(TAG, "onSucceed: 地理位置有权限");
+                    if (locationServiceSuccess){
+                        if (addressAuthoritySuccess) {
+                            Log.i(TAG, "onSucceed: 地理位置有权限");
 
-                    } else {
-                        Log.i(TAG, "onSucceed: 地理位置无权限");
-                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                        } else {
+                            Log.i(TAG, "onSucceed: 地理位置无权限");
+                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                        }
                     }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
@@ -88,14 +93,16 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
-                    if (addressAuthoritySuccess) {
-                        Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-                    } else {
-                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+                    if (locationServiceSuccess){
+                        if (addressAuthoritySuccess) {
+                            Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
+                        } else {
+                            if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
 
-                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
+                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
 
 
+                            }
                         }
                     }
                     break;
@@ -137,6 +144,9 @@ public class LoginAuthorization extends BaseActivity {
                     getContacts();
                 }
                 System.out.println("回调numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                break;
+            case 402:
+                getLonLat();
                 break;
         }
         authorizationSuccess();
@@ -243,20 +253,54 @@ public class LoginAuthorization extends BaseActivity {
     private void getLonLat() {
 
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
-        String mProvider = judgeProvider(mLocationManager);
-        if (Build.VERSION.SDK_INT >= 23 &&
-                LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mLocation = mLocationManager.getLastKnownLocation(mProvider);
-        if (mLocation != null) {
-            System.out.println("地理位置权限申请成功2");
-            addressAuthoritySuccess = true;
+        // 判断GPS模块是否开启，如果没有则开启
+        if (mLocationManager == null || !mLocationManager
+                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(LoginAuthorization.this, "请开启位置服务",
+                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("请开启位置服务");
+            dialog.setPositiveButton("确定",
+                    new android.content.DialogInterface.OnClickListener() {
 
-            setLocationBackground();
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+                            arg0.dismiss();
+                            // 转到手机设置界面，用户设置GPS
+                            Intent intent = new Intent(
+                                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivityForResult(intent, 402); // 设置完成后返回到原来的界面
 
-            System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+                        }
+                    });
+            dialog.setNeutralButton("取消", new android.content.DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    arg0.dismiss();
+                }
+            } );
+            dialog.show();
+        }else {
+            String mProvider = judgeProvider(mLocationManager);
+            if (Build.VERSION.SDK_INT >= 23 &&
+                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            if (mProvider == null) {    //位置提供者为空
+                return;
+            }
+            locationServiceSuccess = true;
+            mLocation = mLocationManager.getLastKnownLocation(mProvider);
+            if (mLocation != null) {
+                System.out.println("地理位置权限申请成功2");
+                addressAuthoritySuccess = true;
+
+                setLocationBackground();
+
+                System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+            }
         }
     }
 
@@ -333,51 +377,6 @@ public class LoginAuthorization extends BaseActivity {
             startActivity(intent);
         }
     }
-
-//    //上传通讯录
-//    private void upLoadingContacts() {
-//
-//        Map<String, Object> contactsMap = new HashMap<>();
-//        String contactString = GsonUtil.GsonString(tempContactsList);
-//        String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
-//        contactsMap.put("data", encodedString);
-//        contactsMap.put("uin", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_UIN, 0));
-//        contactsMap.put("token", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        contactsMap.put("ver", SharePreferenceUtil.get(LoginAuthorization.this, YPlayConstant.YPLAY_VER, 0));
-//
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .updateContacts(contactsMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<BaseRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull BaseRespond baseRespond) {
-//
-//                        if (baseRespond.getCode() == 0) {
-//                            System.out.println("上传通讯录成功---" + baseRespond.toString());
-//                            isSuccess = true;
-//
-//                        } else {
-//                            System.out.println("上传通讯录失败---" + baseRespond.toString());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("上传通讯录失败---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
 
     //设置通讯录的背景
     private void setContactBackground() {

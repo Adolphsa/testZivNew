@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -244,6 +245,7 @@ public class ActivitySetting extends BaseActivity {
     private Uri tempUri;
     String dirStr;
     boolean addressAuthoritySuccess = false;
+    boolean locationServiceSuccess = false;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -261,12 +263,14 @@ public class ActivitySetting extends BaseActivity {
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     getLonLat();
-                    if (addressAuthoritySuccess) {
-                        Log.i(TAG, "onSucceed: 地理位置有权限");
+                    if (locationServiceSuccess){
+                        if (addressAuthoritySuccess) {
+                            Log.i(TAG, "onSucceed: 地理位置有权限");
 
-                    } else {
-                        Log.i(TAG, "onSucceed: 地理位置无权限");
-                        AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                        } else {
+                            Log.i(TAG, "onSucceed: 地理位置无权限");
+                            AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                        }
                     }
                     break;
             }
@@ -280,10 +284,12 @@ public class ActivitySetting extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
-                    if (addressAuthoritySuccess) {
-                        Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-                    } else {
-                        AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                    if (locationServiceSuccess){
+                        if (addressAuthoritySuccess) {
+                            Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
+                        } else {
+                            AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
+                        }
                     }
                     break;
             }
@@ -367,6 +373,8 @@ public class ActivitySetting extends BaseActivity {
                 getLonLat();
             }
 
+        }else if (requestCode == 402){
+            getLonLat();
         }
     }
 
@@ -798,23 +806,57 @@ public class ActivitySetting extends BaseActivity {
     private void getLonLat() {
 
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
-        String mProvider = judgeProvider(mLocationManager);
-        if (Build.VERSION.SDK_INT >= 23 &&
-                ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        Location mLocation = mLocationManager.getLastKnownLocation(mProvider);
-        if (mLocation != null) {
+        // 判断GPS模块是否开启，如果没有则开启
+        if (mLocationManager == null || !mLocationManager
+                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(ActivitySetting.this, "请开启位置服务",
+                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("请开启位置服务");
+            dialog.setPositiveButton("确定",
+                    new android.content.DialogInterface.OnClickListener() {
 
-            Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-            if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
-                addressAuthoritySuccess = true;
-                Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-                intent.putExtra("activity_setting_school", 10);
-                startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+                            arg0.dismiss();
+                            // 转到手机设置界面，用户设置GPS
+                            Intent intent = new Intent(
+                                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivityForResult(intent, 402); // 设置完成后返回到原来的界面
+
+                        }
+                    });
+            dialog.setNeutralButton("取消", new android.content.DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    arg0.dismiss();
+                }
+            } );
+            dialog.show();
+        }else {
+            String mProvider = judgeProvider(mLocationManager);
+            if (Build.VERSION.SDK_INT >= 23 &&
+                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
+            if (mProvider == null) {    //位置提供者为空
+                return;
+            }
+            locationServiceSuccess = true;
+            Location mLocation = mLocationManager.getLastKnownLocation(mProvider);
+            if (mLocation != null) {
 
+                Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+                if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
+                    addressAuthoritySuccess = true;
+                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
+                    intent.putExtra("activity_setting_school", 10);
+                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+                }
+
+            }
         }
     }
 

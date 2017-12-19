@@ -96,8 +96,6 @@ public class YplayApplication extends Application {
         db = mHelper.getWritableDatabase();
         mDaoMaster = new DaoMaster(db);
         mDaoSession = mDaoMaster.newSession();
-
-
     }
 
     public DaoSession getDaoSession() {
