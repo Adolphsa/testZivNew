@@ -88,4 +88,5 @@ dependencies {
     implementation files('libs/imsdk_msg_ext.jar')
     implementation files('libs/MiPush_SDK_Client_3_5_1.jar')
     implementation files('libs/imsdk_group_ext.jar')
+    implementation files('libs/BaiduLBS_Android.jar')
 }

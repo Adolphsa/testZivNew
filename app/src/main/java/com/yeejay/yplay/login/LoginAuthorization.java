@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -20,8 +21,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
@@ -35,6 +39,7 @@ import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LoginAuthorization extends BaseActivity {
@@ -49,8 +54,14 @@ public class LoginAuthorization extends BaseActivity {
     boolean addressAuthoritySuccess = false;
     boolean numberBookAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
+    boolean isFirstShowDialog = true;
+
+    public LocationClient mLocationClient = null;
+    private double latitude;
+    private double longitude;
 
     Location mLocation;
+    LocationManager mLocationManager;
 
     ContactsInfoDao contactsInfoDao;
 
@@ -100,8 +111,6 @@ public class LoginAuthorization extends BaseActivity {
                             if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
 
                                 AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-
-
                             }
                         }
                     }
@@ -125,7 +134,6 @@ public class LoginAuthorization extends BaseActivity {
 
         }
     };
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -159,7 +167,11 @@ public class LoginAuthorization extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_title_text_color));
 
-        System.out.println("LoginAuthorization  onCreate");
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
+        mLocationClient = new LocationClient(getApplicationContext());
+        //声明LocationClient类
+
+        //注册监听函数
 
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
@@ -187,33 +199,6 @@ public class LoginAuthorization extends BaseActivity {
                 getNumberBookAuthority();
             }
         });
-
-
-//        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.CONTACTS)) {
-//            System.out.println("通讯录有权限");
-//            setContactBackground();
-//        }
-//        getContacts();
-//        if (numberBookAuthoritySuccess) {
-//            setContactBackground();
-//        }
-//        if (AndPermission.hasPermission(LoginAuthorization.this, Permission.LOCATION)) {
-//            System.out.println("地理位置有权限");
-//            setLocationBackground();
-//        }
-//        getLonLat();
-//        if (addressAuthoritySuccess) {
-//            setLocationBackground();
-//        }
-//
-//        if (addressAuthoritySuccess && numberBookAuthoritySuccess) {
-//            Intent intent = new Intent(LoginAuthorization.this, ClassList.class);
-//            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, mLocation.getLatitude());
-//            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, mLocation.getLongitude());
-//            System.out.println("授权页面---latitude" + mLocation.getLatitude() +
-//                    "longitude" + mLocation.getLongitude());
-//            startActivity(intent);
-//        }
     }
 
     //获取地址位置权限
@@ -252,12 +237,61 @@ public class LoginAuthorization extends BaseActivity {
     //获取当前经纬度
     private void getLonLat() {
 
-        LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
+        Log.i(TAG, "getLonLat: mLocationManager---" + mLocationManager);
+        Log.i(TAG, "GPS是否打开 " + mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+        Log.i(TAG, "网络定位是否打开 " + mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+
         // 判断GPS模块是否开启，如果没有则开启
-        if (mLocationManager == null || !mLocationManager
-                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(LoginAuthorization.this, "请开启位置服务",
-                    Toast.LENGTH_SHORT).show();
+        if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
+                mLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+
+            isFirstShowDialog = true;
+
+            Log.i(TAG, "getLonLat: 位置服务已开启");
+            LocationClientOption option = new LocationClientOption();
+
+            option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+            option.setCoorType("bd09ll");
+            option.setScanSpan(1000);
+            option.setOpenGps(true);
+            option.setLocationNotify(true);
+            option.setIgnoreKillProcess(true);
+            option.SetIgnoreCacheException(false);
+            option.setWifiCacheTimeOut(5*60*1000);
+            option.setEnableSimulateGps(false);
+
+            mLocationClient.setLocOption(option);
+            mLocationClient.registerLocationListener(bdListener);
+            mLocationClient.start();
+
+//            String mProvider = judgeProvider(mLocationManager);
+//            if (Build.VERSION.SDK_INT >= 23 &&
+//                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+//                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                return;
+//            }
+//            if (mProvider == null) {    //位置提供者为空
+//                Log.i(TAG, "getLonLat: 位置提供者为空");
+//                return;
+//            }
+//
+//            locationServiceSuccess = true;
+//            Log.i(TAG, "getLonLat: locationServiceSuccess---" + locationServiceSuccess);
+//            mLocationManager.requestLocationUpdates(mProvider, 0, 0, locationListener);
+//            mLocation = mLocationManager.getLastKnownLocation(mProvider);
+//
+//            if (mLocation != null) {
+//                Log.i(TAG, "getLonLat: 地位位置已读到数据");
+//                addressAuthoritySuccess = true;
+//
+//                setLocationBackground();
+//
+//                System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+//            }else {
+//                Log.i(TAG, "getLonLat: mLocation ---" + mLocation);
+//            }
+
+        }else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage("请开启位置服务");
             dialog.setPositiveButton("确定",
@@ -281,40 +315,87 @@ public class LoginAuthorization extends BaseActivity {
                 }
             } );
             dialog.show();
-        }else {
-            String mProvider = judgeProvider(mLocationManager);
-            if (Build.VERSION.SDK_INT >= 23 &&
-                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            if (mProvider == null) {    //位置提供者为空
-                return;
-            }
-            locationServiceSuccess = true;
-            mLocation = mLocationManager.getLastKnownLocation(mProvider);
-            if (mLocation != null) {
-                System.out.println("地理位置权限申请成功2");
-                addressAuthoritySuccess = true;
-
-                setLocationBackground();
-
-                System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-            }
         }
     }
 
+//    LocationListener locationListener = new LocationListener() {
+//        @Override
+//        public void onLocationChanged(Location location) {
+//            Log.i(TAG, "onLocationChanged: lat---" + location.getLatitude() +
+//                    "lon---" + location.getLongitude());
+//            if (location.getLatitude() != 0 && location.getLongitude() != 0){
+//                addressAuthoritySuccess = true;
+//                mLocation = location;
+//                setLocationBackground();
+//            }
+//        }
+//
+//        @Override
+//        public void onStatusChanged(String provider, int status, Bundle extras) {
+//
+//        }
+//
+//        @Override
+//        public void onProviderEnabled(String provider) {
+//            Log.i(TAG, "onProviderEnabled: provider---" + provider);
+//        }
+//
+//        @Override
+//        public void onProviderDisabled(String provider) {
+//            Log.i(TAG, "onProviderDisabled: provider---" + provider);
+//        }
+//    };
+
+    BDAbstractLocationListener bdListener = new BDAbstractLocationListener() {
+        @Override
+        public void onReceiveLocation(BDLocation bdLocation) {
+            int errorCode = bdLocation.getLocType();
+            Log.i(TAG, "onReceiveLocation: errorCode---" + errorCode);
+            if (errorCode == 61 || errorCode == 161){
+                //获取纬度信息
+                latitude = bdLocation.getLatitude();
+                //获取经度信息
+                longitude = bdLocation.getLongitude();
+
+                Log.i(TAG, "onReceiveLocation: 百度地图---lat---" + latitude + ",lon---" + longitude);
+                addressAuthoritySuccess = true;
+                setLocationBackground();
+                authorizationSuccess();
+            }else if (errorCode == 62){
+                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, Arrays.asList(Permission.LOCATION))) {
+                    if (isFirstShowDialog){
+                        isFirstShowDialog = false;
+                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
+                    }
+                }
+            }
+
+
+        }
+    };
+
+
     //判断是否有可用的内容提供者
     private String judgeProvider(LocationManager locationManager) {
-        List<String> prodiverlist = locationManager.getProviders(true);
-        if (prodiverlist.contains(LocationManager.NETWORK_PROVIDER)) {
-            return LocationManager.NETWORK_PROVIDER;
-        } else if (prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
-            return LocationManager.GPS_PROVIDER;
-        } else {
-            Toast.makeText(LoginAuthorization.this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
-        }
-        return null;
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);//低精度，如果设置为高精度，依然获取不了location。
+        criteria.setAltitudeRequired(false);//不要求海拔
+        criteria.setBearingRequired(false);//不要求方位
+        criteria.setCostAllowed(true);//允许有花费
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+
+        return locationManager.getBestProvider(criteria,true);
+
+//        List<String> prodiverlist = locationManager.getProviders(true);
+//        if (prodiverlist.contains(LocationManager.NETWORK_PROVIDER)) {
+//            return LocationManager.NETWORK_PROVIDER;
+//        } else if (prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
+//            return LocationManager.GPS_PROVIDER;
+//        } else {
+//            Toast.makeText(LoginAuthorization.this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+//        }
+//        return null;
     }
 
     //获取通讯录联系人
@@ -367,8 +448,8 @@ public class LoginAuthorization extends BaseActivity {
         if ((addressAuthoritySuccess && numberBookAuthoritySuccess)) {
 
             Intent intent = new Intent(LoginAuthorization.this, ClassList.class);
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, mLocation.getLatitude());
-            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, mLocation.getLongitude());
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, latitude);
+            intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, longitude);
 
 //            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LATITUDE, String.valueOf(mLocation.getLatitude()));
 //            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LONGITUDE, String.valueOf(mLocation.getLongitude()));
@@ -402,4 +483,24 @@ public class LoginAuthorization extends BaseActivity {
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mLocationClient != null){
+            mLocationClient.unRegisterLocationListener(bdListener);
+            mLocationClient.stop();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
 }

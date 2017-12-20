@@ -43,6 +43,12 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
 
+        <!--百度key-->
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="xM1oHMw41RihfITRHYLCEkhEC1TPqmox" >
+        </meta-data>
+
         <!-- 华为APPID -->
         <meta-data
             android:name="com.huawei.hms.client.appid"
@@ -204,6 +210,11 @@
 
         <!-- <activity android:name=".friend.TestActivity"/> -->
 
+
+        <!--百度服务-->
+        <service android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote"/>
 
         <!-- IM消息相关 -->
         <!-- 【必须】消息收发service -->

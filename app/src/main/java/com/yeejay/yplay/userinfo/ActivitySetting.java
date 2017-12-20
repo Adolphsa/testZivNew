@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -246,6 +247,8 @@ public class ActivitySetting extends BaseActivity {
     String dirStr;
     boolean addressAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
+    LocationManager mLocationManager;
+    Location mLocation;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -304,6 +307,9 @@ public class ActivitySetting extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivitySetting.this, true);
+
+        //获得位置服务
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         layoutTitle.setText("资料详情");
 
@@ -805,12 +811,35 @@ public class ActivitySetting extends BaseActivity {
     //获取当前经纬度
     private void getLonLat() {
 
-        LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
+
         // 判断GPS模块是否开启，如果没有则开启
-        if (mLocationManager == null || !mLocationManager
-                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(ActivitySetting.this, "请开启位置服务",
-                    Toast.LENGTH_SHORT).show();
+        if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
+                mLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+
+            String mProvider = judgeProvider(mLocationManager);
+            if (Build.VERSION.SDK_INT >= 23 &&
+                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            if (mProvider == null) {    //位置提供者为空
+                return;
+            }
+            locationServiceSuccess = true;
+            mLocationManager.requestLocationUpdates(mProvider, 0, 0, locationListener);
+            mLocation = mLocationManager.getLastKnownLocation(mProvider);
+            if (mLocation != null) {
+
+                Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
+                if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
+                    addressAuthoritySuccess = true;
+                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
+                    intent.putExtra("activity_setting_school", 10);
+                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+                }
+
+            }
+        }else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage("请开启位置服务");
             dialog.setPositiveButton("确定",
@@ -834,31 +863,37 @@ public class ActivitySetting extends BaseActivity {
                 }
             } );
             dialog.show();
-        }else {
-            String mProvider = judgeProvider(mLocationManager);
-            if (Build.VERSION.SDK_INT >= 23 &&
-                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            if (mProvider == null) {    //位置提供者为空
-                return;
-            }
-            locationServiceSuccess = true;
-            Location mLocation = mLocationManager.getLastKnownLocation(mProvider);
-            if (mLocation != null) {
+        }
+    }
 
-                Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-                if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
-                    addressAuthoritySuccess = true;
-                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-                    intent.putExtra("activity_setting_school", 10);
-                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
-                }
+    LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.i(TAG, "onLocationChanged: lat---" + location.getLatitude() +
+                    "lon---" + location.getLongitude());
+            if (location.getLatitude() != 0 && location.getLongitude() != 0){
+                addressAuthoritySuccess = true;
+                mLocation = location;
 
             }
         }
-    }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.i(TAG, "onProviderEnabled: provider---" + provider);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.i(TAG, "onProviderDisabled: provider---" + provider);
+        }
+    };
+
 
     //判断是否有可用的内容提供者
     private String judgeProvider(LocationManager locationManager) {
@@ -873,4 +908,9 @@ public class ActivitySetting extends BaseActivity {
         return null;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLocationManager.removeUpdates(locationListener);
+    }
 }
