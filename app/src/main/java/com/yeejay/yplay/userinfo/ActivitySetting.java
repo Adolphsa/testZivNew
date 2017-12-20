@@ -3,6 +3,7 @@ package com.yeejay.yplay.userinfo;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,10 +25,13 @@ import android.text.TextUtils;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +48,8 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.CustomDialog;
+import com.yeejay.yplay.customview.CustomGenderDialog;
 import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
@@ -150,7 +156,8 @@ public class ActivitySetting extends BaseActivity {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 2;
-            showInputDialog("修改用户名", "");
+            queryUserUpdateLeftCount(2);
+//            showInputDialog("修改用户名", "");
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
@@ -161,9 +168,11 @@ public class ActivitySetting extends BaseActivity {
     @OnClick(R.id.setting_gender)
     public void setSettingGender() {
         System.out.println("性别");
-        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-        intent.putExtra("activity_setting", 1);
-        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
+        tag = 4;
+        queryUserUpdateLeftCount(4);
+//        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+//        intent.putExtra("activity_setting", 1);
+//        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
     }
 
     //修改学校信息
@@ -240,6 +249,10 @@ public class ActivitySetting extends BaseActivity {
     private static final int REQUEST_CODE_SCHOOL = 202;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
+    private static final int INVALID_NUM = 100000;
+    private static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
+    private static int GENDER_MALE = 1;
+    private static int GENDER_FEMALE = 2;
 
     private String imageName;
     private File tempFile;
@@ -337,6 +350,7 @@ public class ActivitySetting extends BaseActivity {
         settingNmae.setText(infoBean.getNickName());
         settingUserNmae.setText(infoBean.getUserName());
         settingGender.setText(infoBean.getGender() == 1 ? "男" : "女");
+        GENDER_VALUE = infoBean.getGender() == 1 ? GENDER_MALE : GENDER_FEMALE;
 
         settingSchoolName.setText(infoBean.getSchoolName());
         String grade = FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade());
@@ -609,14 +623,26 @@ public class ActivitySetting extends BaseActivity {
                             System.out.println(tempField + "---编号");
                             if (tag == 1) {
 
-                                if (letCount > 0) {
-                                    showInputDialog("输入真实姓名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                if (letCount > 0 && letCount != INVALID_NUM) {
+                                    //showInputDialog("输入真实姓名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                    showDialogTips(tag, letCount);
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
                                 } else {
                                     DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
                                 }
 
+                            } else if (tag == 2) {
+                                if (letCount > 0 && letCount != INVALID_NUM) {
+                                    //showInputDialog("修改用户名", "只有" + letCount + "次修改机会,请珍惜喵~");
+                                    showDialogTips(tag, letCount);
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                                }
                             } else if (tag == 3) {
-                                if (letCount > 0) {
+                                if (letCount > 0 && letCount != INVALID_NUM) {
                                     AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
                                             .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
                                             .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
@@ -633,8 +659,29 @@ public class ActivitySetting extends BaseActivity {
                                                 }
                                             })
                                             .show();
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
                                 } else {
                                     DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
+                                }
+                            } else if (tag == 4) {//gender modifer;
+                                if (letCount > 0 && letCount != INVALID_NUM) {
+//                                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
+//                                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
+//                                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which) {
+//                                                    Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
+//                                                    intent.putExtra("activity_setting", 1);
+//                                                    startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
+//                                                }
+//                                            })
+//                                            .show();
+                                    showDialogTips(tag, letCount);
+                                } else if (letCount == INVALID_NUM) {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
+                                } else {
+                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
                                 }
                             }
 
@@ -652,6 +699,222 @@ public class ActivitySetting extends BaseActivity {
                     }
                 });
 
+    }
+
+    private void showDialogTips(int tag, int letCount) {
+        LayoutInflater inflater=(LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        switch (tag) {
+            case 1 :
+                View userNameLayout = inflater.inflate(R.layout.dialog_content_username_layout, null);
+                TextView tips1 = (TextView) userNameLayout.findViewById(R.id.tips1);
+                tips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                        Integer.toString(letCount)));
+
+                final EditText userNameView = (EditText) userNameLayout.findViewById(R.id.username);
+                userNameView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
+                userNameView.setSingleLine();
+                userNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_SEND
+                                || actionId == EditorInfo.IME_ACTION_DONE
+                                || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
+                                && KeyEvent.ACTION_DOWN == event.getAction())) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                CustomDialog.Builder userBuilder = new CustomDialog.Builder(this);
+                userBuilder.setTitle(R.string.title_modify_name);
+                userBuilder.setContentView(userNameLayout);
+                userBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        //设置你的操作事项
+                        System.out.println("modify username" + userNameView.getText().toString().trim());
+                        updateHeaderImg(null, userNameView.getText().toString().trim(),
+                                0, null);
+                    }
+                });
+
+                userBuilder.setNegativeButton(getString(R.string.cancel),
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                userBuilder.create().show();
+
+                break;
+            case 2 :
+                View nickNameLayout = inflater.inflate(R.layout.dialog_content_nickname_layout, null);
+                TextView nickNameTips1 = (TextView) nickNameLayout.findViewById(R.id.tips1);
+                nickNameTips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                        Integer.toString(letCount)));
+
+                final EditText nickNameView = (EditText) nickNameLayout.findViewById(R.id.nickname);
+                nickNameView.setKeyListener(new DigitsKeyListener() {
+                    @Override
+                    public int getInputType() {
+                        return InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                    }
+
+                    @Override
+                    protected char[] getAcceptedChars() {
+                        char[] data = getResources().getString(R.string.login_only_can_input).toCharArray();
+                        return data;
+                    }
+                });
+                nickNameView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+
+                CustomDialog.Builder nickBuilder = new CustomDialog.Builder(this);
+                nickBuilder.setTitle(R.string.title_modify_nickname);
+                nickBuilder.setContentView(nickNameLayout);
+                nickBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        //设置你的操作事项
+                        System.out.println("modify nickname" + nickNameView.getText().toString().trim());
+                        updateHeaderImg(null, null, 0, nickNameView.getText().toString().trim());
+                    }
+                });
+
+                nickBuilder.setNegativeButton(getString(R.string.cancel),
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                nickBuilder.create().show();
+
+                break;
+            case 3 :
+
+                break;
+            case 4 :
+//                View GenderLayout = inflater.inflate(R.layout.dialog_content_gender_layout, null);
+//                TextView genderTips = (TextView) GenderLayout.findViewById(R.id.tips1);
+//                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+//                        Integer.toString(letCount)));
+//
+//
+//
+//                CustomDialog.Builder genderBuilder = new CustomDialog.Builder(this);
+//                genderBuilder.setContentView(GenderLayout);
+//                genderBuilder.create().show();
+                CustomGenderDialog.Builder  genderBuilder = new CustomGenderDialog.Builder(this);
+                final CustomGenderDialog genderDialog = genderBuilder.create();
+                final View genderContentView = genderBuilder.getContentView();
+                TextView genderTips = (TextView) genderContentView.findViewById(R.id.tips1);
+                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                        Integer.toString(letCount)));
+                ImageView cancelView = (ImageView) genderContentView.findViewById(R.id.cancel);
+                cancelView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        genderDialog.dismiss();
+                    }
+                });
+
+                ImageView girlView = (ImageView) genderContentView.findViewById(R.id.girl_icon);
+                ImageView boyView = (ImageView) genderContentView.findViewById(R.id.boy_icon);
+                if (GENDER_VALUE == 1) {
+                    girlView.setImageResource(R.drawable.girl_unselected);
+                    boyView.setImageResource(R.drawable.boy_selected);
+                } else if (GENDER_VALUE == 2) {
+                    girlView.setImageResource(R.drawable.girl_selected);
+                    boyView.setImageResource(R.drawable.boy_unselected);
+                }
+
+                girlView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (GENDER_VALUE == GENDER_MALE) {
+                            ((ImageView) genderContentView.findViewById(R.id.girl_icon)).setImageResource(R.drawable.girl_selected);
+                            ((ImageView) genderContentView.findViewById(R.id.boy_icon)).setImageResource(R.drawable.boy_unselected);
+                            settingGender.setText(R.string.female);
+                            choiceSex(GENDER_FEMALE);
+                            genderDialog.dismiss();
+                        }
+                    }
+                });
+
+                boyView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (GENDER_VALUE == GENDER_FEMALE) {
+                            ((ImageView) genderContentView.findViewById(R.id.girl_icon)).setImageResource(R.drawable.girl_unselected);
+                            ((ImageView) genderContentView.findViewById(R.id.boy_icon)).setImageResource(R.drawable.boy_selected);
+                            settingGender.setText(R.string.male);
+                            choiceSex(GENDER_MALE);
+                            genderDialog.dismiss();
+                        }
+                    }
+                });
+
+                genderDialog.show();
+
+                break;
+            default:
+        }
+    }
+
+    //选择性别
+    private void choiceSex(final int gender){
+
+        Map<String,Object> sexMap = new HashMap<>();
+        System.out.println("gender---" + gender);
+        sexMap.put("gender",gender);
+        sexMap.put("flag",1);
+        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN,0));
+        sexMap.put("token",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        sexMap.put("ver",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_VER,0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .choiceSex(sexMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        if (baseRespond.getCode() == 0){
+                            System.out.println("gender set successfully---" + baseRespond.toString());
+//                            if (isActivitySetting == 1){
+//                                Intent intent = new Intent();
+//                                String str = gender == 1 ? "男" : "女";
+//                                intent.putExtra("activity_setting_gender",str);
+//                               // ChoiceSex.this.setResult(201,intent);
+//                                //ChoiceSex.this.finish();
+//                            }else {
+//                                startActivity(new Intent(this,UserInfo.class));
+//                                //jumpToWhere();
+//                            }
+
+                        }else {
+                            System.out.println("gender set error---" + baseRespond.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("gender set exception---" + e.getMessage());
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     //退出登录
