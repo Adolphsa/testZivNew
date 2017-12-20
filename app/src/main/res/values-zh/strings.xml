@@ -1,0 +1,14 @@
+<resources>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="title_modify_name">修改姓名</string>
+    <string name="title_modify_nickname">修改用户名</string>
+    <string name="title_modify_gender">修改性别</string>
+    <string name="tips1_name_mofify_num">还有%1$s次修改机会</string>
+    <string name="hint_input_username">请输入姓名</string>
+    <string name="hint_input_nickname">请输入用户名</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="which_class">几年级啦?</string>
+    <string name="which_school">哪里上学呀?</string>
+</resources>
