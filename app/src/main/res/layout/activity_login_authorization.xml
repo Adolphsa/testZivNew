@@ -83,9 +83,9 @@
                 android:textColor="@color/feeds_hight_gray"
                 android:textSize="14sp"
                 android:text="我们尊重您的隐私。您的通讯录将用来寻找正在\n使用本产品的好友。您的地理位置，将用来定位\n离您最近的学校。"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="20dp"
                 android:layout_marginTop="20dp"
+                android:layout_gravity="bottom"
+                android:gravity="center"
                 />
         </LinearLayout>
     </RelativeLayout>

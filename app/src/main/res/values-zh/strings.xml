@@ -1,4 +1,40 @@
 <resources>
+
+    <string name="app_name">开浪</string>
+
+    <string name="login_only_can_input">qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM1234567890</string>
+
+    <!--LoadingActivity-->
+    <string name="need_permission">您需要开启权限,并重启应用</string>
+
+    <!--LoginAge-->
+    <string name="la_app_name">软件名</string>
+    <string name="la_privacy1">输入你的年龄，你自动同意为我们的</string>
+    <string name="la_privacy2">条款</string>
+    <string name="la_privacy3">和</string>
+    <string name="la_privacy4">隐私政策</string>
+    <string name="la_choice_age">选择你的年龄</string>
+    <string name="la_quick_start">快速进入</string>
+    <string name="la_age_invail">对不起，你的年龄未达到要求，谢谢配合检查~</string>
+    <string name="la_i_know">知道了~</string>
+
+    <!--Login-->
+    <string name="login_tv_phone_number">手机号</string>
+    <string name="login_et_phone_number">输入手机号</string>
+    <string name="login_auth_code">验证码</string>
+    <string name="login_edt_auth_code">输入验证码</string>
+    <string name="login_get_auth_code">发验证码</string>
+    <string name="login_next">快速进入</string>
+    <string name="laz_tv_authorization">权限开启</string>
+    <string name="laz_btn_get_address">获取地址位置</string>
+    <string name="laz_tv_tips1">帮助你找到你的学校</string>
+    <string name="laz_btn_get_address_book">获取通讯录</string>
+    <string name="laz_tv_tips2">为你推荐在APP内的好友</string>
+    <string name="cl_primary_header">现在读年级</string>
+
+    <!--Contribute-->
+    <string name="contribute_text1">投稿你的问题，让同校同学回答！ \n投稿审核通过后，将匿名展示投票内容～</string>
+
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
     <string name="title_modify_name">修改姓名</string>

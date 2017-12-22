@@ -107,7 +107,7 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
         int status = friendsBean.getStatus();
         String str = friendsBean.getRecommendDesc();
 
-        Log.i(TAG, "getView: status---" + status);
+//        Log.i(TAG, "getView: status---" + status);
 
         if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).into(holder.afItemHeaderImg);

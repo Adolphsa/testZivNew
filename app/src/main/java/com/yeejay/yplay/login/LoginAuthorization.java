@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
-import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +14,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -29,17 +28,15 @@ import com.baidu.location.LocationClientOption;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
-import com.yanzhenjie.permission.Rationale;
-import com.yanzhenjie.permission.RationaleListener;
+import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.base.BaseActivity;
-import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.service.ContactsService;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class LoginAuthorization extends BaseActivity {
@@ -55,14 +52,13 @@ public class LoginAuthorization extends BaseActivity {
     boolean numberBookAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
     boolean isFirstShowDialog = true;
+    boolean isGetLonLat = true;
 
     public LocationClient mLocationClient = null;
     private double latitude;
     private double longitude;
 
-    Location mLocation;
     LocationManager mLocationManager;
-
     ContactsInfoDao contactsInfoDao;
 
     PermissionListener mPermissionListener = new PermissionListener() {
@@ -73,15 +69,6 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     Log.i(TAG, "onSucceed: getLonlat");
                     getLonLat();
-                    if (locationServiceSuccess){
-                        if (addressAuthoritySuccess) {
-                            Log.i(TAG, "onSucceed: 地理位置有权限");
-
-                        } else {
-                            Log.i(TAG, "onSucceed: 地理位置无权限");
-                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                        }
-                    }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     getContacts();
@@ -89,7 +76,11 @@ public class LoginAuthorization extends BaseActivity {
                         Log.i(TAG, "onSucceed: 通讯录有权限");
                     } else {
                         Log.i(TAG, "onSucceed: 通讯录无权限");
-                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
+                        SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
+                        settingDialog.setTitle("开启通讯录权限");
+                        settingDialog.setMessage("方便您找到正在使用本产品的好友");
+                        settingDialog.show();
+
                     }
                     break;
             }
@@ -104,16 +95,6 @@ public class LoginAuthorization extends BaseActivity {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
-                    if (locationServiceSuccess){
-                        if (addressAuthoritySuccess) {
-                            Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-                        } else {
-                            if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-
-                                AndPermission.defaultSettingDialog(LoginAuthorization.this, 400).show();
-                            }
-                        }
-                    }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     System.out.println("回调失败的通讯录权限申请失败");
@@ -122,36 +103,23 @@ public class LoginAuthorization extends BaseActivity {
                         Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
                     } else {
                         if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-
-                            AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
-
+                            SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
+                            settingDialog.setTitle("开启通讯录权限");
+                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
+                            settingDialog.show();
                         }
                     }
                     break;
             }
-
             authorizationSuccess();
-
         }
     };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case 400: { // 这个400就是上面defineSettingDialog()的第二个参数。
-                // 你可以在这里检查你需要的权限是否被允许，并做相应的操作。
-                System.out.println("回调了");
-                if (!addressAuthoritySuccess) {
-                    getLonLat();
-                }
-                System.out.println("回调addressAuthoritySuccess---" + addressAuthoritySuccess);
-                break;
-            }
             case 401:
-                if (!numberBookAuthoritySuccess) {
-                    getContacts();
-                }
-                System.out.println("回调numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                getContacts();
                 break;
             case 402:
                 getLonLat();
@@ -165,13 +133,11 @@ public class LoginAuthorization extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_authorization);
 
+        Log.i(TAG, "onCreate: ");
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_title_text_color));
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
         mLocationClient = new LocationClient(getApplicationContext());
-        //声明LocationClient类
-
-        //注册监听函数
 
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
@@ -199,7 +165,9 @@ public class LoginAuthorization extends BaseActivity {
                 getNumberBookAuthority();
             }
         });
+
     }
+
 
     //获取地址位置权限
     private void getAddressAuthority() {
@@ -208,12 +176,6 @@ public class LoginAuthorization extends BaseActivity {
                 .requestCode(REQUEST_CODE_PERMISSION_SINGLE_LOCATION)
                 .permission(Permission.LOCATION)
                 .callback(mPermissionListener)
-                .rationale(new RationaleListener() {
-                    @Override
-                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-                        AndPermission.rationaleDialog(LoginAuthorization.this, rationale).show();
-                    }
-                })
                 .start();
         Log.i(TAG, "getAddressAuthority: 申请地理位置");
     }
@@ -225,17 +187,16 @@ public class LoginAuthorization extends BaseActivity {
                 .requestCode(REQUEST_CODE_PERMISSION_SINGLE_CONTACTS)
                 .permission(Permission.CONTACTS)
                 .callback(mPermissionListener)
-                .rationale(new RationaleListener() {
-                    @Override
-                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-                        AndPermission.rationaleDialog(LoginAuthorization.this, rationale).show();
-                    }
-                })
                 .start();
     }
 
     //获取当前经纬度
     private void getLonLat() {
+
+        if(addressAuthoritySuccess){
+            Log.i(TAG, "getLonLat: 已经成功过!! " + latitude + longitude);
+            return;
+        }
 
         Log.i(TAG, "getLonLat: mLocationManager---" + mLocationManager);
         Log.i(TAG, "GPS是否打开 " + mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
@@ -245,6 +206,7 @@ public class LoginAuthorization extends BaseActivity {
         if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
                 mLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
 
+            locationServiceSuccess = true;
             isFirstShowDialog = true;
 
             Log.i(TAG, "getLonLat: 位置服务已开启");
@@ -257,41 +219,14 @@ public class LoginAuthorization extends BaseActivity {
             option.setLocationNotify(true);
             option.setIgnoreKillProcess(true);
             option.SetIgnoreCacheException(false);
-            option.setWifiCacheTimeOut(5*60*1000);
+            option.setWifiCacheTimeOut(5 * 60 * 1000);
             option.setEnableSimulateGps(false);
 
             mLocationClient.setLocOption(option);
             mLocationClient.registerLocationListener(bdListener);
             mLocationClient.start();
 
-//            String mProvider = judgeProvider(mLocationManager);
-//            if (Build.VERSION.SDK_INT >= 23 &&
-//                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-//                    LoginAuthorization.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                return;
-//            }
-//            if (mProvider == null) {    //位置提供者为空
-//                Log.i(TAG, "getLonLat: 位置提供者为空");
-//                return;
-//            }
-//
-//            locationServiceSuccess = true;
-//            Log.i(TAG, "getLonLat: locationServiceSuccess---" + locationServiceSuccess);
-//            mLocationManager.requestLocationUpdates(mProvider, 0, 0, locationListener);
-//            mLocation = mLocationManager.getLastKnownLocation(mProvider);
-//
-//            if (mLocation != null) {
-//                Log.i(TAG, "getLonLat: 地位位置已读到数据");
-//                addressAuthoritySuccess = true;
-//
-//                setLocationBackground();
-//
-//                System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-//            }else {
-//                Log.i(TAG, "getLonLat: mLocation ---" + mLocation);
-//            }
-
-        }else {
+        } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage("请开启位置服务");
             dialog.setPositiveButton("确定",
@@ -313,93 +248,56 @@ public class LoginAuthorization extends BaseActivity {
                 public void onClick(DialogInterface arg0, int arg1) {
                     arg0.dismiss();
                 }
-            } );
+            });
             dialog.show();
         }
     }
-
-//    LocationListener locationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(Location location) {
-//            Log.i(TAG, "onLocationChanged: lat---" + location.getLatitude() +
-//                    "lon---" + location.getLongitude());
-//            if (location.getLatitude() != 0 && location.getLongitude() != 0){
-//                addressAuthoritySuccess = true;
-//                mLocation = location;
-//                setLocationBackground();
-//            }
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String provider, int status, Bundle extras) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String provider) {
-//            Log.i(TAG, "onProviderEnabled: provider---" + provider);
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String provider) {
-//            Log.i(TAG, "onProviderDisabled: provider---" + provider);
-//        }
-//    };
 
     BDAbstractLocationListener bdListener = new BDAbstractLocationListener() {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             int errorCode = bdLocation.getLocType();
             Log.i(TAG, "onReceiveLocation: errorCode---" + errorCode);
-            if (errorCode == 61 || errorCode == 161){
+            if (errorCode == 61 || errorCode == 161) {
+
                 //获取纬度信息
                 latitude = bdLocation.getLatitude();
                 //获取经度信息
                 longitude = bdLocation.getLongitude();
 
+                SharePreferenceUtil.put(LoginAuthorization.this,"temp_lat",(float)latitude);
+                SharePreferenceUtil.put(LoginAuthorization.this,"temp_lon",(float)longitude);
+                SharePreferenceUtil.put(LoginAuthorization.this,"temp_location",1);
+
                 Log.i(TAG, "onReceiveLocation: 百度地图---lat---" + latitude + ",lon---" + longitude);
                 addressAuthoritySuccess = true;
                 setLocationBackground();
-                authorizationSuccess();
-            }else if (errorCode == 62){
-                if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, Arrays.asList(Permission.LOCATION))) {
-                    if (isFirstShowDialog){
-                        isFirstShowDialog = false;
-                        AndPermission.defaultSettingDialog(LoginAuthorization.this, 401).show();
-                    }
+
+                if (isGetLonLat) {
+                    isGetLonLat = false;
+                    authorizationSuccess();
+                }
+            } else if (errorCode == 62) {
+                if (isFirstShowDialog) {
+                    Log.i(TAG, "onReceiveLocation: isFirstShowDialog---" + isFirstShowDialog);
+                    isFirstShowDialog = false;
+                    SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 402);
+                    settingDialog.setTitle("开启位置权限");
+                    settingDialog.setMessage("通过您的位置定位离您最近的学校");
+                    settingDialog.show();
+
                 }
             }
-
-
         }
     };
 
-
-    //判断是否有可用的内容提供者
-    private String judgeProvider(LocationManager locationManager) {
-
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_COARSE);//低精度，如果设置为高精度，依然获取不了location。
-        criteria.setAltitudeRequired(false);//不要求海拔
-        criteria.setBearingRequired(false);//不要求方位
-        criteria.setCostAllowed(true);//允许有花费
-        criteria.setPowerRequirement(Criteria.POWER_LOW);
-
-        return locationManager.getBestProvider(criteria,true);
-
-//        List<String> prodiverlist = locationManager.getProviders(true);
-//        if (prodiverlist.contains(LocationManager.NETWORK_PROVIDER)) {
-//            return LocationManager.NETWORK_PROVIDER;
-//        } else if (prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
-//            return LocationManager.GPS_PROVIDER;
-//        } else {
-//            Toast.makeText(LoginAuthorization.this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
-//        }
-//        return null;
-    }
-
     //获取通讯录联系人
     private void getContacts() {
+
+        if(numberBookAuthoritySuccess){
+            Log.i(TAG, "getContacts: numberBookAuthoritySuccess 已经成功过!!");
+            return;
+        }
 
         if (Build.VERSION.SDK_INT >= 23
                 && LoginAuthorization.this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
@@ -418,6 +316,14 @@ public class LoginAuthorization extends BaseActivity {
             String contactNumber;
             //String contactSortKey;
             //int contactId;
+
+            int counter = 0;
+
+            //如果有权限count就++
+            if (!TextUtils.isEmpty(contactUri.toString())){
+                counter++;
+            }
+
             while (cursor != null && cursor.moveToNext()) {
                 contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -425,16 +331,18 @@ public class LoginAuthorization extends BaseActivity {
                 //contactSortKey =getSortkey(cursor.getString(1));
                 com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, contactNumber);
                 contactsInfoDao.insert(contactsInfo);
+                counter += 1;
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
-            List<ContactsInfo> tempList = contactsInfoDao.loadAll();
-            if (tempList != null && tempList.size() > 0) {
-                numberBookAuthoritySuccess = true;
-                setContactBackground();
-            }
 
-            //开启服务上传通讯录
-            startService(new Intent(LoginAuthorization.this, ContactsService.class));
+            Log.i(TAG, "getContacts: 通讯录长度---" + counter);
+            if (counter > 0) {
+                setContactBackground();
+                numberBookAuthoritySuccess = true;
+                SharePreferenceUtil.put(LoginAuthorization.this,"temp_book",1);
+                //开启服务上传通讯录
+                startService(new Intent(LoginAuthorization.this, ContactsService.class));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -446,15 +354,9 @@ public class LoginAuthorization extends BaseActivity {
     //授权成功
     private void authorizationSuccess() {
         if ((addressAuthoritySuccess && numberBookAuthoritySuccess)) {
-
             Intent intent = new Intent(LoginAuthorization.this, ClassList.class);
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, latitude);
             intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, longitude);
-
-//            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LATITUDE, String.valueOf(mLocation.getLatitude()));
-//            SharePreferenceUtil.put(LoginAuthorization.this, YPlayConstant.YPLAY_LONGITUDE, String.valueOf(mLocation.getLongitude()));
-            //上传通讯录（后续，有风险。应该改为起一个服务，然后在服务中上传）
-
             startActivity(intent);
         }
     }
@@ -464,7 +366,6 @@ public class LoginAuthorization extends BaseActivity {
         Drawable nav_up = getResources().getDrawable(R.drawable.contacts_yes);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
         mBtnGetNumberBookAuthority.setCompoundDrawables(null, nav_up, null, null);
-        //mBtnGetNumberBookAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
         mBtnGetNumberBookAuthority.setEnabled(false);
     }
 
@@ -473,7 +374,6 @@ public class LoginAuthorization extends BaseActivity {
         Drawable nav_up = getResources().getDrawable(R.drawable.location_yes);
         nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
         mBtnGetAddressAuthority.setCompoundDrawables(null, nav_up, null, null);
-        //mBtnGetAddressAuthority.setTextColor(getResources().getColor(R.color.edit_text_color3));
         mBtnGetAddressAuthority.setEnabled(false);
     }
 
@@ -487,20 +387,46 @@ public class LoginAuthorization extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume: ");
+        float tempLat = (float)SharePreferenceUtil.get(LoginAuthorization.this,"temp_lat",0.0f);
+        float tempLon = (float)SharePreferenceUtil.get(LoginAuthorization.this,"temp_lon",0.0f);
+        int tempBook = (int)SharePreferenceUtil.get(LoginAuthorization.this,"temp_book",0);
+        int tempAddress = (int)SharePreferenceUtil.get(LoginAuthorization.this,"temp_location",0);
+
+        if (tempBook == 1){
+            setContactBackground();
+            numberBookAuthoritySuccess = true;
+        }
+
+        if (tempAddress == 1){
+            setLocationBackground();
+            latitude = tempLat;
+            longitude = tempLon;
+            addressAuthoritySuccess = true;
+        }
+
+        authorizationSuccess();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mLocationClient != null){
+        if (mLocationClient != null) {
             mLocationClient.unRegisterLocationListener(bdListener);
             mLocationClient.stop();
         }
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.i(TAG, "onNewIntent: ");
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy:");
     }
 
 }

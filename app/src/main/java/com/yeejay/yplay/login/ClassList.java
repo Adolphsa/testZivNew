@@ -1,17 +1,11 @@
 package com.yeejay.yplay.login;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
@@ -25,7 +19,6 @@ import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,6 +41,8 @@ public class ClassList extends BaseActivity {
         finish();
     }
 
+    private static final String TAG = "ClassList";
+
     ArrayList<String> primaryList;
 
     double mLatitude;
@@ -65,8 +60,6 @@ public class ClassList extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.class_color));
 
-        getLonLat();
-
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             isActivitySetting = bundle.getInt("activity_setting_school");
@@ -74,11 +67,10 @@ public class ClassList extends BaseActivity {
             if (isActivitySetting == 10){
                 clBack.setVisibility(View.VISIBLE);
             }
+            mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
+            mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
+            Log.i(TAG, "onCreate: lat---" + mLatitude + ",lon---" + mLongitude);
         }
-
-//        if (mLatitude == 0 || mLongitude == 0) {
-//            Toast.makeText(ClassList.this,"请打开位置权限",Toast.LENGTH_LONG).show();
-//        }
 
         mPrimaryListView = (MesureListView) findViewById(R.id.cl_grade_list);
 
@@ -234,48 +226,5 @@ public class ClassList extends BaseActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK)
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
-    }
-
-    // 5.0版本以上
-    private void setStatusBarUpperAPI21() {
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.TRANSPARENT);
-    }
-
-    String mProvider;//位置提供器
-    LocationManager mLocationManager;//位置服务
-    Location mLocation;
-
-
-    //获取当前经纬度
-    private void getLonLat(){
-
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
-        mProvider = judgeProvider(mLocationManager);
-        if (Build.VERSION.SDK_INT >= 23 &&
-                ClassList.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ClassList.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return  ;
-        }
-        mLocation = mLocationManager.getLastKnownLocation(mProvider);
-        if (mLocation != null){
-            System.out.println("当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-        }
-    }
-
-    //判断是否有可用的内容提供者
-    private String judgeProvider(LocationManager locationManager) {
-        List<String> prodiverlist = locationManager.getProviders(true);
-        if(prodiverlist.contains(LocationManager.NETWORK_PROVIDER)){
-            return LocationManager.NETWORK_PROVIDER;
-        }else if(prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
-            return LocationManager.GPS_PROVIDER;
-        }else{
-            System.out.println("没有可用的位置提供器");
-        }
-        return null;
     }
 }

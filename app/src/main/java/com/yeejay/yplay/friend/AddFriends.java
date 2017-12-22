@@ -78,12 +78,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
-
         if (isFromAddFriend){
             startActivity(new Intent(AddFriends.this, MainActivity.class));
+        }else {
+            finish();
         }
-
-        finish();
     }
 
     @OnClick(R.id.searchView)
@@ -245,6 +244,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             public void loadMore() {
                 //加载更多
                 mPageNum++;
+                Log.i(TAG, "loadMore: pageNum---" + mPageNum);
 
                 if (mType == 1) {    //通讯录已开通
                     getRecommends(1, mPageNum);
@@ -256,7 +256,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                     getRecommends(5, mPageNum);
                 } else if (mType == 6) {    //同校女生
                     getRecommends(6, mPageNum);
-                } else if (mType == 7) {    //共同好友
+                } else if (mType == 7) {    //可能认识的人
                     getRecommends(7, mPageNum);
                 }
             }
@@ -504,9 +504,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             contactsAdapter = new ContactsAdapter(AddFriends.this,
                     new ContactsAdapter.hideCallback() {
                         @Override
-                        public void hideClick(View v) {
-
-                        }
+                        public void hideClick(View v) {}
                     },
                     new ContactsAdapter.acceptCallback() {
                         @Override
@@ -703,6 +701,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         if (friendsBeanList.size() > 0) {
             lmklLlNull.setVisibility(View.GONE);
         }
+
+
 
         lmkListView.setAdapter(new SchoolmateAdapter(AddFriends.this,
                 new SchoolmateAdapter.hideCallback() {

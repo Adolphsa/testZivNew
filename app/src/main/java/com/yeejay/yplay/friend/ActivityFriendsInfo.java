@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -104,11 +103,6 @@ public class ActivityFriendsInfo extends BaseActivity {
             Toast.makeText(ActivityFriendsInfo.this,"网络异常",Toast.LENGTH_SHORT).show();
         }
 
-    }
-
-    @OnClick(R.id.lui_header_img)
-    public void test(View view) {
-        testToast();
     }
 
     @Override
@@ -427,18 +421,6 @@ public class ActivityFriendsInfo extends BaseActivity {
         dbHelper.deleteFriendInfo(friendInfo);
 
         finish();
-    }
-
-
-    private void testToast() {
-
-        Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP, 0, 0);
-        TextView view = new TextView(this);
-        view.setText("我是测试oast");
-        view.setBackgroundColor(getResources().getColor(R.color.feeds_title_color));
-        toast.setView(view);
-        toast.show();
     }
 
 }

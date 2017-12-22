@@ -490,13 +490,15 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         if (mPageNum == 1){
             dbHelper.deleteFriendInfoAll();
         }
-
+        Log.i(TAG, "getMyFriendsList: 493");
         Map<String, Object> myFriendsMap = new HashMap<>();
+
         myFriendsMap.put("pageNum", mPageNum);
         myFriendsMap.put("pageSize", mPageSize);
         myFriendsMap.put("uin", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, 0));
         myFriendsMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myFriendsMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
+        Log.i(TAG, "getMyFriendsList: 501");
         YPlayApiManger.getInstance().getZivApiService()
                 .getMyFriendsList(myFriendsMap)
                 .subscribeOn(Schedulers.io())
@@ -549,6 +551,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
                     @Override
                     public void onComplete() {
+                        Log.i(TAG, "onComplete: 554");
                     }
                 });
     }

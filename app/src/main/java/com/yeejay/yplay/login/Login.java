@@ -3,7 +3,6 @@ package com.yeejay.yplay.login;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -18,7 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tencent.wns.client.inte.WnsService;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
@@ -31,15 +29,10 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ContactsInfo;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
-import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +116,12 @@ public class Login extends BaseActivity {
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
+
+        //删掉权限页面临时保存的数据
+        SharePreferenceUtil.remove(Login.this,"temp_lat");
+        SharePreferenceUtil.remove(Login.this,"temp_lon");
+        SharePreferenceUtil.remove(Login.this,"temp_book");
+        SharePreferenceUtil.remove(Login.this,"temp_location");
 
         mContactsList = new ArrayList<>();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
@@ -218,10 +217,7 @@ public class Login extends BaseActivity {
                 if (NetWorkUtil.isNetWorkAvailable(Login.this)) {
                     long uuid = (long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0);
                     Log.i(TAG, "onClick: uuid---" + uuid);
-//                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid);
-
-                    new WnsTask().execute();
-
+                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid);
                 } else {
                     Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
@@ -342,7 +338,6 @@ public class Login extends BaseActivity {
 
     }
 
-
     //插入uin到数据库
     private void insertUin(LoginRespond.PayloadBean payloadBean) {
 
@@ -354,6 +349,66 @@ public class Login extends BaseActivity {
             myInfoDao.insert(insert);
             System.out.println("插入数据库");
         }
+    }
+
+
+    //登录
+    private void login(final String phoneNumber, String code, long uuid) {
+        YPlayApiManger.getInstance().getZivApiService()
+                .login(phoneNumber, code, uuid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<LoginRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+                    @Override
+                    public void onNext(@NonNull LoginRespond loginRespond) {
+                        System.out.println("登录返回---" + loginRespond.toString());
+                        if (loginRespond.getCode() == 0) {
+                            int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
+                            uin = loginRespond.getPayload().getUin();
+                            ver = loginRespond.getPayload().getVer();
+                            token = loginRespond.getPayload().getToken();
+                            if (hasCheckInviteCode == 0) { //0表示邀请码验证未通过
+                                Intent intent = new Intent(Login.this, ActivityInviteCode.class);
+                                intent.putExtra("phone_number", phoneNumber);
+                                intent.putExtra("uin", uin);
+                                intent.putExtra("ver", ver);
+                                intent.putExtra("token", token);
+                                intent.putExtra("nick_name", loginRespond.getPayload().getInfo().getUserName());
+                                startActivity(intent);
+                                return;
+                            }
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
+                            insertUin(loginRespond.getPayload());
+                            if (loginRespond.getPayload().getIsNewUser() == 1) {
+                                startActivity(new Intent(Login.this, LoginAge.class));
+                            } else {
+                                //逻辑跳转
+                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
+                                        loginRespond.getPayload().getInfo().getGrade(),
+                                        loginRespond.getPayload().getInfo().getSchoolId(),
+                                        loginRespond.getPayload().getInfo().getGender(),
+                                        loginRespond.getPayload().getInfo().getNickName()
+                                );
+                                //startActivity(new Intent(Login.this, LoginAge.class));
+                            }
+                        } else {
+                            Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("登录返回错误---" + e.getMessage());
+                    }
+                    @Override
+                    public void onComplete() {
+                    }
+                });
     }
 
 
@@ -411,135 +466,4 @@ public class Login extends BaseActivity {
         super.onDestroy();
         countDownTimer.cancel();
     }
-
-    WnsService wnsService = YplayApplication.getWnsInstance();
-
-    private String sendHttpUrlConnReq(String url,String phoneNumber, String code, long uuid){
-
-        String result = "";
-
-        try{
-            //1.构造URL，底层网络走wns通道,使用起来和URL是一样的。
-            URL u = wnsService.getWnsHttpUrl(url);                   //需要在控制台上配置url对应域名的路由
-            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-            conn.addRequestProperty("User-Agent", "");
-            conn.addRequestProperty("Content-Type","application/x-www-form-urlencoded");
-
-            //[两个超时总和的请求，建议60秒
-            conn.setConnectTimeout(30*1000);
-            conn.setReadTimeout(30*1000);
-
-            //如果是post方法，需要设置一下post参数,
-            conn.setDoOutput(true);
-            StringBuilder outStr = new StringBuilder("phone=");
-            outStr.append(phoneNumber);
-            outStr.append("&");
-            outStr.append("code=");
-            outStr.append(code);
-            outStr.append("&");
-            outStr.append("uuid=");
-            outStr.append(uuid);
-            Log.i(TAG, "sendHttpUrlConnReq: outStr---" + outStr.toString());
-            conn.getOutputStream().write(outStr.toString().getBytes());
-
-            //获取页面内容
-            int rspcode = conn.getResponseCode();
-            Log.d(TAG, "rspcode = " + rspcode);
-            if (HttpURLConnection.HTTP_OK == rspcode)
-            {
-                InputStream in = conn.getInputStream();
-                if (in == null)
-                {
-                    return null;
-                }
-                byte[] buff = new byte[1024];
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                int len = -1;
-                while ((len = in.read(buff)) != -1)
-                {
-                    out.write(buff, 0, len);
-                }
-                in.close();
-                String content = out.toString().trim();
-                Log.i(TAG, "sendHttpUrlConnReq: content---" + content);
-                return content;
-            }
-
-        }catch (Exception e){
-            Log.i(TAG, "sendHttpUrlConnReq: 异常e---" + e.getMessage());
-        }
-
-        return result;
-    }
-
-
-    class WnsTask extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            //执行异步任务
-            long uuid = (long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0);
-            return sendHttpUrlConnReq("http://yplay.vivacampus.com/api/account/login2",
-                    mEdtPhoneNumber.getText().toString(),
-                    mEdtAuthCode.getText().toString(),
-                    uuid);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            //更新UI,显示结果
-            Log.i(TAG, "onPostExecute: result---" + result);
-            handleLoginRespond(result);
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            //更新进度信息
-        }
-    }
-
-    //处理登录返回
-    private void handleLoginRespond(String result){
-        LoginRespond loginRespond = GsonUtil.GsonToBean(result,LoginRespond.class);
-        if (loginRespond.getCode() == 0) {
-
-            int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
-            uin = loginRespond.getPayload().getUin();
-            ver = loginRespond.getPayload().getVer();
-            token = loginRespond.getPayload().getToken();
-
-            if (hasCheckInviteCode == 0) { //0表示邀请码验证未通过
-                Intent intent = new Intent(Login.this, ActivityInviteCode.class);
-                intent.putExtra("phone_number", mEdtPhoneNumber.getText().toString());
-                intent.putExtra("uin", uin);
-                intent.putExtra("ver", ver);
-                intent.putExtra("token", token);
-                intent.putExtra("nick_name", loginRespond.getPayload().getInfo().getUserName());
-                startActivity(intent);
-                return;
-            }
-
-            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
-            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
-            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
-            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
-            insertUin(loginRespond.getPayload());
-
-            if (loginRespond.getPayload().getIsNewUser() == 1) {
-                startActivity(new Intent(Login.this, LoginAge.class));
-            } else {
-                //逻辑跳转
-                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
-                        loginRespond.getPayload().getInfo().getGrade(),
-                        loginRespond.getPayload().getInfo().getSchoolId(),
-                        loginRespond.getPayload().getInfo().getGender(),
-                        loginRespond.getPayload().getInfo().getNickName()
-                );
-                //startActivity(new Intent(Login.this, LoginAge.class));
-            }
-        } else {
-            Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();
-        }
-    }
-
 }

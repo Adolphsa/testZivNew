@@ -105,6 +105,7 @@ public class FragmentAnswer extends BaseFragment {
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
     int colorCount = 7;
+    boolean isFreeze;
 
     int backgroundColor[] = {R.color.play_color7,
             R.color.play_color2,
@@ -460,6 +461,10 @@ public class FragmentAnswer extends BaseFragment {
                 frandProgress.setVisibility(View.INVISIBLE);
             }
             setFriendCount();
+
+            if (isFreeze){  //如果是冷却状态就去拉一把问题
+                getQuestion();
+            }
         }
     }
 
@@ -511,6 +516,8 @@ public class FragmentAnswer extends BaseFragment {
     //点击继续15次
     private void questionOut15() {
 
+        isFreeze = true;
+
         //修改背景颜色
         changeColor(R.color.play_color2);
 
@@ -534,6 +541,9 @@ public class FragmentAnswer extends BaseFragment {
 
     //解除冷冻
     private void relieve() {
+
+        isFreeze = false;
+
         questionNum = 1;
         getQuestion();
 
@@ -584,9 +594,17 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull QuestionRespond questionRespond) {
 //                        System.out.println("问题列表---" + questionListRespond.toString());
+                        Log.i(TAG, "onNext: 拉取问题---" + questionRespond.toString());
                         if (questionRespond.getCode() == 0) {
+
                             QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
                             if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
+                                Log.i(TAG, "onNext: 正常状态");
+                                if (isFreeze){
+                                    isFreeze = false;
+                                    relieve();
+                                }
+
                                 //非冷冻状态
                                 questionBean = questionRespond.getPayload().getQuestion();
                                 List<QuestionRespond.PayloadBean.OptionsBean> optionsList = questionRespond.getPayload().getOptions();
@@ -600,13 +618,13 @@ public class FragmentAnswer extends BaseFragment {
                                 voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
                                 voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
 
-
                                 if (questionBean != null) {
                                     nextQuestionUpdate();
                                 }
 
-
                             } else if (payloadBean != null && payloadBean.getFreezeStatus() == 1) {
+                                Log.i(TAG, "onNext: 冷冻状态");
+
                                 //冷冻状态
                                 getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
                                 //进入冷冻的时间点
@@ -788,7 +806,7 @@ public class FragmentAnswer extends BaseFragment {
     public void setFriendCount() {
 
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
-        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+        int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
         if (myInfo != null) {

@@ -2,6 +2,7 @@ package com.yeejay.yplay.answer;
 
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -52,6 +53,8 @@ public class ActivityInviteFriend extends BaseActivity {
     ImageButton aifTipClose;
     @BindView(R.id.aif_tip_ll)
     LinearLayout aifTipLl;
+
+    private static final String TAG = "ActivityInviteFriend";
 
     WaitInviteAdapter waitInviteAdapter;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> mDataList;
@@ -126,7 +129,9 @@ public class ActivityInviteFriend extends BaseActivity {
 
                 String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
                 System.out.println("邀请的电话---" + phone);
-                String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
+                String phoneStr = "[" + phone + "]";
+                String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
+                Log.i(TAG, "acceptClick: base64phone---" + base64phone);
                 invitefriendsbysms(base64phone);
             }
         }, tempList);
@@ -196,13 +201,14 @@ public class ActivityInviteFriend extends BaseActivity {
 
     //通过短信邀请好友
     private void invitefriendsbysms(String friends) {
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("friends", friends);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_VER, 0));
+        Log.i(TAG, "invitefriendsbysms: friends---" + friends);
+        Map<String, Object> invitefriendsMap = new HashMap<>();
+        invitefriendsMap.put("friends", friends);
+        invitefriendsMap.put("uin", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, 0));
+        invitefriendsMap.put("token", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        invitefriendsMap.put("ver", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
+                .smsInviteFriends(invitefriendsMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<BaseRespond>() {

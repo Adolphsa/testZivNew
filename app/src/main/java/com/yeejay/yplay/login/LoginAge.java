@@ -106,7 +106,7 @@ public class LoginAge extends BaseActivity {
                 if (Integer.parseInt(mAge.trim()) < 12) {
                     //年龄未达到要求
                     showNormalDialog();
-                } else if (Integer.parseInt(mAge.trim()) >= 12 && Integer.parseInt(mAge.trim()) < 24) {
+                } else if (Integer.parseInt(mAge.trim()) >= 12 && Integer.parseInt(mAge.trim()) < 25) {
                     //允许进入
                     settingAge(Integer.parseInt(mAge.trim()));
 

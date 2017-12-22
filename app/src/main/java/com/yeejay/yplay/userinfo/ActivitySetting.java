@@ -3,14 +3,11 @@ package com.yeejay.yplay.userinfo;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -36,6 +33,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMManager;
@@ -44,13 +45,13 @@ import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
+import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CustomDialog;
 import com.yeejay.yplay.customview.CustomGenderDialog;
-import com.yeejay.yplay.login.ChoiceSex;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
 import com.yeejay.yplay.model.BaseRespond;
@@ -261,7 +262,10 @@ public class ActivitySetting extends BaseActivity {
     boolean addressAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
     LocationManager mLocationManager;
-    Location mLocation;
+
+    public LocationClient mLocationClient = null;
+    boolean isFirstShowDialog = true;
+    boolean isGetLonLat = true;
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -279,15 +283,6 @@ public class ActivitySetting extends BaseActivity {
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     getLonLat();
-                    if (locationServiceSuccess){
-                        if (addressAuthoritySuccess) {
-                            Log.i(TAG, "onSucceed: 地理位置有权限");
-
-                        } else {
-                            Log.i(TAG, "onSucceed: 地理位置无权限");
-                            AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
-                        }
-                    }
                     break;
             }
 
@@ -295,18 +290,11 @@ public class ActivitySetting extends BaseActivity {
 
         @Override
         public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
-            System.out.println("相册权限申请失败");
+
             switch (requestCode) {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
                     System.out.println("回调失败的地理位置权限申请失败");
                     getLonLat();
-                    if (locationServiceSuccess){
-                        if (addressAuthoritySuccess) {
-                            Log.i(TAG, "onFailed: 读到地理位置权限了addressAuthoritySuccess---" + addressAuthoritySuccess);
-                        } else {
-                            AndPermission.defaultSettingDialog(ActivitySetting.this, 400).show();
-                        }
-                    }
                     break;
             }
         }
@@ -323,6 +311,7 @@ public class ActivitySetting extends BaseActivity {
 
         //获得位置服务
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mLocationClient = new LocationClient(getApplicationContext());
 
         layoutTitle.setText("资料详情");
 
@@ -387,13 +376,10 @@ public class ActivitySetting extends BaseActivity {
             }
         } else if (requestCode == REQUEST_CODE_SCHOOL) {
             getMyInfo();
-        }else if (requestCode == 400){
+        } else if (requestCode == 400) {
             Log.i(TAG, "onActivityResult: requestCode == 400");
-            if (!addressAuthoritySuccess) {
-                getLonLat();
-            }
-
-        }else if (requestCode == 402){
+            getLonLat();
+        } else if (requestCode == 402) {
             getLonLat();
         }
     }
@@ -650,11 +636,13 @@ public class ActivitySetting extends BaseActivity {
                                                 public void onClick(DialogInterface dialog, int which) {
 
                                                     //查看地理位置权限
-                                                    getLonLat();
-                                                    if (!addressAuthoritySuccess) { //无权限
-                                                        getAddressAuthority();
-                                                    }
-
+//                                                    getLonLat();
+//                                                    if (!addressAuthoritySuccess) { //无权限
+//
+//                                                    }
+                                                    isGetLonLat = true;
+                                                    isFirstShowDialog = true;
+                                                    getAddressAuthority();
 
                                                 }
                                             })
@@ -702,9 +690,9 @@ public class ActivitySetting extends BaseActivity {
     }
 
     private void showDialogTips(int tag, int letCount) {
-        LayoutInflater inflater=(LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch (tag) {
-            case 1 :
+            case 1:
                 View userNameLayout = inflater.inflate(R.layout.dialog_content_username_layout, null);
                 TextView tips1 = (TextView) userNameLayout.findViewById(R.id.tips1);
                 tips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -749,7 +737,7 @@ public class ActivitySetting extends BaseActivity {
                 userBuilder.create().show();
 
                 break;
-            case 2 :
+            case 2:
                 View nickNameLayout = inflater.inflate(R.layout.dialog_content_nickname_layout, null);
                 TextView nickNameTips1 = (TextView) nickNameLayout.findViewById(R.id.tips1);
                 nickNameTips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -792,10 +780,10 @@ public class ActivitySetting extends BaseActivity {
                 nickBuilder.create().show();
 
                 break;
-            case 3 :
+            case 3:
 
                 break;
-            case 4 :
+            case 4:
 //                View GenderLayout = inflater.inflate(R.layout.dialog_content_gender_layout, null);
 //                TextView genderTips = (TextView) GenderLayout.findViewById(R.id.tips1);
 //                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -806,7 +794,7 @@ public class ActivitySetting extends BaseActivity {
 //                CustomDialog.Builder genderBuilder = new CustomDialog.Builder(this);
 //                genderBuilder.setContentView(GenderLayout);
 //                genderBuilder.create().show();
-                CustomGenderDialog.Builder  genderBuilder = new CustomGenderDialog.Builder(this);
+                CustomGenderDialog.Builder genderBuilder = new CustomGenderDialog.Builder(this);
                 final CustomGenderDialog genderDialog = genderBuilder.create();
                 final View genderContentView = genderBuilder.getContentView();
                 TextView genderTips = (TextView) genderContentView.findViewById(R.id.tips1);
@@ -864,15 +852,15 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //选择性别
-    private void choiceSex(final int gender){
+    private void choiceSex(final int gender) {
 
-        Map<String,Object> sexMap = new HashMap<>();
+        Map<String, Object> sexMap = new HashMap<>();
         System.out.println("gender---" + gender);
-        sexMap.put("gender",gender);
-        sexMap.put("flag",1);
-        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN,0));
-        sexMap.put("token",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_TOKEN,"yplay"));
-        sexMap.put("ver",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_VER,0));
+        sexMap.put("gender", gender);
+        sexMap.put("flag", 1);
+        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN, 0));
+        sexMap.put("token", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        sexMap.put("ver", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .choiceSex(sexMap)
@@ -886,7 +874,7 @@ public class ActivitySetting extends BaseActivity {
 
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0){
+                        if (baseRespond.getCode() == 0) {
                             System.out.println("gender set successfully---" + baseRespond.toString());
 //                            if (isActivitySetting == 1){
 //                                Intent intent = new Intent();
@@ -899,7 +887,7 @@ public class ActivitySetting extends BaseActivity {
 //                                //jumpToWhere();
 //                            }
 
-                        }else {
+                        } else {
                             System.out.println("gender set error---" + baseRespond.toString());
                         }
                     }
@@ -1061,12 +1049,6 @@ public class ActivitySetting extends BaseActivity {
                 .requestCode(REQUEST_CODE_PERMISSION_SINGLE_LOCATION)
                 .permission(Permission.LOCATION)
                 .callback(mPermissionListener)
-                .rationale(new RationaleListener() {
-                    @Override
-                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-                        AndPermission.rationaleDialog(ActivitySetting.this, rationale).show();
-                    }
-                })
                 .start();
         Log.i(TAG, "getAddressAuthority: 申请地理位置");
     }
@@ -1074,35 +1056,30 @@ public class ActivitySetting extends BaseActivity {
     //获取当前经纬度
     private void getLonLat() {
 
-
         // 判断GPS模块是否开启，如果没有则开启
         if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
                 mLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
 
-            String mProvider = judgeProvider(mLocationManager);
-            if (Build.VERSION.SDK_INT >= 23 &&
-                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivitySetting.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            if (mProvider == null) {    //位置提供者为空
-                return;
-            }
             locationServiceSuccess = true;
-            mLocationManager.requestLocationUpdates(mProvider, 0, 0, locationListener);
-            mLocation = mLocationManager.getLastKnownLocation(mProvider);
-            if (mLocation != null) {
+            isFirstShowDialog = true;
 
-                Log.i(TAG, "getLonLat: 当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-                if (mLocation.getLatitude() != 0 && mLocation.getLongitude() != 0){
-                    addressAuthoritySuccess = true;
-                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
-                    intent.putExtra("activity_setting_school", 10);
-                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
-                }
+            Log.i(TAG, "getLonLat: 位置服务已开启");
+            LocationClientOption option = new LocationClientOption();
 
-            }
-        }else {
+            option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+            option.setCoorType("bd09ll");
+            option.setScanSpan(1000);
+            option.setOpenGps(true);
+            option.setLocationNotify(true);
+            option.setIgnoreKillProcess(true);
+            option.SetIgnoreCacheException(false);
+            option.setWifiCacheTimeOut(5 * 60 * 1000);
+            option.setEnableSimulateGps(false);
+
+            mLocationClient.setLocOption(option);
+            mLocationClient.registerLocationListener(bdListener);
+            mLocationClient.start();
+        } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage("请开启位置服务");
             dialog.setPositiveButton("确定",
@@ -1124,56 +1101,59 @@ public class ActivitySetting extends BaseActivity {
                 public void onClick(DialogInterface arg0, int arg1) {
                     arg0.dismiss();
                 }
-            } );
+            });
             dialog.show();
         }
     }
 
-    LocationListener locationListener = new LocationListener() {
+    BDAbstractLocationListener bdListener = new BDAbstractLocationListener() {
         @Override
-        public void onLocationChanged(Location location) {
-            Log.i(TAG, "onLocationChanged: lat---" + location.getLatitude() +
-                    "lon---" + location.getLongitude());
-            if (location.getLatitude() != 0 && location.getLongitude() != 0){
+        public void onReceiveLocation(BDLocation bdLocation) {
+            int errorCode = bdLocation.getLocType();
+            Log.i(TAG, "onReceiveLocation: errorCode---" + errorCode);
+            if (errorCode == 61 || errorCode == 161) {
+
+                //获取纬度信息
+                double latitude = bdLocation.getLatitude();
+                //获取经度信息
+                double longitude = bdLocation.getLongitude();
+
+                Log.i(TAG, "onReceiveLocation: 百度地图---lat---" + latitude + ",lon---" + longitude);
                 addressAuthoritySuccess = true;
-                mLocation = location;
 
+                if (isGetLonLat) {
+                    Log.i(TAG, "onReceiveLocation: isGetLonLat---已经获取到经纬度");
+                    isGetLonLat = false;
+                    Intent intent = new Intent(ActivitySetting.this, ClassList.class);
+                    intent.putExtra("activity_setting_school", 10);
+                    intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, latitude);
+                    intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, longitude);
+                    startActivityForResult(intent, REQUEST_CODE_SCHOOL);
+                }
+            } else if (errorCode == 62) {
+                if (isFirstShowDialog) {
+                    Log.i(TAG, "onReceiveLocation: isFirstShowDialog---" + isFirstShowDialog);
+                    isFirstShowDialog = false;
+                    SettingDialog  settingDialog = AndPermission.defaultSettingDialog(ActivitySetting.this, 402);
+                    settingDialog.setTitle("开启位置权限");
+                    settingDialog.setMessage("通过您的位置定位离您最近的学校");
+                    settingDialog.show();
+                }
             }
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.i(TAG, "onProviderEnabled: provider---" + provider);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.i(TAG, "onProviderDisabled: provider---" + provider);
         }
     };
 
-
-    //判断是否有可用的内容提供者
-    private String judgeProvider(LocationManager locationManager) {
-        List<String> prodiverlist = locationManager.getProviders(true);
-        if (prodiverlist.contains(LocationManager.NETWORK_PROVIDER)) {
-            return LocationManager.NETWORK_PROVIDER;
-        } else if (prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
-            return LocationManager.GPS_PROVIDER;
-        } else {
-            Toast.makeText(ActivitySetting.this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mLocationClient != null) {
+            mLocationClient.unRegisterLocationListener(bdListener);
+            mLocationClient.stop();
         }
-        return null;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mLocationManager.removeUpdates(locationListener);
     }
 }

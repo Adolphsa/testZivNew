@@ -2,10 +2,6 @@ package com.yeejay.yplay.login;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -90,13 +86,6 @@ public class SchoolList extends BaseActivity {
             grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
             isActivitySetting = bundle.getInt("activity_setting_class_school");
         }
-
-//        if (mLatitude == 0 || mLongitude == 0) {
-//            mLatitude = (double) SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_LATITUDE, 0.0);
-//            mLongitude = (double) SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_LONGITUDE, 0.0);
-//        }
-
-
 
         mDataList = new ArrayList<>();
 
@@ -200,8 +189,6 @@ public class SchoolList extends BaseActivity {
 
     //获取学校列表
     private void getSchoolList(int pageNum, int pageSize) {
-
-        getLonLat();
 
         Map<String, Object> schoolMap = new HashMap<>();
 
@@ -339,39 +326,4 @@ public class SchoolList extends BaseActivity {
         startActivity(new Intent(SchoolList.this, MainActivity.class));
     }
 
-    String mProvider;//位置提供器
-    LocationManager mLocationManager;//位置服务
-    Location mLocation;
-
-
-    //获取当前经纬度
-    private void getLonLat(){
-
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//获得位置服务
-        mProvider = judgeProvider(mLocationManager);
-        if (Build.VERSION.SDK_INT >= 23 &&
-                SchoolList.this.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                SchoolList.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return  ;
-        }
-        mLocation = mLocationManager.getLastKnownLocation(mProvider);
-        if (mLocation != null){
-            mLatitude = mLocation.getLatitude();
-            mLongitude = mLocation.getLongitude();
-            System.out.println("学校页面当前维度---" + mLocation.getLatitude() + "当前精度---" + mLocation.getLongitude());
-        }
-    }
-
-    //判断是否有可用的内容提供者
-    private String judgeProvider(LocationManager locationManager) {
-        List<String> prodiverlist = locationManager.getProviders(true);
-        if(prodiverlist.contains(LocationManager.NETWORK_PROVIDER)){
-            return LocationManager.NETWORK_PROVIDER;
-        }else if(prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
-            return LocationManager.GPS_PROVIDER;
-        }else{
-            Toast.makeText(SchoolList.this,"没有可用的位置提供器",Toast.LENGTH_SHORT).show();
-        }
-        return null;
-    }
 }

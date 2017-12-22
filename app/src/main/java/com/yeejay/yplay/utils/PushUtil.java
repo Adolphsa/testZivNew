@@ -221,17 +221,21 @@ public class PushUtil implements Observer {
     //设置华为角标
     public static void setHuaWeiBadgenumber(int i){
 
-        String deviceMan = android.os.Build.MANUFACTURER;
-        if (deviceMan.equals("HUAWEI")){
-            Bundle extra =new Bundle();
-            extra.putString("package", "com.yeejay.yplay");
-            extra.putString("class", "com.yeejay.yplay.login.LoadingActivity");
-            extra.putInt("badgenumber", i);
-            YplayApplication.getInstance().getContentResolver().call(Uri.parse(
-                    "content://com.huawei.android.launcher.settings/badge/"),
-                    "change_badge", null, extra);
-        }
+        try{
+            String deviceMan = android.os.Build.MANUFACTURER;
+            if (deviceMan.equals("HUAWEI")){
+                Bundle extra =new Bundle();
+                extra.putString("package", "com.yeejay.yplay");
+                extra.putString("class", "com.yeejay.yplay.login.LoadingActivity");
+                extra.putInt("badgenumber", i);
+                YplayApplication.getInstance().getContentResolver().call(Uri.parse(
+                        "content://com.huawei.android.launcher.settings/badge/"),
+                        "change_badge", null, extra);
+            }
 
+        }catch (Exception e){
+            Log.i(TAG, "setHuaWeiBadgenumber: 华为角标---" + e.getMessage());
+        }
 
     }
 

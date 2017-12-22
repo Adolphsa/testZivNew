@@ -19,7 +19,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
     @OnClick(R.id.aafg_enter)
     public void aafgEnter(){
-        //添加好友
+        //跳转到添加好友
         Intent intent = new Intent(AddFriendGuide.this, AddFriends.class);
         intent.putExtra("from_add_friend_guide",true);
         startActivity(intent);
