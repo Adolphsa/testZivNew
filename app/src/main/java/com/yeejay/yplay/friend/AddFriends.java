@@ -619,7 +619,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     int uin = friendsBeanList.get(position).getUin();
                     if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                        getFriendInfo(uin);
+                        getFriendInfo(uin, view);
                     } else {
                         Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }
@@ -770,7 +770,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int uin = friendsBeanList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin);
+                    getFriendInfo(uin, view);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
@@ -827,7 +827,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 System.out.println("点击事件");
                 int uin = friendsBeanList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin);
+                    getFriendInfo(uin, view);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
@@ -837,7 +837,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     }
 
     //查询朋友的信息
-    private void getFriendInfo(int friendUin) {
+    private void getFriendInfo(int friendUin, View view) {
+        final View friendItemView = view;
         Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("userUin", friendUin);
         friendMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
@@ -865,7 +866,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                                 System.out.println("朋友的uin---" + infoBean.getUin());
                                 startActivity(intent);
                             } else {
-                                showCardDialog(userInfoResponde.getPayload());
+                                showCardDialog(userInfoResponde.getPayload(), friendItemView);
                             }
 
                         }
@@ -884,8 +885,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     }
 
     //显示名片
-    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean) {
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean, View view) {
 
+        final View friendItemView = view;
         final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
 
         //状态
@@ -900,6 +902,13 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 ImageView button = (ImageView) v;
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     button.setImageResource(R.drawable.peer_friend_requested);
+                    //除了更新朋友选项卡信息中的按钮状态外，还要更新外部对应的朋友列表item的按钮状态；
+                    if (friendItemView != null) {
+                        Button freiendIcon = (Button) friendItemView.findViewById(R.id.af_btn_accept2);
+                        if (freiendIcon != null) {
+                            freiendIcon.setBackgroundResource(R.drawable.add_friend_apply);
+                        }
+                    }
                     addFriend(infoBean.getUin(),mType);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
