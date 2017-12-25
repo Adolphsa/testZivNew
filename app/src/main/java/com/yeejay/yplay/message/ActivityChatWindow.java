@@ -106,6 +106,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     @OnClick(R.id.acw_send)
     public void send() {
         //点击之后立马变为不可点状态
+        acwSend.setClickable(false);
+        acwSend.setImageResource(R.drawable.feather_no);
         System.out.println("发送消息");
         if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             String str = acwEdit.getText().toString().trim();
