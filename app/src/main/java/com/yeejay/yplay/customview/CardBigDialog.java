@@ -47,7 +47,6 @@ public class CardBigDialog extends Dialog {
     private static final int STATUS_FRIEND = 1;
     private static final int STATUS_REQUEST_FRIEND = 2;
 
-    LinearLayout cardDialogRl;
     ImageView backView;
     TextView nameView;
     ImageView genderView;
@@ -65,14 +64,7 @@ public class CardBigDialog extends Dialog {
     private int mUin;
     private int mType;
 
-    @OnClick(R.id.back)
-    public void back() {
-        dismiss();
-    }
-
     private View.OnClickListener addFriendListener;
-
-    private View.OnClickListener carDialogRlListener;
 
     private Context context;
     private UserInfoResponde.PayloadBean mPayloadBean;
@@ -101,8 +93,13 @@ public class CardBigDialog extends Dialog {
     }
 
     private void initCardDialog(){
-        cardDialogRl = (LinearLayout) findViewById(R.id.card_dialog_rl);
         backView = (ImageView) findViewById(R.id.back);
+        backView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
         nameView = (TextView) findViewById(R.id.lui_name);
         genderView = (ImageView) findViewById(R.id.lui_gender);
         diamondNumView = (TextView) findViewById(R.id.diamond_num);
@@ -141,16 +138,10 @@ public class CardBigDialog extends Dialog {
         //cardAddFriends.setImageResource(buttonImg);
 
         addFriendView.setOnClickListener(addFriendListener);
-
-        cardDialogRl.setOnClickListener(carDialogRlListener);
     }
 
     public void setAddFriendListener(View.OnClickListener addFriendListener) {
         this.addFriendListener = addFriendListener;
-    }
-
-    public void setCarDialogRlListener(View.OnClickListener carDialogRlListener) {
-        this.carDialogRlListener = carDialogRlListener;
     }
 
     private void initDiamondList(final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList){

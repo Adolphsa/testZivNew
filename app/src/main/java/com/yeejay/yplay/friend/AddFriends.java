@@ -906,13 +906,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 }
             }
         });
-        cardDialog.setCarDialogRlListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("哈哈哈");
-                cardDialog.dismiss();
-            }
-        });
         cardDialog.show();
     }
 
