@@ -41,8 +41,7 @@
             android:layout_toRightOf="@+id/lui_name"
             android:layout_alignBottom="@+id/lui_name"
             android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
-            android:visibility="invisible" />
+            android:layout_marginLeft="10dp" />
     </RelativeLayout>
 
     <RelativeLayout

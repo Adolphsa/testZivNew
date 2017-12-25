@@ -2,7 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="72dp"
-    android:layout_height="30dp"
+    android:layout_height="48dp"
     android:paddingStart="6dp"
     android:paddingEnd="4dp" >
 
@@ -19,9 +19,8 @@
         android:id="@+id/spinner_icon"
         android:layout_width="14dp"
         android:layout_height="14dp"
-        android:gravity="center"
         android:layout_marginStart="2dp"
-        android:src="@drawable/spinner_normal"
+        android:src="@drawable/hook"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         />

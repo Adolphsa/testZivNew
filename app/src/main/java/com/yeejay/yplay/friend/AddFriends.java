@@ -1,6 +1,8 @@
 package com.yeejay.yplay.friend;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -35,6 +38,7 @@ import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ClassmatesTypeAdapter;
+import com.yeejay.yplay.adapter.ClassmatesTypeArrayAdapter;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.answer.ActivityInviteFriend;
@@ -78,6 +82,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private static final int CLASSMATE_MALE = 1;
     private static final int CLASSMATE_FEMALE = 2;
     private static final int CLASSMATE_SAME_GRADE = 3;
+    private static final String KEY_SHARED_PREFERENCE = "preferences_class_type";
 
     @BindView(R.id.af_btn_add_contacts)
     ImageButton btnAddContacts;
@@ -269,14 +274,28 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //ArrayAdapter<CharSequence> classTypeAdapter = ArrayAdapter.createFromResource(this, R.array.classmates_type,
         //        android.R.layout.simple_dropdown_item_1line);
 
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        float density = dm.density;
+        float spiderItemHeight = (float)114/dm.density;
+
         List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.classmates_type));
-        ClassmatesTypeAdapter classTypeAdapter = new ClassmatesTypeAdapter(this, typeList);
-        //classTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ClassmatesTypeArrayAdapter classTypeAdapter = new ClassmatesTypeArrayAdapter(this,
+                R.layout.spinner_layout_filer_classmate_type, typeList);
+        classTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_layout_filter_classmat_type);
         typeSpinner.setAdapter(classTypeAdapter);
-        typeSpinner.setSelection(0, true);
+        typeSpinner.setDropDownVerticalOffset((int)spiderItemHeight);
+        SharedPreferences lastSettings = getSharedPreferences(KEY_SHARED_PREFERENCE,
+                Context.MODE_PRIVATE);
+        typeSpinner.setSelection(lastSettings.getInt("position", 0), true);
         typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences settings = getSharedPreferences(KEY_SHARED_PREFERENCE,
+                        Context.MODE_PRIVATE);
+                SharedPreferences.Editor editorsettings = settings.edit();
+                editorsettings.putInt("position", position);
+                editorsettings.commit();
                 switch (position) {
                     case CLASSMATE_TYPE_ALL ://全部
                         mType = 3;
@@ -648,8 +667,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             typeSpinner.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
-
-
 
 /*        arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
