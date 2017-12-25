@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_dialog_rl"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_width="320dp"
+    android:layout_height="468dp"
+    android:background="@drawable/shape_dialog_userinfo_backgroud" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="@drawable/diamond_list_icon" >
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            android:clickable="true"
+            android:layout_alignParentEnd="true"
+            android:src ="@drawable/icon_close_white"
+            android:contentDescription="@null" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/aad_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:focusable="false"
+        android:divider="@color/feeds_search_color"
+        android:dividerHeight="0.3dp" />
+
+</LinearLayout>

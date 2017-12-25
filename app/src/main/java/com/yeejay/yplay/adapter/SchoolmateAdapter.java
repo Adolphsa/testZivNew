@@ -122,13 +122,13 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
 //        holder.afBtnHide.setVisibility(View.VISIBLE);
 
         holder.afBtnAccept.setEnabled(true);
-        holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend);
+        holder.afBtnAccept.setBackgroundResource(R.drawable.add_friend_icon);
         holder.afBtnAccept.setOnClickListener(acceptListener);
 
         for (Integer temp : positionList){
             if (temp == position){
                 Log.i(TAG, "getView: 已经接受的item---" + temp);
-                holder.afBtnAccept.setBackgroundResource(R.drawable.already_apply);
+                holder.afBtnAccept.setBackgroundResource(R.drawable.add_friend_apply);
                 holder.afBtnAccept.setOnClickListener(acceptListener);
             }
         }

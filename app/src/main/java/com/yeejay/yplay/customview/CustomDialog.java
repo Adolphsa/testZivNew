@@ -33,6 +33,7 @@ public class CustomDialog extends Dialog {
         private String positiveButtonText;
         private String negativeButtonText;
         private View contentView;
+        private View layout;
         private DialogInterface.OnClickListener positiveButtonClickListener;
         private DialogInterface.OnClickListener negativeButtonClickListener;
 
@@ -120,12 +121,16 @@ public class CustomDialog extends Dialog {
             return this;
         }
 
+        public View getCustomView() {
+            return layout;
+        }
+
         public CustomDialog create() {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             // instantiate the dialog with the custom Theme
             final CustomDialog dialog = new CustomDialog(context,R.style.Dialog);
-            View layout = inflater.inflate(R.layout.dialog_normal_layout, null);
+            layout = inflater.inflate(R.layout.dialog_normal_layout, null);
             dialog.addContentView(layout, new LayoutParams(
                     LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
             // set the dialog title

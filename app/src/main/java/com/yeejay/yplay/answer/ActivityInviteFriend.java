@@ -123,7 +123,7 @@ public class ActivityInviteFriend extends BaseActivity {
                 System.out.println("邀请按钮被点击");
                 Button button = (Button) v;
                 //button.setText("已邀请");
-                button.setBackgroundResource(R.drawable.play_invite_yes);
+                button.setBackgroundResource(R.drawable.friend_invitation_done);
                 button.setEnabled(false);
                 //邀请好友的请求
 

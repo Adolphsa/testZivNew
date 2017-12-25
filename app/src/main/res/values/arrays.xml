@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="classmates_type">
+        <item>All</item>
+        <item>Boy</item>
+        <item>Girl</item>
+        <item>Same Grade</item>
+    </string-array>
+</resources>

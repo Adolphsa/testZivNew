@@ -5,50 +5,61 @@
     android:orientation="vertical"
     android:background="@color/white"
     >
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/center_img"
-        />
+
     <RelativeLayout
         android:id="@+id/lsm_rl_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:paddingBottom="10dp"
         android:paddingTop="10dp">
 
-        <ImageView
-            android:id="@+id/lsm_img"
-            android:layout_width="17dp"
-            android:layout_height="16dp"
-            android:src="@drawable/school_mate"
-            android:scaleType="fitXY"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="3dp"
-            />
         <TextView
             android:id="@+id/lsm_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            style="@style/add_friends_subtitle_style"
+            android:text="@string/classmate_in_same_school"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:textColor="@color/play_color2"
-            android:textSize="16sp"
-            android:text="同校同学"
-            android:layout_toRightOf="@+id/lsm_img"
-            android:layout_marginLeft="10dp"
+            android:textSize="14sp"
+            android:text="@string/filter"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/filter_spinner" />
+
+        <Spinner
+            android:id="@+id/filter_spinner"
+            android:layout_width="72dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/shape_classmates_filter_backgound"
+            android:gravity="center"
+            android:spinnerMode="dropdown"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:entries="@array/classmates_type"
+            android:visibility="invisible"
             />
+        <!--
         <ImageButton
             android:id="@+id/lsm_arrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/down_arrow"
             android:background="@android:color/transparent"
-            android:layout_toRightOf="@+id/lsm_tv"
-            android:layout_marginLeft="10dp"
+            android:layout_alignParentEnd="true"
             android:visibility="invisible"
             />
+        -->
     </RelativeLayout>
-    
+
     <LinearLayout
         android:id="@+id/lsm_ll_button"
         android:layout_width="match_parent"
@@ -117,7 +128,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="邀请更多好友来玩吧"
+            android:text="@string/invite_tips"
             android:textSize="14sp"
             android:textColor="@color/feeds_hight_gray"
             android:layout_marginTop="11dp"

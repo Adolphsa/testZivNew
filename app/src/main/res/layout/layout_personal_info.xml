@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/personal_nick_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/name"
+            android:textColor="@color/add_friend_subtitle_color"
+            android:textSize="28sp"
+            android:maxEms="5"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+            <ImageView
+                android:id="@+id/personal_gender"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/feeds_girl"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/personal_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/username"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="90dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/personal_school"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:drawableStart="@drawable/mine_school"
+            android:gravity="right"
+            android:text="@string/school"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="14dp"
+            android:layout_marginTop="6dp"
+            android:background="#3B3C40"/>
+
+        <TextView
+            android:id="@+id/personal_grade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:gravity="left"
+            android:text="@string/grade"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

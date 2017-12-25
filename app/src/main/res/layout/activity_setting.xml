@@ -144,7 +144,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:background="@drawable/selector_myinfo_item_bacnground">
+                    android:background="@drawable/selector_myinfo_item_background">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -319,7 +319,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
-                android:background="@drawable/selector_myinfo_item_bacnground">
+                android:background="@drawable/selector_myinfo_item_background">
 
                 <TextView
                     android:id="@+id/setting_contacts_us"
@@ -347,7 +347,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
-                android:background="@drawable/selector_myinfo_item_bacnground">
+                android:background="@drawable/selector_myinfo_item_background">
 
                 <TextView
                     android:id="@+id/setting_exit"

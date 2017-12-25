@@ -69,7 +69,7 @@ public class ActivityMyFriends extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityMyFriends.this, true);
 
-        layoutTitle.setText("我的好友");
+        layoutTitle.setText(R.string.my_friends);
         mDataList = new ArrayList<>();
 
         loadMore();

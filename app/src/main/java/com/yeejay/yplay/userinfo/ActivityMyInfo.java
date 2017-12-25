@@ -7,9 +7,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,7 +20,6 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
-import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.friend.ActivityAddFiendsDetail;
 import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -69,26 +65,31 @@ public class ActivityMyInfo extends BaseActivity {
     //我的资料
     @BindView(R.id.lui_header_img)
     EffectiveShapeView amiItemHeaderImg;
-    @BindView(R.id.lui_name)
-    TextView amiTvName;
-    @BindView(R.id.lui_gender)
-    ImageView amiGender;
-    @BindView(R.id.lui_user_name)
-    TextView amiTvName2;
-    @BindView(R.id.lui_school_name)
-    TextView amiTvSchoolName;
-    @BindView(R.id.lui_grade)
-    TextView amiGrade;
+    @BindView(R.id.personal_nick_name)
+    TextView personalNickName;
+    @BindView(R.id.personal_gender)
+    ImageView personalGender;
+    @BindView(R.id.personal_user_name)
+    TextView personalUserName;
+    @BindView(R.id.personal_school)
+    TextView personalSchool;
+    @BindView(R.id.personal_grade)
+    TextView personalGrade;
 
     //钻石
+//    @BindView(R.id.diamond_tv_num)
+//    TextView amiTvDiamondNumber;
+//    @BindView(R.id.diamond_list)
+//    MesureListView amiDiamondListView;
+//    @BindView(R.id.diamond_line)
+//    View amiDiamonLine;
+//    @BindView(R.id.diamond_null_img)
+//    ImageView amiDiamondNullImg;
     @BindView(R.id.diamond_tv_num)
     TextView amiTvDiamondNumber;
-    @BindView(R.id.diamond_list)
-    MesureListView amiDiamondListView;
-    @BindView(R.id.diamond_line)
-    View amiDiamonLine;
-    @BindView(R.id.diamond_null_img)
-    ImageView amiDiamondNullImg;
+    @BindView(R.id.ami_include_my_diammonds)
+    RelativeLayout amiDiamonds;
+
 
     //好友相关
     @BindView(R.id.ami_include_my_friends)
@@ -122,17 +123,21 @@ public class ActivityMyInfo extends BaseActivity {
         startActivity(new Intent(ActivityMyInfo.this, ActivitySetting.class));
     }
 
+    //钻石
+    @OnClick(R.id.ami_include_my_diammonds)
+    public void myDiamonds(){
+        startActivity(new Intent(ActivityMyInfo.this,ActivityAllDiamond.class));
+    }
+
     //我的好友
     @OnClick(R.id.ami_include_my_friends)
     public void myFriends(){
-        System.out.println("我的好友");
         startActivity(new Intent(ActivityMyInfo.this,ActivityMyFriends.class));
     }
 
     //好友请求
     @OnClick(R.id.ami_include_friend_request)
     public void friendsRequest(){
-        System.out.println("好友请求");
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
@@ -185,7 +190,7 @@ public class ActivityMyInfo extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_info);
+        setContentView(R.layout.activity_personal_info);
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
@@ -211,29 +216,31 @@ public class ActivityMyInfo extends BaseActivity {
     private void initTitle() {
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
         layoutSetting.setVisibility(View.VISIBLE);
-        myTvBack.setImageResource(R.drawable.white_back);
-        myTvTitle.setText("我的");
-        myTvTitle.setTextColor(getResources().getColor(R.color.white));
+//        myTvBack.setImageResource(R.drawable.back_white);
+//        myTvTitle.setText("我的");
+//        myTvTitle.setTextColor(getResources().getColor(R.color.white));
+        myTvTitle.setVisibility(View.GONE);
     }
 
     //初始化我的资料
     private void initMyInfo(UserInfoResponde.PayloadBean.InfoBean infoBean) {
 
         if (infoBean != null) {
-            amiTvSchoolName.setText(infoBean.getSchoolName());
             String url = infoBean.getHeadImgUrl();
             if (!TextUtils.isEmpty(url)) {
                 Picasso.with(ActivityMyInfo.this).load(url).into(amiItemHeaderImg);
             }
-            amiTvName.setText(infoBean.getNickName());
-            amiTvName2.setText(infoBean.getUserName());
-            amiGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
+
+            personalSchool.setText(infoBean.getSchoolName());
+            personalNickName.setText(infoBean.getNickName());
+            personalUserName.setText(infoBean.getUserName());
+            personalGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             if (infoBean.getGender() == 1) {
-                amiGender.setVisibility(View.VISIBLE);
-                amiGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
+                personalGender.setVisibility(View.VISIBLE);
+                personalGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
             } else {
-                amiGender.setVisibility(View.VISIBLE);
-                amiGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
+                personalGender.setVisibility(View.VISIBLE);
+                personalGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
             }
 
             //钻石数量
@@ -250,80 +257,80 @@ public class ActivityMyInfo extends BaseActivity {
     //初始化钻石
     private void initDiamondList(UsersDiamondInfoRespond.PayloadBean payloadBean) {
 
-        final View footView = View.inflate(ActivityMyInfo.this, R.layout.item_af_listview_foot, null);
-        int total = payloadBean.getTotal();
-        if (total > 0) {
-            amiDiamondNullImg.setVisibility(View.GONE);
-            amiDiamonLine.setVisibility(View.GONE);
-        }
-        if (total >= 3) {
-            TextView countTv = (TextView) footView.findViewById(R.id.af_foot_tv1);
-            countTv.setText("查看全部");
-            amiDiamonLine.setVisibility(View.VISIBLE);
-            if (!footView.isShown()){
-                amiDiamondListView.addFooterView(footView);
-            }
-        }
-        final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = payloadBean.getStats();
-        amiDiamondListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return tempList.size() >= 3 ? 3 : tempList.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return tempList.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean;
-                if (convertView == null){
-                    convertView = View.inflate(ActivityMyInfo.this, R.layout.item_user_info_diamond, null);
-                    holder = new ViewHolder();
-                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.item_diamond_top_img);
-                    holder.itemAmiImg2 = (ImageView) convertView.findViewById(R.id.item_diamond_img);
-                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.item_diamond_text);
-                    convertView.setTag(holder);
-                }else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-                statsBean = tempList.get(position);
-                if (position == 0){
-                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top1));
-                } else if (position == 1) {
-                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top2));
-                } else if (position == 2) {
-                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
-                }else {
-                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
-                }
-                System.out.println("钻石position---" + position);
-                String url = statsBean.getQiconUrl();
-                if (!TextUtils.isEmpty(url)) {
-                    Picasso.with(ActivityMyInfo.this).load(url).into(holder.itemAmiImg2);
-                } else {
-                    holder.itemAmiImg2.setVisibility(View.GONE);
-                }
-                holder.itemAmiText.setText(statsBean.getQtext());
-                return convertView;
-            }
-        });
-        amiDiamondListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 3) {
-                    startActivity(new Intent(ActivityMyInfo.this, ActivityAllDiamond.class));
-                }
-            }
-        });
+//        final View footView = View.inflate(ActivityMyInfo.this, R.layout.item_af_listview_foot, null);
+//        int total = payloadBean.getTotal();
+//        if (total > 0) {
+//            amiDiamondNullImg.setVisibility(View.GONE);
+//            amiDiamonLine.setVisibility(View.GONE);
+//        }
+//        if (total >= 3) {
+//            TextView countTv = (TextView) footView.findViewById(R.id.af_foot_tv1);
+//            countTv.setText("查看全部");
+//            amiDiamonLine.setVisibility(View.VISIBLE);
+//            if (!footView.isShown()){
+//                amiDiamondListView.addFooterView(footView);
+//            }
+//        }
+//        final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = payloadBean.getStats();
+//        amiDiamondListView.setAdapter(new BaseAdapter() {
+//            @Override
+//            public int getCount() {
+//                return tempList.size() >= 3 ? 3 : tempList.size();
+//            }
+//
+//            @Override
+//            public Object getItem(int position) {
+//                return tempList.get(position);
+//            }
+//
+//            @Override
+//            public long getItemId(int position) {
+//                return position;
+//            }
+//
+//            @Override
+//            public View getView(int position, View convertView, ViewGroup parent) {
+//                ViewHolder holder;
+//                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean;
+//                if (convertView == null){
+//                    convertView = View.inflate(ActivityMyInfo.this, R.layout.item_user_info_diamond, null);
+//                    holder = new ViewHolder();
+//                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.item_diamond_top_img);
+//                    holder.itemAmiImg2 = (ImageView) convertView.findViewById(R.id.item_diamond_img);
+//                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.item_diamond_text);
+//                    convertView.setTag(holder);
+//                }else {
+//                    holder = (ViewHolder) convertView.getTag();
+//                }
+//                statsBean = tempList.get(position);
+//                if (position == 0){
+//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top1));
+//                } else if (position == 1) {
+//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top2));
+//                } else if (position == 2) {
+//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+//                }else {
+//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
+//                }
+//                System.out.println("钻石position---" + position);
+//                String url = statsBean.getQiconUrl();
+//                if (!TextUtils.isEmpty(url)) {
+//                    Picasso.with(ActivityMyInfo.this).load(url).into(holder.itemAmiImg2);
+//                } else {
+//                    holder.itemAmiImg2.setVisibility(View.GONE);
+//                }
+//                holder.itemAmiText.setText(statsBean.getQtext());
+//                return convertView;
+//            }
+//        });
+//        amiDiamondListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                if (position == 3) {
+//                    startActivity(new Intent(ActivityMyInfo.this, ActivityAllDiamond.class));
+//                }
+//            }
+//        });
     }
 
     //初始化我的好友列表
@@ -333,21 +340,21 @@ public class ActivityMyInfo extends BaseActivity {
         friendNumTv = (TextView) myFriendsRl.findViewById(R.id.friend_tv_num);
 
         //好友请求
-        ImageView friendRequestImg = (ImageView) friendRequestRl.findViewById(R.id.friend_iv1);
-        TextView friendRequestTv = (TextView) friendRequestRl.findViewById(R.id.friend_tv1);
+        //ImageView friendRequestImg = (ImageView) friendRequestRl.findViewById(R.id.friend_iv1);
+        //TextView friendRequestTv = (TextView) friendRequestRl.findViewById(R.id.friend_tv1);
         friendRequestNum = (TextView) friendRequestRl.findViewById(R.id.friend_tv_num);
 
-        friendRequestImg.setImageDrawable(getDrawable(R.drawable.my_info_friend_request));
-        friendRequestTv.setText("好友请求");
+        //friendRequestImg.setImageDrawable(getDrawable(R.drawable.my_info_friend_request));
+        //friendRequestTv.setText("好友请求");
 
         //添加好友
-        ImageView addFriendImg = (ImageView) addFriendsRl.findViewById(R.id.friend_iv1);
-        TextView addFriendTv = (TextView) addFriendsRl.findViewById(R.id.friend_tv1);
-        TextView addFriendNum = (TextView) addFriendsRl.findViewById(R.id.friend_tv_num);
+        //ImageView addFriendImg = (ImageView) addFriendsRl.findViewById(R.id.friend_iv1);
+        //TextView addFriendTv = (TextView) addFriendsRl.findViewById(R.id.friend_tv1);
+        //TextView addFriendNum = (TextView) addFriendsRl.findViewById(R.id.friend_tv_num);
 
-        addFriendImg.setImageDrawable(getDrawable(R.drawable.my_info_add_friend));
-        addFriendTv.setText("添加好友");
-        addFriendNum.setVisibility(View.GONE);
+        //addFriendImg.setImageDrawable(getDrawable(R.drawable.my_info_add_friend));
+        //addFriendTv.setText("添加好友");
+        //addFriendNum.setVisibility(View.GONE);
     }
 
     //扩列开启相关

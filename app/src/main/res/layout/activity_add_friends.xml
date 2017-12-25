@@ -23,64 +23,89 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/searchView"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="搜索"
-                    android:textColor="@color/feeds_hight_gray"
-                    android:drawableLeft="@drawable/search"
+                    android:layout_height="80dp"
                     android:gravity="center_vertical"
-                    android:drawablePadding="15dp"
-                    android:background="@color/feeds_search_color"
-                    android:paddingLeft="30dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_marginStart="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:src="@drawable/add_friend_search"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical" >
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="15dp"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/search"
+                            android:textColor="#3B3C40"
+                            android:background="@color/feeds_search_color"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/searchView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:cursorVisible="false"
+                            android:text="@string/hint_search_gate"
+                            android:singleLine="true"
+                            android:textSize="22sp"
+                            android:textColor="#9A9FA7"
+                            android:alpha="0.5"
+                            android:layout_marginStart="15dp"/>
+
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="30dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="14dp"
                     android:background="@color/white"
                     android:paddingBottom="14dp"
                     >
 
-                    <Button
+                    <ImageButton
                         android:id="@+id/af_btn_add_contacts"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="通讯录好友"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
                         android:background="@android:color/transparent"
-                        android:textColor="@color/feeds_text_color"
-                        android:drawableTop="@drawable/feeds_contacts"
-                        android:drawablePadding="8dp"
+                        android:src="@drawable/selector_add_friends_contacts"
                         android:layout_weight="1"
                         />
-                    <Button
+                    <ImageButton
                         android:id="@+id/af_btn_add_schoolmate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="同校同学"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
                         android:background="@android:color/transparent"
-                        android:textColor="@color/feeds_text_color"
-                        android:drawableTop="@drawable/feeds_school_mate"
-                        android:drawablePadding="8dp"
+                        android:src="@drawable/selector_add_friends_class_school"
                         android:layout_weight="1"
                         />
-                    <Button
+                    <ImageButton
                         android:id="@+id/af_btn_wait_invite"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="可能认识的人"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
                         android:background="@android:color/transparent"
-                        android:textColor="@color/feeds_text_color"
-                        android:drawableTop="@drawable/feeds_wait_invite"
-                        android:drawablePadding="8dp"
+                        android:src="@drawable/selector_add_friends_maybe_known"
                         android:layout_weight="1"
                         />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/add_friend_line_color" />
 
                 <include layout="@layout/layout_contacts_null"
                     android:id="@+id/layout_contact"

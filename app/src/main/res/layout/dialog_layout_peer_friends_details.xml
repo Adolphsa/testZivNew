@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_dialog_rl"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_width="320dp"
+    android:layout_height="468dp"
+    android:background="@drawable/shape_dialog_userinfo_backgroud" >
+
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_gravity="right"
+        android:src ="@drawable/gender_cancel"
+        android:contentDescription="@null" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp"
+        android:layout_marginBottom="10dp" >
+
+        <TextView
+            android:id="@+id/lui_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxEms="5"
+            android:maxLines="1"
+            android:text="姓名"
+            android:textColor="@color/add_friend_subtitle_color"
+            android:textSize="28sp" />
+        <ImageView
+            android:id="@+id/lui_gender"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/feeds_girl"
+            android:layout_toRightOf="@+id/lui_name"
+            android:layout_alignBottom="@+id/lui_name"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp" >
+
+        <ImageView
+            android:id="@+id/diamond"
+            android:layout_width="@dimen/personal_icon_width"
+            android:layout_height="@dimen/personal_icon_height"
+            android:layout_centerVertical="true"
+            android:src="@drawable/personal_friends_dimand" />
+        <TextView
+            android:id="@+id/diamond_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="111"
+            android:layout_marginStart="34dp"
+            android:textColor="@color/add_friend_subtitle_color"
+            android:textSize="14sp" />
+        <ImageView
+            android:id="@+id/add_friend"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/peer_add_friends" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginBottom="42dp">
+
+        <ImageView
+            android:id="@+id/school_icon"
+            android:layout_width="@dimen/personal_icon_width"
+            android:layout_height="@dimen/personal_icon_height"
+            android:src="@drawable/mine_school" />
+        <TextView
+            android:id="@+id/school"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="222"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/school_icon"
+            android:textColor="@color/add_friend_subtitle_color"
+            android:textSize="14sp" />
+
+        <View
+            android:id="@+id/devider"
+            android:layout_width="1dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/school"
+            android:background="@color/devider_line_color" />
+
+        <TextView
+            android:id="@+id/grade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="333"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/devider"
+            android:textColor="@color/add_friend_subtitle_color"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <!--
+    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
+        android:id="@+id/aad_ptf_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F9F9F9"
+        android:focusable="false"
+        android:layout_marginTop="10dp">
+        -->
+
+        <ListView
+            android:id="@+id/aad_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="234dp"
+            android:background="#F9F9F9"
+            android:layout_marginTop="10dp"
+            android:divider="@color/feeds_search_color"
+            android:dividerHeight="0.3dp" />
+    <!--
+    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
+    -->
+
+</LinearLayout>

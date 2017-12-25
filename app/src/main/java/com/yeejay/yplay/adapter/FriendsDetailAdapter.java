@@ -112,10 +112,10 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 1){
-            holder.afBtnAccept.setBackgroundResource(R.drawable.is_friend);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setBackgroundResource(R.drawable.green_accept);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.friends_accept);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }

@@ -104,4 +104,17 @@
     <!--contribute-->
     <color name="contribute_color">#483DE2</color>
     <color name="contribute_edit_color">#1AFFFFFF</color>
+
+    <color name="add_friend_line_color">#F9F9F9</color>
+    <color name="add_friend_subtitle_color">#333333</color>
+
+    <color name="my_item_backgroud_color">#F6F9FC</color>
+    <color name="my_item_font_color">#3B3C40</color>
+
+    <color name="gold_diamond_color">#FFF5C60A</color>
+    <color name="silver_diamond_color">#FFBFBFBF</color>
+    <color name="brozne_diamond_color">#FFF5900A</color>
+
+    <color name="devider_line_color">#ff000000</color>
+
 </resources>

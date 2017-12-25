@@ -44,10 +44,10 @@
 
     <Button
         android:id="@+id/af_btn_accept"
-        android:layout_width="80dp"
-        android:layout_height="34sp"
+        android:layout_width="@dimen/friend_add_icon_width"
+        android:layout_height="@dimen/friend_add_icon_height"
         android:layout_marginRight="20dp"
-        android:background="@drawable/selector_play_invite"
+        android:background="@drawable/friend_invitation"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="21dp" />

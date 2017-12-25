@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:paddingBottom="20dp"
+    android:gravity="center"
+    android:background="@drawable/shape_user_info_background">
+
+    <tangxiaolv.com.library.EffectiveShapeView
+        android:id="@+id/lui_header_img"
+        android:layout_width="122dp"
+        android:layout_height="122dp"
+        android:scaleType="fitXY"
+        app:shape="circle"
+        android:src="@drawable/header_deafult"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/shape_cycyle"
+        />
+</RelativeLayout>

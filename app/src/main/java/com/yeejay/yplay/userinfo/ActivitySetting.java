@@ -16,9 +16,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -250,10 +253,14 @@ public class ActivitySetting extends BaseActivity {
     private static final int REQUEST_CODE_SCHOOL = 202;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
-    private static final int INVALID_NUM = 100000;
-    private static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
-    private static int GENDER_MALE = 1;
-    private static int GENDER_FEMALE = 2;
+    private  final int INVALID_NUM = 100000;
+    private  static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
+    private final static int GENDER_MALE = 1;
+    private final static int GENDER_FEMALE = 2;
+    private final static int TYPE_NICKNAME = 1;
+    private final static int TYPE_USERNAME = 2;
+    private final static int TYPE_CLASSSCHOOL = 3;
+    private final static int  TYPE_GENDER = 4;
 
     private String imageName;
     private File tempFile;
@@ -495,8 +502,10 @@ public class ActivitySetting extends BaseActivity {
             imgMap.put("gender", gender);
         if (!TextUtils.isEmpty(headImgId))
             imgMap.put("headImgId", headImgId);
-        if (!TextUtils.isEmpty(userName))
+        if (!TextUtils.isEmpty(userName)) {
             imgMap.put("userName", userName);
+            imgMap.put("flag", 1);
+        }
 
         imgMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         imgMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
@@ -690,15 +699,16 @@ public class ActivitySetting extends BaseActivity {
     }
 
     private void showDialogTips(int tag, int letCount) {
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater=(LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch (tag) {
-            case 1:
+            case TYPE_NICKNAME ://nick name
                 View userNameLayout = inflater.inflate(R.layout.dialog_content_username_layout, null);
                 TextView tips1 = (TextView) userNameLayout.findViewById(R.id.tips1);
                 tips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
                         Integer.toString(letCount)));
 
                 final EditText userNameView = (EditText) userNameLayout.findViewById(R.id.username);
+
                 userNameView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
                 userNameView.setSingleLine();
                 userNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -734,10 +744,38 @@ public class ActivitySetting extends BaseActivity {
                             }
                         });
 
-                userBuilder.create().show();
+                CustomDialog customDlg = userBuilder.create();
+                final Button positiveBtn = (Button)userBuilder.getCustomView().findViewById(R.id.positiveButton);
+                positiveBtn.setEnabled(false);
+
+                userNameView.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if(s.toString().trim().length() <= 0) {
+                            positiveBtn.setEnabled(false);
+                        } else {
+                            positiveBtn.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if(s.toString().trim().length() <= 0) {
+                            positiveBtn.setEnabled(false);
+                        } else {
+                            positiveBtn.setEnabled(true);
+                        }
+                    }
+                });
+
+                customDlg.show();
 
                 break;
-            case 2:
+            case TYPE_USERNAME ://userkname
                 View nickNameLayout = inflater.inflate(R.layout.dialog_content_nickname_layout, null);
                 TextView nickNameTips1 = (TextView) nickNameLayout.findViewById(R.id.tips1);
                 nickNameTips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -776,14 +814,41 @@ public class ActivitySetting extends BaseActivity {
                                 dialog.dismiss();
                             }
                         });
+                CustomDialog usernameDlg = nickBuilder.create();
+                final Button usernamePosBtn = (Button)nickBuilder.getCustomView().findViewById(R.id.positiveButton);
+                usernamePosBtn.setEnabled(false);
 
-                nickBuilder.create().show();
+                nickNameView.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if(s.toString().trim().length() <= 0) {
+                            usernamePosBtn.setEnabled(false);
+                        } else {
+                            usernamePosBtn.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if(s.toString().trim().length() <= 0) {
+                            usernamePosBtn.setEnabled(false);
+                        } else {
+                            usernamePosBtn.setEnabled(true);
+                        }
+                    }
+                });
+
+                usernameDlg.show();
 
                 break;
-            case 3:
+            case TYPE_CLASSSCHOOL :
 
                 break;
-            case 4:
+            case TYPE_GENDER ://gender
 //                View GenderLayout = inflater.inflate(R.layout.dialog_content_gender_layout, null);
 //                TextView genderTips = (TextView) GenderLayout.findViewById(R.id.tips1);
 //                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -794,7 +859,7 @@ public class ActivitySetting extends BaseActivity {
 //                CustomDialog.Builder genderBuilder = new CustomDialog.Builder(this);
 //                genderBuilder.setContentView(GenderLayout);
 //                genderBuilder.create().show();
-                CustomGenderDialog.Builder genderBuilder = new CustomGenderDialog.Builder(this);
+                CustomGenderDialog.Builder  genderBuilder = new CustomGenderDialog.Builder(this);
                 final CustomGenderDialog genderDialog = genderBuilder.create();
                 final View genderContentView = genderBuilder.getContentView();
                 TextView genderTips = (TextView) genderContentView.findViewById(R.id.tips1);
@@ -852,15 +917,15 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //选择性别
-    private void choiceSex(final int gender) {
+    private void choiceSex(final int gender){
 
-        Map<String, Object> sexMap = new HashMap<>();
+        Map<String,Object> sexMap = new HashMap<>();
         System.out.println("gender---" + gender);
-        sexMap.put("gender", gender);
-        sexMap.put("flag", 1);
-        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN, 0));
-        sexMap.put("token", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        sexMap.put("ver", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_VER, 0));
+        sexMap.put("gender",gender);
+        sexMap.put("flag",1);
+        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN,0));
+        sexMap.put("token",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        sexMap.put("ver",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_VER,0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .choiceSex(sexMap)
@@ -874,7 +939,7 @@ public class ActivitySetting extends BaseActivity {
 
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0) {
+                        if (baseRespond.getCode() == 0){
                             System.out.println("gender set successfully---" + baseRespond.toString());
 //                            if (isActivitySetting == 1){
 //                                Intent intent = new Intent();
@@ -887,7 +952,7 @@ public class ActivitySetting extends BaseActivity {
 //                                //jumpToWhere();
 //                            }
 
-                        } else {
+                        }else {
                             System.out.println("gender set error---" + baseRespond.toString());
                         }
                     }

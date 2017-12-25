@@ -68,7 +68,7 @@ public class ActivityAllDiamond extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityAllDiamond.this, true);
 
-        layoutTitle.setText("所有钻石");
+        layoutTitle.setText(R.string.diamonds_list);
         mDataList = new ArrayList<>();
         uin = (int)SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_UIN, 0);
         getUserDiamondInfo(uin,mPageNum,mPageSize);
@@ -118,11 +118,24 @@ public class ActivityAllDiamond extends BaseActivity {
                 if (!TextUtils.isEmpty(url)){
                     Picasso.with(ActivityAllDiamond.this).load(url).into(holder.itemAmiImg);
                 }else {
-                    holder.itemAmiImg.setVisibility(View.GONE);
+                    holder.itemAmiImg.setImageResource(R.drawable.diamond_null);
                 }
                 holder.itemAmiText.setText(statsBean.getQtext());
-
                 holder.itemAmiCount.setText(String.valueOf(statsBean.getGemCnt()));
+
+                if(position == 0) {
+                    holder.itemAmiIndex.setBackgroundResource(R.drawable.gold_medal);
+                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.gold_diamond_color));
+                } else if(position == 1) {
+                    holder.itemAmiIndex.setBackgroundResource(R.drawable.silver_medal);
+                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.silver_diamond_color));
+                } else if(position == 2) {
+                    holder.itemAmiIndex.setBackgroundResource(R.drawable.bronze_medal);
+                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.brozne_diamond_color));
+                } else {
+                    holder.itemAmiIndex.setBackgroundResource(R.drawable.normal_medal);
+                }
+
                 return convertView;
             }
         });
@@ -175,7 +188,6 @@ public class ActivityAllDiamond extends BaseActivity {
                                 mPageNum++;
                                 mDataList.addAll(tempList);
                                 int total = usersDiamondInfoRespond.getPayload().getTotal();
-                                layoutTitle.setText("所有钻石" + total);
                                 initDiamondList(mDataList);
                             }else {
                                 System.out.println("数据加载完毕");

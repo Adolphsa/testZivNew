@@ -6,4 +6,10 @@
     <dimen name="layer_padding">0dp</dimen>
     <dimen name="title_height">17.7dp</dimen>
     <dimen name="title_userinfo_modify_name">16dp</dimen>
+    <dimen name="activity_margin_start">14dp</dimen>
+    <dimen name="activity_margin_end">14dp</dimen>
+    <dimen name="friend_add_icon_width">48dp</dimen>
+    <dimen name="friend_add_icon_height">48dp</dimen>
+    <dimen name="personal_icon_width">34dp</dimen>
+    <dimen name="personal_icon_height">34dp</dimen>
 </resources>

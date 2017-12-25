@@ -7,14 +7,14 @@
 
     <TextView
         android:id="@+id/afi_item_index"
-        android:layout_width="25dp"
-        android:layout_height="wrap_content"
-        android:gravity="right"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:gravity="center"
         android:text="10"
         android:layout_centerVertical="true"
         android:layout_marginLeft="25dp"
-        android:textSize="22sp"
-        android:textColor="@color/feeds_hight_gray"
+        android:textSize="14sp"
+        android:textColor="#ffffff"
 
         />
 
@@ -45,19 +45,9 @@
         android:layout_height="wrap_content"
         android:text="0"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="48dp"
+        android:layout_marginRight="25dp"
         android:layout_centerVertical="true"
         android:textColor="@color/play_color2"
         android:textSize="16sp"
-        />
-
-    <ImageView
-        android:layout_width="17dp"
-        android:layout_height="16dp"
-        android:src="@drawable/diamond"
-        android:scaleType="fitXY"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="25dp"
         />
 </RelativeLayout>

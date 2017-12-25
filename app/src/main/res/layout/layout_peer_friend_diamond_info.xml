@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="54dp"
+    android:layout_gravity="center"
+    android:background="@drawable/selector_myinfo_item_background">
+
+    <ImageView
+        android:id="@+id/diamond_icon"
+        android:layout_width="@dimen/personal_icon_width"
+        android:layout_height="@dimen/personal_icon_height"
+        android:src="@drawable/personal_friends_dimand"
+        android:scaleType="fitXY"
+        android:layout_marginLeft="20dp"
+        android:layout_centerVertical="true"
+        />
+    <TextView
+        android:id="@+id/diamond_tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/my_item_font_color"
+        android:text="@string/friend_diamonds"
+        android:layout_toRightOf="@id/diamond_icon"
+        android:layout_marginLeft="6dp"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        />
+    <TextView
+        android:id="@+id/diamond_tv_num"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:textSize="14sp"
+        android:textColor="@color/text_color_gray2"
+        android:text="0"
+        android:layout_toRightOf="@+id/diamond_tv1"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="5dp"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        />
+    <ImageView
+        android:id="@+id/toplist"
+        android:layout_width="54dp"
+        android:layout_height="28dp"
+        android:src="@drawable/top"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/diamond_tv_num"
+        android:layout_centerVertical="true"
+        />
+</RelativeLayout>

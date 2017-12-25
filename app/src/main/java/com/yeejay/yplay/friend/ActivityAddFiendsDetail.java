@@ -104,7 +104,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                 Button button = (Button) v;
 
                 if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
-                    button.setBackgroundResource(R.drawable.is_friend);
+                    button.setBackgroundResource(R.drawable.be_as_friends);
                     button.setEnabled(false);
                     //接受加好友的请求
                     accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),

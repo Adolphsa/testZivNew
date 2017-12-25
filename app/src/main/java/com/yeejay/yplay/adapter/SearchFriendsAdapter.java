@@ -106,17 +106,17 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
         holder.afItemName.setText(contentList.get(position).getNickName());
         int status = contentList.get(position).getStatus();
         if (status == 0) {//非好友
-            holder.afBtnAccept.setBackgroundResource(R.drawable.green_add_friend);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.add_friend_icon);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         } else if (status == 1) {//互为好友
-            holder.afBtnAccept.setBackgroundResource(R.drawable.is_friend);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);
             holder.afBtnAccept.setEnabled(false);
         } else if (status == 2) {//已申请
-            holder.afBtnAccept.setBackgroundResource(R.drawable.already_apply);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.add_friend_apply);
             holder.afBtnAccept.setEnabled(false);
         } else if (status == 3) {//接受
-            holder.afBtnAccept.setBackgroundResource(R.drawable.green_accept);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }

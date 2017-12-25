@@ -56,16 +56,17 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="40dp"
-                    android:text="几年级啦"
+                    android:text="@string/which_class"
                     android:textColor="@color/black"
                     android:textSize="26sp" />
 
                 <TextView
+                    android:id="@+id/tips"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="30dp"
-                    android:text="找同年好友一起玩"
+                    android:text="@string/tips1_name_mofify_num"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 

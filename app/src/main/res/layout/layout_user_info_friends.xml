@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="51dp"
-    android:background="@drawable/selector_myinfo_item_bacnground">
+    android:layout_width="270dp"
+    android:layout_height="54dp"
+    android:layout_gravity="center"
+    android:background="@drawable/selector_my_info_main_item_background">
 
     <ImageView
         android:id="@+id/friend_iv1"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/my_info_my_friend"
+        android:layout_width="@dimen/personal_icon_width"
+        android:layout_height="@dimen/personal_icon_height"
+        android:src="@drawable/personal_friends_icon"
         android:scaleType="fitXY"
         android:layout_marginLeft="20dp"
         android:layout_centerVertical="true"
@@ -19,8 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:textColor="@color/play_color2"
-        android:text="我的好友"
+        android:textColor="@color/my_item_font_color"
+        android:text="@string/my_item_friend"
         android:layout_toRightOf="@id/friend_iv1"
         android:layout_marginLeft="6dp"
         android:layout_centerVertical="true"
@@ -42,7 +43,7 @@
         android:id="@+id/friend_arrows"
         android:layout_width="4.5dp"
         android:layout_height="7.7dp"
-        android:src="@drawable/item_arrows"
+        android:src="@drawable/personal_info_arrow"
         android:layout_alignParentRight="true"
         android:layout_marginRight="20.4dp"
         android:layout_centerVertical="true"

@@ -100,10 +100,10 @@ public class WaitInviteAdapter extends BaseAdapter implements View.OnClickListen
         //holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 5){
-            holder.afBtnAccept.setBackgroundResource(R.drawable.play_invite_yes);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.friend_invitation_done);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setBackgroundResource(R.drawable.play_invite_no);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.friend_invitation);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }

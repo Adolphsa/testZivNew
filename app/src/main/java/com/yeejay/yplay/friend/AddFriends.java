@@ -11,11 +11,16 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,11 +34,13 @@ import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.adapter.ClassmatesTypeAdapter;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.greendao.ContactsInfo;
@@ -48,6 +55,7 @@ import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +74,17 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private static final String TAG = "AddFriends";
     private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
 
+    private static final int CLASSMATE_TYPE_ALL = 0;
+    private static final int CLASSMATE_MALE = 1;
+    private static final int CLASSMATE_FEMALE = 2;
+    private static final int CLASSMATE_SAME_GRADE = 3;
+
+    @BindView(R.id.af_btn_add_contacts)
+    ImageButton btnAddContacts;
+    @BindView(R.id.af_btn_add_schoolmate)
+    ImageButton btnAddSchollMate;
+    @BindView(R.id.af_btn_wait_invite)
+    ImageButton btnAddWaitInvite;
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
@@ -75,14 +94,17 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @BindView(R.id.friend_pll_refresh)
     PullToRefreshLayout pullToRefreshLayout;
+    @BindView(R.id.filter_spinner)
+    Spinner typeSpinner;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
+
         if (isFromAddFriend){
             startActivity(new Intent(AddFriends.this, MainActivity.class));
-        }else {
-            finish();
         }
+
+        finish();
     }
 
     @OnClick(R.id.searchView)
@@ -92,6 +114,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.af_btn_add_contacts)
     public void btnAddContacts() {
+        btnAddContacts.setImageResource(R.drawable.add_friends_contacts_icon_selected);
+        btnAddSchollMate.setImageResource(R.drawable.add_friends_classmates_icon_unselected);
+        btnAddWaitInvite.setImageResource(R.drawable.add_friends__wait_invite_icon_unselected);
+
         //通讯录好友
         System.out.println("通讯录好友");
 
@@ -120,6 +146,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.af_btn_add_schoolmate)
     public void btnAddSchool() {
+        btnAddContacts.setImageResource(R.drawable.add_friends_contacts_icon_unselected);
+        btnAddSchollMate.setImageResource(R.drawable.add_friends_classmates_icon_selected);
+        btnAddWaitInvite.setImageResource(R.drawable.add_friends__wait_invite_icon_unselected);
 
         //同校好友
         System.out.println("同校好友");
@@ -149,6 +178,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.af_btn_wait_invite)
     public void btnWaitInvite() {
+        btnAddContacts.setImageResource(R.drawable.add_friends_contacts_icon_unselected);
+        btnAddSchollMate.setImageResource(R.drawable.add_friends_classmates_icon_unselected);
+        btnAddWaitInvite.setImageResource(R.drawable.add_friends__wait_invite_icon_selected);
+
         //可能认识的人
         System.out.println("可能认识的人");
 
@@ -227,8 +260,61 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         positionList = new ArrayList();
 
         initPullRefresh();
+        initClassmatesTypeSpinner();
 
         getRecommends(1, 1);
+    }
+
+    private void initClassmatesTypeSpinner() {
+        //ArrayAdapter<CharSequence> classTypeAdapter = ArrayAdapter.createFromResource(this, R.array.classmates_type,
+        //        android.R.layout.simple_dropdown_item_1line);
+
+        List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.classmates_type));
+        ClassmatesTypeAdapter classTypeAdapter = new ClassmatesTypeAdapter(this, typeList);
+        //classTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeSpinner.setAdapter(classTypeAdapter);
+        typeSpinner.setSelection(0, true);
+        typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case CLASSMATE_TYPE_ALL ://全部
+                        mType = 3;
+                        mPageNum = 1;
+                        positionList.clear();
+                        allSchoolMateList.clear();
+                        getRecommends(3, mPageNum);
+                        break;
+                    case CLASSMATE_MALE ://男同学
+                        mType = 5;
+                        mPageNum = 1;
+                        positionList.clear();
+                        boyList.clear();
+                        getRecommends(5, mPageNum);
+                        break;
+                    case CLASSMATE_FEMALE ://女同学
+                        mType = 6;
+                        mPageNum = 1;
+                        positionList.clear();
+                        girlList.clear();
+                        getRecommends(6, mPageNum);
+                        break;
+                    case CLASSMATE_SAME_GRADE ://同年级
+                        mType = 4;
+                        mPageNum = 1;
+                        positionList.clear();
+                        sameGradeList.clear();
+                        getRecommends(4, mPageNum);
+                        break;
+                    default :
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void initPullRefresh() {
@@ -504,14 +590,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             contactsAdapter = new ContactsAdapter(AddFriends.this,
                     new ContactsAdapter.hideCallback() {
                         @Override
-                        public void hideClick(View v) {}
+                        public void hideClick(View v) {
+
+                        }
                     },
                     new ContactsAdapter.acceptCallback() {
                         @Override
                         public void acceptClick(View v) {
                             if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                                 Button button = (Button) v;
-                                button.setBackgroundResource(R.drawable.already_apply);
+                                button.setBackgroundResource(R.drawable.add_friend_apply);
                                 button.setEnabled(false);
 
                                 int position = (int) button.getTag();
@@ -547,7 +635,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     //处理同校同学
     private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
 
-        final ImageButton arrowButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_arrow);
+        Spinner typeSpinner = (Spinner) schoolRoot.findViewById(R.id.filter_spinner);
         final LinearLayout llButton = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_button);
         LinearLayout llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
         final ImageButton allImgButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_all);
@@ -557,11 +645,13 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
 
         if (friendsBeanList.size() > 0) {
-            arrowButton.setVisibility(View.VISIBLE);
+            typeSpinner.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
 
-        arrowButton.setOnClickListener(new View.OnClickListener() {
+
+
+/*        arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 System.out.println("箭头被点击");
@@ -576,6 +666,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 }
             }
         });
+
 
         //全部
         allImgButton.setOnClickListener(new View.OnClickListener() {
@@ -646,7 +737,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 girlList.clear();
                 getRecommends(6, mPageNum);
             }
-        });
+        });*/
 
         schoolmateAdapter = new SchoolmateAdapter(AddFriends.this,
                 new SchoolmateAdapter.hideCallback() {
@@ -660,7 +751,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                     public void acceptClick(View v) {
                         if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                             Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.already_apply);
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
                             button.setEnabled(false);
                             int position = (int) button.getTag();
                             Log.i(TAG, "acceptClick: mType---" + mType);
@@ -716,7 +807,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                     public void acceptClick(View v) {
                         if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                             Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.already_apply);
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
                             button.setEnabled(false);
 
                             int position = (int) button.getTag();
@@ -800,26 +891,15 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //状态
         int status = payloadBean.getStatus();
 
-        final CardDialog cardDialog = new CardDialog(AddFriends.this, R.style.CustomDialog);
-        cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
-        cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
-        cardDialog.setCardNameStr(infoBean.getNickName());
-        cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
-        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
-
-        if (status == 0) {
-            cardDialog.setButtonImg(R.drawable.green_add_friend);
-
-        } else if (status == 2) {
-            cardDialog.setButtonImg(R.drawable.already_apply);
-        }
+        final CardBigDialog cardDialog = new CardBigDialog(AddFriends.this, R.style.CustomDialog,
+                payloadBean);
 
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton) v;
+                ImageView button = (ImageView) v;
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    button.setImageResource(R.drawable.already_apply);
+                    button.setImageResource(R.drawable.peer_friend_requested);
                     addFriend(infoBean.getUin(),mType);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
