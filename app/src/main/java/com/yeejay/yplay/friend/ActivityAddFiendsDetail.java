@@ -26,6 +26,7 @@ import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
 
     FriendsDetailAdapter friendsDetailAdapter;
     int mPageNum = 1;
+    List<GetAddFriendMsgs.PayloadBean.MsgsBean> mDataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityAddFiendsDetail.this, true);
 
+        mDataList = new ArrayList<>();
         layoutTitle.setText("好友请求");
 
         getAddFriendmsgs(mPageNum);
@@ -157,13 +160,16 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         if (getAddFriendMsgs.getCode() == 0) {
                             List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
                                     = getAddFriendMsgs.getPayload().getMsgs();
-                            initFriendsDetailListView(tempList);
+                            mDataList.addAll(tempList);
+                            initFriendsDetailListView(mDataList);
                         }
+                        aafdPtfRefresh.finishLoadMore();
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("拉取添加好友消息异常---" + e.getMessage());
+                        aafdPtfRefresh.finishLoadMore();
                     }
 
                     @Override

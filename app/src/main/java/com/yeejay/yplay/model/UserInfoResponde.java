@@ -398,7 +398,7 @@ public class UserInfoResponde implements Parcelable {
         this.payload = in.readParcelable(PayloadBean.class.getClassLoader());
     }
 
-    public static final Creator<UserInfoResponde> CREATOR = new Creator<UserInfoResponde>() {
+    public static final Parcelable.Creator<UserInfoResponde> CREATOR = new Parcelable.Creator<UserInfoResponde>() {
         @Override
         public UserInfoResponde createFromParcel(Parcel source) {
             return new UserInfoResponde(source);
