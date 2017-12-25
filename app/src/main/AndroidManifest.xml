@@ -72,6 +72,19 @@
             android:exported="false"
             android:grantUriPermissions="true" />
 
+        <!--android7.0文件相关-->
+        <provider
+            android:authorities="com.yeejay.yplay"
+            android:name="android.support.v4.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths"
+                />
+        </provider>
+
+
         <activity
             android:name=".login.LoadingActivity"
             android:screenOrientation="portrait"

@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.MainActivity;
@@ -105,6 +106,7 @@ public class FragmentAnswer extends BaseFragment {
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
     int colorCount = 7;
+    int changeCount = 0;    //换一换的次数
     boolean isFreeze;
 
     int backgroundColor[] = {R.color.play_color7,
@@ -288,9 +290,14 @@ public class FragmentAnswer extends BaseFragment {
         //换批人
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
 
-            frandProgress.setVisibility(View.INVISIBLE);
-            Log.i(TAG, "nextPersons: 换一换--" + questionNum);
-            getQuestionsCandidate(questionBean.getQid(), questionNum);
+            if (changeCount >= 2){
+                Toast.makeText(getContext(), "只能更换两次", Toast.LENGTH_SHORT).show();
+            }else {
+                frandProgress.setVisibility(View.INVISIBLE);
+                Log.i(TAG, "nextPersons: 换一换--" + questionNum);
+                getQuestionsCandidate(questionBean.getQid(), questionNum);
+            }
+
 
         } else {
             frandProgress.setVisibility(View.VISIBLE);
@@ -347,6 +354,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.INVISIBLE);
             questionNum++;
+            changeCount = 0;
 
             hideKeep();
             getQuestion();
@@ -376,6 +384,7 @@ public class FragmentAnswer extends BaseFragment {
             frandProgress.setVisibility(View.INVISIBLE);
 
             System.out.println("过questionNum----" + questionNum);
+            changeCount = 0;
 
             frgansBtn1.updateProgress(0);
             frgansBtn2.updateProgress(0);
@@ -681,7 +690,7 @@ public class FragmentAnswer extends BaseFragment {
                         System.out.println("某个问题的候选者---" + questionCandidateRespond.toString());
                         if (questionCandidateRespond.getCode() == 0) {
                             List<QuestionCandidateRespond.PayloadBean.OptionsBean> optionsList = questionCandidateRespond.getPayload().getOptions();
-
+                            changeCount++;
                             if (voteOptionsBeanList.size() > 0) {
                                 voteOptionsBeanList.clear();
                             }
