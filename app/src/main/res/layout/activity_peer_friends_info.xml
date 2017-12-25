@@ -30,7 +30,7 @@
             android:layout_width="@dimen/personal_icon_width"
             android:layout_height="@dimen/personal_icon_height"
             android:layout_centerVertical="true"
-            android:src="@drawable/personal_friends_icon"/>
+            android:src="@drawable/remove_friends_icon"/>
 
         <TextView
             android:id="@+id/remove_friend_text"

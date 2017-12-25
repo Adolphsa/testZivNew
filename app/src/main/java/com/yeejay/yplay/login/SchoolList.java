@@ -3,6 +3,8 @@ package com.yeejay.yplay.login;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import com.yeejay.yplay.customview.LazyScrollView;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
+import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
 import com.yeejay.yplay.userinfo.ActivitySetting;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -66,8 +69,19 @@ public class SchoolList extends BaseActivity {
     int grade;
     int isActivitySetting;
     int mPageNum = 1;
+    private int mLeftCnt;
+    private TextView mTips;
 
     List<NearestSchoolsRespond.PayloadBean.SchoolsBean> mDataList;
+
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                    Integer.toString(mLeftCnt)));
+        }
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -86,6 +100,9 @@ public class SchoolList extends BaseActivity {
             grade = bundle.getInt(YPlayConstant.YPLAY_SCHOOL_GRADE);
             isActivitySetting = bundle.getInt("activity_setting_class_school");
         }
+
+        mTips = (TextView) findViewById(R.id.tips);
+        queryUserUpdateLeftCount(3);
 
         mDataList = new ArrayList<>();
 
@@ -326,4 +343,42 @@ public class SchoolList extends BaseActivity {
         startActivity(new Intent(SchoolList.this, MainActivity.class));
     }
 
+    //查询用户的修改配额
+    private void queryUserUpdateLeftCount(int field) {
+
+        Map<String, Object> leftCountMap = new HashMap<>();
+        leftCountMap.put("field", field);
+        leftCountMap.put("uin", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0));
+        leftCountMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        leftCountMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserUpdateCount(leftCountMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
+                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
+                        if (userUpdateLeftCountRespond.getCode() == 0) {
+                            mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+                            mHandler.sendEmptyMessage(mLeftCnt);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
 }

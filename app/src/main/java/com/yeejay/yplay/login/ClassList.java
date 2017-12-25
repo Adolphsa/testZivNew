@@ -1,8 +1,11 @@
 package com.yeejay.yplay.login;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +16,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LazyScrollView;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ClassList extends BaseActivity {
 
@@ -50,7 +62,18 @@ public class ClassList extends BaseActivity {
     int schoolType;
     int grade;
     int isActivitySetting;
+    private int mLeftCnt;
+    private TextView mTips;
 
+
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                    Integer.toString(mLeftCnt)));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +94,8 @@ public class ClassList extends BaseActivity {
             mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
             Log.i(TAG, "onCreate: lat---" + mLatitude + ",lon---" + mLongitude);
         }
+        mTips = (TextView) findViewById(R.id.tips);
+        queryUserUpdateLeftCount(3);
 
         mPrimaryListView = (MesureListView) findViewById(R.id.cl_grade_list);
 
@@ -140,6 +165,13 @@ public class ClassList extends BaseActivity {
 ////                clTitleLl.getBackground().setAlpha(1);
 //            }
 //        });
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                Integer.toString(mLeftCnt)));
     }
 
     private void jumpToSchoolList() {
@@ -226,5 +258,43 @@ public class ClassList extends BaseActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK)
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
+    }
+    //查询用户的修改配额
+    private void queryUserUpdateLeftCount(int field) {
+
+        Map<String, Object> leftCountMap = new HashMap<>();
+        leftCountMap.put("field", field);
+        leftCountMap.put("uin", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_UIN, 0));
+        leftCountMap.put("token", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        leftCountMap.put("ver", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserUpdateCount(leftCountMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
+                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
+                        if (userUpdateLeftCountRespond.getCode() == 0) {
+                            mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+                            mHandler.sendEmptyMessage(mLeftCnt);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }
