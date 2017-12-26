@@ -155,7 +155,8 @@ public class ActivityFriendsInfo extends BaseActivity {
                 Picasso.with(this).load(url).into(luiHeaderImg);
             }
             luiName.setText(infoBean.getNickName());
-            luiUserName.setText(infoBean.getUserName());
+            luiUserName.setText(String.format(getResources().getString(R.string.username_colon),
+                    infoBean.getUserName()));
             luiGrade.setText(schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             if (infoBean.getGender() == 1) {
                 luiGender.setVisibility(View.VISIBLE);

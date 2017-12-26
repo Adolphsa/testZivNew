@@ -100,16 +100,16 @@ public class ActivityMyInfo extends BaseActivity {
     RelativeLayout addFriendsRl;
 
     //扩列开启
-    @BindView(R.id.ami_view2)
-    View amiView2;
-    @BindView(R.id.frf_no_more_show)
-    ImageButton frfNoMoreShow;
-    @BindView(R.id.frf_see_more)
-    TextView frfSeeMore;
-    @BindView(R.id.diamond_expansion)
-    RelativeLayout diamondExpansionRl;
-    @BindView(R.id.frf_list_view)
-    ListView diamondExpansionListView;
+//    @BindView(R.id.ami_view2)
+//    View amiView2;
+//    @BindView(R.id.frf_no_more_show)
+//    ImageButton frfNoMoreShow;
+//    @BindView(R.id.frf_see_more)
+//    TextView frfSeeMore;
+//    @BindView(R.id.diamond_expansion)
+//    RelativeLayout diamondExpansionRl;
+//    @BindView(R.id.frf_list_view)
+//    ListView diamondExpansionListView;
 
     //返回
     @OnClick(R.id.layout_title_back2)
@@ -158,26 +158,26 @@ public class ActivityMyInfo extends BaseActivity {
 
 
     //不再显示
-    @OnClick(R.id.frf_no_more_show)
-    public void diamondNoMoreShow(View v) {
-
-        diamondExpansionRl.setVisibility(View.GONE);
-        //将数据库中的值变为1
-        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
-        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
-        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
-                .build().unique();
-        if (myInfo != null) {
-            myInfo.setIsNoMoreShow2(1);
-            myInfoDao.update(myInfo);
-        }
-    }
+//    @OnClick(R.id.frf_no_more_show)
+//    public void diamondNoMoreShow(View v) {
+//
+//        diamondExpansionRl.setVisibility(View.GONE);
+//        //将数据库中的值变为1
+//        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+//        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
+//        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+//                .build().unique();
+//        if (myInfo != null) {
+//            myInfo.setIsNoMoreShow2(1);
+//            myInfoDao.update(myInfo);
+//        }
+//    }
 
     //查看更多
-    @OnClick(R.id.frf_see_more)
-    public void DiamondseeMore(View v) {
-        startActivity(new Intent(ActivityMyInfo.this, AddFriends.class));
-    }
+//    @OnClick(R.id.frf_see_more)
+//    public void DiamondseeMore(View v) {
+//        startActivity(new Intent(ActivityMyInfo.this, AddFriends.class));
+//    }
 
     List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
     int mPageNum = 1;
@@ -233,7 +233,8 @@ public class ActivityMyInfo extends BaseActivity {
 
             personalSchool.setText(infoBean.getSchoolName());
             personalNickName.setText(infoBean.getNickName());
-            personalUserName.setText(infoBean.getUserName());
+            personalUserName.setText(String.format(getResources().getString(R.string.username_colon),
+                    infoBean.getUserName()));
             personalGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             if (infoBean.getGender() == 1) {
                 personalGender.setVisibility(View.VISIBLE);
@@ -365,9 +366,9 @@ public class ActivityMyInfo extends BaseActivity {
         int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
-        if (myInfo != null && myInfo.getIsNoMoreShow2() == 1) {
-            diamondExpansionRl.setVisibility(View.GONE);
-        }
+//        if (myInfo != null && myInfo.getIsNoMoreShow2() == 1) {
+//            diamondExpansionRl.setVisibility(View.GONE);
+//        }
 
         recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(ActivityMyInfo.this,
                 new RecommendFriendForNullAdapter.hideCallback() {
@@ -397,7 +398,7 @@ public class ActivityMyInfo extends BaseActivity {
                     }
                 },
                 tempList,2);
-        diamondExpansionListView.setAdapter(recommendFriendForNullAdapter);
+//        diamondExpansionListView.setAdapter(recommendFriendForNullAdapter);
     }
 
     //加载更多
@@ -591,8 +592,8 @@ public class ActivityMyInfo extends BaseActivity {
                                     && getRecommendsRespond.getPayload().getFriends().size() > 0) {
                                 initRecommendList(getRecommendsRespond.getPayload().getFriends());
                             } else {
-                                diamondExpansionRl.setVisibility(View.GONE);
-                                amiView2.setVisibility(View.GONE);
+//                                diamondExpansionRl.setVisibility(View.GONE);
+//                                amiView2.setVisibility(View.GONE);
                             }
 
                         }

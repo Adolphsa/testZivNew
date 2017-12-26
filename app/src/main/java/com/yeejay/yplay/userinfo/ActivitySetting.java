@@ -33,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -108,7 +109,7 @@ public class ActivitySetting extends BaseActivity {
     TextView settingGender;
 
     @BindView(R.id.setting_school)
-    TextView settingSchool;
+    RelativeLayout settingSchool;
     @BindView(R.id.setting_school_name)
     TextView settingSchoolName;
     @BindView(R.id.setting_grade)

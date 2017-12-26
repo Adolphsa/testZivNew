@@ -186,35 +186,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <RelativeLayout
+                    android:id="@+id/setting_school"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="20dp"
                     android:text="学校信息"
                     android:textColor="@color/play_color2"
                     android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/setting_school"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="37dp"
-                    android:layout_marginTop="21dp"
-                    android:text="修改"
-                    android:textColor="@color/feeds_hight_gray"
-                    android:textSize="14sp"
-                    android:gravity="center"
-                    />
 
                 <ImageView
                     android:layout_width="4.5dp"
                     android:layout_height="7.7dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="20.3dp"
-                    android:layout_marginTop="28dp"
+                    android:layout_centerVertical="true"
                     android:src="@drawable/item_arrows" />
+                </RelativeLayout>
 
                 <TextView
                     android:layout_width="wrap_content"

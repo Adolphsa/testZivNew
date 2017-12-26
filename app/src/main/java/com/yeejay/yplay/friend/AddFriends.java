@@ -101,6 +101,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     PullToRefreshLayout pullToRefreshLayout;
     @BindView(R.id.filter_spinner)
     Spinner typeSpinner;
+    @BindView(R.id.filter_text)
+    TextView filterText;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -665,6 +667,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
         if (friendsBeanList.size() > 0) {
             typeSpinner.setVisibility(View.VISIBLE);
+            filterText.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
 

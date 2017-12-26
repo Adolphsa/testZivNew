@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="10dp"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/personal_nick_name"
@@ -41,15 +42,16 @@
         android:id="@+id/personal_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/username"
+        android:layout_marginBottom="10dp"
+        android:text="@string/username_colon"
         android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="90dp"
+        android:gravity="center_horizontal"
         android:layout_marginTop="6dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal" >
         <TextView
             android:id="@+id/personal_school"
@@ -58,6 +60,8 @@
             android:layout_marginEnd="6dp"
             android:drawableStart="@drawable/mine_school"
             android:gravity="right"
+            android:lines="1"
+            android:ellipsize="end"
             android:text="@string/school"
             android:textSize="16sp" />
 
@@ -74,6 +78,8 @@
             android:layout_marginStart="6dp"
             android:gravity="left"
             android:text="@string/grade"
+            android:lines="1"
+            android:ellipsize="end"
             android:textSize="16sp" />
     </LinearLayout>
 
