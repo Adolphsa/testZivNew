@@ -86,9 +86,10 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
                         if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
-                            accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),
-                                    1,
-                                    tempList.get((int) button.getTag()));
+                            //隐藏按钮点击后不做接受好友处理；
+                            //accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),
+                            //        1,
+                            //        tempList.get((int) button.getTag()));
                             button.setVisibility(View.INVISIBLE);
                             if (tempList.size() > 0) {
                                 System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());

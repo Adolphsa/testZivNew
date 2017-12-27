@@ -123,7 +123,8 @@ public class ActivitySearchFriends extends BaseActivity {
                     public void hideClick(View v) {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
-                        removeFriend(tempList.get((int) button.getTag()).getUin());
+                        //忽略好友请求，而不是删除
+                        //removeFriend(tempList.get((int) button.getTag()).getUin());
                         button.setVisibility(View.INVISIBLE);
                         if (tempList.size() > 0) {
                             System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
@@ -140,11 +141,11 @@ public class ActivitySearchFriends extends BaseActivity {
                 int status = tempList.get((int) button.getTag()).getStatus();
                 if (NetWorkUtil.isNetWorkAvailable(ActivitySearchFriends.this)){
                     if (status == 0){
-                        button.setBackgroundResource(R.drawable.already_apply);
+                        button.setBackgroundResource(R.drawable.add_friend_apply);
                         //加好友
                         addFriend(tempList.get((int) button.getTag()).getUin());
                     }else if (status == 3){
-                        button.setBackgroundResource(R.drawable.is_friend);
+                        button.setBackgroundResource(R.drawable.be_as_friends);
                         //接受
                         accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),0);
                     }

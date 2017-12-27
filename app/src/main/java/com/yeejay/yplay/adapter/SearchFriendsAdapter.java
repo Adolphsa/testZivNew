@@ -116,10 +116,11 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
             holder.afBtnAccept.setBackgroundResource(R.drawable.add_friend_apply);
             holder.afBtnAccept.setEnabled(false);
         } else if (status == 3) {//接受
-            holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.friends_accept);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }
+        holder.afBtnHide.setOnClickListener(hideListener);
         holder.afItemTvSharesFriends.setText(username);
         holder.afBtnAccept.setTag(position);
         return convertView;
