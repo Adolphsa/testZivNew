@@ -69,6 +69,11 @@ public interface YPlayApi {
     @POST("/api/addr/remove")
     Observable<BaseRespond> removeContacts(@FieldMap Map<String,String> filemap);
 
+    //搜索学校列表
+    @FormUrlEncoded
+    @POST("/api/account/searchschools")
+    Observable<NearestSchoolsRespond> getSearchScools(@FieldMap Map<String,Object> filemap);
+
     //最近学校列表
     @FormUrlEncoded
     @POST("/api/account/getnearestschools")
