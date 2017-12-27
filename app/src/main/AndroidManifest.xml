@@ -116,6 +116,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".login.SchoolList"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:screenOrientation="portrait" />
         <activity
             android:name=".login.ChoiceSex"

@@ -1,17 +1,28 @@
 package com.yeejay.yplay.login;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +57,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class SchoolList extends BaseActivity {
+    private static final String TAG = "SchoolList";
 
     @BindView(R.id.sl_back)
     ImageButton slBack;
@@ -57,11 +69,46 @@ public class SchoolList extends BaseActivity {
     PullToRefreshLayout mptfRefresh;
     @BindView(R.id.sl_scroll_view)
     LazyScrollView slScrollView;
+    @BindView(R.id.sl_search)
+    ImageView btnSearch;
+    @BindView(R.id.sl_rl)
+    RelativeLayout rlLayout;
+    @BindView(R.id.sl_search_cancel)
+    Button btnSearchCancel;
+    @BindView(R.id.sl_search_result)
+    TextView resultTip;
+    @BindView(R.id.emptyview)
+    View emptyView;
+
+    @OnClick(R.id.sl_search)
+    public void search() {
+        btnSearch.setVisibility(View.GONE);
+        rlLayout.setVisibility(View.VISIBLE);
+    }
+
+    @OnClick(R.id.sl_search_cancel)
+    public void cancelSearch() {
+        Log.d(TAG, "cancel search, isInputMethodShow() = " + isInputMethodShow());
+        if(isInputMethodShow()) {
+            closeInputMethod(mActivity);
+        } else {
+            mSearchFlag = 0;
+            mHandler.sendEmptyMessage(MSG_CODE_HIDE_RESULT_TIP);
+
+            //清空搜索结果后，重新拉一次学校数据
+            mDataList.clear();
+            getSchoolList(mPageNum, 10);
+        }
+    }
 
     @OnClick(R.id.sl_back)
     public void back() {
         finish();
     }
+
+    private static final int MSG_CODE_LEFT_COUNT = 0;
+    private static final int MSG_CODE_HIDE_RESULT_TIP = 1;
+    private static final int MSG_CODE_SHOW_RESULT_TIP = 2;
 
     double mLatitude;
     double mLongitude;
@@ -69,8 +116,12 @@ public class SchoolList extends BaseActivity {
     int grade;
     int isActivitySetting;
     int mPageNum = 1;
+    private int mSearchPageNum = 1;
     private int mLeftCnt;
+    private int mSearchFlag = 0;
     private TextView mTips;
+    private EditText searchEdit;
+    private Activity mActivity;
 
     List<NearestSchoolsRespond.PayloadBean.SchoolsBean> mDataList;
 
@@ -78,8 +129,28 @@ public class SchoolList extends BaseActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-                    Integer.toString(mLeftCnt)));
+            Log.d(TAG, "msg.what = " + msg.what);
+            switch (msg.what) {
+                case MSG_CODE_LEFT_COUNT :
+                    mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                            Integer.toString(mLeftCnt)));
+
+                    break;
+
+                case MSG_CODE_HIDE_RESULT_TIP :
+                    resultTip.setVisibility(View.GONE);
+                    btnSearch.setVisibility(View.VISIBLE);
+                    rlLayout.setVisibility(View.GONE);
+
+                    break;
+
+                case MSG_CODE_SHOW_RESULT_TIP :
+                    resultTip.setVisibility(View.VISIBLE);
+                    btnSearchCancel.setEnabled(true);
+
+                    break;
+                default:
+            }
         }
     };
 
@@ -89,6 +160,7 @@ public class SchoolList extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_school_list);
         ButterKnife.bind(this);
+        mActivity = this;
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_text_color2));
 
@@ -102,6 +174,7 @@ public class SchoolList extends BaseActivity {
         }
 
         mTips = (TextView) findViewById(R.id.tips);
+        searchEdit = (EditText) findViewById(R.id.sl_search_edit);
         queryUserUpdateLeftCount(3);
 
         mDataList = new ArrayList<>();
@@ -112,6 +185,7 @@ public class SchoolList extends BaseActivity {
             Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
         }
 
+        mSchoolListView.setEmptyView(emptyView);
         mSchoolListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -141,7 +215,7 @@ public class SchoolList extends BaseActivity {
 //            }
 //        });
 
-        mptfRefresh.setCanRefresh(false);
+       mptfRefresh.setCanRefresh(false);
         mptfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {}
@@ -149,11 +223,61 @@ public class SchoolList extends BaseActivity {
             @Override
             public void loadMore() {
                 mPageNum++;
-                getSchoolList(mPageNum, 10);
+                mSearchPageNum++;
+                if(mSearchFlag == 1) {
+                    searchSchoolList(mSearchPageNum, 10);
+                } else {
+                    getSchoolList(mPageNum, 10);
+                }
+            }
+        });
+
+       searchEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d(TAG, "actionId = " + actionId);
+                if(actionId == EditorInfo.IME_ACTION_SEARCH){
+                    mSearchFlag = 1;
+                    mHandler.sendEmptyMessage(MSG_CODE_SHOW_RESULT_TIP);
+
+                    if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)) {
+                        //先清空之前根据定位拉取的学校数据；
+                        mDataList.clear();
+                        searchSchoolList(mSearchPageNum, 10);
+                    } else {
+                        Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                    }
+
+                    closeInputMethod(mActivity);
+                    return false;
+                }
+                return false;
             }
         });
     }
 
+    private void closeInputMethod(Activity context) {
+        try {
+            InputMethodManager inputMethodManager = (InputMethodManager) context
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(context
+                            .getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+        } catch (Exception e) {
+            // TODO: handle exception
+            Log.d(TAG, "close inputmethod exception!");
+        }
+    }
+
+    private boolean isInputMethodShow() {
+        //获取当前屏幕内容的高度
+        int screenHeight = getWindow().getDecorView().getHeight();
+        //获取View可见区域的bottom
+        Rect rect = new Rect();
+        getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+
+        return screenHeight - rect.bottom != 0;
+    }
 
     class SchoolAdapter extends BaseAdapter {
 
@@ -202,6 +326,64 @@ public class SchoolList extends BaseActivity {
         TextView slItemNumber;
         TextView slItemAddress;
         TextView slItemIsJoin;
+    }
+
+    //获取学校搜索结果列表
+    private void searchSchoolList(int pageNum, int pageSize) {
+        Map<String, Object> schoolMap = new HashMap<>();
+
+        Log.d(TAG, "searchEdit content = " + searchEdit.getText().toString().trim() +
+                " , schoolType = " + schoolType);
+        schoolMap.put("schoolType", schoolType);
+        schoolMap.put("schoolName", searchEdit.getText().toString().trim());
+        schoolMap.put("pageNum", pageNum);
+        schoolMap.put("pageSize", pageSize);
+        schoolMap.put("uin", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0));
+        schoolMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        schoolMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
+
+        Log.d(TAG,"school---" + schoolType +
+                ",latitude---" + mLatitude +
+                ",latitude---" + mLongitude +
+                ",uin---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0) +
+                ",token---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay") +
+                ",ver---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0)
+
+        );
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .getSearchScools(schoolMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NearestSchoolsRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull NearestSchoolsRespond nearestSchoolsRespond) {
+                        Log.d(TAG, "搜索得到的学校列表信息---" + nearestSchoolsRespond.toString());
+                        if (nearestSchoolsRespond.getCode() == 0) {
+                            showSchoolData(nearestSchoolsRespond);
+                        } else {
+                            mSchoolListView.setAdapter(null);
+                            Log.d(TAG,"搜索学校失败");
+                        }
+                        mptfRefresh.finishLoadMore();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d(TAG, "搜索学校异常---" + e.getMessage());
+                        mptfRefresh.finishLoadMore();
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     //获取学校列表
@@ -366,7 +548,7 @@ public class SchoolList extends BaseActivity {
                         System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
                         if (userUpdateLeftCountRespond.getCode() == 0) {
                             mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
-                            mHandler.sendEmptyMessage(mLeftCnt);
+                            mHandler.sendEmptyMessage(MSG_CODE_LEFT_COUNT);
                         }
                     }
 

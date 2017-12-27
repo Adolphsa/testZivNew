@@ -75,4 +75,8 @@
     <string name="search_result">搜索结果</string>
     <string name="hint_search_school">输入校名</string>
     <string name="username_colon">用户名：%1$s</string>
+    <string name="warning_no_school_name">校名不能为空</string>
+    <string name="empty_school_tips1">没找到呦</string>
+    <string name="empty_school_tips2">请确认输入完整校名</string>
+    <string name="empty_school_tips3">╮(╯▽╰)╭</string>
 </resources>
