@@ -1,5 +1,20 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao'
+
+def currentTime = getCurrentTime();
+
+def getCurrentTime() {
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+    return df.format(Calendar.getInstance(Locale.CHINA).getTime())
+}
+
+//String getDate() {
+//    DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+//    return df.format(Calendar.getInstance(Locale.CHINA).getTime()).toString()
+//};
 
 android {
     signingConfigs {
@@ -16,7 +31,7 @@ android {
         applicationId "com.yeejay.yplay"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 1
+        versionCode 0
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
@@ -26,14 +41,17 @@ android {
         }
 
         multiDexEnabled true
+
     }
     buildTypes {
         release {
+            buildConfigField("String", "BUILD_TIMESTAMP", "\"${currentTime}\"")
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
         debug {
+            buildConfigField("String", "BUILD_TIMESTAMP", "\"${currentTime}\"")
             signingConfig signingConfigs.release
         }
     }
@@ -47,6 +65,35 @@ android {
     }
 
     useLibrary 'org.apache.http.legacy'
+
+    //如果version.properties文件可读则执行操作
+    def versionPropsFile = file('version.properties')
+    if (versionPropsFile.canRead()) {
+        //载入version.properties
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        //从version.properties根据关键字"VERSION_CODE"取Integer
+        def verCode = versionProps['VERSION_CODE'].toInteger()
+        //判断build模式，如果是发布模式（':app:assembleRelease'）则自增版本号，并且写回version.properties文件中
+//          def runTasks = gradle.startParameter.taskNames
+//        if (':app:assembleRelease' in runTasks) {
+            versionProps['VERSION_CODE'] = (++verCode).toString()
+            versionProps.store(versionPropsFile.newWriter(), null)
+//        }
+        //使用自增后的版本号为为生成的APK命名
+//        def verName = "0."+versionProps['VERSION_CODE'].toString()
+
+        defaultConfig.versionCode = verCode;
+        android.applicationVariants.all { variant ->
+            variant.outputs.all {
+                def newApkName
+                newApkName = defaultConfig.applicationId + "_" + defaultConfig.versionName + "." + defaultConfig.versionCode  + "_beta" + ".apk"
+                outputFileName = newApkName;
+            }
+        }
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
 }
 
 dependencies {

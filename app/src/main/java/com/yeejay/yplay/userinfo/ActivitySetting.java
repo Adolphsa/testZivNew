@@ -50,6 +50,7 @@ import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yanzhenjie.permission.SettingDialog;
+import com.yeejay.yplay.BuildConfig;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
@@ -125,6 +126,8 @@ public class ActivitySetting extends BaseActivity {
     TextView settingPhoneNumber;
     @BindView(R.id.setting_exit)
     TextView settingExitButton;
+    @BindView(R.id.version)
+    TextView versionText;
 
 
     @OnClick(R.id.layout_title_back2)
@@ -329,8 +332,15 @@ public class ActivitySetting extends BaseActivity {
 
         layoutTitle.setText("资料详情");
 
+        getVersion();
         initData();
         getMyInfo();
+    }
+
+    private void getVersion() {
+        String ver = BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE)+
+                "_" + BuildConfig.BUILD_TIMESTAMP + "_beta";
+        versionText.setText(ver);
     }
 
     private void initData() {
