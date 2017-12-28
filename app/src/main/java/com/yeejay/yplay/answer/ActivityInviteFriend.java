@@ -53,6 +53,8 @@ public class ActivityInviteFriend extends BaseActivity {
     ImageButton aifTipClose;
     @BindView(R.id.aif_tip_ll)
     LinearLayout aifTipLl;
+    @BindView(R.id.emptyview)
+    View emptyView;
 
     private static final String TAG = "ActivityInviteFriend";
 
@@ -135,6 +137,7 @@ public class ActivityInviteFriend extends BaseActivity {
                 invitefriendsbysms(base64phone);
             }
         }, tempList);
+        aifListView.setEmptyView(emptyView);
         aifListView.setAdapter(waitInviteAdapter);
 
     }
@@ -182,6 +185,9 @@ public class ActivityInviteFriend extends BaseActivity {
                             List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList = getRecommendsRespond.getPayload().getFriends();
                             mDataList.addAll(tempList);
                             init(mDataList);
+                        } else {
+                            //如果服务器返回失败;
+                            aifListView.setAdapter(null);
                         }
                         aifPtfRefresh.finishLoadMore();
                     }

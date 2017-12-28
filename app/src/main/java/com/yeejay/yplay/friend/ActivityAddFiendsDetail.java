@@ -52,6 +52,8 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     ListView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
+    @BindView(R.id.emptyview)
+    View emptyView;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -120,6 +122,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
 
             }
         }, tempList);
+        aafdListView.setEmptyView(emptyView);
         aafdListView.setAdapter(friendsDetailAdapter);
     }
 
@@ -163,6 +166,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                                     = getAddFriendMsgs.getPayload().getMsgs();
                             mDataList.addAll(tempList);
                             initFriendsDetailListView(mDataList);
+                        } else {
+                            //如果服务器返回失败
+                            aafdListView.setAdapter(null);
                         }
                         aafdPtfRefresh.finishLoadMore();
                     }

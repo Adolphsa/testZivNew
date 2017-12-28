@@ -80,4 +80,5 @@
     <string name="empty_school_tips1">没找到呦</string>
     <string name="empty_school_tips2">请确认输入完整校名</string>
     <string name="empty_school_tips3">╮(╯▽╰)╭</string>
+    <string name="username_already_exist">用户名已经存在</string>
 </resources>

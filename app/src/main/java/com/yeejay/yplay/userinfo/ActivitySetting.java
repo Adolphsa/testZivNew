@@ -545,7 +545,7 @@ public class ActivitySetting extends BaseActivity {
                             }
 
                         } else if (baseRespond.getCode() == 11011) {
-                            Toast.makeText(ActivitySetting.this, "门牌号已经存在", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivitySetting.this, R.string.username_already_exist, Toast.LENGTH_SHORT).show();
                         }
                     }
 

@@ -21,6 +21,9 @@
             android:divider="@color/feeds_search_color"
             android:dividerHeight="0.3dp"
             />
+        <include
+            android:id="@+id/emptyview"
+            layout="@layout/layout_empty_friend_listview"/>
     </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 
 </LinearLayout>

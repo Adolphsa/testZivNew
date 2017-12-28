@@ -47,6 +47,8 @@ public class ActivityAllDiamond extends BaseActivity {
     @BindView(R.id.aad_ptf_refresh)
     PullToRefreshLayout aadPtfRefresh;
     private LoadMoreView loadMoreView;
+    @BindView(R.id.emptyview)
+    View emptyView;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -80,6 +82,7 @@ public class ActivityAllDiamond extends BaseActivity {
 
     private void initDiamondList(final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList){
 
+        aadListView.setEmptyView(emptyView);
         aadListView.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
@@ -194,6 +197,9 @@ public class ActivityAllDiamond extends BaseActivity {
                                 loadMoreView.noData();
                             }
 
+                        } else {
+                            //服务器获取信息失败
+                            aadListView.setAdapter(null);
                         }
                         aadPtfRefresh.finishLoadMore();
                     }
