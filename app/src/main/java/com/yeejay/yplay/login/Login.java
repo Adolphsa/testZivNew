@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yeejay.yplay.BuildConfig;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
@@ -216,8 +217,12 @@ public class Login extends BaseActivity {
             public void onClick(View v) {
                 if (NetWorkUtil.isNetWorkAvailable(Login.this)) {
                     long uuid = (long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0);
-                    Log.i(TAG, "onClick: uuid---" + uuid);
-                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid);
+                    String os = getOsTyep();
+                    String appVersion = getVersion();
+                    Log.i(TAG, "onClick: uuid---" + uuid + " , device name = " + android.os.Build.MODEL
+                            + " , os = " + os + " , appVersion = " + appVersion);
+                    login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid,
+                            android.os.Build.MODEL, os, appVersion);
                 } else {
                     Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
@@ -229,6 +234,19 @@ public class Login extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    private String getVersion() {
+        return  BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE)+
+                "_" + BuildConfig.BUILD_TIMESTAMP + "_beta";
+    }
+
+    private String getOsTyep() {
+        String sdk = android.os.Build.VERSION.SDK;
+        if(TextUtils.isEmpty(sdk)) {
+            return "android_" + android.os.Build.VERSION.RELEASE;
+        }
+        return "android_" + android.os.Build.VERSION.RELEASE + "_" + sdk;
     }
 
     //跳转逻辑判断
@@ -353,9 +371,9 @@ public class Login extends BaseActivity {
 
 
     //登录
-    private void login(final String phoneNumber, String code, long uuid) {
+    private void login(final String phoneNumber, String code, long uuid, String deviceName, String os, String appVersion) {
         YPlayApiManger.getInstance().getZivApiService()
-                .login(phoneNumber, code, uuid)
+                .login(phoneNumber, code, uuid, deviceName, os, appVersion)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<LoginRespond>() {

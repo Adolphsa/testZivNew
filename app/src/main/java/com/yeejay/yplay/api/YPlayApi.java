@@ -52,7 +52,10 @@ public interface YPlayApi {
     @POST("/api/account/login2")
     Observable<LoginRespond> login(@Field("phone") String phone,
                                    @Field("code") String code,
-                                   @Field("uuid") long uuid);
+                                   @Field("uuid") long uuid,
+                                   @Field("device") String device,
+                                   @Field("os") String os,
+                                   @Field("appVer") String appVer);
 
     //校验邀请码
     @FormUrlEncoded
