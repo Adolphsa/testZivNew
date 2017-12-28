@@ -27,7 +27,7 @@
             android:text="添加好友吧"
             android:layout_gravity="center"
             android:textSize="26sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_marginTop="30dp"
             />
         <TextView
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:text="对好友匿名投票，说出心里话；"
             android:textSize="16sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_marginTop="26dp"
             android:layout_gravity="center"
             />
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:text="收到好友匿名投票，看大家对我的印象"
             android:textSize="16sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_marginTop="4dp"
             android:layout_gravity="center"
             />
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:text="添加越多好友，越好玩！"
             android:textSize="16sp"
-            android:textColor="@color/feeds_hight_gray50"
+            android:textColor="@color/white"
             android:layout_marginTop="58dp"
             android:layout_gravity="center"
             />

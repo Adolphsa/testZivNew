@@ -107,6 +107,12 @@ public class ActivitySetting extends BaseActivity {
     TextView settingUserNmae;
     @BindView(R.id.setting_gender)
     TextView settingGender;
+    @BindView(R.id.rl_gender)
+    RelativeLayout rlGenderView;
+    @BindView(R.id.rl_user_name)
+    RelativeLayout rlUserName;
+    @BindView(R.id.rl_nick_name)
+    RelativeLayout rlNickName;
 
     @BindView(R.id.setting_school)
     RelativeLayout settingSchool;
@@ -142,7 +148,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //姓名
-    @OnClick(R.id.setting_name)
+    @OnClick(R.id.rl_nick_name)
     public void settingName() {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
@@ -156,7 +162,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //用户姓名
-    @OnClick(R.id.setting_user_name)
+    @OnClick(R.id.rl_user_name)
     public void settingUserName() {
 
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
@@ -170,7 +176,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //性别
-    @OnClick(R.id.setting_gender)
+    @OnClick(R.id.rl_gender)
     public void setSettingGender() {
         System.out.println("性别");
         tag = 4;
