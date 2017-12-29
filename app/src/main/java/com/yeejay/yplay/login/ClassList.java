@@ -2,6 +2,7 @@ package com.yeejay.yplay.login;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LazyScrollView;
@@ -70,8 +72,12 @@ public class ClassList extends BaseActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-                    Integer.toString(mLeftCnt)));
+            if(isLoginMode()) {
+                mTips.setText(R.string.look_for_sameclass);
+            } else {
+                mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                        Integer.toString(mLeftCnt)));
+            }
         }
     };
 
@@ -95,6 +101,10 @@ public class ClassList extends BaseActivity {
             Log.i(TAG, "onCreate: lat---" + mLatitude + ",lon---" + mLongitude);
         }
         mTips = (TextView) findViewById(R.id.tips);
+
+        if(isLoginMode()) {
+            mTips.setText(R.string.look_for_sameclass);
+        }
         queryUserUpdateLeftCount(3);
 
         mPrimaryListView = (MesureListView) findViewById(R.id.cl_grade_list);
@@ -167,11 +177,20 @@ public class ClassList extends BaseActivity {
 //        });
     }
 
+    boolean isLoginMode() {
+        SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
+        return  pref.getBoolean("isLogin", false);
+    }
+
     @Override
     protected void onResume(){
         super.onResume();
-        mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-                Integer.toString(mLeftCnt)));
+        if(isLoginMode()) {
+            mTips.setText(R.string.look_for_sameclass);
+        } else {
+            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                    Integer.toString(mLeftCnt)));
+        }
     }
 
     private void jumpToSchoolList() {

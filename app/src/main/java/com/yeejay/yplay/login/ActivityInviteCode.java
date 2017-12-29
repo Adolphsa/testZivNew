@@ -1,6 +1,7 @@
 package com.yeejay.yplay.login;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -195,6 +196,12 @@ public class ActivityInviteCode extends BaseActivity {
                                     infoBean.getSchoolId() == 0 ||
                                     infoBean.getGender() == 0 ||
                                     TextUtils.isEmpty(infoBean.getNickName())) {
+
+                                //首次登录注册，记录一个标志到sharedPreference中，表明现在是注册向导状态；
+                                SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putBoolean("isLogin",true);
+                                editor.commit();
 
                                 Intent intent = new Intent(ActivityInviteCode.this, LoginAge.class);
                                 intent.putExtra("is_from_invite_code",true);

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +31,7 @@ import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LazyScrollView;
@@ -132,8 +134,12 @@ public class SchoolList extends BaseActivity {
             Log.d(TAG, "msg.what = " + msg.what);
             switch (msg.what) {
                 case MSG_CODE_LEFT_COUNT :
-                    mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-                            Integer.toString(mLeftCnt)));
+                    if(isLoginMode()) {
+                        mTips.setText(R.string.look_for_classmates);
+                    } else {
+                        mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                                Integer.toString(mLeftCnt)));
+                    }
 
                     break;
 
@@ -174,6 +180,9 @@ public class SchoolList extends BaseActivity {
         }
 
         mTips = (TextView) findViewById(R.id.tips);
+        if(isLoginMode()) {
+            mTips.setText(R.string.look_for_classmates);
+        }
         searchEdit = (EditText) findViewById(R.id.sl_search_edit);
         queryUserUpdateLeftCount(3);
 
@@ -254,6 +263,11 @@ public class SchoolList extends BaseActivity {
                 return false;
             }
         });
+    }
+
+    boolean isLoginMode() {
+        SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
+        return pref.getBoolean("isLogin", false);
     }
 
     private void closeInputMethod(Activity context) {
