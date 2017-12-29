@@ -5,25 +5,22 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,22 +34,19 @@ import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.adapter.ClassmatesTypeAdapter;
-import com.yeejay.yplay.adapter.ClassmatesTypeArrayAdapter;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardBigDialog;
-import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.customview.SpinerPopWindow;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
-import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -99,8 +93,18 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @BindView(R.id.friend_pll_refresh)
     PullToRefreshLayout pullToRefreshLayout;
-    @BindView(R.id.filter_spinner)
-    Spinner typeSpinner;
+    @BindView(R.id.filter_text)
+    TextView filterText;
+
+    @OnClick(R.id.filter_text)
+    public void filterClick() {
+        Drawable drawable = getResources().getDrawable(R.drawable.spinner_down);
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(),drawable.getMinimumHeight());// 必须设置图片大小，否则不显示
+        filterText.setCompoundDrawables(null, null, drawable, null);
+
+        mSpinerPopWindow.setWidth(filterText.getWidth());
+        mSpinerPopWindow.showAsDropDown(filterText);
+    }
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
@@ -235,6 +239,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     SchoolmateAdapter schoolmateAdapter;
     List<Integer> positionList;
 
+    private SpinerPopWindow<String> mSpinerPopWindow;
+    private List<String> typeList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -265,37 +272,28 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         positionList = new ArrayList();
 
         initPullRefresh();
-        initClassmatesTypeSpinner();
+        initClassmatesTypePop();
 
         getRecommends(1, 1);
     }
 
-    private void initClassmatesTypeSpinner() {
-        //ArrayAdapter<CharSequence> classTypeAdapter = ArrayAdapter.createFromResource(this, R.array.classmates_type,
-        //        android.R.layout.simple_dropdown_item_1line);
-
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        float density = dm.density;
-        float spiderItemHeight = (float)114/dm.density;
-
-        List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.classmates_type));
-        ClassmatesTypeArrayAdapter classTypeAdapter = new ClassmatesTypeArrayAdapter(this,
-                R.layout.spinner_layout_filer_classmate_type, typeList);
-        classTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_layout_filter_classmat_type);
-        typeSpinner.setAdapter(classTypeAdapter);
-        typeSpinner.setDropDownVerticalOffset((int)spiderItemHeight);
-        SharedPreferences lastSettings = getSharedPreferences(KEY_SHARED_PREFERENCE,
+    private void initClassmatesTypePop() {
+        final List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.classmates_type));
+        SharedPreferences sharedFilter = getSharedPreferences("preferences_class_filter",
                 Context.MODE_PRIVATE);
-        typeSpinner.setSelection(lastSettings.getInt("position", 0), true);
-        typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        int selectOpn = sharedFilter.getInt("position", 0);
+        filterText.setText(typeList.get(selectOpn));
+        mSpinerPopWindow = new SpinerPopWindow<String>(this, this, typeList,
+                new AdapterView.OnItemClickListener(){
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getSharedPreferences(KEY_SHARED_PREFERENCE,
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences sharedFilterItem = getSharedPreferences("preferences_class_filter",
                         Context.MODE_PRIVATE);
-                SharedPreferences.Editor editorsettings = settings.edit();
+                SharedPreferences.Editor editorsettings = sharedFilterItem.edit();
                 editorsettings.putInt("position", position);
                 editorsettings.commit();
+
+                filterText.setText(typeList.get(position));
                 switch (position) {
                     case CLASSMATE_TYPE_ALL ://全部
                         mType = 3;
@@ -327,11 +325,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                         break;
                     default :
                 }
+
+                mSpinerPopWindow.dismiss();
             }
-
+        });
+        mSpinerPopWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+            public void onDismiss() {
+                Drawable drawable = getResources().getDrawable(R.drawable.spinner_normal);
+                drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());// 必须设置图片大小，否则不显示
+                filterText.setCompoundDrawables(null, null, drawable, null);
             }
         });
     }
@@ -653,8 +656,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     //处理同校同学
     private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-
-        Spinner typeSpinner = (Spinner) schoolRoot.findViewById(R.id.filter_spinner);
         final LinearLayout llButton = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_button);
         LinearLayout llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
         final ImageButton allImgButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_all);
@@ -664,7 +665,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
 
         if (friendsBeanList.size() > 0) {
-            typeSpinner.setVisibility(View.VISIBLE);
+            filterText.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
 
