@@ -35,8 +35,10 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
+                    android:id="@+id/rl_header"
                     android:layout_width="match_parent"
-                    android:layout_height="71.5dp">
+                    android:layout_height="71.5dp"
+                    android:background="@drawable/selector_myinfo_item_background">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -314,6 +316,7 @@
                 android:background="@color/feeds_search_color" />
 
             <RelativeLayout
+                android:id="@+id/rl_contacts_us"
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
                 android:layout_alignParentStart="true"
@@ -344,6 +347,7 @@
                 android:background="@color/feeds_search_color"/>
 
             <RelativeLayout
+                android:id="@+id/rl_logout"
                 android:layout_width="match_parent"
                 android:layout_height="45.5dp"
                 android:background="@drawable/selector_myinfo_item_background">

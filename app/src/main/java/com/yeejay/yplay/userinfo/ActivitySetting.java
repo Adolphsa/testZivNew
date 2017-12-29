@@ -102,6 +102,8 @@ public class ActivitySetting extends BaseActivity {
     EffectiveShapeView settingImgHeader;
 
     //个人资料
+    @BindView(R.id.rl_header)
+    RelativeLayout rlHeaderView;
     @BindView(R.id.setting_name)
     TextView settingNmae;
     @BindView(R.id.setting_user_name)
@@ -128,6 +130,8 @@ public class ActivitySetting extends BaseActivity {
     TextView settingExitButton;
     @BindView(R.id.version)
     TextView versionText;
+    @BindView(R.id.rl_contacts_us)
+    RelativeLayout rlContactsUsView;
 
 
     @OnClick(R.id.layout_title_back2)
@@ -138,8 +142,8 @@ public class ActivitySetting extends BaseActivity {
     int tag;
 
     //头像
-    @OnClick(R.id.setting_img_header)
-    public void settingImgHeader() {
+    @OnClick(R.id.rl_header)
+    public void settingImgageHeader() {
         System.out.println("头像");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
@@ -208,7 +212,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //联系我们
-    @OnClick(R.id.setting_contacts_us)
+    @OnClick(R.id.rl_contacts_us)
     public void contacts() {
         System.out.println("联系我们");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
@@ -228,7 +232,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //退出
-    @OnClick(R.id.setting_exit)
+    @OnClick(R.id.rl_logout)
     public void settingExit() {
         System.out.println("退出");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
