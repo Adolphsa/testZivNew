@@ -35,18 +35,36 @@ import butterknife.ButterKnife;
  * Created by Administrator on 2017/11/25.
  */
 
-public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
 
     public enum ITEM_TYPE {
         ITEM_TYPE_LEFT,
         ITEM_TYPE_RIGHT,
         ITEM_TYPE_VOTE_CARD,
-        ITEM_TYPE_CENTER
+        ITEM_TYPE_CENTER,
+        ITEM_TYPE_IMAGE_LEFT,
+        ITEM_TYPE_IMAGE_RIGHT
     }
 
     private Context context;
     private List<ImMsg> mDataList;
+    private OnItemClickListener mItemClickListener;
     String content;
+
+    public interface OnItemClickListener{
+        void onItemClick(int position);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (mItemClickListener != null){
+            mItemClickListener.onItemClick((Integer) v.getTag());
+        }
+    }
+
+    public void setItemClickListener(OnItemClickListener itemClickListener) {
+        mItemClickListener = itemClickListener;
+    }
 
     public ChatAdapter(Context context, List<ImMsg> dataList) {
         this.context = context;
@@ -68,6 +86,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return new VoteCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_card, parent, false));
         }else if (viewType == ITEM_TYPE.ITEM_TYPE_CENTER.ordinal()){    //中间
             return new CenterMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_center, parent, false));
+        }else if (viewType == ITEM_TYPE.ITEM_TYPE_IMAGE_LEFT.ordinal()){    //左边的图片
+
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_imge_left, parent, false);
+            LeftImageViewHolder holder = new LeftImageViewHolder(view);
+            holder.msgImageLeft.setOnClickListener(this);
+//            view.setOnClickListener(this);
+            return holder;
+        }else if (viewType == ITEM_TYPE.ITEM_TYPE_IMAGE_RIGHT.ordinal()){   //右边的图片
+
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_image_right, parent, false);
+            RightImageViewHolder holder = new RightImageViewHolder(view);
+            holder.msgImageRight.setOnClickListener(this);
+//            view.setOnClickListener(this);
+            return holder;
         }
         return null;
     }
@@ -143,6 +175,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }else if (immsgType == 100){    //中间的提示
             ((CenterMsgViewHolder)holder).msgCenter.setText(msgContent);
+        }else if (immsgType == TIMElemType.Image.ordinal()){
+            if (holder instanceof LeftImageViewHolder){     //左边的图片
+                ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
+                Picasso.with(context).load(msgContent).into(((LeftImageViewHolder)holder).msgImageLeft);
+            }else if (holder instanceof RightImageViewHolder){      //右边的图片
+                ((RightImageViewHolder)holder).msgImageRight.setTag(position);
+                Picasso.with(context).load(msgContent).into(((RightImageViewHolder)holder).msgImageRight);
+            }
         }
 
     }
@@ -190,6 +230,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return ITEM_TYPE.ITEM_TYPE_CENTER.ordinal();
         }else if (immsgType == 101){
             return ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal();
+        }else if (immsgType == 2){      //图片消息
+            if (!sender.equals(String.valueOf(uin))) { //发送者不是自己
+                return ITEM_TYPE.ITEM_TYPE_IMAGE_LEFT.ordinal();
+            } else if (sender.equals(String.valueOf(uin))) {  //发送者是自己
+                return ITEM_TYPE.ITEM_TYPE_IMAGE_RIGHT.ordinal();
+            }
         }
 
         return -1;
@@ -316,6 +362,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView msgCenter;
 
         public CenterMsgViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public static class LeftImageViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.msg_item_image_left)
+        ImageView msgImageLeft;
+
+        public LeftImageViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public static class RightImageViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.msg_item_image_right)
+        ImageView msgImageRight;
+        @BindView(R.id.msg_item_image_right_not_friend)
+        ImageView msgImageNotFriend;
+
+        public RightImageViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

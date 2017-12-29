@@ -88,6 +88,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
         System.out.println("投票回复");
 
         if (NetWorkUtil.isNetWorkAvailable(ActivityNnonymityReply.this)) {
+            nonSend.setEnabled(false);
             replayImVote(sessionId, nonEdit.getText().toString().trim());
         } else {
             Toast.makeText(ActivityNnonymityReply.this, "网络异常", Toast.LENGTH_SHORT).show();

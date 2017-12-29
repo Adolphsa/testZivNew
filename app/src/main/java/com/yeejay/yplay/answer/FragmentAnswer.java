@@ -821,8 +821,10 @@ public class FragmentAnswer extends BaseFragment {
         if (myInfo != null) {
             int addFriendNum = myInfo.getAddFriendNum();
             if (addFriendNum == 0) {
+                if (addFriendCount != null)
                 addFriendCount.setText("");
             } else {
+                if (addFriendCount != null)
                 addFriendCount.setText(addFriendNum + "");
             }
 

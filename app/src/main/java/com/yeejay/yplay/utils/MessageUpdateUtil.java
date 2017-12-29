@@ -1,6 +1,7 @@
 package com.yeejay.yplay.utils;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -9,7 +10,10 @@ import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
 import com.tencent.imsdk.TIMCustomElem;
+import com.tencent.imsdk.TIMElem;
 import com.tencent.imsdk.TIMElemType;
+import com.tencent.imsdk.TIMImage;
+import com.tencent.imsdk.TIMImageElem;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMTextElem;
@@ -31,6 +35,8 @@ import com.yeejay.yplay.model.UserInfoResponde;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 /**
  * 会话消息更新
@@ -220,6 +226,39 @@ public class MessageUpdateUtil {
 
             status = 2;
             msgContent = text;
+        }
+
+        //收到图片消息
+        if (msgType == TIMElemType.Image.ordinal()){
+
+            String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+            String dirStr = root + File.separator + "yplay" + File.separator + "image";
+            File dir = new File(dirStr);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            final String imageName = System.currentTimeMillis() + ".jpg";
+            TIMElem elem = timMessage.getElement(0);
+            TIMImageElem e = (TIMImageElem)elem;
+            TIMImage image =  e.getImageList().get(0);
+            String imageUrl = image.getUrl();
+//            image.getImage(dirStr, new TIMCallBack() {
+//                @Override
+//                public void onError(int i, String s) {
+//                    //错误码code含义请参见错误码表
+//                    Log.d(TAG, "getImage failed. code: " + i + " errmsg: " + s);
+//                }
+//
+//                @Override
+//                public void onSuccess() {
+//                    Log.i(TAG, "onSuccess: 图片下载成功");
+//
+//                }
+//            });
+            Log.i(TAG, "updateSessionAndMessage: imageUrl---" + image.getUrl());
+            Log.i(TAG, "updateSessionAndMessage: uuid---" + image.getUuid());
+            status = 2;
+            msgContent = imageUrl;
         }
 
         if (msgType == TIMElemType.Custom.ordinal()) {

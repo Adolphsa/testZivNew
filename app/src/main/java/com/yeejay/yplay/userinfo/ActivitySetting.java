@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -41,6 +42,10 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
+import com.donkingliang.imageselector.utils.PhotoUtils;
+import com.donkingliang.imageselector.utils.ToastUtils;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMManager;
@@ -52,6 +57,7 @@ import com.yanzhenjie.permission.RationaleListener;
 import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.BuildConfig;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
@@ -73,6 +79,7 @@ import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +90,7 @@ import butterknife.OnClick;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -147,7 +155,9 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("头像");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
-            applyForAlbumAuthority();
+//            applyForAlbumAuthority();
+//            ImageSelectorUtils.openPhoto(ActivitySetting.this,REQUEST_CODE,true,true,0);
+            ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this,REQUEST_CODE);
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
@@ -265,6 +275,7 @@ public class ActivitySetting extends BaseActivity {
     private static final int REQUEST_CODE_PERMISSION_SINGLE_IMAGE = 201;
     private static final int REQUEST_CODE_CHOICE_GENDER = 201;
     private static final int REQUEST_CODE_SCHOOL = 202;
+    private static final int REQUEST_CODE = 0x00000022;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
     private  final int INVALID_NUM = 100000;
@@ -276,9 +287,6 @@ public class ActivitySetting extends BaseActivity {
     private final static int TYPE_CLASSSCHOOL = 3;
     private final static int  TYPE_GENDER = 4;
 
-    private String imageName;
-    private File tempFile;
-    private Uri tempUri;
     String dirStr;
     boolean addressAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
@@ -385,15 +393,20 @@ public class ActivitySetting extends BaseActivity {
                     //获取选择的图片的URI
                     if (data != null) {
                         Uri uri = data.getData();
-                        cropImage(uri);
+//                        cropImage(uri);
                     }
                     break;
                 case CROP_IMAGE:
-                    //图片裁剪完，已经保存到文件中
-                    Bitmap bm = BitmapFactory.decodeFile(tempFile.getAbsolutePath());
-                    System.out.println("图片位置---" + tempFile.getAbsolutePath());
-                    uploadImage();
-                    settingImgHeader.setImageBitmap(bm);
+                    break;
+                case REQUEST_CODE:
+                    ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
+                    String imagePath = images.get(0);
+                    Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
+                    Bitmap bm1 = BitmapFactory.decodeFile(imagePath);
+                    System.out.println("图片位置---" + imagePath);
+                    String imageName = imagePath.substring(imagePath.length()-17,imagePath.length());
+                    uploadImage(imagePath,imageName);
+                    settingImgHeader.setImageBitmap(bm1);
                     break;
             }
         } else if (requestCode == REQUEST_CODE_CHOICE_GENDER) {
@@ -436,42 +449,21 @@ public class ActivitySetting extends BaseActivity {
         startActivityForResult(intent, REQ_CODE_SEL_IMG);
     }
 
-    /**
-     * 裁剪图片
-     *
-     * @param uri
-     */
-    private void cropImage(Uri uri) {
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.putExtra("crop", "true");
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
-        intent.putExtra("outputX", 300);
-        intent.putExtra("outputY", 300);
-        imageName = System.currentTimeMillis() + ".jpg";
-        tempFile = new File(dirStr + File.separator + imageName);
-        System.out.println("文件位置---" + tempFile.getPath());
-        tempUri = Uri.fromFile(tempFile);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
-        intent.putExtra("return-data", false); //裁剪后的数据不以bitmap的形式返回
-        startActivityForResult(intent, CROP_IMAGE);
-    }
-
     //上传图头像
-    private void uploadImage() {
+    private void uploadImage(String imagePath, final String imageName){
 
         System.out.println("imageName---" + imageName);
 
-        Bitmap bitmap = BitmapFactory.decodeFile(tempFile.getAbsolutePath());
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] datas = baos.toByteArray();
+        Log.i(TAG, "uploadImage: 图片大小---" + datas.length);
         RequestBody upload = RequestBody.create(MediaType.parse("text/plain"), "upload");
         RequestBody requestFile =
                 RequestBody.create(
                         MediaType.parse("image/*"),
-                        tempFile
+                        new File(imagePath)
                 );
         MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent", imageName, requestFile);
 
@@ -480,18 +472,19 @@ public class ActivitySetting extends BaseActivity {
         body.setFilecontent(datas);
 
         YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName, upload, aa)
+                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
                     @Override
                     public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
                     }
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
                         System.out.println("图片上传返回---" + imageUploadRespond.toString());
-                        if (imageUploadRespond.getCode() == 0) {
+                        if (imageUploadRespond.getCode() == 0){
                             //保存图片id
                             SharePreferenceUtil.put(ActivitySetting.this, YPlayConstant.YPLAY_HEADER_IMG, imageName);
                             updateHeaderImg(imageName, null, 0, null);
@@ -508,7 +501,19 @@ public class ActivitySetting extends BaseActivity {
 
                     }
                 });
+
+//        YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
+//                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Consumer<ImageUploadRespond>() {
+//                    @Override
+//                    public void accept(ImageUploadRespond imageUploadRespond) throws Exception {
+//                        Log.i(TAG, "accept: 图片上传返回imageUploadRespond---" + imageUploadRespond.toString());
+//                    }
+//                });
     }
+
 
     //修改头像
     private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {

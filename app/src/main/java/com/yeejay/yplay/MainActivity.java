@@ -235,7 +235,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         getImSignature();
         //获取加好友的人数
         getAddFreindCount();
-        setMessageIcon();
+//        setMessageIcon();
 //        setFeedIcon();
 
         getMyFriendsList();

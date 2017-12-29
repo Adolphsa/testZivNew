@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:orientation="vertical"
+    >
+
+    <ImageView
+        android:id="@+id/msg_item_image_right_not_friend"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="3dp"
+        android:layout_toLeftOf="@+id/msg_item_image_right"
+        android:src="@drawable/msg_not_friend"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/msg_item_image_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="21dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/right_chat"
+        android:maxHeight="200dp"
+        android:maxWidth="200dp"
+        android:scaleType="fitCenter" />
+
+</RelativeLayout>

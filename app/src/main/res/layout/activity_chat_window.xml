@@ -35,7 +35,19 @@
         android:layout_alignParentBottom="true"
         android:background="@color/feeds_search_color"
         android:orientation="horizontal"
+        android:layout_marginTop="5dp"
         >
+        <ImageButton
+            android:id="@+id/acw_img_choice"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/choice_picture"
+            android:background="@color/color_transparent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitXY"
+            android:visibility="gone"
+            />
         <EditText
             android:id="@+id/acw_edit"
             android:layout_width="wrap_content"
@@ -49,7 +61,7 @@
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
             android:cursorVisible="false"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="5dp"
             android:maxLength="5000"
             />
         <ImageButton

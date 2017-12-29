@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="is_white">#ffffff</color>
+    <color name="preview_gray">#3B3C40</color>
+    <color name="is_blue">#57A8FF</color>
+
+</resources>

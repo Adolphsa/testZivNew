@@ -1,5 +1,6 @@
 package com.yeejay.yplay.message;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -18,14 +19,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.donkingliang.imageselector.utils.ImageSelectorUtils;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
+import com.tencent.imsdk.TIMImageElem;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMMessageOfflinePushSettings;
@@ -59,6 +64,7 @@ import org.greenrobot.greendao.query.DeleteQuery;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -68,6 +74,7 @@ import butterknife.OnClick;
 public class ActivityChatWindow extends BaseActivity implements MessageUpdateUtil.MessageUpdateListener {
 
     private static final String TAG = "ActivityChatWindow";
+    private static final int REQUEST_CODE = 0x00000011;
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
@@ -79,6 +86,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     ImageButton layoutSetting;
     @BindView(R.id.acw_recycle_view)
     RecyclerView acwRecycleView;
+    @BindView(R.id.acw_img_choice)
+    ImageButton acwImgChoice;
     @BindView(R.id.acw_edit)
     EditText acwEdit;
     @BindView(R.id.acw_send)
@@ -103,8 +112,21 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         System.out.println("聊天对象资料");
     }
 
+    @OnClick(R.id.acw_img_choice)
+    public void acwImgChoice(){
+        Log.i(TAG, "acwImgChoice: 图片选择");
+        ImageSelectorUtils.openPhoto(ActivityChatWindow.this,REQUEST_CODE,true,false,0);
+
+    }
+
     @OnClick(R.id.acw_send)
     public void send() {
+        sendMessage("");
+    }
+
+    //发送消息
+    private void sendMessage(String imagePath){
+
         //点击之后立马变为不可点状态
         acwSend.setClickable(false);
         acwSend.setImageResource(R.drawable.feather_no);
@@ -163,16 +185,30 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
 
             Log.i(TAG, "send: 编辑框的内容---" + str);
-            if (!TextUtils.isEmpty(str)) {
+            if (!TextUtils.isEmpty(str) || !TextUtils.isEmpty(imagePath)) {
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
-                //添加文本内容
-                TIMTextElem elem = new TIMTextElem();
-                elem.setText(str);
-                //将elem添加到消息
-                if (msg.addElement(elem) != 0) {
-                    Log.d(TAG, "addElement failed");
-                    return;
+
+                if (TextUtils.isEmpty(imagePath)){
+                    //添加文本内容
+                    TIMTextElem elem = new TIMTextElem();
+                    elem.setText(str);
+
+                    //将elem添加到消息
+                    if (msg.addElement(elem) != 0) {
+                        Log.d(TAG, "addElement text failed");
+                        return;
+                    }
+                }else {
+                    //添加图片
+                    TIMImageElem elem = new TIMImageElem();
+                    elem.setPath(imagePath);
+
+                    //将elem添加到消息
+                    if (msg.addElement(elem) != 0) {
+                        Log.d(TAG, "addElement image failed");
+                        return;
+                    }
                 }
 
                 TIMMessageOfflinePushSettings offlineSettings = new TIMMessageOfflinePushSettings();
@@ -229,8 +265,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         } else {
             Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
-
     }
+
 
     String sessionId;
     ImMsgDao imMsgDao;
@@ -291,6 +327,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             mDataList.add(0,imMsg1);
             mDataList.add(0,imMsg2);
 
+            acwImgChoice.setVisibility(View.GONE);
+
             Log.i(TAG, "onCreate: mDataList-size" + mDataList.size());
         }
 
@@ -299,6 +337,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
             mDataList.add(0,imMsg1);
+
+            acwImgChoice.setVisibility(View.GONE);
         }
 
         if (1 == status && (uin != mSender) && mDataList.size() == 4){
@@ -306,10 +346,26 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
+
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
 
         chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
         acwRecycleView.setAdapter(chatAdapter);
+
+        chatAdapter.setItemClickListener(new ChatAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                int realPosition = mDataList.size()- (position + 1);
+                Log.i(TAG, "onItemClick: 图片被点击了---" + mDataList.get(realPosition).getMsgContent()
+                        + ",position---" + position
+                + ",realPosition---" + realPosition);
+                String imagePath = mDataList.get(realPosition).getMsgContent();
+                if (!TextUtils.isEmpty(imagePath)){
+                    showImageDialog(imagePath);
+                }
+            }
+        });
 
         if (mDataList != null && mDataList.size() > 0) {
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
@@ -387,6 +443,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             acwEdit.setCompoundDrawablePadding(25);
             acwEdit.setEnabled(false);
             acwSend.setEnabled(false);
+            acwImgChoice.setEnabled(false);
         }
     }
 
@@ -400,7 +457,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             mSender = Integer.valueOf(sender);
             String msgContent = bundle.getString("yplay_msg_content");
             tempNickname = bundle.getString("yplay_nick_name");
-            Log.d(TAG, "receiveBundleData: sessionId---" + sessionId);
+            Log.d(TAG, "receiveBundleData: sessionId---" + sessionId + ",status---" + status);
 
             if (status == 0 || status == 1) {
                 try {
@@ -500,7 +557,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     @Override
     public void onMessageUpdate(ImMsg imMsg) {
         String content = imMsg.getMsgContent();
-        System.out.println("聊天窗口收到了contenty---" + content);
+        System.out.println("聊天窗口收到了content---" + content);
         String tempSessionId = imMsg.getSessionId();
 
         if (!TextUtils.isEmpty(tempSessionId) && sessionId.equals(tempSessionId)) {
@@ -512,6 +569,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             acwEdit.setEnabled(true);
             acwEdit.setHint("回复");
             acwEdit.setCompoundDrawables(null,null,null,null);
+            acwImgChoice.setEnabled(true);
         }
         if (!acwSend.isEnabled()){
             acwSend.setEnabled(true);
@@ -529,6 +587,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
             mDataList.add(0,imMsg1);
+
+            acwImgChoice.setVisibility(View.GONE);
         }
 
         if (1 == status && (uin == Integer.valueOf(imMsg.getSender())) && mDataList.size() == 4){
@@ -536,6 +596,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
+
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
         Log.i(TAG, "onMessageUpdate: status---" + status + ",sender---" + imMsg.getSender());
     }
@@ -604,5 +666,38 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 .buildDelete();
         sessionDelete.executeDeleteWithoutDetachingEntities();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE && data != null){
+            ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
+            Log.i(TAG, "onActivityResult: images_url---" + images.get(0));
+//            Toast.makeText(ActivityChatWindow.this,images.get(0),Toast.LENGTH_SHORT).show();
+            sendMessage(images.get(0));
+        }
+    }
+
+    //显示图片的dialog
+    private void showImageDialog(String imagePath){
+
+        final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this).create();
+        dialog.show();
+
+        dialog.setContentView(R.layout.layout_show_chat_image);
+        ImageView imageView = (ImageView) dialog.findViewById(R.id.acw_show_image);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        if (!TextUtils.isEmpty(imagePath)){
+            Picasso.with(ActivityChatWindow.this).load(imagePath).into(imageView);
+        }
+
+        dialog.setCanceledOnTouchOutside(true);
+    }
+
 
 }

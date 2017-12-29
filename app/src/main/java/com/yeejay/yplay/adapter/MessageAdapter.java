@@ -224,7 +224,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
         if (msgType == TIMElemType.Custom.ordinal()){
 
         }
-
+        if (msgType == TIMElemType.Image.ordinal()){
+            msgContent = "[图片]";
+        }
         String headerUrl = imSession.getHeaderImgUrl();
         String nickName = imSession.getNickName();
         long msgTime = imSession.getMsgTs();

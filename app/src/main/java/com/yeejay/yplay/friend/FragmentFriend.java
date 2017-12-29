@@ -717,7 +717,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     public void setFriendCount() {
 
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
-        int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
+        int uin = (int) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
         if (myInfo != null) {

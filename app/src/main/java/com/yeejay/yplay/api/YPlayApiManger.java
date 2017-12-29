@@ -78,6 +78,8 @@ public class YPlayApiManger {
             .addInterceptor(REWRITE_CACHE_CONTROL_INTERCEPTOR)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30,TimeUnit.SECONDS)
+            .writeTimeout(30,TimeUnit.SECONDS)
             .cache(cache)
             .build();
 
