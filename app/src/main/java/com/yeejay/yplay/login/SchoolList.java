@@ -97,8 +97,9 @@ public class SchoolList extends BaseActivity {
             mSearchFlag = 0;
             mHandler.sendEmptyMessage(MSG_CODE_HIDE_RESULT_TIP);
 
-            //清空搜索结果后，重新拉一次学校数据
+            //清空搜索结果后，重新拉一次学校数据，从第一页开始拉;
             mDataList.clear();
+            mPageNum  = 1;
             getSchoolList(mPageNum, 10);
         }
     }

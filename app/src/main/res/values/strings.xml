@@ -86,4 +86,5 @@
     <string name="filter_boy">男生</string>
     <string name="filter_girl">女生</string>
     <string name="filter_same_grade">同年级</string>
+    <string name="username_colon_only">用户名：</string>
 </resources>

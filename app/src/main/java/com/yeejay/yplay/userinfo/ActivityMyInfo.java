@@ -233,8 +233,7 @@ public class ActivityMyInfo extends BaseActivity {
 
             personalSchool.setText(infoBean.getSchoolName());
             personalNickName.setText(infoBean.getNickName());
-            personalUserName.setText(String.format(getResources().getString(R.string.username_colon),
-                    infoBean.getUserName()));
+            personalUserName.setText(infoBean.getUserName());
             personalGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             if (infoBean.getGender() == 1) {
                 personalGender.setVisibility(View.VISIBLE);

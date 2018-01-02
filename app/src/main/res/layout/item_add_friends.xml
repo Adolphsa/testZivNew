@@ -34,6 +34,7 @@
         android:layout_height="wrap_content"
         android:text="段誉"
         android:layout_toRightOf="@+id/af_item_header_img"
+        android:layout_toLeftOf="@id/af_btn_accept2"
         android:textColor="@color/text_color_gray"
         android:textSize="18sp"
         android:layout_marginTop="13dp"
