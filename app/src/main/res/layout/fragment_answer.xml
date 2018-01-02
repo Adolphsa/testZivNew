@@ -77,9 +77,9 @@
             android:textSize="18sp"
             android:textColor="@color/black50"
             android:background="@drawable/play_button_background"
+            android:maxLength="5"
+            android:maxLines="1"
             android:ellipsize="end"
-            android:maxEms="5"
-            android:singleLine="true"
             android:textAllCaps="false"
             />
         <com.yeejay.yplay.customview.ProgressButton
@@ -92,8 +92,8 @@
             android:layout_toRightOf="@+id/frgans_btn1"
             android:layout_marginLeft="17.2dp"
             android:ellipsize="end"
-            android:maxEms="5"
-            android:singleLine="true"
+            android:maxLength="5"
+            android:maxLines="1"
             android:background="@drawable/play_button_background"
             android:textAllCaps="false"
             />
@@ -108,8 +108,8 @@
             android:layout_marginTop="17.2dp"
             android:background="@drawable/play_button_background"
             android:ellipsize="end"
-            android:maxEms="5"
-            android:singleLine="true"
+            android:maxLength="5"
+            android:maxLines="1"
             android:textAllCaps="false"
             />
 
@@ -125,8 +125,8 @@
             android:textColor="@color/black50"
             android:textSize="18sp"
             android:ellipsize="end"
-            android:maxEms="5"
-            android:singleLine="true"
+            android:maxLength="5"
+            android:maxLines="1"
             android:textAllCaps="false"
             />
         <TextView

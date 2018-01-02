@@ -1,6 +1,7 @@
 package com.yeejay.yplay.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -93,14 +94,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_imge_left, parent, false);
             LeftImageViewHolder holder = new LeftImageViewHolder(view);
             holder.msgImageLeft.setOnClickListener(this);
-//            view.setOnClickListener(this);
             return holder;
         }else if (viewType == ITEM_TYPE.ITEM_TYPE_IMAGE_RIGHT.ordinal()){   //右边的图片
 
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_image_right, parent, false);
             RightImageViewHolder holder = new RightImageViewHolder(view);
             holder.msgImageRight.setOnClickListener(this);
-//            view.setOnClickListener(this);
             return holder;
         }
         return null;
@@ -182,12 +181,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
                 String url = imageInfo.getThumbImage().getImageUrl();
-                Picasso.with(context).load(url).into(((LeftImageViewHolder)holder).msgImageLeft);
+                int width = imageInfo.getThumbImage().getImageWidth();
+                int height = imageInfo.getThumbImage().getImageHeight();
+                if (!TextUtils.isEmpty(url)){
+                    Picasso.with(context).load(url)
+                            .resize(width,height)
+                            .config(Bitmap.Config.RGB_565)
+                            .centerCrop()
+                            .into(((LeftImageViewHolder)holder).msgImageLeft);
+                }
+
             }else if (holder instanceof RightImageViewHolder){      //右边的图片
                 ((RightImageViewHolder)holder).msgImageRight.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
                 String url = imageInfo.getThumbImage().getImageUrl();
-                Picasso.with(context).load(url).into(((RightImageViewHolder)holder).msgImageRight);
+                int width = imageInfo.getThumbImage().getImageWidth();
+                int height = imageInfo.getThumbImage().getImageHeight();
+                if(!TextUtils.isEmpty(url)){
+                    Picasso.with(context).load(url)
+                            .resize(width,height)
+                            .config(Bitmap.Config.RGB_565)
+                            .centerCrop()
+                            .into(((RightImageViewHolder)holder).msgImageRight);
+                }
+
             }
         }
 

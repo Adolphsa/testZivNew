@@ -220,7 +220,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                     messageFragmentStatus();
                 }
 
-                setMessageClear();
+                setMessageIcon();
 
             }
 
@@ -235,7 +235,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         getImSignature();
         //获取加好友的人数
         getAddFreindCount();
-//        setMessageIcon();
+        setMessageIcon();
 //        setFeedIcon();
 
         getMyFriendsList();
@@ -622,19 +622,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             Drawable nav_up2 = getResources().getDrawable(R.drawable.message_yes);
             nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
             mainNavRight2.setCompoundDrawables(null, nav_up2, null, null);
-        }
-    }
-
-    //设置消息icon变暗
-    public void setMessageClear() {
-
-        Log.i(TAG, "setMessageClear: 消息ICON清除");
-
-        List<ImSession> imSessionList = imSessionDao.queryBuilder()
-                .where(ImSessionDao.Properties.UnreadMsgNum.gt(0))
-                .build().list();
-        if (imSessionList == null || imSessionList.size() == 0) {
-            Log.i(TAG, "setMessageClear: 为空");
+        }else {
+            Log.i(TAG, "setMessageIcon: ");
             Drawable nav_up = getResources().getDrawable(R.drawable.message_no);
             nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
             mainNavBarRight.setCompoundDrawables(null, nav_up, null, null);
@@ -643,9 +632,23 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             Drawable nav_up2 = getResources().getDrawable(R.drawable.message_no);
             nav_up2.setBounds(0, 0, nav_up2.getMinimumWidth(), nav_up2.getMinimumHeight());
             mainNavRight2.setCompoundDrawables(null, nav_up2, null, null);
-
         }
     }
+
+//    //设置消息icon变暗
+//    public void setMessageClear() {
+//
+//        Log.i(TAG, "setMessageClear: 消息ICON清除");
+//
+//        List<ImSession> imSessionList = imSessionDao.queryBuilder()
+//                .where(ImSessionDao.Properties.UnreadMsgNum.gt(0))
+//                .build().list();
+//        if (imSessionList == null || imSessionList.size() == 0) {
+//            Log.i(TAG, "setMessageClear: 为空");
+//
+//
+//        }
+//    }
 
     //动态图标点亮
     public void setFeedIcon() {
@@ -679,7 +682,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     public void setFriendCount(){
         fragmentAnswer.setFriendCount();
         fragmentFriend.setFriendCount();
-        fragmentFriend.setFriendCount();
+        fragmentMessage.setFriendCount();
     }
 
     private void clearNotification() {

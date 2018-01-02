@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
@@ -348,7 +349,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
 
-            acwImgChoice.setVisibility(View.VISIBLE);
+//            acwImgChoice.setVisibility(View.VISIBLE);
         }
 
         chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
@@ -600,7 +601,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
 
-            acwImgChoice.setVisibility(View.VISIBLE);
+//            acwImgChoice.setVisibility(View.VISIBLE);
         }
         Log.i(TAG, "onMessageUpdate: status---" + status + ",sender---" + imMsg.getSender());
     }
@@ -696,7 +697,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
         });
         if (!TextUtils.isEmpty(imagePath)){
-            Picasso.with(ActivityChatWindow.this).load(imagePath).into(imageView);
+            Picasso.with(ActivityChatWindow.this).load(imagePath)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE,MemoryPolicy.NO_STORE)
+                    .into(imageView);
         }
 
         dialog.setCanceledOnTouchOutside(true);

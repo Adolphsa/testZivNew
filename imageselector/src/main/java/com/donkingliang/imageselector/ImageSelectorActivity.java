@@ -43,6 +43,7 @@ import com.donkingliang.imageselector.entry.Image;
 import com.donkingliang.imageselector.model.ImageModel;
 import com.donkingliang.imageselector.utils.DateUtils;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
 import com.donkingliang.imageselector.utils.PhotoUtils;
 import com.donkingliang.imageselector.utils.ToastUtils;
 
@@ -484,6 +485,8 @@ public class ImageSelectorActivity extends AppCompatActivity {
 //            cropImageUri = Uri.fromFile(fileCropUri);
 
 //            PhotoUtils.cropImageUri(this, imageUri, cropImageUri, 1, 1, OUTPUT_X, OUTPUT_Y, CODE_RESULT_REQUEST);
+
+//            ImageUtil.saveImage()
 
             Log.i(TAG, "onActivityResult: 照相的图片url---" + imageUri);
         }

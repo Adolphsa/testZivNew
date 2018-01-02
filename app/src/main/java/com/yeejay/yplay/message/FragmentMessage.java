@@ -173,7 +173,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             updateUi();
 
             MainActivity mainActivity = (MainActivity)getActivity();
-            mainActivity.setMessageClear();
+            mainActivity.setMessageIcon();
 
             setFriendCount();
         }
@@ -236,9 +236,15 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         if (myInfo != null){
             int addFriendNum = myInfo.getAddFriendNum();
             if (addFriendNum == 0){
-                addFriendCount.setText("");
+                if (addFriendCount != null){
+                    addFriendCount.setText("");
+                }
+
             }else {
-                addFriendCount.setText(addFriendNum + "");
+                if (addFriendCount != null){
+                    addFriendCount.setText(addFriendNum + "");
+                }
+
             }
 
         }

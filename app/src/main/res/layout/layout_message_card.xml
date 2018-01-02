@@ -73,10 +73,11 @@
                     android:textColor="@color/black50"
                     android:background="@drawable/button_white_background"
                     android:ellipsize="end"
-                    android:maxEms="6"
-                    android:singleLine="true"
+                    android:maxLength="5"
+                    android:maxLines="1"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
+                    android:textAllCaps="false"
                     />
                 <Button
                     android:id="@+id/lmc_button2"
@@ -90,10 +91,11 @@
                     android:textColor="@color/black50"
                     android:background="@drawable/button_white_background"
                     android:ellipsize="end"
-                    android:maxEms="6"
-                    android:singleLine="true"
+                    android:maxLength="5"
+                    android:maxLines="1"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
+                    android:textAllCaps="false"
                     />
             </LinearLayout>
 
@@ -118,10 +120,11 @@
                     android:textColor="@color/black50"
                     android:background="@drawable/button_white_background"
                     android:ellipsize="end"
-                    android:maxEms="6"
-                    android:singleLine="true"
+                    android:maxLength="5"
+                    android:maxLines="1"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
+                    android:textAllCaps="false"
                     />
                 <Button
                     android:id="@+id/lmc_button4"
@@ -135,10 +138,11 @@
                     android:textColor="@color/black50"
                     android:background="@drawable/button_white_background"
                     android:ellipsize="end"
-                    android:maxEms="6"
-                    android:singleLine="true"
+                    android:maxLength="5"
+                    android:maxLines="1"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
+                    android:textAllCaps="false"
                     />
             </LinearLayout>
         </RelativeLayout>

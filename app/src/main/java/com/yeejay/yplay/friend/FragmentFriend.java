@@ -723,9 +723,10 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         if (myInfo != null) {
             int addFriendNum = myInfo.getAddFriendNum();
             if (addFriendNum == 0) {
-                if (addFriendTextView != null) {
+                if (addFriendTextView != null){
                     addFriendTextView.setText("");
                 }
+
             } else {
                 if (addFriendTextView != null){
                     addFriendTextView.setText(addFriendNum + "");
