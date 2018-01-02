@@ -50,6 +50,7 @@ import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
@@ -360,9 +361,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 Log.i(TAG, "onItemClick: 图片被点击了---" + mDataList.get(realPosition).getMsgContent()
                         + ",position---" + position
                 + ",realPosition---" + realPosition);
-                String imagePath = mDataList.get(realPosition).getMsgContent();
-                if (!TextUtils.isEmpty(imagePath)){
-                    showImageDialog(imagePath);
+                String imageInfoStr = mDataList.get(realPosition).getMsgContent();
+                ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
+                String url = imageInfo.getLargeImage().getImageUrl();
+                if (!TextUtils.isEmpty(url)){
+                    showImageDialog(url);
                 }
             }
         });

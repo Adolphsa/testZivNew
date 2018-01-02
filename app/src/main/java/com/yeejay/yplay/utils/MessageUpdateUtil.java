@@ -14,6 +14,7 @@ import com.tencent.imsdk.TIMElem;
 import com.tencent.imsdk.TIMElemType;
 import com.tencent.imsdk.TIMImage;
 import com.tencent.imsdk.TIMImageElem;
+import com.tencent.imsdk.TIMImageType;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMTextElem;
@@ -30,6 +31,7 @@ import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.model.ImCustomMsgData;
+import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.model.UserInfoResponde;
 
@@ -240,25 +242,48 @@ public class MessageUpdateUtil {
             final String imageName = System.currentTimeMillis() + ".jpg";
             TIMElem elem = timMessage.getElement(0);
             TIMImageElem e = (TIMImageElem)elem;
-            TIMImage image =  e.getImageList().get(0);
-            String imageUrl = image.getUrl();
-//            image.getImage(dirStr, new TIMCallBack() {
-//                @Override
-//                public void onError(int i, String s) {
-//                    //错误码code含义请参见错误码表
-//                    Log.d(TAG, "getImage failed. code: " + i + " errmsg: " + s);
-//                }
-//
-//                @Override
-//                public void onSuccess() {
-//                    Log.i(TAG, "onSuccess: 图片下载成功");
-//
-//                }
-//            });
-            Log.i(TAG, "updateSessionAndMessage: imageUrl---" + image.getUrl());
-            Log.i(TAG, "updateSessionAndMessage: uuid---" + image.getUuid());
+            ImageInfo imageInfo = new ImageInfo();
+
+            for(TIMImage image : e.getImageList()) {
+
+                //获取图片类型, 大小, 宽高
+                Log.i(TAG, "image type: " + image.getType() +
+                        " image size " + image.getSize() +
+                        " image height " + image.getHeight() +
+                        " image width " + image.getWidth());
+                TIMImageType imageType = image.getType();
+                if (imageType == TIMImageType.Original){
+                    ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
+                    originalImage.setImageType(image.getType());
+                    originalImage.setImageWidth((int)image.getWidth());
+                    originalImage.setImageHeight((int)image.getHeight());
+                    originalImage.setImageUrl(image.getUrl());
+                    originalImage.setImageSize((int)image.getSize());
+                    imageInfo.setOriginalImage(originalImage);
+                }else if (imageType == TIMImageType.Thumb){
+                    ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
+                    thumbImage.setImageType(image.getType());
+                    thumbImage.setImageWidth((int)image.getWidth());
+                    thumbImage.setImageHeight((int)image.getHeight());
+                    thumbImage.setImageUrl(image.getUrl());
+                    thumbImage.setImageSize((int)image.getSize());
+                    imageInfo.setThumbImage(thumbImage);
+                }else if (imageType == TIMImageType.Large){
+                    ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
+                    largeImage.setImageType(image.getType());
+                    largeImage.setImageWidth((int)image.getWidth());
+                    largeImage.setImageHeight((int)image.getHeight());
+                    largeImage.setImageUrl(image.getUrl());
+                    largeImage.setImageSize((int)image.getSize());
+                    imageInfo.setLargeImage(largeImage);
+                }
+            }
+
+            String imageInfoStr = GsonUtil.GsonString(imageInfo);
+            Log.i(TAG, "updateSessionAndMessage: imageInfoStr---" + imageInfoStr);
+
             status = 2;
-            msgContent = imageUrl;
+            msgContent = imageInfoStr;
         }
 
         if (msgType == TIMElemType.Custom.ordinal()) {

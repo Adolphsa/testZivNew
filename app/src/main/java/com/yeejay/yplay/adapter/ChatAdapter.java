@@ -13,10 +13,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.donkingliang.imageselector.entry.Image;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMElemType;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.ImMsg;
+import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -178,10 +180,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         }else if (immsgType == TIMElemType.Image.ordinal()){
             if (holder instanceof LeftImageViewHolder){     //左边的图片
                 ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
-                Picasso.with(context).load(msgContent).into(((LeftImageViewHolder)holder).msgImageLeft);
+                ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
+                String url = imageInfo.getThumbImage().getImageUrl();
+                Picasso.with(context).load(url).into(((LeftImageViewHolder)holder).msgImageLeft);
             }else if (holder instanceof RightImageViewHolder){      //右边的图片
                 ((RightImageViewHolder)holder).msgImageRight.setTag(position);
-                Picasso.with(context).load(msgContent).into(((RightImageViewHolder)holder).msgImageRight);
+                ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
+                String url = imageInfo.getThumbImage().getImageUrl();
+                Picasso.with(context).load(url).into(((RightImageViewHolder)holder).msgImageRight);
             }
         }
 
