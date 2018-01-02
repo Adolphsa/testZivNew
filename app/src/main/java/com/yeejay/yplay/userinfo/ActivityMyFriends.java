@@ -73,16 +73,18 @@ public class ActivityMyFriends extends BaseActivity {
         mDataList = new ArrayList<>();
 
         loadMore();
+
+        getMyFriendsList(mPageNum);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mDataList.clear();
+       // mDataList.clear();
 
         System.out.println("我的好友resume" + mDataList.size());
-        getMyFriendsList(mPageNum);
+        //getMyFriendsList(mPageNum);
     }
 
     private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
