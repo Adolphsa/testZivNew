@@ -608,7 +608,10 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     //设置消息icon的点亮
     public void setMessageIcon() {
 
+        int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
+
         List<ImSession> imSessionList = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.Uin.eq(uin))
                 .where(ImSessionDao.Properties.UnreadMsgNum.gt(0))
                 .build().list();
 
