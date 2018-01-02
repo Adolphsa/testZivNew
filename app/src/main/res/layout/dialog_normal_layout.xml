@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="20dp"
-    android:background="@drawable/shape_dialog_userinfo_backgroud"
+    android:background="@drawable/shape_dialog_personal_info_background"
     android:orientation="vertical" >
 
     <TextView
