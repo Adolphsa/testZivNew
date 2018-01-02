@@ -84,10 +84,11 @@ android {
 //        def verName = "0."+versionProps['VERSION_CODE'].toString()
 
         defaultConfig.versionCode = verCode;
+        defaultConfig.versionName = defaultConfig.versionName + ".".toString() + verCode.toString();
         android.applicationVariants.all { variant ->
             variant.outputs.all {
                 def newApkName
-                newApkName = defaultConfig.applicationId + "_" + defaultConfig.versionName + "." + defaultConfig.versionCode  + "_beta" + ".apk"
+                newApkName = defaultConfig.applicationId + "_" + defaultConfig.versionName  + "_beta" + ".apk"
                 outputFileName = newApkName;
             }
         }
