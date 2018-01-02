@@ -137,6 +137,7 @@ public class ActivityAllDiamond extends BaseActivity {
                     holder.itemAmiCount.setTextColor(getResources().getColor(R.color.brozne_diamond_color));
                 } else {
                     holder.itemAmiIndex.setBackgroundResource(R.drawable.normal_medal);
+                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.play_color2));
                 }
 
                 return convertView;

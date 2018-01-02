@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="64dp"
     android:paddingTop="5dp"
-    android:paddingStart="@dimen/activity_margin_start"
-    android:layout_alignParentEnd="@dimen/activity_margin_end" >
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp" >
 
     <TextView
         android:id="@+id/item_diamond_sort"
@@ -20,19 +20,21 @@
         android:id="@+id/item_diamond_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="84dp"
         android:layout_centerVertical="true"
         android:maxLength="60"
         android:ellipsize="end"
         android:textColor="#27282C"
         android:textSize="14sp"
-        android:layout_toRightOf="@+id/item_diamond_sort"
-        android:layout_marginLeft="10dp" />
+        android:layout_toRightOf="@+id/item_diamond_sort" />
 
     <ImageView
         android:id="@+id/item_diamond_lable"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:minWidth="50dp"
+        android:minHeight="50dp"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp" />
+        android:layout_alignParentRight="true" />
 </RelativeLayout>

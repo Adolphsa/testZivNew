@@ -2,17 +2,14 @@
 
     <!-- 填充的颜色 -->
 
-    <solid android:color="#ffffff" />
+    <solid android:color="#F9F9F9" />
 
     <!-- 设置边框宽度 -->
-
 
     <!-- 四个角的弧度 -->
     <corners
         android:bottomLeftRadius="12dp"
-        android:bottomRightRadius="12dp"
-        android:topLeftRadius="12dp"
-        android:topRightRadius="12dp" />
+        android:bottomRightRadius="12dp" />
     <!-- padding：TextView里面的文字与TextView边界的间隔 -->
 
     <!-- <size android:width="100dp" android:height="45dp"/> -->

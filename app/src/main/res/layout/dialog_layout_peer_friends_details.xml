@@ -51,17 +51,17 @@
 
         <ImageView
             android:id="@+id/diamond"
-            android:layout_width="@dimen/personal_icon_width"
-            android:layout_height="@dimen/personal_icon_height"
+            android:layout_width="20dp"
+            android:layout_height="15dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/personal_friends_dimand" />
+            android:src="@drawable/mine_diamond" />
         <TextView
             android:id="@+id/diamond_num"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:text="111"
-            android:layout_marginStart="34dp"
+            android:layout_marginStart="24dp"
             android:textColor="@color/add_friend_subtitle_color"
             android:textSize="14sp" />
         <ImageView
@@ -77,18 +77,20 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginStart="42dp"
-        android:layout_marginBottom="42dp">
+>
 
         <ImageView
             android:id="@+id/school_icon"
-            android:layout_width="@dimen/personal_icon_width"
-            android:layout_height="@dimen/personal_icon_height"
+            android:layout_width="20dp"
+            android:layout_height="15dp"
+            android:layout_centerVertical="true"
             android:src="@drawable/mine_school" />
         <TextView
             android:id="@+id/school"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="222"
+            android:layout_marginStart="4dp"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/school_icon"
             android:textColor="@color/add_friend_subtitle_color"
@@ -126,14 +128,25 @@
         android:layout_marginTop="10dp">
         -->
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="244dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:background="@drawable/shape_dialog_friends_info_down_background">
         <ListView
             android:id="@+id/aad_list_view"
             android:layout_width="match_parent"
             android:layout_height="234dp"
-            android:background="#F9F9F9"
-            android:layout_marginTop="10dp"
+            android:paddingTop="10dp"
             android:divider="@color/feeds_search_color"
             android:dividerHeight="0.3dp" />
+    </LinearLayout>
     <!--
     </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
     -->
