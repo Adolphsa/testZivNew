@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -57,6 +58,7 @@ public class ActivityMyFriends extends BaseActivity {
         finish();
     }
 
+    private LoadMoreView loadMoreView;
     List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
     int mPageNum = 1;
 
@@ -72,9 +74,8 @@ public class ActivityMyFriends extends BaseActivity {
         layoutTitle.setText(R.string.my_friends);
         mDataList = new ArrayList<>();
 
-        loadMore();
-
         getMyFriendsList(mPageNum);
+        loadMore();
     }
 
     @Override
@@ -160,6 +161,8 @@ public class ActivityMyFriends extends BaseActivity {
     private void loadMore() {
 
         amfPtfRefresh.setCanRefresh(false);
+        loadMoreView = new LoadMoreView(ActivityMyFriends.this);
+        amfPtfRefresh.setFooterView(loadMoreView);
         amfPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
@@ -200,8 +203,13 @@ public class ActivityMyFriends extends BaseActivity {
                         if (friendsListRespond.getCode() == 0) {
                             List<FriendsListRespond.PayloadBean.FriendsBean> tempList
                                     = friendsListRespond.getPayload().getFriends();
-                            mDataList.addAll(tempList);
-                            initMyFriendsList(mDataList);
+                            if(tempList.size() > 0) {
+                                mDataList.addAll(tempList);
+                                initMyFriendsList(mDataList);
+                            } else {
+                                System.out.println("数据加载完毕");
+                                loadMoreView.noData();
+                            }
                         }
                         amfPtfRefresh.finishLoadMore();
                     }
