@@ -10,12 +10,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -485,10 +487,13 @@ public class ImageSelectorActivity extends AppCompatActivity {
 //            cropImageUri = Uri.fromFile(fileCropUri);
 
 //            PhotoUtils.cropImageUri(this, imageUri, cropImageUri, 1, 1, OUTPUT_X, OUTPUT_Y, CODE_RESULT_REQUEST);
-
-//            ImageUtil.saveImage()
-
             Log.i(TAG, "onActivityResult: 照相的图片url---" + imageUri);
+            Bitmap bitmap = PhotoUtils.getBitmapFromUri(imageUri,ImageSelectorActivity.this);
+
+            Bitmap bitmap1 = ImageUtil.decodeSampledBitmapFromFile(fileUri.getAbsolutePath(),bitmap.getWidth(),bitmap.getHeight());
+            MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "", "");
+            loadImageForSDCard();
+            mAdapter.notifyDataSetChanged();
         }
     }
 

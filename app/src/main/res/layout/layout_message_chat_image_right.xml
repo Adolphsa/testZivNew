@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="20dp"
     android:orientation="vertical"
+    android:id="@+id/msg_item_image_right_root"
     >
 
     <ImageView
@@ -23,9 +24,22 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="21dp"
         android:adjustViewBounds="true"
-        android:background="@drawable/right_chat"
         android:maxHeight="200dp"
         android:maxWidth="200dp"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        />
+
+    <ImageView
+        android:id="@+id/msg_item_image_right_up"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="21dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/right_chat_img"
+        android:maxHeight="200dp"
+        android:maxWidth="200dp"
+        android:scaleType="fitCenter"
+        />
 
 </RelativeLayout>

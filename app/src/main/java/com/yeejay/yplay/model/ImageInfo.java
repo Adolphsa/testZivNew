@@ -9,9 +9,18 @@ import com.tencent.imsdk.TIMImageType;
 
 public class ImageInfo {
 
+    private int imageFormat;
     private OriginalImage originalImage;
     private ThumbImage thumbImage;
     private LargeImage largeImage;
+
+    public int getImageFormat() {
+        return imageFormat;
+    }
+
+    public void setImageFormat(int imageFormat) {
+        this.imageFormat = imageFormat;
+    }
 
     public OriginalImage getOriginalImage() {
         return originalImage;

@@ -7,11 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+
+import java.io.IOException;
 
 /**
  * Created by Adolph on 2017/12/28.
@@ -208,4 +212,21 @@ public class PhotoUtils {
     private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+
+    /**
+     * 把原图按1/10的比例压缩
+     *
+     * @param path 原图的路径
+     * @return 压缩后的图片
+     */
+    public static Bitmap getCompressPhoto(String path) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = 10; // 图片的大小设置为原来的十分之一
+        Bitmap bmp = BitmapFactory.decodeFile(path, options);
+        options = null;
+        return bmp;
+    }
+
 }

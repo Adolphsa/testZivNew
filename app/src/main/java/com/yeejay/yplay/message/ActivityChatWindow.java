@@ -16,6 +16,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,6 +33,7 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
+import com.tencent.imsdk.TIMImage;
 import com.tencent.imsdk.TIMImageElem;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
@@ -349,7 +352,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
 
-//            acwImgChoice.setVisibility(View.VISIBLE);
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
 
         chatAdapter = new ChatAdapter(ActivityChatWindow.this, mDataList);
@@ -365,8 +368,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 String imageInfoStr = mDataList.get(realPosition).getMsgContent();
                 ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
                 String url = imageInfo.getLargeImage().getImageUrl();
-                if (!TextUtils.isEmpty(url)){
-                    showImageDialog(url);
+                int imageFormat = imageInfo.getImageFormat();
+                int largeWidth = imageInfo.getLargeImage().getImageWidth();
+                int largeHeight = imageInfo.getLargeImage().getImageHeight();
+                if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+                    showImageDialog(url,largeWidth,largeHeight);
                 }
             }
         });
@@ -500,8 +506,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
         }
 
-
-
         if (!TextUtils.isEmpty(sessionId)) {
             //查询消息表
             mDataList = queryDatabaseForImsession(sessionId);
@@ -601,7 +605,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             imMsg1.setMsgContent("对方已看到你的真实姓名");
             mDataList.add(0,imMsg1);
 
-//            acwImgChoice.setVisibility(View.VISIBLE);
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
         Log.i(TAG, "onMessageUpdate: status---" + status + ",sender---" + imMsg.getSender());
     }
@@ -683,13 +687,34 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     }
 
     //显示图片的dialog
-    private void showImageDialog(String imagePath){
+    private void showImageDialog(String imagePath, int largeWidth, int largeHeight){
 
-        final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this).create();
+        final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this,R.style.StyleDialog).create();
         dialog.show();
 
         dialog.setContentView(R.layout.layout_show_chat_image);
+        Window window = dialog.getWindow();
+        window.setGravity(Gravity.CENTER_VERTICAL); //可设置dialog的位置
+        window.getDecorView().setPadding(0, 0, 0, 0); //消除边距
+
+        WindowManager.LayoutParams lp = window.getAttributes();
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;   //设置宽度充满屏幕
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        window.setAttributes(lp);
+
         ImageView imageView = (ImageView) dialog.findViewById(R.id.acw_show_image);
+        int screenWidth = DensityUtil.getScreenWidth(this);
+        ViewGroup.LayoutParams imageLp = imageView.getLayoutParams();
+        imageLp.width = screenWidth;
+        imageLp.height =  ViewGroup.LayoutParams.WRAP_CONTENT;
+        Log.i(TAG, "showImageDialog: lh---"  + largeHeight);
+        Log.i(TAG, "showImageDialog: lw---" + largeWidth);
+        Log.i(TAG, "showImageDialog: height---" + largeHeight*screenWidth/largeWidth + ",width---" + imageLp.width);
+        imageView.setLayoutParams(imageLp);
+
+        imageView.setMaxWidth(screenWidth);
+        imageView.setMaxHeight(largeHeight*screenWidth/largeWidth);
+
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

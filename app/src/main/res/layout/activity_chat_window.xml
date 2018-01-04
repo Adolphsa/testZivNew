@@ -46,7 +46,6 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="10dp"
             android:scaleType="fitXY"
-            android:visibility="gone"
             />
         <EditText
             android:id="@+id/acw_edit"

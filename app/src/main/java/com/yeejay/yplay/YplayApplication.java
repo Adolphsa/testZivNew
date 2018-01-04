@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.bumptech.glide.request.target.ViewTarget;
 import com.tencent.imsdk.TIMGroupReceiveMessageOpt;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMOfflinePushListener;
@@ -47,6 +48,8 @@ public class YplayApplication extends Application {
 
         Foreground.init(this);
         context = getApplicationContext();
+
+        ViewTarget.setTagId(R.id.glide_tag);
 
         WnsAppInfo info = new WnsAppInfo()
                 .setAppId(203682)

@@ -243,6 +243,8 @@ public class MessageUpdateUtil {
             TIMElem elem = timMessage.getElement(0);
             TIMImageElem e = (TIMImageElem)elem;
             ImageInfo imageInfo = new ImageInfo();
+            imageInfo.setImageFormat(e.getImageFormat());
+            Log.i(TAG, "updateSessionAndMessage: imageFormat---" + e.getImageFormat());
 
             for(TIMImage image : e.getImageList()) {
 
@@ -250,7 +252,8 @@ public class MessageUpdateUtil {
                 Log.i(TAG, "image type: " + image.getType() +
                         " image size " + image.getSize() +
                         " image height " + image.getHeight() +
-                        " image width " + image.getWidth());
+                        " image width " + image.getWidth()
+                );
                 TIMImageType imageType = image.getType();
                 if (imageType == TIMImageType.Original){
                     ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();

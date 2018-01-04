@@ -1,7 +1,12 @@
 package com.yeejay.yplay.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.WindowManager;
+
+import com.donkingliang.imageselector.constant.Constants;
 
 /**
  * 像素转换工具类.
@@ -52,5 +57,22 @@ public class DensityUtil {
      */
     public static float px2sp(Context context, float pxVal) {
         return (pxVal / context.getResources().getDisplayMetrics().scaledDensity);
+    }
+
+    /**
+     * 获取屏幕宽度
+     * @param context
+     * @return
+     */
+    public static int getScreenWidth(Context context){
+        Resources resources = context.getResources();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        return  dm.widthPixels;
+    }
+
+    public static int getScreenHeight(Context context){
+        Resources resources = context.getResources();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        return dm.heightPixels;
     }
 }

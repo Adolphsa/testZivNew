@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,13 +15,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.donkingliang.imageselector.entry.Image;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMElemType;
+import com.tencent.imsdk.TIMImageElem;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
+import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -39,6 +44,8 @@ import butterknife.ButterKnife;
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
+
+    private static final String TAG = "ChatAdapter";
 
     public enum ITEM_TYPE {
         ITEM_TYPE_LEFT,
@@ -180,29 +187,112 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             if (holder instanceof LeftImageViewHolder){     //左边的图片
                 ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
-                String url = imageInfo.getThumbImage().getImageUrl();
-                int width = imageInfo.getThumbImage().getImageWidth();
-                int height = imageInfo.getThumbImage().getImageHeight();
+                String url;
+                int imageFormat = imageInfo.getImageFormat();
+                int width;
+                int height;
+                if (imageFormat == TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+
+                    width = imageInfo.getOriginalImage().getImageWidth();
+                    height = imageInfo.getOriginalImage().getImageHeight();
+                    url = imageInfo.getOriginalImage().getImageUrl();
+                }else {
+                    width = imageInfo.getThumbImage().getImageWidth();
+                    height = imageInfo.getThumbImage().getImageHeight();
+                    url = imageInfo.getThumbImage().getImageUrl();
+                }
                 if (!TextUtils.isEmpty(url)){
-                    Picasso.with(context).load(url)
-                            .resize(width,height)
-                            .config(Bitmap.Config.RGB_565)
-                            .centerCrop()
-                            .into(((LeftImageViewHolder)holder).msgImageLeft);
+                    ViewGroup.LayoutParams lp = ((LeftImageViewHolder)holder).msgImageLeft.getLayoutParams();
+                    ViewGroup.LayoutParams lpUp = ((LeftImageViewHolder)holder).msgImageLeftUp.getLayoutParams();
+                    if (width > height){
+                        lp.width = DensityUtil.dp2px(context,200);
+                        lp.height = DensityUtil.dp2px(context,200*height/width);
+                        ((LeftImageViewHolder)holder).msgImageLeft.setLayoutParams(lp);
+
+                        lpUp.width = DensityUtil.dp2px(context,200);
+                        lpUp.height = DensityUtil.dp2px(context,200*height/width);
+                        ((LeftImageViewHolder)holder).msgImageLeftUp.setLayoutParams(lpUp);
+
+                    }else {
+                        lp.width = DensityUtil.dp2px(context,200*width/height);
+                        lp.height = DensityUtil.dp2px(context,200);
+                        ((LeftImageViewHolder)holder).msgImageLeft.setLayoutParams(lp);
+
+                        lpUp.width = DensityUtil.dp2px(context,200*width/height);
+                        lpUp.height = DensityUtil.dp2px(context,200);
+                        ((LeftImageViewHolder)holder).msgImageLeftUp.setLayoutParams(lpUp);
+                    }
+
+                    if (imageFormat == TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+                        Glide.with(context).load(url)
+                                .asGif()
+                                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                                .into(((LeftImageViewHolder)holder).msgImageLeft);
+                        Log.i(TAG, "onBindViewHolder: left gif---" + url);
+                    }else {
+                        Picasso.with(context).load(url)
+                                .resize(lp.width,lp.height)
+                                .config(Bitmap.Config.RGB_565)
+                                .centerCrop()
+                                .into(((LeftImageViewHolder)holder).msgImageLeft);
+                    }
+
                 }
 
             }else if (holder instanceof RightImageViewHolder){      //右边的图片
                 ((RightImageViewHolder)holder).msgImageRight.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
-                String url = imageInfo.getThumbImage().getImageUrl();
-                int width = imageInfo.getThumbImage().getImageWidth();
-                int height = imageInfo.getThumbImage().getImageHeight();
+                String url;
+                int imageFormat = imageInfo.getImageFormat();
+                int width;
+                int height;
+                if (imageFormat == TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+                    width = imageInfo.getOriginalImage().getImageWidth();
+                    height = imageInfo.getOriginalImage().getImageHeight();
+                    url = imageInfo.getOriginalImage().getImageUrl();
+                }else {
+                    width = imageInfo.getThumbImage().getImageWidth();
+                    height = imageInfo.getThumbImage().getImageHeight();
+                    url = imageInfo.getThumbImage().getImageUrl();
+                }
+
                 if(!TextUtils.isEmpty(url)){
-                    Picasso.with(context).load(url)
-                            .resize(width,height)
-                            .config(Bitmap.Config.RGB_565)
-                            .centerCrop()
-                            .into(((RightImageViewHolder)holder).msgImageRight);
+
+                    ViewGroup.LayoutParams lp = ((RightImageViewHolder)holder).msgImageRight.getLayoutParams();
+                    ViewGroup.LayoutParams lpUp = ((RightImageViewHolder)holder).msgImageRightUp.getLayoutParams();
+
+
+                    if (width > height){
+                        lp.width = DensityUtil.dp2px(context,200);
+                        lp.height = DensityUtil.dp2px(context,200*height/width);
+                        ((RightImageViewHolder)holder).msgImageRight.setLayoutParams(lp);
+
+                        lpUp.width = DensityUtil.dp2px(context,200);
+                        lpUp.height = DensityUtil.dp2px(context,200*height/width);
+                        ((RightImageViewHolder)holder).msgImageRightUp.setLayoutParams(lpUp);
+                    } else{
+                        lp.width = DensityUtil.dp2px(context,200*width/height);
+                        lp.height = DensityUtil.dp2px(context,200);
+                        ((RightImageViewHolder)holder).msgImageRight.setLayoutParams(lp);
+
+                        lpUp.width = DensityUtil.dp2px(context,200*width/height);
+                        lpUp.height = DensityUtil.dp2px(context,200);
+                        ((RightImageViewHolder)holder).msgImageRightUp.setLayoutParams(lpUp);
+                    }
+
+                    if (imageFormat == TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+                        Glide.with(context).load(url)
+                                .asGif()
+                                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                                .into(((RightImageViewHolder)holder).msgImageRight);
+                        Log.i(TAG, "onBindViewHolder: right gif---" + url);
+                    }else {
+                        Picasso.with(context).load(url)
+                                .resize(lp.width,lp.height)
+                                .config(Bitmap.Config.RGB_565)
+                                .centerCrop()
+                                .into(((RightImageViewHolder)holder).msgImageRight);
+                    }
                 }
 
             }
@@ -392,6 +482,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     public static class LeftImageViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.msg_item_image_left_up)
+        ImageView msgImageLeftUp;
         @BindView(R.id.msg_item_image_left)
         ImageView msgImageLeft;
 
@@ -403,6 +495,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     public static class RightImageViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.msg_item_image_right_up)
+        ImageView msgImageRightUp;
         @BindView(R.id.msg_item_image_right)
         ImageView msgImageRight;
         @BindView(R.id.msg_item_image_right_not_friend)
