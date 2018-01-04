@@ -26,6 +26,7 @@ import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.CardDialog;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -78,12 +79,15 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     FriendFeedsAdapter feedsAdapter;
     DaoFriendFeedsDao mDaoFriendFeedsDao;
-    List<DaoFriendFeeds> mDataList;
+    List<DaoFriendFeeds> mDataList = new ArrayList<>();
     MainActivity mainActivity;
+    LinearLayoutManager linearLayoutMgr;
+    DefaultItemDecoration defaultItemDecoration;
 
     int refreshOffset = 0;
 
     private RelativeLayout rl;
+    private LoadMoreView loadMoreView;
 
     @Override
     public void onDestroyView() {
@@ -95,6 +99,11 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         return R.layout.fragment_friend;
     }
 
+    private void resetData(){
+         mDataList.clear();
+         refreshOffset = 0;
+    }
+
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
 
@@ -102,66 +111,87 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
         //跳转到我的资料
         jumpToUserInfo();
-        mDataList = new ArrayList<>();
+
         mainActivity = (MainActivity) getActivity();
 
         mDaoFriendFeedsDao = YplayApplication.getInstance().getDaoSession().getDaoFriendFeedsDao();
 
-        ffSwipeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        ffSwipeRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
+        linearLayoutMgr = new LinearLayoutManager(getActivity());
+        ffSwipeRecyclerView.setLayoutManager(linearLayoutMgr);
 
-//        ffSwipeRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {
-//            @Override
-//            public void onItemClick(View itemView, int position) {
-//                System.out.println("被点击的item---" + position);
-//
-//            }
-//        });
+        defaultItemDecoration = new DefaultItemDecoration(getResources().getColor(R.color.divider_color2));
+        ffSwipeRecyclerView.addItemDecoration(defaultItemDecoration);
 
-        feedsAdapter = new FriendFeedsAdapter(getActivity(),
-                mDataList,
-                mDaoFriendFeedsDao);
+        if(feedsAdapter == null) {
+            feedsAdapter = new FriendFeedsAdapter(getActivity(),
+                    mDataList,
+                    mDaoFriendFeedsDao);
+        }
         ffSwipeRecyclerView.setAdapter(feedsAdapter);
         feedsAdapter.addRecycleImageListener(this);
+
+        if(loadMoreView == null) {
+            loadMoreView = new LoadMoreView(getActivity());
+        }
+        ffPtfRefreshLayout.setFooterView(loadMoreView);
         ffPtfRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
                 long ts = System.currentTimeMillis();
                 System.out.println("顶部刷新--" + ts);
 
-                refreshOffset = 0;
-                getFriendFeeds(ts, 10);
-                updateUiData();
-                mainActivity.setFeedClear();
+                resetData();
+
+                //拉取新数据
+                getFriendFeeds(ts, 10, false);
+
             }
 
             @Override
             public void loadMore() {
-                refreshOffset++;
-                updateUiData();
+                System.out.println("底部刷新--");
+
+                if(0 == mDataList.size()){
+                    updateUiData();
+                }else {
+                    //取当前最后一个feed的ts去服务器拉数据 并插入到本地数据库
+                    DaoFriendFeeds feed = mDataList.get(mDataList.size()-1);
+                    long ts = feed.getTs();
+                    getFriendFeeds(ts, 10, true);
+                }
 
                 ffPtfRefreshLayout.finishLoadMore();
             }
         });
-
-
     }
 
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser) {
-            System.out.println("FragmentFriend---可见");
 
-            if (mainActivity.isNewFeeds() && refreshOffset == 0) {
-                long ts = System.currentTimeMillis();
-                Log.i(TAG, "onVisibilityChangedToUser: ts---" + ts);
-                getFriendFeeds(ts, 10);
-
-            } else {
-                refreshOffset = 0;
-                updateUiData();
+            //判断当前的view是否已经滑动到顶部，如果是则需要自动更新 pos=0表示在顶部
+            int pos = -1;
+            if(linearLayoutMgr != null){
+                pos = linearLayoutMgr.findFirstCompletelyVisibleItemPosition();
             }
+            System.out.println("FragmentFriend---可见" + "  refreshOffset-- " + refreshOffset + " feed数组大小--" + mDataList.size()
+                   + " , 在顶部 = " + pos);
+
+            //refreshOffset = 0 表示第一次进入动态页面
+            //refreshOffset = 1 表示拉取过一次进入动态页面
+            if ( refreshOffset <= 1) {
+
+                //pos = 0 表示拉取过并且处于顶端
+                //refreshOffset = 0 表示从来没有数据，这时需要去刷新看看有没有新数据
+                if(pos == 0 || refreshOffset == 0){
+                    resetData();
+                    long ts = System.currentTimeMillis();
+                    Log.i(TAG, "scrollview 在顶部，需要更新数据: ts---" + ts);
+                    getFriendFeeds(ts, 10, false);
+                }
+            }
+
             setFriendCount();
         }
 
@@ -177,7 +207,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     }
 
     //获取好友动态
-    public void getFriendFeeds(long ts, int cnt) {
+    public void getFriendFeeds(long ts, int cnt, final boolean isLoadMore) {
 
         System.out.println("拉取好友动态----" + ts);
         Map<String, Object> friendFeedsMap = new HashMap<>();
@@ -201,9 +231,10 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                     public void onNext(@NonNull FriendFeedsRespond friendFeedsRespond) {
                         System.out.println("获取好友动态---" + friendFeedsRespond.toString());
                         if (friendFeedsRespond.getCode() == 0) {
+
                             List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList = friendFeedsRespond.getPayload().getFeeds();
                             if (feedsBeanList != null && feedsBeanList.size() > 0) {
-
+                                Log.d("feed","拉取好友动态----" + " retCnt--" + feedsBeanList.size());
                                 for (int i = 0; i < feedsBeanList.size(); i++) {
                                     //插入到数据库
                                     insertFeedsToDataBase(feedsBeanList.get(i));
@@ -212,14 +243,47 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                                 makeSureFeeds(feedsBeanList.get(feedsBeanList.size() - 1).getTs(),
                                         feedsBeanList.get(0).getTs());
                             }
-                        }
 
-                        if (mainActivity.isNewFeeds() && refreshOffset == 0) {
+                            Log.d("feed","从数据库查询动态----" + " pagenum--" + refreshOffset);
+
+                            List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset++);
+                            if(refreshList.size() == 0){
+                                //已经是最后一页了没有数据了，页码不应该一直增加
+                                refreshOffset--;
+                                //todo提示加载完成了没有更多数据了
+                                loadMoreView.noData();
+                                Log.d("feed","从数据库查询动态返回为空----" + " pagenum--" + refreshOffset);
+                            } else {
+                                //不是最后一页，在拉取数据后，RecycleView自动向上滑动一个item高度；
+                                mDataList.addAll(refreshList);
+                                if (isLoadMore) {
+                                    //是底部刷新时，才需要向上自动滚动2个item高度；
+                                    if(refreshList.size() >= 2) {
+                                        Log.d("feed","smoothScroll to position---" + (mDataList.size()-refreshList.size()+1) + "  mDatalist.size()---" + mDataList.size());
+                                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size()-refreshList.size()+1);
+                                    } else if (refreshList.size() == 1) {
+                                        Log.d("feed","smoothScroll to position---" + (mDataList.size()-refreshList.size()) + "  mDatalist.size()---" + mDataList.size());
+                                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size()-refreshList.size());
+                                    }
+                                }
+
+                                feedsAdapter.notifyDataSetChanged();
+                            }
+
+                            Log.d("feed","当前feeds总数目----" + mDataList.size() + "当前页码数--" + (refreshOffset-1));
+
+                            //判断是否扩列开启
                             updateUiData();
-                            mainActivity.setNewFeeds(false);
-                            mainActivity.setFeedClear();
-                        }
 
+                            //顶部刷新清理点亮标志
+                            if ( !isLoadMore ) {
+                                mainActivity.setNewFeeds(false);
+                                mainActivity.setFeedClear();
+                            }
+
+                        }else{
+                            //todo失败的处理
+                        }
                     }
 
                     @Override
@@ -239,31 +303,17 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     }
 
 
-    //更新UI数据
+    //扩列开启界面
     private void updateUiData() {
-
-        if (0 == refreshOffset && mDataList != null) {
-            mDataList.clear();
-        }
-
-        List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset);
-        System.out.println("刷新----refreshOffset---" + refreshOffset);
-        System.out.println("刷新----refreshList---" + refreshList.size());
-
-        if (refreshList.size() != 0) {
-            mDataList.addAll(refreshList);
-        }
-
-        if (mDataList.size() == 0 && refreshOffset == 0) {
-            System.out.println("无动态");
-            fransFrfLayout.setVisibility(View.VISIBLE);
-            ffPtfRefreshLayout.setVisibility(View.GONE);
-            initRecommentFriends();
-        } else {
+           if(mDataList.size()==0) {
+               System.out.println("无动态");
+               fransFrfLayout.setVisibility(View.VISIBLE);
+               ffPtfRefreshLayout.setVisibility(View.GONE);
+               initRecommentFriends();
+           }else{
             System.out.println("有动态");
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
-            feedsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -439,7 +489,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 public void refresh() {
                     System.out.println("刷新");
                     long ts = System.currentTimeMillis();
-                    getFriendFeeds(ts, 10);
+                    getFriendFeeds(ts, 10, false);
                     recommendPullView.finishRefresh();
                 }
 

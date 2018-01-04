@@ -22,6 +22,7 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -72,8 +73,9 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     int dataOffset = 0;
     int uin;
     MessageAdapter messageAdapter;
-    List<ImSession> mDataList;
+    List<ImSession> mDataList = new ArrayList<>();
     ImSessionDao imSessionDao;
+    private LoadMoreView loadMoreView;
 
     @Override
     public int getContentViewId() {
@@ -82,6 +84,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+
         messageTitle.setBackgroundColor(getResources().getColor(R.color.message_title_color));
         frgTitle.setText("消息");
         frgTitle.setTextColor(getResources().getColor(R.color.white));
@@ -90,14 +93,56 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         MessageUpdateUtil.getMsgUpdateInstance().setSessionUpdateListener(this);
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
-        mDataList = new ArrayList<>();
 
         initMessageView();
     }
 
+    private void loadMoreData(){
+
+        Log.d("msg", "begin loadMoreData, dataOffset--" + dataOffset);
+
+        List<ImSession> tempImSessinList = queryDatabaseForImsession(dataOffset++);
+
+        if (tempImSessinList != null && tempImSessinList.size() > 0){
+
+            for(int i = 0; i < tempImSessinList.size(); ++i){
+                Log.d("msg", "queryFromDatabase index " + i + ", info--" + tempImSessinList.get(i).getSessionId() + ",content--" + tempImSessinList.get(i).getMsgContent());
+            }
+
+            mDataList.addAll(tempImSessinList);
+
+            Log.d("msg", "loadMoreData, allDataSize--" + mDataList.size() + " fromDataBase size--" + tempImSessinList.size());
+
+            //底部刷新的时候才需要将新加载的页面外露一部分
+            //dataOffset == 1表示顶部更新，>1表示底部更新
+            if(dataOffset > 1) {
+                if (tempImSessinList.size() >= 2) {
+                    Log.d("msg", "smoothScroll to position---" + (mDataList.size() - tempImSessinList.size() + 1) + "  mDatalist.size()---" + mDataList.size());
+                    messageRecyclerView.smoothScrollToPosition(mDataList.size() - tempImSessinList.size() + 1);
+                } else if (tempImSessinList.size() == 1) {
+                    Log.d("msg", "smoothScroll to position---" + (mDataList.size() - tempImSessinList.size()) + "  mDatalist.size()---" + mDataList.size());
+                    messageRecyclerView.smoothScrollToPosition(mDataList.size() - tempImSessinList.size());
+                }
+            }
+            messageAdapter.notifyDataSetChanged();
+
+        }else {
+            dataOffset--;
+            //Toast.makeText(getActivity(),"没有更多数据了",Toast.LENGTH_LONG).show();
+            //没有更多数据了
+            loadMoreView.noData();
+
+            Log.d("msg", "loadMoreData, fromDbSize 0, allDataSize--" + mDataList.size());
+        }
+        messageRefreshView.finishLoadMore();
+    }
+
     private void initMessageView(){
 
-        messageAdapter = new MessageAdapter(getActivity(),mDataList);
+        if(messageAdapter == null){
+            messageAdapter = new MessageAdapter(getActivity(),mDataList);
+        }
+
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         messageRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
 
@@ -111,7 +156,13 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 String sessionId = imSession.getSessionId();
                 String msgContent = imSession.getMsgContent();
                 String nickName = imSession.getNickName();
+
                 imSession.setUnreadMsgNum(0);
+                View tmp = (View)itemView.findViewById(R.id.msg_item_new_msg);
+                if(tmp != null){
+                    tmp.setVisibility(View.GONE);
+                }
+
                 imSessionDao.update(imSession);
                 int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
 
@@ -141,80 +192,79 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         messageRecyclerView.setAdapter(messageAdapter);
 
+        if(loadMoreView == null) {
+            loadMoreView = new LoadMoreView(YplayApplication.getContext());
+        }
+
         messageRefreshView.setCanRefresh(false);
+        messageRefreshView.setFooterView(loadMoreView);
         messageRefreshView.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
-
             }
 
             @Override
             public void loadMore() {
-                dataOffset++;
-                List<ImSession> tempImSessinList = queryDatabaseForImsession();
-                if (tempImSessinList != null && tempImSessinList.size() > 0){
-                    mDataList.addAll(tempImSessinList);
-                    messageAdapter.notifyDataSetChanged();
-                }else {
-                    Toast.makeText(getActivity(),"没有更多数据了",Toast.LENGTH_LONG).show();
-                }
-                messageRefreshView.finishLoadMore();
+                loadMoreData();
+                //messageRefreshView.finishLoadMore();
             }
-        });
+            });
     }
 
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser){
-            System.out.println("FragmentMessage---消息可见");
+
+            System.out.println("FragmentMessage---消息可见" + "--dataOffset--"+ dataOffset);
             frgEdit.setVisibility(View.GONE);
-            dataOffset = 0;
-            updateUi();
+
+            if(dataOffset == 0) {
+                loadMoreData();
+            }else {
+                System.out.println("FragmentMessage---消息可见" + "--allDataSize--"+ mDataList.size());
+            }
 
             MainActivity mainActivity = (MainActivity)getActivity();
             mainActivity.setMessageIcon();
 
             setFriendCount();
+
+            updateUi();
         }
     }
 
     //从数据库中查找会话列表
-    private List<ImSession> queryDatabaseForImsession(){
+    private List<ImSession> queryDatabaseForImsession(int pageNumber){
 
-        Log.i(TAG, "queryDatabaseForImsession: uin---" + uin);
+        Log.i(TAG, "queryDatabaseForImsession: uin---" + uin + " ---pageNum---" +pageNumber);
+
+        if(pageNumber < 0){
+            return null;
+        }
+
+        long ts = 3000000000000L;
+        if(mDataList.size()>0) {
+            ts = mDataList.get(mDataList.size() - 1).getMsgTs();
+        }
 
         return imSessionDao.queryBuilder()
                 .where(ImSessionDao.Properties.Uin.eq(uin))
+                .where(ImSessionDao.Properties.MsgTs.lt(ts))
                 .orderDesc(ImSessionDao.Properties.MsgTs)
-                .offset(dataOffset * 10)
                 .limit(10)
                 .list();
     }
 
-    //更新UI
+    //更新UI 判断是否数据为空
     private void updateUi(){
 
-        mDataList.clear();
-
-        List<ImSession> tempList = queryDatabaseForImsession();
-        if (tempList == null){
-            System.out.println("数据库中没有查到数据");
-        }else{
-//            System.out.println("查询到的列表长度---" + tempList.size());
-            mDataList.addAll(tempList);
-            messageAdapter.notifyDataSetChanged();
-            if (messageRecyclerView != null){
-                messageRecyclerView.scrollToPosition(0);
-                messageRecyclerView.loadMoreFinish(false, true);
+        if (messageNull != null) {
+            if (mDataList.size() > 0) {
+                messageNull.setVisibility(View.GONE);
+            } else {
+                messageNull.setVisibility(View.VISIBLE);
             }
-
-        }
-
-        if (mDataList.size() > 0){
-            messageNull.setVisibility(View.GONE);
-        }else {
-            messageNull.setVisibility(View.VISIBLE);
         }
 
     }
@@ -222,9 +272,32 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     @Override
     public void onSessionUpdate(ImSession imSession) {
         String sessionId =  imSession.getSessionId();
-        Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId---" + sessionId);
+        Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId---" + sessionId + ", uin--" + imSession.getUin());
 
-        updateUi();
+        if(uin != imSession.getUin()){
+            return;
+        }
+
+        int idx = 0;
+        boolean find = false;
+
+        for(; idx < mDataList.size();++idx){
+            if(mDataList.get(idx).getSessionId() == sessionId){
+                find = true;
+                break;
+            }
+        }
+
+        if(find){
+            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId已经存在回话列表中--" + sessionId );
+            mDataList.remove(idx);
+            mDataList.add(0,imSession);
+        }else{
+            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId是新回话--" + sessionId );
+            mDataList.add(0,imSession);
+        }
+
+        messageAdapter.notifyDataSetChanged();
     }
 
     public void setFriendCount(){
