@@ -202,7 +202,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         initMainView();
         addFragment();
         viewPager.setAdapter(frgAdapter);
-        viewPager.setOffscreenPageLimit(3);
         viewPager.setCurrentItem(1);
         viewPager.setOffscreenPageLimit(3);
 
@@ -262,7 +261,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         fragments.add(fragmentMessage);
 
         frgAdapter = new FragmentAdapter(getSupportFragmentManager(), fragments);
-
     }
 
     private void initMainView() {

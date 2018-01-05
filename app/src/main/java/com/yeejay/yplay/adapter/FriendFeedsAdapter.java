@@ -40,9 +40,6 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     private Context mContext;
     private DaoFriendFeedsDao mDaoFriendFeedsDao;
     private List<DaoFriendFeeds> daoFriendFeedsList;
-    private DaoFriendFeeds daoFriendFeeds;
-
-
 
     public FriendFeedsAdapter(Context context,
                               List<DaoFriendFeeds> daoFriendFeedsList,
@@ -61,7 +58,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
     @Override
     public void onBindViewHolder(FeedsViewHolder holder, final int position) {
 
-        daoFriendFeeds = daoFriendFeedsList.get(position);
+        DaoFriendFeeds daoFriendFeeds = daoFriendFeedsList.get(position);
 //        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
 
         holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);

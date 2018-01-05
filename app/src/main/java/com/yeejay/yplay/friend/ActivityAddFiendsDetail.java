@@ -3,8 +3,10 @@ package com.yeejay.yplay.friend;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,11 +18,13 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendsDetailAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.CardRequestFredDialog;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -124,6 +128,18 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         }, tempList);
         aafdListView.setEmptyView(emptyView);
         aafdListView.setAdapter(friendsDetailAdapter);
+        aafdListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int userUin = mDataList.get(position).getFromUin();
+                if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)) {
+                    getFriendInfo(userUin, view);
+                } else {
+                    Toast.makeText(ActivityAddFiendsDetail.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     private void loadMore(){
@@ -138,6 +154,90 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                 getAddFriendmsgs(mPageNum);
             }
         });
+    }
+
+    //查询发好友请求之人的信息
+    private void getFriendInfo(int friendUin, View view) {
+        final View friendItemView = view;
+        Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("userUin", friendUin);
+        friendMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
+        friendMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserInfo(friendMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {}
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
+                        if (userInfoResponde.getCode() == 0) {
+                            UserInfoResponde.PayloadBean.InfoBean infoBean =
+                                    userInfoResponde.getPayload().getInfo();
+//                            int status = userInfoResponde.getPayload().getStatus();
+//                            if (status == 1) {
+//                                Intent intent = new Intent(ActivityAddFiendsDetail.this, ActivityFriendsInfo.class);
+//                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
+//                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
+//                                System.out.println("朋友的uin---" + infoBean.getUin());
+//                                startActivity(intent);
+//                            } else {
+                                showCardDialog(userInfoResponde.getPayload(), friendItemView);
+//                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    //显示名片
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean, View view) {
+
+        final View friendItemView = view;
+        final Button freiendIcon = (Button) friendItemView.findViewById(R.id.af_btn_accept2);
+        final Button hideIcon = (Button) friendItemView.findViewById(R.id.af_btn_hide);
+        final CardRequestFredDialog cardDialog = new CardRequestFredDialog(ActivityAddFiendsDetail.this, R.style.CustomDialog,
+                payloadBean);
+
+        cardDialog.setAddFriendListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageView button = (ImageView) v;
+                if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)) {
+                    button.setImageResource(R.drawable.peer_be_as_friends);
+                    //除了更新朋友选项卡信息中的按钮状态外，还要更新外部对应的好友请求列表item的按钮状态；
+                    if (friendItemView != null) {
+
+                        if (freiendIcon != null) {
+                            freiendIcon.setBackgroundResource(R.drawable.be_as_friends);
+                            accepeAddFreind(mDataList.get((int)freiendIcon.getTag()).getMsgId(),
+                                    0,
+                                    mDataList.get((int)freiendIcon.getTag()));
+                        }
+                        if (hideIcon != null) {
+                            hideIcon.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                } else {
+                    Toast.makeText(ActivityAddFiendsDetail.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        cardDialog.show();
     }
 
     //拉取添加好友消息
