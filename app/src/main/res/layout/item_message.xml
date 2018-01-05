@@ -58,6 +58,7 @@
             android:id="@+id/msg_item_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:text="永不停息对工作的热爱"
             android:textSize="14sp"
             />

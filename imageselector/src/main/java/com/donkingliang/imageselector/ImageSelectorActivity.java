@@ -156,6 +156,9 @@ public class ImageSelectorActivity extends AppCompatActivity {
         tvFolderName = (TextView) findViewById(R.id.tv_folder_name);
         tvTime = (TextView) findViewById(R.id.tv_time);
         masking = findViewById(R.id.masking);
+        if (isSettingHeader){
+            ibCamera.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initListener() {
@@ -484,13 +487,8 @@ public class ImageSelectorActivity extends AppCompatActivity {
                 setSelectImageCount(mAdapter.getSelectImages().size());
             }
         }else if (requestCode == CODE_CAMERA_REQUEST){
-//            cropImageUri = Uri.fromFile(fileCropUri);
-
-//            PhotoUtils.cropImageUri(this, imageUri, cropImageUri, 1, 1, OUTPUT_X, OUTPUT_Y, CODE_RESULT_REQUEST);
             Log.i(TAG, "onActivityResult: 照相的图片url---" + imageUri);
             Bitmap bitmap = PhotoUtils.getBitmapFromUri(imageUri,ImageSelectorActivity.this);
-
-            Bitmap bitmap1 = ImageUtil.decodeSampledBitmapFromFile(fileUri.getAbsolutePath(),bitmap.getWidth(),bitmap.getHeight());
             MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "", "");
             loadImageForSDCard();
             mAdapter.notifyDataSetChanged();

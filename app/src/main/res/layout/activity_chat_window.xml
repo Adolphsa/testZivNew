@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="46dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/feeds_search_color"
+        android:background="@color/white"
         android:orientation="horizontal"
         android:layout_marginTop="5dp"
         >

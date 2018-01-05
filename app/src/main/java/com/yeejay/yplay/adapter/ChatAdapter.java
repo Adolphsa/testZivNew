@@ -228,7 +228,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                                 .asGif()
                                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                                 .into(((LeftImageViewHolder)holder).msgImageLeft);
-                        Log.i(TAG, "onBindViewHolder: left gif---" + url);
+//                        Log.i(TAG, "onBindViewHolder: left gif---" + url);
                     }else {
                         Picasso.with(context).load(url)
                                 .resize(lp.width,lp.height)
@@ -285,7 +285,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                                 .asGif()
                                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                                 .into(((RightImageViewHolder)holder).msgImageRight);
-                        Log.i(TAG, "onBindViewHolder: right gif---" + url);
+//                        Log.i(TAG, "onBindViewHolder: right gif---" + url);
                     }else {
                         Picasso.with(context).load(url)
                                 .resize(lp.width,lp.height)

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -47,6 +48,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ActivityNnonymityReply extends AppCompatActivity {
+
+    private static final String TAG = "ActivityNnonymityReply";
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
@@ -139,6 +142,31 @@ public class ActivityNnonymityReply extends AppCompatActivity {
         layoutTitleBack2.setImageResource(R.drawable.white_back);
         layoutTitle2.setVisibility(View.GONE);
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.message_title_color));
+        nonSend.setEnabled(false);
+
+        nonEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.i(TAG, "onTextChanged: " + s);
+                if (s.length() > 0) {
+                    nonSend.setEnabled(true);
+                    nonSend.setImageResource(R.drawable.feather_yes);
+                } else {
+                    nonSend.setEnabled(false);
+                    nonSend.setImageResource(R.drawable.feather_no);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     //status == o, dataType == 1
@@ -183,28 +211,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
                 }
 
 
-                nonEdit.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (s.length() > 0) {
-                            nonSend.setClickable(true);
-                            nonSend.setImageResource(R.drawable.feather_yes);
-                        } else {
-                            nonSend.setClickable(false);
-                            nonSend.setImageResource(R.drawable.feather_no);
-                        }
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-
-                    }
-                });
 
             }
 

@@ -117,13 +117,13 @@ public class FragmentAnswer extends BaseFragment {
             R.color.play_color6,
             R.color.play_color1,};
 
-    int buttonColor[] = {R.color.button_color207,
-            R.color.button_color202,
-            R.color.button_color203,
-            R.color.button_color204,
-            R.color.button_color205,
-            R.color.button_color206,
-            R.color.button_color201};
+//    int buttonColor[] = {R.color.button_color207,
+//            R.color.button_color202,
+//            R.color.button_color203,
+//            R.color.button_color204,
+//            R.color.button_color205,
+//            R.color.button_color206,
+//            R.color.button_color201};
 
     int selectButtonColor[] = {R.color.button_color707,
             R.color.button_color702,
@@ -157,22 +157,21 @@ public class FragmentAnswer extends BaseFragment {
                     voteOptionsBeanList.get(0).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
-            frgansBtn1.setClickable(false);
+
+            frgansBtn1.setEnabled(false);
+            frgansBtn2.setEnabled(false);
+            frgansBtn3.setEnabled(false);
+            frgansBtn4.setEnabled(false);
 
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
-            System.out.println("total---" + total);
-            System.out.println(",btn1Cnt---" + btn1Cnt
-                    + ",btn2Cnt---" + btn2Cnt
-                    + ",btn3Cnt---" + btn3Cnt
-                    + ",btn4Cnt---" + btn4Cnt);
 
             int width = frgansBtn1.getWidth();
             System.out.println("宽度---" + width);
 
             frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(selectButtonColor[questionNum % colorCount]);
 
             new ProgressTask((1 + btn1Cnt) * 100 / total, 1).execute();
             new ProgressTask(btn2Cnt * 100 / total, 2).execute();
@@ -195,17 +194,17 @@ public class FragmentAnswer extends BaseFragment {
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
-            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
-            System.out.println("total---" + total);
-            System.out.println(",btn1Cnt---" + btn1Cnt
-                    + ",btn2Cnt---" + btn2Cnt
-                    + ",btn3Cnt---" + btn3Cnt
-                    + ",btn4Cnt---" + btn4Cnt);
+            frgansBtn1.setEnabled(false);
+            frgansBtn2.setEnabled(false);
+            frgansBtn3.setEnabled(false);
+            frgansBtn4.setEnabled(false);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
             frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(selectButtonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
             new ProgressTask((1 + btn2Cnt) * 100 / total, 2).execute();
@@ -227,17 +226,17 @@ public class FragmentAnswer extends BaseFragment {
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
-            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
-            System.out.println("total---" + total);
-            System.out.println(",btn1Cnt---" + btn1Cnt
-                    + ",btn2Cnt---" + btn2Cnt
-                    + ",btn3Cnt---" + btn3Cnt
-                    + ",btn4Cnt---" + btn4Cnt);
+            frgansBtn1.setEnabled(false);
+            frgansBtn2.setEnabled(false);
+            frgansBtn3.setEnabled(false);
+            frgansBtn4.setEnabled(false);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
             frgansBtn3.setButtonColor(selectButtonColor[questionNum % colorCount]);
-            frgansBtn4.setButtonColor(buttonColor[questionNum % colorCount]);
+            frgansBtn4.setButtonColor(selectButtonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
             new ProgressTask((btn2Cnt) * 100 / total, 2).execute();
@@ -261,16 +260,16 @@ public class FragmentAnswer extends BaseFragment {
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
 
-            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
-            System.out.println("total---" + total);
-            System.out.println(",btn1Cnt---" + btn1Cnt
-                    + ",btn2Cnt---" + btn2Cnt
-                    + ",btn3Cnt---" + btn3Cnt
-                    + ",btn4Cnt---" + btn4Cnt);
+            frgansBtn1.setEnabled(false);
+            frgansBtn2.setEnabled(false);
+            frgansBtn3.setEnabled(false);
+            frgansBtn4.setEnabled(false);
 
-            frgansBtn1.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn2.setButtonColor(buttonColor[questionNum % colorCount]);
-            frgansBtn3.setButtonColor(buttonColor[questionNum % colorCount]);
+            total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
+
+            frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
+            frgansBtn3.setButtonColor(selectButtonColor[questionNum % colorCount]);
             frgansBtn4.setButtonColor(selectButtonColor[questionNum % colorCount]);
 
             new ProgressTask(btn1Cnt * 100 / total, 1).execute();
@@ -290,14 +289,9 @@ public class FragmentAnswer extends BaseFragment {
         //换批人
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
 
-            if (changeCount >= 2){
-                Toast.makeText(getContext(), "只能更换两次", Toast.LENGTH_SHORT).show();
-            }else {
-                frandProgress.setVisibility(View.INVISIBLE);
-                Log.i(TAG, "nextPersons: 换一换--" + questionNum);
-                getQuestionsCandidate(questionBean.getQid(), questionNum);
-            }
-
+            frandProgress.setVisibility(View.INVISIBLE);
+            Log.i(TAG, "nextPersons: 换一换--" + questionNum);
+            getQuestionsCandidate(questionBean.getQid(), questionNum);
 
         } else {
             frandProgress.setVisibility(View.VISIBLE);
@@ -471,7 +465,7 @@ public class FragmentAnswer extends BaseFragment {
             }
             setFriendCount();
 
-            if (isFreeze){  //如果是冷却状态就去拉一把问题
+            if (isFreeze) {  //如果是冷却状态就去拉一把问题
                 getQuestion();
             }
         }
@@ -609,7 +603,7 @@ public class FragmentAnswer extends BaseFragment {
                             QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
                             if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
                                 Log.i(TAG, "onNext: 正常状态");
-                                if (isFreeze){
+                                if (isFreeze) {
                                     isFreeze = false;
                                     relieve();
                                 }
@@ -709,6 +703,11 @@ public class FragmentAnswer extends BaseFragment {
                             btn2Cnt = optionsList.get(1).getBeSelCnt();
                             btn3Cnt = optionsList.get(2).getBeSelCnt();
                             btn4Cnt = optionsList.get(3).getBeSelCnt();
+
+                            frgansBtn1.setEnabled(true);
+                            frgansBtn2.setEnabled(true);
+                            frgansBtn3.setEnabled(true);
+                            frgansBtn4.setEnabled(true);
                         }
                     }
 
@@ -749,10 +748,6 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull VoteRespond voteRespond) {
                         System.out.println("投票返回---" + voteRespond);
-                        frgansBtn1.setEnabled(false);
-                        frgansBtn2.setEnabled(false);
-                        frgansBtn3.setEnabled(false);
-                        frgansBtn4.setEnabled(false);
                     }
 
                     @Override
@@ -791,7 +786,7 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(BaseRespond baseRespond) {
                         System.out.println("跳过下个问题---" + baseRespond);
-                        if (baseRespond.getCode() == 0){
+                        if (baseRespond.getCode() == 0) {
                             questionNum++;
                             getQuestion();
                         }
@@ -822,10 +817,10 @@ public class FragmentAnswer extends BaseFragment {
             int addFriendNum = myInfo.getAddFriendNum();
             if (addFriendNum == 0) {
                 if (addFriendCount != null)
-                addFriendCount.setText("");
+                    addFriendCount.setText("");
             } else {
                 if (addFriendCount != null)
-                addFriendCount.setText(addFriendNum + "");
+                    addFriendCount.setText(addFriendNum + "");
             }
 
         }

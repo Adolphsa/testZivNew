@@ -1,11 +1,20 @@
 package com.yeejay.yplay.message;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -26,7 +35,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.donkingliang.imageselector.ImageSelectorActivity;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
+import com.donkingliang.imageselector.utils.PhotoUtils;
+import com.donkingliang.imageselector.utils.ToastUtils;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.MemoryPolicy;
@@ -69,17 +82,25 @@ import org.greenrobot.greendao.query.DeleteQuery;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import QMF_LOG.LogInfo;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.donkingliang.imageselector.ImageSelectorActivity.hasSdcard;
 
 public class ActivityChatWindow extends BaseActivity implements MessageUpdateUtil.MessageUpdateListener {
 
     private static final String TAG = "ActivityChatWindow";
     private static final int REQUEST_CODE = 0x00000011;
+    private static final int CODE_CAMERA_REQUEST = 0xa01;
+    private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0xa03;
+    private File fileUri = new File(Environment.getExternalStorageDirectory().getPath() + "/photo.jpg");
+    private Uri imageUri;
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
@@ -118,10 +139,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     }
 
     @OnClick(R.id.acw_img_choice)
-    public void acwImgChoice(){
+    public void acwImgChoice() {
         Log.i(TAG, "acwImgChoice: 图片选择");
-        ImageSelectorUtils.openPhoto(ActivityChatWindow.this,REQUEST_CODE,true,false,0);
-
+        showImageBottomDialog();
     }
 
     @OnClick(R.id.acw_send)
@@ -130,7 +150,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     }
 
     //发送消息
-    private void sendMessage(String imagePath){
+    private void sendMessage(String imagePath) {
 
         //点击之后立马变为不可点状态
         acwSend.setClickable(false);
@@ -147,7 +167,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             //判断是否是好友关系
             FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
-            if (friendInfo == null){
+            if (friendInfo == null) {
 
                 ImMsg imMsg0 = new ImMsg(null,
                         sessionId,
@@ -155,7 +175,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         String.valueOf(uin),
                         101,
                         str,
-                        (System.currentTimeMillis()/1000),
+                        (System.currentTimeMillis() / 1000),
                         1);
                 imMsgDao.insert(imMsg0);
 
@@ -165,7 +185,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         String.valueOf(uin),
                         100,
                         "对方已不是你的好友",
-                        (System.currentTimeMillis()/1000),
+                        (System.currentTimeMillis() / 1000),
                         1);
                 imMsgDao.insert(imMsg1);
 
@@ -175,17 +195,17 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         String.valueOf(uin),
                         100,
                         "先和对方成为好友，才能聊天哦~",
-                        (System.currentTimeMillis()/1000),
+                        (System.currentTimeMillis() / 1000),
                         1);
                 imMsgDao.insert(imMsg2);
 
 
-                mDataList.add(0,imMsg0);
-                mDataList.add(0,imMsg1);
-                mDataList.add(0,imMsg2);
+                mDataList.add(0, imMsg0);
+                mDataList.add(0, imMsg1);
+                mDataList.add(0, imMsg2);
                 chatAdapter.notifyDataSetChanged();
                 acwEdit.setText("");
-                acwRecycleView.scrollToPosition(mDataList.size()-1);
+                acwRecycleView.scrollToPosition(mDataList.size() - 1);
                 return;
             }
 
@@ -194,7 +214,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
 
-                if (TextUtils.isEmpty(imagePath)){
+                if (TextUtils.isEmpty(imagePath)) {
                     //添加文本内容
                     TIMTextElem elem = new TIMTextElem();
                     elem.setText(str);
@@ -204,7 +224,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         Log.d(TAG, "addElement text failed");
                         return;
                     }
-                }else {
+                } else {
                     //添加图片
                     TIMImageElem elem = new TIMImageElem();
                     elem.setPath(imagePath);
@@ -321,7 +341,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         Log.i(TAG, "onCreate: status---" + status + ",uin---" + uin + ",mSender---" + mSender);
 
-        if (1 == status && (uin == mSender)){
+        if (1 == status && (uin == mSender)) {
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("对方已看到你的姓名");
@@ -329,28 +349,28 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             ImMsg imMsg2 = new ImMsg();
             imMsg2.setMsgType(100);
             imMsg2.setMsgContent("对方回复后，双方互相实名，能够继续聊天 ");
-            mDataList.add(0,imMsg1);
-            mDataList.add(0,imMsg2);
+            mDataList.add(0, imMsg1);
+            mDataList.add(0, imMsg2);
 
             acwImgChoice.setVisibility(View.GONE);
 
             Log.i(TAG, "onCreate: mDataList-size" + mDataList.size());
         }
 
-        if (1 == status && (uin != mSender) && mDataList.size() == 2){
+        if (1 == status && (uin != mSender) && mDataList.size() == 2) {
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
-            mDataList.add(0,imMsg1);
+            mDataList.add(0, imMsg1);
 
-            acwImgChoice.setVisibility(View.GONE);
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
 
-        if (1 == status && (uin != mSender) && mDataList.size() == 4){
+        if (1 == status && (uin != mSender) && mDataList.size() == 4) {
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("对方已看到你的真实姓名");
-            mDataList.add(0,imMsg1);
+            mDataList.add(0, imMsg1);
 
             acwImgChoice.setVisibility(View.VISIBLE);
         }
@@ -361,18 +381,18 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         chatAdapter.setItemClickListener(new ChatAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                int realPosition = mDataList.size()- (position + 1);
+                int realPosition = mDataList.size() - (position + 1);
                 Log.i(TAG, "onItemClick: 图片被点击了---" + mDataList.get(realPosition).getMsgContent()
                         + ",position---" + position
-                + ",realPosition---" + realPosition);
+                        + ",realPosition---" + realPosition);
                 String imageInfoStr = mDataList.get(realPosition).getMsgContent();
                 ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
                 String url = imageInfo.getLargeImage().getImageUrl();
                 int imageFormat = imageInfo.getImageFormat();
                 int largeWidth = imageInfo.getLargeImage().getImageWidth();
                 int largeHeight = imageInfo.getLargeImage().getImageHeight();
-                if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF){
-                    showImageDialog(url,largeWidth,largeHeight);
+                if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF) {
+                    showImageDialog(url, largeWidth, largeHeight);
                 }
             }
         });
@@ -403,7 +423,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
 
             @Override
-            public void loadMore() {}
+            public void loadMore() {
+            }
         });
 
     }
@@ -443,13 +464,13 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         });
 
         //状态为1  发送者是自己
-        if (1 == status && (uin == mSender)){
+        if (1 == status && (uin == mSender)) {
             layoutTitle2.setText(gradeAndGenderStr);
             layoutSetting.setVisibility(View.INVISIBLE);
             acwEdit.setHint("等待回复");
             Drawable nav_up = getResources().getDrawable(R.drawable.wait_repeat);
             nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
-            acwEdit.setCompoundDrawables(nav_up,null,null,null);
+            acwEdit.setCompoundDrawables(nav_up, null, null, null);
             acwEdit.setCompoundDrawablePadding(25);
             acwEdit.setEnabled(false);
             acwSend.setEnabled(false);
@@ -486,7 +507,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
                         MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
-                        tempNickname2=  receiverInfoBean.getNickName();
+                        tempNickname2 = receiverInfoBean.getNickName();
                         nickName = senderInfoBean.getNickName();
 
                         int gender = senderInfoBean.getGender();
@@ -573,37 +594,37 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             chatAdapter.notifyItemInserted(mDataList.size() - 1);
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
         }
-        if (!acwEdit.isEnabled()){
+        if (!acwEdit.isEnabled()) {
             acwEdit.setEnabled(true);
             acwEdit.setHint("回复");
-            acwEdit.setCompoundDrawables(null,null,null,null);
+            acwEdit.setCompoundDrawables(null, null, null, null);
             acwImgChoice.setEnabled(true);
         }
-        if (!acwSend.isEnabled()){
+        if (!acwSend.isEnabled()) {
             acwSend.setEnabled(true);
         }
-        if (!layoutSetting.isShown()){
+        if (!layoutSetting.isShown()) {
             layoutSetting.setVisibility(View.VISIBLE);
         }
 
-        if (status == 1 && uin != Integer.valueOf(imMsg.getSender())){
+        if (status == 1 && uin != Integer.valueOf(imMsg.getSender())) {
             layoutTitle2.setText(tempNickname2);
         }
 
-        if (1 == status && (uin != Integer.valueOf(imMsg.getSender())) && mDataList.size() == 2){
+        if (1 == status && (uin != Integer.valueOf(imMsg.getSender())) && mDataList.size() == 2) {
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("此时回复，对方将看到你的真实姓名");
-            mDataList.add(0,imMsg1);
+            mDataList.add(0, imMsg1);
 
             acwImgChoice.setVisibility(View.GONE);
         }
 
-        if (1 == status && (uin == Integer.valueOf(imMsg.getSender())) && mDataList.size() == 4){
+        if (1 == status && (uin == Integer.valueOf(imMsg.getSender())) && mDataList.size() == 4) {
             ImMsg imMsg1 = new ImMsg();
             imMsg1.setMsgType(100);
             imMsg1.setMsgContent("对方已看到你的真实姓名");
-            mDataList.add(0,imMsg1);
+            mDataList.add(0, imMsg1);
 
             acwImgChoice.setVisibility(View.VISIBLE);
         }
@@ -678,18 +699,26 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE && data != null){
+        Log.i(TAG, "onActivityResult: requestCode---" + requestCode);
+
+        if (requestCode == REQUEST_CODE && data != null) {
             ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
             Log.i(TAG, "onActivityResult: images_url---" + images.get(0));
-//            Toast.makeText(ActivityChatWindow.this,images.get(0),Toast.LENGTH_SHORT).show();
             sendMessage(images.get(0));
+        } else if (requestCode == CODE_CAMERA_REQUEST) {
+            Log.i(TAG, "onActivityResult: 拍照的url---" + imageUri);
+            String imagePath = fileUri.getAbsolutePath();
+            Log.i(TAG, "onActivityResult: imagePath---" + imagePath);
+            sendMessage(imagePath);
         }
+
+
     }
 
     //显示图片的dialog
-    private void showImageDialog(String imagePath, int largeWidth, int largeHeight){
+    private void showImageDialog(String imagePath, int largeWidth, int largeHeight) {
 
-        final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this,R.style.StyleDialog).create();
+        final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this, R.style.StyleDialog).create();
         dialog.show();
 
         dialog.setContentView(R.layout.layout_show_chat_image);
@@ -706,14 +735,14 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         int screenWidth = DensityUtil.getScreenWidth(this);
         ViewGroup.LayoutParams imageLp = imageView.getLayoutParams();
         imageLp.width = screenWidth;
-        imageLp.height =  ViewGroup.LayoutParams.WRAP_CONTENT;
-        Log.i(TAG, "showImageDialog: lh---"  + largeHeight);
+        imageLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        Log.i(TAG, "showImageDialog: lh---" + largeHeight);
         Log.i(TAG, "showImageDialog: lw---" + largeWidth);
-        Log.i(TAG, "showImageDialog: height---" + largeHeight*screenWidth/largeWidth + ",width---" + imageLp.width);
+        Log.i(TAG, "showImageDialog: height---" + largeHeight * screenWidth / largeWidth + ",width---" + imageLp.width);
         imageView.setLayoutParams(imageLp);
 
         imageView.setMaxWidth(screenWidth);
-        imageView.setMaxHeight(largeHeight*screenWidth/largeWidth);
+        imageView.setMaxHeight(largeHeight * screenWidth / largeWidth);
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -721,14 +750,108 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 dialog.dismiss();
             }
         });
-        if (!TextUtils.isEmpty(imagePath)){
+        if (!TextUtils.isEmpty(imagePath)) {
             Picasso.with(ActivityChatWindow.this).load(imagePath)
-                    .memoryPolicy(MemoryPolicy.NO_CACHE,MemoryPolicy.NO_STORE)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                     .into(imageView);
         }
 
         dialog.setCanceledOnTouchOutside(true);
     }
 
+    //显示底部对话框
+    private void showImageBottomDialog() {
+        final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
+        View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
+        bottomDialog.setContentView(contentView);
 
+        Button msgProBt = (Button) contentView.findViewById(R.id.message_profile);
+        msgProBt.setText("相册");
+        Button msgDeleteBt = (Button) contentView.findViewById(R.id.message_delete);
+        msgDeleteBt.setText("拍照");
+        msgDeleteBt.setTextColor(getResources().getColor(R.color.message_profile_blue));
+        Button msgCancelBt = (Button) contentView.findViewById(R.id.message_cancel);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.message_profile:
+                        Log.i(TAG, "onClick: 相册");
+                        ImageSelectorUtils.openPhoto(ActivityChatWindow.this, REQUEST_CODE, true, false, 0);
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_delete:
+                        Log.i(TAG, "onClick: 拍照");
+                        autoObtainCameraPermission();
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_cancel:
+                        Log.i(TAG, "onClick: 取消");
+                        bottomDialog.dismiss();
+                        break;
+                }
+            }
+        };
+
+        msgProBt.setOnClickListener(onClickListener);
+        msgDeleteBt.setOnClickListener(onClickListener);
+        msgCancelBt.setOnClickListener(onClickListener);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentView.getLayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels - DensityUtil.dp2px(this, 16f);
+        params.bottomMargin = DensityUtil.dp2px(this, 8f);
+        contentView.setLayoutParams(params);
+        bottomDialog.setCanceledOnTouchOutside(true);
+        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        bottomDialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
+        bottomDialog.show();
+    }
+
+    /**
+     * 自动获取相机权限
+     */
+    private void autoObtainCameraPermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                ToastUtils.showShort(this, "您已经拒绝过一次");
+            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSIONS_REQUEST_CODE);
+        } else {//有权限直接调用系统相机拍照
+            if (hasSdcard()) {
+                imageUri = Uri.fromFile(fileUri);
+                //通过FileProvider创建一个content类型的Uri
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    imageUri = FileProvider.getUriForFile(ActivityChatWindow.this, "com.donkingliang.imageselector", fileUri);
+                }
+                PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                Log.i(TAG, "autoObtainCameraPermission: CODE_CAMERA_REQUEST---" + CODE_CAMERA_REQUEST);
+            } else {
+                ToastUtils.showShort(this, "设备没有SD卡！");
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (hasSdcard()) {
+                    imageUri = Uri.fromFile(fileUri);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        imageUri = FileProvider.getUriForFile(ActivityChatWindow.this, "com.donkingliang.imageselector", fileUri);//通过FileProvider创建一个content类型的Uri
+                    PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                } else {
+                    ToastUtils.showShort(this, "设备没有SD卡！");
+                }
+            } else {
+
+                ToastUtils.showShort(this, "请允许打开相机！！");
+            }
+        }
+    }
 }

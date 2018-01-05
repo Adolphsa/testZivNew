@@ -47,6 +47,8 @@
             android:textColor="@color/message_title_color"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/non_ques_head_img"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             />
         <LinearLayout
             android:id="@+id/non_button12_ll"
@@ -150,7 +152,7 @@
         android:layout_width="match_parent"
         android:layout_height="46dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/feeds_search_color"
+        android:background="@color/white"
         android:orientation="horizontal"
         >
         <EditText
@@ -177,7 +179,6 @@
             android:layout_marginRight="7dp"
             android:layout_marginLeft="10dp"
             android:background="@android:color/transparent"
-            android:clickable="false"
             />
     </LinearLayout>
 </RelativeLayout>
