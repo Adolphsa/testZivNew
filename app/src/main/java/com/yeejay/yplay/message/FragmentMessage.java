@@ -130,7 +130,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             dataOffset--;
             //Toast.makeText(getActivity(),"没有更多数据了",Toast.LENGTH_LONG).show();
             //没有更多数据了
-            loadMoreView.noData();
+            loadMoreView.noData(true);
 
             Log.d("msg", "loadMoreData, fromDbSize 0, allDataSize--" + mDataList.size());
         }

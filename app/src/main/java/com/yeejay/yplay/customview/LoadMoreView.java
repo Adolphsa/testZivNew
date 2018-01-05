@@ -22,6 +22,7 @@ public class LoadMoreView extends FrameLayout implements FooterView {
     private TextView tv;
     private ImageView arrow;
     private ProgressBar progressBar;
+    private boolean mLoadingFlag = false;
 
     public LoadMoreView(Context context) {
         this(context,null);
@@ -66,7 +67,6 @@ public class LoadMoreView extends FrameLayout implements FooterView {
 
     @Override
     public void finishing(float progress, float all) {
-
     }
 
     @Override
@@ -74,6 +74,11 @@ public class LoadMoreView extends FrameLayout implements FooterView {
         arrow.setVisibility(GONE);
         progressBar.setVisibility(VISIBLE);
         tv.setText("加载中...");
+
+        if (mLoadingFlag) {
+            mLoadingFlag = false;
+            noData();
+        }
     }
 
     @Override
@@ -91,6 +96,12 @@ public class LoadMoreView extends FrameLayout implements FooterView {
     public void noData(){
         tv.setText("数据已加载完毕");
         arrow.setVisibility(INVISIBLE);
+    }
+
+    public void noData(boolean flag){
+        if (flag) {
+            mLoadingFlag = true;
+        }
     }
 
 }
