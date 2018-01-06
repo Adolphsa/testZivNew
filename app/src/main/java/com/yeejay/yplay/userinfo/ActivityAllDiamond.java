@@ -1,10 +1,7 @@
 package com.yeejay.yplay.userinfo;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -12,8 +9,8 @@ import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.adapter.AllDiamondsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LoadMoreView;
@@ -60,6 +57,7 @@ public class ActivityAllDiamond extends BaseActivity {
     int mPageNum = 1;
     int mPageSize = 15;
     int uin;
+    private AllDiamondsAdapter diamondsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +70,9 @@ public class ActivityAllDiamond extends BaseActivity {
 
         layoutTitle.setText(R.string.diamonds_list);
         mDataList = new ArrayList<>();
+
+        initAdapter();
+
         uin = (int)SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_UIN, 0);
         getUserDiamondInfo(uin,mPageNum,mPageSize);
 
@@ -80,69 +81,23 @@ public class ActivityAllDiamond extends BaseActivity {
 
     }
 
-    private void initDiamondList(final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList){
-
+    private void initAdapter() {
+        diamondsAdapter = new AllDiamondsAdapter(this, mDataList);
         aadListView.setEmptyView(emptyView);
-        aadListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return tempList.size();
+        aadListView.setAdapter(diamondsAdapter);
+    }
+
+    private void initDiamondList(final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList){
+        if (tempList.size() > 0) {
+            diamondsAdapter.notifyDataSetChanged();
+            //拉到第二页数据时，自动向上滚动两个item高度（如果第二页只有一个数据的话，则只滚动一个item高度）
+            //ListView需要先调用notifyDataSetChanged()再滚动
+            if (tempList.size() >= 2) {
+                aadListView.smoothScrollToPosition(mDataList.size() - tempList.size() + 1);
+            } else if (tempList.size() == 1) {
+                aadListView.smoothScrollToPosition(mDataList.size() - tempList.size());
             }
-
-            @Override
-            public Object getItem(int position) {
-                return tempList.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                if (convertView == null) {
-                    convertView = View.inflate(ActivityAllDiamond.this, R.layout.item_afi, null);
-                    holder = new ViewHolder();
-                    holder.itemAmiIndex = (TextView) convertView.findViewById(R.id.afi_item_index);
-                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.afi_item_img);
-                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.afi_item_text);
-                    holder.itemAmiCount = (TextView) convertView.findViewById(R.id.afi_item_count);
-                    convertView.setTag(holder);
-                } else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean = tempList.get(position);
-
-                holder.itemAmiIndex.setText(String.valueOf(position+1));
-
-                String url = statsBean.getQiconUrl();
-                if (!TextUtils.isEmpty(url)){
-                    Picasso.with(ActivityAllDiamond.this).load(url).into(holder.itemAmiImg);
-                }else {
-                    holder.itemAmiImg.setImageResource(R.drawable.diamond_null);
-                }
-                holder.itemAmiText.setText(statsBean.getQtext());
-                holder.itemAmiCount.setText(String.valueOf(statsBean.getGemCnt()));
-
-                if(position == 0) {
-                    holder.itemAmiIndex.setBackgroundResource(R.drawable.gold_medal);
-                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.gold_diamond_color));
-                } else if(position == 1) {
-                    holder.itemAmiIndex.setBackgroundResource(R.drawable.silver_medal);
-                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.silver_diamond_color));
-                } else if(position == 2) {
-                    holder.itemAmiIndex.setBackgroundResource(R.drawable.bronze_medal);
-                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.brozne_diamond_color));
-                } else {
-                    holder.itemAmiIndex.setBackgroundResource(R.drawable.normal_medal);
-                    holder.itemAmiCount.setTextColor(getResources().getColor(R.color.play_color2));
-                }
-
-                return convertView;
-            }
-        });
+        }
     }
 
     private void loadMore(){
@@ -192,7 +147,7 @@ public class ActivityAllDiamond extends BaseActivity {
                                 mPageNum++;
                                 mDataList.addAll(tempList);
                                 int total = usersDiamondInfoRespond.getPayload().getTotal();
-                                initDiamondList(mDataList);
+                                initDiamondList(tempList);
                             }else {
                                 System.out.println("数据加载完毕");
                                 loadMoreView.noData();
