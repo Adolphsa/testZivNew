@@ -1,5 +1,6 @@
 package com.yeejay.yplay.friend;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,12 +20,14 @@ import com.yeejay.yplay.adapter.FriendsDetailAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardRequestFredDialog;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.userinfo.ActivityMyFriends;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -64,6 +67,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         finish();
     }
 
+    private LoadMoreView loadMoreView;
     FriendsDetailAdapter friendsDetailAdapter;
     int mPageNum = 1;
     List<GetAddFriendMsgs.PayloadBean.MsgsBean> mDataList;
@@ -80,11 +84,13 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         mDataList = new ArrayList<>();
         layoutTitle.setText("好友请求");
 
+        initAdapter();
+
         getAddFriendmsgs(mPageNum);
         loadMore();
     }
 
-    private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
+    private void initAdapter() {
         friendsDetailAdapter = new FriendsDetailAdapter(ActivityAddFiendsDetail.this,
                 new FriendsDetailAdapter.hideCallback() {
                     @Override
@@ -97,9 +103,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                             //        1,
                             //        tempList.get((int) button.getTag()));
                             button.setVisibility(View.INVISIBLE);
-                            if (tempList.size() > 0) {
-                                System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
-                                tempList.remove((int) v.getTag());
+                            if (mDataList.size() > 0) {
+                                System.out.println("tempList---" + mDataList.size() + "----" + (int) v.getTag());
+                                mDataList.remove((int) v.getTag());
                                 friendsDetailAdapter.notifyDataSetChanged();
                             }
                         }else {
@@ -117,17 +123,19 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                     button.setBackgroundResource(R.drawable.be_as_friends);
                     button.setEnabled(false);
                     //接受加好友的请求
-                    accepeAddFreind(tempList.get((int) button.getTag()).getMsgId(),
+                    accepeAddFreind(mDataList.get((int) button.getTag()).getMsgId(),
                             0,
-                            tempList.get((int) button.getTag()));
+                            mDataList.get((int) button.getTag()));
                 }else {
                     Toast.makeText(ActivityAddFiendsDetail.this,"网络异常",Toast.LENGTH_SHORT).show();
                 }
 
             }
-        }, tempList);
+        }, mDataList);
+
         aafdListView.setEmptyView(emptyView);
         aafdListView.setAdapter(friendsDetailAdapter);
+
         aafdListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -142,8 +150,21 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         });
     }
 
+    private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
+        friendsDetailAdapter.notifyDataSetChanged();
+        //拉到第二页数据时，自动向上滚动两个item高度（如果第二页只有一个数据的话，则只滚动一个item高度）
+        //ListView需要先调用notifyDataSetChanged()再滚动
+        if (tempList.size() >= 2) {
+            aafdListView.smoothScrollToPosition(mDataList.size() - tempList.size() + 1);
+        } else if (tempList.size() == 1) {
+            aafdListView.smoothScrollToPosition(mDataList.size() - tempList.size());
+        }
+    }
+
     private void loadMore(){
         aafdPtfRefresh.setCanRefresh(false);
+        loadMoreView = new LoadMoreView(this);
+        aafdPtfRefresh.setFooterView(loadMoreView);
         aafdPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {}
@@ -178,16 +199,16 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         if (userInfoResponde.getCode() == 0) {
                             UserInfoResponde.PayloadBean.InfoBean infoBean =
                                     userInfoResponde.getPayload().getInfo();
-//                            int status = userInfoResponde.getPayload().getStatus();
-//                            if (status == 1) {
-//                                Intent intent = new Intent(ActivityAddFiendsDetail.this, ActivityFriendsInfo.class);
-//                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
-//                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
-//                                System.out.println("朋友的uin---" + infoBean.getUin());
-//                                startActivity(intent);
-//                            } else {
+                            int status = userInfoResponde.getPayload().getStatus();
+                            if (status == 1) {
+                                Intent intent = new Intent(ActivityAddFiendsDetail.this, ActivityFriendsInfo.class);
+                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
+                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
+                                System.out.println("朋友的uin---" + infoBean.getUin());
+                                startActivity(intent);
+                            } else {
                                 showCardDialog(userInfoResponde.getPayload(), friendItemView);
-//                            }
+                            }
 
                         }
                     }
@@ -264,8 +285,14 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         if (getAddFriendMsgs.getCode() == 0) {
                             List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
                                     = getAddFriendMsgs.getPayload().getMsgs();
-                            mDataList.addAll(tempList);
-                            initFriendsDetailListView(mDataList);
+                            if (tempList != null && tempList.size() > 0) {
+                                mDataList.addAll(tempList);
+                                initFriendsDetailListView(tempList);
+                            } else {
+                                //不能拉到数据了
+                                loadMoreView.noData();
+                            }
+
                         } else {
                             //如果服务器返回失败
                             aafdListView.setAdapter(null);

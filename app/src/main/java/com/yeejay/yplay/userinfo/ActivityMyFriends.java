@@ -2,11 +2,8 @@ package com.yeejay.yplay.userinfo;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -14,8 +11,8 @@ import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.adapter.MyFriendsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LoadMoreView;
@@ -38,7 +35,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import tangxiaolv.com.library.EffectiveShapeView;
 
 public class ActivityMyFriends extends BaseActivity {
 
@@ -61,6 +57,7 @@ public class ActivityMyFriends extends BaseActivity {
     private LoadMoreView loadMoreView;
     List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
     int mPageNum = 1;
+    private MyFriendsAdapter mMyFriendsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,70 +71,15 @@ public class ActivityMyFriends extends BaseActivity {
         layoutTitle.setText(R.string.my_friends);
         mDataList = new ArrayList<>();
 
+        initAdapter();
+
         getMyFriendsList(mPageNum);
         loadMore();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-       // mDataList.clear();
-
-        System.out.println("我的好友resume" + mDataList.size());
-        //getMyFriendsList(mPageNum);
-    }
-
-    private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
-
-        if (tempList.size() > 0){
-            friendNull.setVisibility(View.GONE);
-        }else {
-            friendNull.setVisibility(View.VISIBLE);
-        }
-
-        amfListView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return tempList.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                ViewHolder holder;
-                if (convertView == null){
-                    convertView = View.inflate(ActivityMyFriends.this,R.layout.item_my_friend,null);
-                    holder = new ViewHolder();
-                    holder.itemMyFriendImg = (EffectiveShapeView) convertView.findViewById(R.id.item_my_friend_img);
-                    holder.itemMyFriendName = (TextView) convertView.findViewById(R.id.item_my_friend_name);
-                    convertView.setTag(holder);
-                }else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-
-                String url = tempList.get(position).getHeadImgUrl();
-                holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
-                if (!TextUtils.isEmpty(url)){
-                    Picasso.with(ActivityMyFriends.this).load(url).into(holder.itemMyFriendImg);
-                }else {
-                    holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
-                }
-                String name = tempList.get(position).getNickName();
-                holder.itemMyFriendName.setText(name);
-                return convertView;
-            }
-        });
+    private void initAdapter() {
+        mMyFriendsAdapter = new MyFriendsAdapter(this, mDataList);
+        amfListView.setAdapter(mMyFriendsAdapter);
 
         amfListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -150,16 +92,27 @@ public class ActivityMyFriends extends BaseActivity {
                 }
             }
         });
-
     }
 
-    private static class ViewHolder{
-        EffectiveShapeView itemMyFriendImg;
-        TextView itemMyFriendName;
+    private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
+        if (tempList.size() > 0){
+            friendNull.setVisibility(View.GONE);
+        }else {
+            friendNull.setVisibility(View.VISIBLE);
+        }
+
+        mMyFriendsAdapter.notifyDataSetChanged();
+        //拉到第二页数据时，自动向上滚动两个item高度（如果第二页只有一个数据的话，则只滚动一个item高度）
+        //ListView需要先调用notifyDataSetChanged()再滚动
+        if (tempList.size() >= 2) {
+            amfListView.smoothScrollToPosition(mDataList.size() - tempList.size() + 1);
+        } else if (tempList.size() == 1) {
+            amfListView.smoothScrollToPosition(mDataList.size() - tempList.size());
+        }
     }
+
 
     private void loadMore() {
-
         amfPtfRefresh.setCanRefresh(false);
         loadMoreView = new LoadMoreView(ActivityMyFriends.this);
         amfPtfRefresh.setFooterView(loadMoreView);
@@ -205,7 +158,7 @@ public class ActivityMyFriends extends BaseActivity {
                                     = friendsListRespond.getPayload().getFriends();
                             if(tempList.size() > 0) {
                                 mDataList.addAll(tempList);
-                                initMyFriendsList(mDataList);
+                                initMyFriendsList(tempList);
                             } else {
                                 System.out.println("数据加载完毕");
                                 loadMoreView.noData();
