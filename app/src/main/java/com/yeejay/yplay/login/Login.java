@@ -237,7 +237,7 @@ public class Login extends BaseActivity {
     }
 
     private String getVersion() {
-        return  BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE)+
+        return  BuildConfig.VERSION_NAME +
                 "_" + BuildConfig.BUILD_TIMESTAMP + "_beta";
     }
 

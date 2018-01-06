@@ -350,7 +350,7 @@ public class ActivitySetting extends BaseActivity {
     }
 
     private void getVersion() {
-        String ver = BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE)+
+        String ver = BuildConfig.VERSION_NAME +
                 "_" + BuildConfig.BUILD_TIMESTAMP + "_beta";
         versionText.setText(ver);
     }
