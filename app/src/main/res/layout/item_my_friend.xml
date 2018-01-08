@@ -7,8 +7,8 @@
 
     <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/item_my_friend_img"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/item_my_friends_width"
+        android:layout_height="@dimen/item_my_friends_height"
         android:src="@drawable/header_deafult"
         app:shape="circle"
         android:layout_marginLeft="16dp"

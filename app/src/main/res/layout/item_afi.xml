@@ -20,8 +20,8 @@
 
     <ImageView
         android:id="@+id/afi_item_img"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/item_diamonds_list_img_width"
+        android:layout_height="@dimen/item_diamonds_list_img_height"
         android:src="@drawable/diamond"
         android:layout_toRightOf="@+id/afi_item_index"
         android:layout_centerVertical="true"

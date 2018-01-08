@@ -110,7 +110,8 @@ public class SchoolmateAdapter extends BaseAdapter implements View.OnClickListen
 //        Log.i(TAG, "getView: status---" + status);
 
         if (!TextUtils.isEmpty(url)) {
-            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).into(holder.afItemHeaderImg);
         } else {
             holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }

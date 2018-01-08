@@ -64,7 +64,8 @@ public class MyFriendsAdapter extends BaseAdapter{
         String url = friendsInfoList.get(position).getHeadImgUrl();
         holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(context).load(url).into(holder.itemMyFriendImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_my_friends_width,
+                    R.dimen.item_my_friends_height).into(holder.itemMyFriendImg);
         }else {
             holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
         }

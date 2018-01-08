@@ -108,7 +108,8 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         holder.afItemName.setText(contentList.get(position).getNickName());
         holder.afItemTvSharesFriends.setText(str);
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).into(holder.afItemHeaderImg);
         }else {
             if (status == 1){ //已开通
                 holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);

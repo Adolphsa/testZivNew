@@ -100,7 +100,8 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         }
         String url = contentList.get(position).getFromHeadImgUrl();
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).into(holder.afItemHeaderImg);
         }else {
             holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }

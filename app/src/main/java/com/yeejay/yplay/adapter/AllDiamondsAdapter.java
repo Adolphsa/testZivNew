@@ -75,7 +75,8 @@ public class AllDiamondsAdapter extends BaseAdapter{
 
         String url = statsBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(context).load(url).into(holder.itemAmiImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_diamonds_list_img_width,
+                    R.dimen.item_diamonds_list_img_height).into(holder.itemAmiImg);
         }else {
             holder.itemAmiImg.setImageResource(R.drawable.diamond_null);
         }

@@ -40,6 +40,7 @@ import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardBigDialog;
+import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.customview.SpinerPopWindow;
 import com.yeejay.yplay.greendao.ContactsInfo;
@@ -216,9 +217,19 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         }
     }
 
-    LinearLayout contactRoot; //通讯录好友
-    LinearLayout schoolRoot;    //同校同学
-    LinearLayout maybeRoot;     //可能认识的人
+    private LoadMoreView loadMoreView;
+    private LinearLayout contactRoot; //通讯录好友
+    private LinearLayout nullLl;
+    private MesureListView dredgeListView;
+    private RelativeLayout dredgeNoRl;
+
+    private LinearLayout schoolRoot;    //同校同学
+    private LinearLayout llNullView;
+    private MesureListView allSchoolmateListView;
+
+    private LinearLayout maybeRoot;     //可能认识的人
+    private LinearLayout lmklLlNull;
+    private MesureListView lmkListView;
 
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contactDredgeList;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
@@ -236,7 +247,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     boolean numberBookAuthoritySuccess = false;
     ContactsInfoDao contactsInfoDao;
     ContactsAdapter contactsAdapter;
-    SchoolmateAdapter schoolmateAdapter;
+    SchoolmateAdapter schoolmateAdapter;//全部同学
+    SchoolmateAdapter sameGradeAdapter;//同年级
+    SchoolmateAdapter boyAdapter;//男同学
+    SchoolmateAdapter girlAdapter;//女同学
+    SchoolmateAdapter maybeKnownAdapter;
     List<Integer> positionList;
 
     private SpinerPopWindow<String> mSpinerPopWindow;
@@ -259,10 +274,46 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
         }
 
-        contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
-        schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
-        maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
+        initViewControls();
+        initListAndAdapter();
 
+        initPullRefresh();
+        initClassmatesTypePop();
+
+        getRecommends(1, 1);
+    }
+
+    private void initViewControls() {
+        loadMoreView = new LoadMoreView(this);
+        //通讯录联系人相关的UI控件
+        contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
+        nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
+        dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
+        dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
+        dredgeNoRl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                getContacts();
+                if (!numberBookAuthoritySuccess){    //如果没有权限  就申请权限
+                    getNumberBookAuthority();
+                }
+
+            }
+        });
+
+        //同校同学相关的UI控件
+        schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
+        llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
+        allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
+
+        //可能认识的人相关的UI控件
+        maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
+        lmklLlNull = (LinearLayout) maybeRoot.findViewById(R.id.lmk_ll_null);
+        lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
+    }
+
+    private void initListAndAdapter() {
         contactDredgeList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
         sameGradeList = new ArrayList<>();
@@ -271,10 +322,192 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         maybeKnowList = new ArrayList<>();
         positionList = new ArrayList();
 
-        initPullRefresh();
-        initClassmatesTypePop();
+        initContactsAdapter();
+        initAllSchoolMateAdapter();
+        initSameGradeAdapter();
+        initBoyAdapter();
+        initGirlAdapter();
+        initMaybeKnownAdapter();
 
-        getRecommends(1, 1);
+    }
+
+    private void initContactsAdapter() {
+        //联系人；
+        contactsAdapter = new ContactsAdapter(AddFriends.this,
+                null,
+                new ContactsAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+
+                            int position = (int) button.getTag();
+                            positionList.add(position);
+                            addFriend(contactDredgeList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+
+                    }
+                },
+                contactDredgeList,positionList);
+
+        dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int uin = contactDredgeList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, view);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+
+        dredgeListView.setAdapter(contactsAdapter);
+    }
+
+    private void initAllSchoolMateAdapter() {
+        Log.d(TAG, "initAllSchoolMateAdapter(), allSchoolMateList = " + allSchoolMateList.toString());
+        //全部同学
+        schoolmateAdapter = new SchoolmateAdapter(AddFriends.this,
+                null,
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+                            int position = (int) button.getTag();
+                            Log.i(TAG, "acceptClick: mType---" + mType);
+                            positionList.add(position);
+                            addFriend(allSchoolMateList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                allSchoolMateList,positionList);
+    }
+
+    private void initSameGradeAdapter() {
+        Log.d(TAG, "initSameGradeAdapter(), sameGradeList = " + sameGradeList.toString());
+        //同年级
+        sameGradeAdapter = new SchoolmateAdapter(AddFriends.this,
+                null,
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+                            int position = (int) button.getTag();
+                            Log.i(TAG, "acceptClick: mType---" + mType);
+                            positionList.add(position);
+                            addFriend(sameGradeList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                sameGradeList,positionList);
+    }
+
+    private void initBoyAdapter() {
+        Log.d(TAG, "initBoyAdapter(), boyList = " + boyList.toString());
+        //男同学
+        boyAdapter = new SchoolmateAdapter(AddFriends.this,
+                null,
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+                            int position = (int) button.getTag();
+                            Log.i(TAG, "acceptClick: mType---" + mType);
+                            positionList.add(position);
+                            addFriend(boyList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                boyList,positionList);
+    }
+
+    private void initGirlAdapter() {
+        Log.d(TAG, "initGirlAdapter(), girlList = " + girlList.toString());
+        //女同学
+        girlAdapter = new SchoolmateAdapter(AddFriends.this,
+                null,
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+                            int position = (int) button.getTag();
+                            Log.i(TAG, "acceptClick: mType---" + mType);
+                            positionList.add(position);
+                            addFriend(girlList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                girlList,positionList);
+    }
+
+    private void initMaybeKnownAdapter() {
+        //可能认识的人；
+        maybeKnownAdapter = new SchoolmateAdapter(AddFriends.this,
+                null,
+                new SchoolmateAdapter.acceptCallback() {
+                    @Override
+                    public void acceptClick(View v) {
+                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                            Button button = (Button) v;
+                            button.setBackgroundResource(R.drawable.add_friend_apply);
+                            button.setEnabled(false);
+
+                            int position = (int) button.getTag();
+                            positionList.add(position);
+                            addFriend(maybeKnowList.get(position).getUin(),mType);
+                        } else {
+                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                },
+                maybeKnowList,positionList);
+
+        lmkListView.setAdapter(maybeKnownAdapter);
+        lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("点击事件");
+                int uin = maybeKnowList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, view);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void initClassmatesTypePop() {
@@ -342,6 +575,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private void initPullRefresh() {
 
         pullToRefreshLayout.setCanRefresh(false);
+        pullToRefreshLayout.setFooterView(loadMoreView);
         pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
@@ -537,28 +771,61 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             System.out.println("好友列表---" + getRecommendsRespond.toString());
                             List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
                                     getRecommendsRespond.getPayload().getFriends();
-                            if (friendsBeanList != null) {
+                            if (friendsBeanList != null && friendsBeanList.size() > 0) {
 
                                 if (mType == 1) { //通讯录已开通
                                     contactDredgeList.addAll(friendsBeanList);
-                                    handleContactDredge(contactDredgeList);
+                                    handleContactDredge(friendsBeanList);
                                 } else if (mType == 3) {  //全部
                                     allSchoolMateList.addAll(friendsBeanList);
-                                    handleSchoolMate(allSchoolMateList);
+                                    handleSchoolMate(friendsBeanList);
                                 } else if (mType == 4) {  //同年级
                                     sameGradeList.addAll(friendsBeanList);
-                                    handleSchoolMate(sameGradeList);
+                                    handleSameGradeMate(friendsBeanList);
                                 } else if (mType == 5) {      //男
                                     boyList.addAll(friendsBeanList);
-                                    handleSchoolMate(boyList);
+                                    handleBoyMate(friendsBeanList);
                                 } else if (mType == 6) {      //女
                                     girlList.addAll(friendsBeanList);
-                                    handleSchoolMate(girlList);
+                                    handleGirlMate(friendsBeanList);
                                 } else if (mType == 7) {      //可能认识的人
                                     maybeKnowList.addAll(friendsBeanList);
-                                    handleMaybeKnowFriend(maybeKnowList);
+                                    handleMaybeKnowFriend(friendsBeanList);
                                 }
 
+                            } else {
+                                //针对同校同学的处理（拉第一把数据就没有时，要如此处理是因为四个同学类型公用一个ListView）
+                                if(mType == 3) {//全部同学
+                                    if(allSchoolMateList.size() == 0) {
+                                        allSchoolmateListView.setAdapter(null);
+                                        schoolmateAdapter.notifyDataSetChanged();
+
+                                        llNullView.setVisibility(View.VISIBLE);
+                                    }
+                                } else if(mType == 4) {//同年级
+                                    if(sameGradeList.size() == 0) {
+                                        allSchoolmateListView.setAdapter(null);
+                                        sameGradeAdapter.notifyDataSetChanged();
+
+                                        llNullView.setVisibility(View.VISIBLE);
+                                    }
+                                } if(mType == 5) {//男生
+                                    if(boyList.size() == 0) {
+                                        allSchoolmateListView.setAdapter(null);
+                                        boyAdapter.notifyDataSetChanged();
+
+                                        llNullView.setVisibility(View.VISIBLE);
+                                    }
+                                } if(mType == 6) {//女生
+                                    if(girlList.size() == 0) {
+                                        allSchoolmateListView.setAdapter(null);
+                                        girlAdapter.notifyDataSetChanged();
+
+                                        llNullView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                                //网络获取不到数据了；
+                                loadMoreView.noData();
                             }
 
                         }
@@ -590,85 +857,39 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     //处理通讯录已开通
     private void handleContactDredge(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-
-        LinearLayout nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
-        MesureListView dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
-        RelativeLayout dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
-        dredgeNoRl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-               getContacts();
-               if (!numberBookAuthoritySuccess){    //如果没有权限  就申请权限
-                   getNumberBookAuthority();
-               }
-
-            }
-        });
-
         if (friendsBeanList.size() > 0) {
-
             nullLl.setVisibility(View.GONE);
-            contactsAdapter = new ContactsAdapter(AddFriends.this,
-                    new ContactsAdapter.hideCallback() {
-                        @Override
-                        public void hideClick(View v) {
-
-                        }
-                    },
-                    new ContactsAdapter.acceptCallback() {
-                        @Override
-                        public void acceptClick(View v) {
-                            if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                                Button button = (Button) v;
-                                button.setBackgroundResource(R.drawable.add_friend_apply);
-                                button.setEnabled(false);
-
-                                int position = (int) button.getTag();
-                                positionList.add(position);
-                                addFriend(friendsBeanList.get(position).getUin(),mType);
-                            } else {
-                                Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                            }
-
-
-                        }
-                    },
-                    friendsBeanList,positionList);
-
-            dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    int uin = friendsBeanList.get(position).getUin();
-                    if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                        getFriendInfo(uin, view);
-                    } else {
-                        Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-
-            });
-
-            dredgeListView.setAdapter(contactsAdapter);
         }
+
+        contactsAdapter.notifyDataSetChanged();
     }
 
     //处理同校同学
     private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-        final LinearLayout llButton = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_button);
-        LinearLayout llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
-        final ImageButton allImgButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_all);
-        final ImageButton sameGradeButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_class);
-        final ImageButton boyButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_boy);
-        final ImageButton girlButton = (ImageButton) schoolRoot.findViewById(R.id.lsm_girl);
-        MesureListView allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
-
+        Log.d(TAG, ", handleSchoolMate(), allSchoolMateList.size() = " + allSchoolMateList.size()
+                + allSchoolMateList.toString());
         if (friendsBeanList.size() > 0) {
             filterText.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
 
+        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int uin = allSchoolMateList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, view);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+
+        allSchoolmateListView.setAdapter(schoolmateAdapter);
+
+        schoolmateAdapter.notifyDataSetChanged();
 /*        arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -756,37 +977,21 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 getRecommends(6, mPageNum);
             }
         });*/
+    }
 
-        schoolmateAdapter = new SchoolmateAdapter(AddFriends.this,
-                new SchoolmateAdapter.hideCallback() {
-                    @Override
-                    public void hideClick(View v) {
-
-                    }
-                },
-                new SchoolmateAdapter.acceptCallback() {
-                    @Override
-                    public void acceptClick(View v) {
-                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                            Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.add_friend_apply);
-                            button.setEnabled(false);
-                            int position = (int) button.getTag();
-                            Log.i(TAG, "acceptClick: mType---" + mType);
-                            positionList.add(position);
-                            addFriend(friendsBeanList.get(position).getUin(),mType);
-                        } else {
-                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                },
-                friendsBeanList,positionList);
+    //处理同年级同学
+    private void handleSameGradeMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
+        Log.d(TAG, ", handleSameGradeMate(), sameGradeList.size() = " + sameGradeList.size()
+                + sameGradeList.toString());
+        if (friendsBeanList.size() > 0) {
+            filterText.setVisibility(View.VISIBLE);
+            llNullView.setVisibility(View.GONE);
+        }
 
         allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int uin = friendsBeanList.get(position).getUin();
+                int uin = sameGradeList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, view);
                 } else {
@@ -797,61 +1002,77 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
         });
 
-        allSchoolmateListView.setAdapter(schoolmateAdapter);
+        allSchoolmateListView.setAdapter(sameGradeAdapter);
+
+        sameGradeAdapter.notifyDataSetChanged();
+    }
+
+    //处理男同学
+    private void handleBoyMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
+        Log.d(TAG, ", handleBoyMate(), boyList.size() = " + boyList.size()
+                + boyList.toString());
+        if (friendsBeanList.size() > 0) {
+            filterText.setVisibility(View.VISIBLE);
+            llNullView.setVisibility(View.GONE);
+        }
+
+        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int uin = boyList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, view);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+
+        allSchoolmateListView.setAdapter(boyAdapter);
+
+        boyAdapter.notifyDataSetChanged();
+    }
+
+    //处理女同学
+    private void handleGirlMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
+        Log.d(TAG, ", handleGirlMate(), girlList.size() = " + girlList.size()
+                + girlList.toString());
+        if (friendsBeanList.size() > 0) {
+            filterText.setVisibility(View.VISIBLE);
+            llNullView.setVisibility(View.GONE);
+        }
+
+        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int uin = girlList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, view);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+
+        allSchoolmateListView.setAdapter(girlAdapter);
+
+        girlAdapter.notifyDataSetChanged();
     }
 
 
     //处理可能认识的人
     private void handleMaybeKnowFriend(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-        maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
-        LinearLayout lmklLlNull = (LinearLayout) maybeRoot.findViewById(R.id.lmk_ll_null);
-        MesureListView lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
-
+        Log.d(TAG, ", handleMaybeKnowFriend(), maybeKnowList.size() = " + maybeKnowList.size()
+                + " , friendsBeanList.size() = " + friendsBeanList.size() + " , mPageNum = " + mPageNum);
         if (friendsBeanList.size() > 0) {
             lmklLlNull.setVisibility(View.GONE);
         }
 
-
-
-        lmkListView.setAdapter(new SchoolmateAdapter(AddFriends.this,
-                new SchoolmateAdapter.hideCallback() {
-                    @Override
-                    public void hideClick(View v) {
-
-                    }
-                },
-                new SchoolmateAdapter.acceptCallback() {
-                    @Override
-                    public void acceptClick(View v) {
-                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                            Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.add_friend_apply);
-                            button.setEnabled(false);
-
-                            int position = (int) button.getTag();
-                            positionList.add(position);
-                            addFriend(friendsBeanList.get(position).getUin(),mType);
-                        } else {
-                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                },
-                friendsBeanList,positionList));
-
-        lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("点击事件");
-                int uin = friendsBeanList.get(position).getUin();
-                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
-                } else {
-                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
+        maybeKnownAdapter.notifyDataSetChanged();
     }
 
     //查询朋友的信息

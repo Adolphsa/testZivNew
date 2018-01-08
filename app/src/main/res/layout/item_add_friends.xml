@@ -8,8 +8,8 @@
 
     <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/af_item_header_img"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/item_add_friends_width"
+        android:layout_height="@dimen/item_add_friends_height"
         android:src="@drawable/header_deafult"
         android:layout_centerVertical="true"
         android:scaleType="fitXY"
