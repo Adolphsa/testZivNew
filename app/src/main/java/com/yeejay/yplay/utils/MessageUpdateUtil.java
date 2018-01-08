@@ -1,6 +1,7 @@
 package com.yeejay.yplay.utils;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMTextElem;
 import com.tencent.imsdk.ext.message.TIMConversationExt;
 import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.greendao.FriendInfo;
@@ -32,13 +34,27 @@ import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.model.ImCustomMsgData;
 import com.yeejay.yplay.model.ImageInfo;
+import com.yeejay.yplay.model.LogUploadRespond;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.model.UserInfoResponde;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 /**
  * 会话消息更新
@@ -48,6 +64,8 @@ import java.io.File;
 public class MessageUpdateUtil {
 
     private static final String TAG = "MessageUpdateUtil";
+    private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
+    private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
 
     MessageUpdateListener messageUpdateListener;
     SessionUpdateListener sessionUpdateListener;
@@ -82,7 +100,105 @@ public class MessageUpdateUtil {
         private static final MessageUpdateUtil instance = new MessageUpdateUtil();
     }
 
-    //会话列表更新
+    private void handleUploadLogs() {
+        UpdateTask task = new UpdateTask();
+        task.execute();
+    }
+
+    private static final String getZipName() {
+        String uin = Integer.toString((int)SharePreferenceUtil.get(YplayApplication.getContext(),
+                YPlayConstant.YPLAY_UIN, 0));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        return uin + "_" + df.format(System.currentTimeMillis()) + ".zip";
+    }
+
+    private static class UpdateTask extends AsyncTask<Void,Integer,Integer> {
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            String dirOri = Environment.getExternalStorageDirectory().getAbsolutePath()
+                    + File.separator + "yplay" + File.separator + "logs";
+            File file = new File(dirOri);
+            if (file.exists()) {
+                String dirDest = Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + File.separator + "yplay" + File.separator + getZipName();
+                try {
+                    ZipUtils.zip(dirOri, dirDest);
+                } catch (IOException ex) {
+                    Log.i(TAG, "zip log file exception! " + ex.getMessage());
+                }
+
+                //将指定LOG压缩后，接下来通过网络接口发给服务器；
+                uploadLogs(Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + File.separator + "yplay", getZipName());
+            }
+
+            return null;
+        }
+    }
+
+    private static void uploadLogs(String logZipPath, final String logZipName){
+        final String fileStr = logZipPath + File.separator + logZipName;
+        Log.i(TAG, "logZipPath = " + logZipPath + " , logZipName = " + logZipName
+                + " , fileStr = " + fileStr);
+
+        File logFile = new File(fileStr);
+        if (!logFile.exists()) {
+            return;
+        }
+
+        Log.i(TAG, "file path = " + logFile.getPath() + " , file name = " + logFile.getName()
+                + " , file absolute path = " + logFile.getAbsolutePath());
+
+        byte[] datas = ZipUtils.File2byte(logFile.getAbsolutePath());
+        Log.i(TAG, "logZipPath: zip size = " + datas.length);
+        RequestBody upload = RequestBody.create(MediaType.parse("application/octstream"), "upload");
+        RequestBody requestFile =
+                RequestBody.create(
+                        MediaType.parse("application/octstream"),
+                        new File(logFile.getAbsolutePath())
+                );
+        MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent",
+                logFile.getAbsolutePath(), requestFile);
+
+        YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
+                .uploadLogs(IMAGE_AUTHORIZATION, logZipName, upload, aa)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<LogUploadRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull LogUploadRespond logUploadRespond) {
+                        if (logUploadRespond.getCode() == 0){
+                            //上传成功，则删除在手机上生成的zip文件
+                            Log.i(TAG, "upload successfully! ");
+                            File file = new File(fileStr);
+                            if (file.exists()) {
+                                file.delete();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        Log.i(TAG, "upload error! " + e.getMessage());
+                        File file = new File(fileStr);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+        //会话列表更新
     public void updateSessionAndMessage(TIMMessage timMessage, int msgSuccess, boolean isOffline) {
 
         ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
@@ -165,6 +281,33 @@ public class MessageUpdateUtil {
                                 msgsBean.getTs()));
                     } catch (Exception e) {
                         Log.i(TAG, "PushNotify: 7---" + e.getMessage());
+                    }
+                }
+            } else if (8 == customType) {//设置对用户当前的日志进行操作；
+                Log.i(TAG, "updateSessionAndMessage: 8");
+                if (!ImConfig.getImInstance().isOffline) {
+                    String cmdStr = imCustomMsgData.getData();
+                    if ("debug".equals(cmdStr)) {
+                        Log.i(TAG, "updateSessionAndMessage: 8, cmd = " + cmdStr);
+                        try {
+                            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                            loggerContext.getLogger("LOG_WRITE").setLevel(Level.valueOf("DEBUG"));
+                        } catch (Exception e) {
+                            Log.i(TAG, "exception happened when updating logger level as debug!"
+                                    + e.toString());
+                        }
+                    } else if ("error".equals(cmdStr)) {
+                        Log.i(TAG, "updateSessionAndMessage: 8, cmd = " + cmdStr);
+                        try {
+                            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                            loggerContext.getLogger("LOG_WRITE").setLevel(Level.valueOf("ERROR"));
+                        } catch (Exception e) {
+                            Log.i(TAG, "exception happened when updating logger level as error"
+                                    + e.toString());
+                        }
+                    } else if ("upload".equals(cmdStr)) {
+                        Log.i(TAG, "updateSessionAndMessage: 8, cmd = " + cmdStr);
+                        handleUploadLogs();
                     }
                 }
             }

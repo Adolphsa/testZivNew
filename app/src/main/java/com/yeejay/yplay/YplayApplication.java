@@ -3,6 +3,7 @@ package com.yeejay.yplay;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 import com.bumptech.glide.request.target.ViewTarget;
 import com.tencent.imsdk.TIMGroupReceiveMessageOpt;
@@ -18,6 +19,8 @@ import com.yeejay.yplay.greendao.DaoSession;
 import com.yeejay.yplay.greendao.DataBaseHelper;
 import com.yeejay.yplay.im.ImConfig;
 import com.yeejay.yplay.utils.Foreground;
+
+import java.io.File;
 
 /**
  *
@@ -73,6 +76,14 @@ public class YplayApplication extends Application {
                     }
                 }
             });
+        }
+
+        //创建记录日志的文件夹，路径为/storage/emulated/0/yplay/logs
+        String dirStr = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + File.separator + "yplay" + File.separator + "logs";
+        File file = new File(dirStr);
+        if (!file.exists()) {
+            file.mkdirs();// 创建文件夹
         }
     }
 

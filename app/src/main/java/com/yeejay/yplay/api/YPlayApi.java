@@ -9,6 +9,7 @@ import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.ImageUploadRespond;
+import com.yeejay.yplay.model.LogUploadRespond;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
@@ -249,5 +250,13 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/notify/getnewnotifystat")
     Observable<PushNotifyRespond> getNewNotify(@FieldMap Map<String,Object> filemap);
+
+    //上传Log
+    @Multipart
+    @POST("/files/v2/1253229355/yplay/logs/{logzipname}")
+    Observable<LogUploadRespond> uploadLogs(@Header("Authorization") String authorization,
+                                            @Path("logzipname") String logzipname,
+                                            @Part("op") RequestBody upload,
+                                            @Part MultipartBody.Part file);
 
 }
