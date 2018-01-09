@@ -35,9 +35,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.donkingliang.imageselector.ImageSelectorActivity;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
-import com.donkingliang.imageselector.utils.ImageUtil;
 import com.donkingliang.imageselector.utils.PhotoUtils;
 import com.donkingliang.imageselector.utils.ToastUtils;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -46,7 +44,6 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
-import com.tencent.imsdk.TIMImage;
 import com.tencent.imsdk.TIMImageElem;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
@@ -56,7 +53,9 @@ import com.tencent.imsdk.TIMValueCallBack;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ChatAdapter;
+import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.HeadRefreshView;
 import com.yeejay.yplay.customview.NoDataView;
 import com.yeejay.yplay.data.db.DbHelper;
@@ -67,8 +66,10 @@ import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
+import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
@@ -84,12 +85,17 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import QMF_LOG.LogInfo;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.donkingliang.imageselector.ImageSelectorActivity.hasSdcard;
 
@@ -648,11 +654,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 switch (v.getId()) {
                     case R.id.message_profile:
                         Log.i(TAG, "onClick: 查看资料");
-                        Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
-                        intent.putExtra("yplay_friend_name", nickName);
-                        intent.putExtra("yplay_friend_uin", mSender);
-                        bottomDialog.dismiss();
-                        startActivity(intent);
+//                        Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
+//                        intent.putExtra("yplay_friend_name", nickName);
+//                        intent.putExtra("yplay_friend_uin", mSender);
+//                        bottomDialog.dismiss();
+//                        startActivity(intent);
+                        getFriendInfo(mSender);
                         break;
                     case R.id.message_delete:
                         Log.i(TAG, "onClick: 删除对话");
@@ -694,6 +701,114 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 .where(ImSessionDao.Properties.SessionId.eq(sessionId))
                 .buildDelete();
         sessionDelete.executeDeleteWithoutDetachingEntities();
+    }
+
+    //查询朋友的信息
+    private void getFriendInfo(int friendUin) {
+        Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("userUin", friendUin);
+        friendMap.put("uin", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, 0));
+        friendMap.put("token", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendMap.put("ver", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .getUserInfo(friendMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfoResponde>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {}
+
+                    @Override
+                    public void onNext(UserInfoResponde userInfoResponde) {
+                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
+                        if (userInfoResponde.getCode() == 0) {
+                            UserInfoResponde.PayloadBean.InfoBean infoBean =
+                                    userInfoResponde.getPayload().getInfo();
+                            int status = userInfoResponde.getPayload().getStatus();
+                            if (status == 1) {
+                                Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
+                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
+                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
+                                System.out.println("朋友的uin---" + infoBean.getUin());
+                                startActivity(intent);
+                            } else {
+                                showCardDialog(userInfoResponde.getPayload());
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    //发送加好友的请求
+    private void addFriend(int toUin,int srcType) {
+        Map<String, Object> addFreindMap = new HashMap<>();
+        addFreindMap.put("toUin", toUin);
+        addFreindMap.put("srcType",srcType);
+        addFreindMap.put("uin", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, 0));
+        addFreindMap.put("token", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        addFreindMap.put("ver", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .addFriend(addFreindMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<AddFriendRespond>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull AddFriendRespond addFriendRespond) {
+                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        System.out.println("发送加好友请求异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    //显示名片
+    private void showCardDialog(UserInfoResponde.PayloadBean payloadBean) {
+        final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
+
+        //状态
+        int status = payloadBean.getStatus();
+
+        final CardBigDialog cardDialog = new CardBigDialog(ActivityChatWindow.this, R.style.CustomDialog,
+                payloadBean);
+
+        cardDialog.setAddFriendListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageView button = (ImageView) v;
+                if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
+                    button.setImageResource(R.drawable.peer_friend_requested);
+                    addFriend(infoBean.getUin(),8);
+                } else {
+                    Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        cardDialog.show();
     }
 
     @Override
