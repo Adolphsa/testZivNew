@@ -10,7 +10,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
@@ -23,6 +22,7 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.LoadMoreView;
+import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -76,6 +76,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     List<ImSession> mDataList = new ArrayList<>();
     ImSessionDao imSessionDao;
     private LoadMoreView loadMoreView;
+    private UpRefreshView upRefreshView;
+    private RelativeLayout rlRefreshLayout;
 
     @Override
     public int getContentViewId() {
@@ -195,12 +197,19 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         if(loadMoreView == null) {
             loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
+        if(upRefreshView == null) {
+            upRefreshView = new UpRefreshView(getActivity());
+            rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
+            rlRefreshLayout.setBackgroundColor(getActivity().getResources().
+                    getColor(R.color.message_title_color));
+        }
 
-        messageRefreshView.setCanRefresh(false);
         messageRefreshView.setFooterView(loadMoreView);
+        messageRefreshView.setHeaderView(upRefreshView);
         messageRefreshView.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
+                messageRefreshView.finishRefresh();
             }
 
             @Override

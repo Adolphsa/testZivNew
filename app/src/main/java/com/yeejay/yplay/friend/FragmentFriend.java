@@ -27,6 +27,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
+import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -88,6 +89,8 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     private RelativeLayout rl;
     private LoadMoreView loadMoreView;
+    private UpRefreshView upRefreshView;
+    private RelativeLayout rlRefreshLayout;
 
     @Override
     public void onDestroyView() {
@@ -133,7 +136,14 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         if(loadMoreView == null) {
             loadMoreView = new LoadMoreView(getActivity());
         }
+        if(upRefreshView == null) {
+            upRefreshView = new UpRefreshView(getActivity());
+            rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
+            rlRefreshLayout.setBackgroundColor(mainActivity.getResources().
+                    getColor(R.color.feeds_title_color));
+        }
         ffPtfRefreshLayout.setFooterView(loadMoreView);
+        ffPtfRefreshLayout.setHeaderView(upRefreshView);
         ffPtfRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--   
+    根标签为animation-list，其中oneshot代表着是否只展示一遍，设置为false会不停的循环播放动画  
+    根标签下，通过item标签对动画中的每一个图片进行声明  
+    android:duration 表示展示所用的该图片的时间长度  
+ -->
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false" >
+
+    <item android:drawable="@drawable/loading_00151" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00153" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00155" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00157" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00159" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00161" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00163" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00165" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00167" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00169" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00161" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00171" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00173" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00175" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00177" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00179" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00181" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00183" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00185" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00187" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00189" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00191" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00193" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00195" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00197" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00199" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00201" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00203" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00205" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00207" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00209" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00211" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00213" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00215" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00217" android:duration="60"></item>
+    <item android:drawable="@drawable/loading_00219" android:duration="60"></item>
+</animation-list>
