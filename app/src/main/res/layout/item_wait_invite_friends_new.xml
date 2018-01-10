@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/afi_item_first_alpha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="A"
+        android:paddingLeft="20dp"
+        android:textSize="14sp"
+        android:textColor="@color/first_name"
+        android:background="@color/divider_color2"
+        />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/afi_item_text_family_name"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/shape_round_background"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="19dp"
+            android:text="段"
+            android:gravity="center"
+            android:textSize="22sp"
+            />
+
+        <TextView
+            android:id="@+id/af_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="段誉"
+            android:layout_toRightOf="@+id/afi_item_text_family_name"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:layout_marginTop="13dp"
+            android:layout_marginLeft="19dp"
+            />
+
+        <TextView
+            android:id="@+id/af_item_tv_shares_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12345678911"
+            android:layout_toRightOf="@+id/afi_item_text_family_name"
+            android:layout_below="@+id/af_item_name"
+            android:layout_marginLeft="19dp"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="10dp"
+            />
+
+        <Button
+            android:id="@+id/af_btn_accept"
+            android:layout_width="@dimen/friend_add_icon_width"
+            android:layout_height="@dimen/friend_add_icon_height"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/friend_invitation"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="21dp" />
+
+        <Button
+            android:id="@+id/af_btn_hide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="隐藏"
+            android:background="@android:color/transparent"
+            android:layout_toLeftOf="@+id/af_btn_accept"
+            android:layout_centerVertical="true"
+            android:visibility="gone"
+            />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

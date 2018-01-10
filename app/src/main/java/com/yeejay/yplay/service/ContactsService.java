@@ -3,6 +3,7 @@ package com.yeejay.yplay.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -11,6 +12,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -33,7 +35,6 @@ public class ContactsService extends Service {
 
     public ContactsService() {
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
-
     }
 
     @Override
@@ -70,20 +71,23 @@ public class ContactsService extends Service {
                 .updateContacts(contactsMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+                .subscribe(new Observer<UpdateContactsRespond>() {
                     @Override
                     public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
+                    public void onNext(@io.reactivex.annotations.NonNull UpdateContactsRespond baseRespond) {
 
                         if (baseRespond.getCode() == 0) {
                             System.out.println("上传通讯录成功---" + baseRespond.toString());
                             offset++;
-
                             Log.i(TAG, "onNext: offset---" + offset);
+
+                            List<UpdateContactsRespond.PayloadBean.InfosBean> infoList = baseRespond.getPayload().getInfos();
+                            updateSuccessHandle(infoList);
+
                             upLoadingContacts();
 
                         } else {
@@ -102,6 +106,27 @@ public class ContactsService extends Service {
                     }
                 });
     }
+
+    //上传成功后更新数据库数据
+    private void updateSuccessHandle(List<UpdateContactsRespond.PayloadBean.InfosBean> infoList) {
+        for (UpdateContactsRespond.PayloadBean.InfosBean infosBean : infoList) {
+            ContactsInfo contactsInfo = contactsInfoDao.queryBuilder()
+                    .where(ContactsInfoDao.Properties.OrgPhone.eq(infosBean.getOrgPhone()))
+                    .build().unique();
+            if (contactsInfo != null){
+                contactsInfo.setPhone(infosBean.getPhone());
+                contactsInfo.setUin(infosBean.getUin());
+                if (!TextUtils.isEmpty(infosBean.getNickName())){
+                    contactsInfo.setNiclName(infosBean.getNickName());
+                }
+                if (!TextUtils.isEmpty(infosBean.getHeadImgUrl())){
+                    contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());
+                }
+                contactsInfoDao.update(contactsInfo);
+            }
+        }
+    }
+
 
     //查询数据库
     private List<ContactsInfo> queryContacts(){

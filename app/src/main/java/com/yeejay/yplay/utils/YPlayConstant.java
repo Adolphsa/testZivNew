@@ -42,4 +42,6 @@ public class YPlayConstant {
     public static String MI_PUSH_APP_ID = "2882303761517630988";
     public static String MI_PUSH_APP_KEY = "5841763037988";
 
+    public static String IMEI = "";
+
 }

@@ -16,6 +16,7 @@ import com.yeejay.yplay.adapter.MyFriendsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LoadMoreView;
+import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -48,6 +49,8 @@ public class ActivityMyFriends extends BaseActivity {
     ListView amfListView;
     @BindView(R.id.amf_ptf_refresh)
     PullToRefreshLayout amfPtfRefresh;
+    @BindView(R.id.amf_side_veiw)
+    SideView amfSideView;
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {

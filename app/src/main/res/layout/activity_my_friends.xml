@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white"
     tools:context="com.yeejay.yplay.userinfo.ActivityMyFriends">
 
-    <include layout="@layout/layout_title_bar2" />
+    <include layout="@layout/layout_title_bar2"
+        android:id="@+id/amf_title"
+        />
 
     <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:id="@+id/amf_ptf_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
+        android:layout_below="@+id/amf_title"
         >
         <ListView
             android:id="@+id/amf_list_view"
@@ -33,4 +35,13 @@
             />
     </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 
-</LinearLayout>
+    <com.yeejay.yplay.customview.SideView
+        android:id="@+id/amf_side_veiw"
+        android:layout_width="30dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="60dp"
+        />
+
+</RelativeLayout>

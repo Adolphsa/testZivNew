@@ -16,6 +16,9 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.SideView;
+import com.yeejay.yplay.greendao.ContactsInfo;
+import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
@@ -39,7 +42,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityInviteFriend extends BaseActivity {
+public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdapter.OnGetAlphaIndexerAndSectionsListener{
 
     @BindView(R.id.aif_back)
     ImageButton aifBack;
@@ -47,24 +50,27 @@ public class ActivityInviteFriend extends BaseActivity {
 //    TextView aifTvSearchView;
     @BindView(R.id.aif_list_view)
     ListView aifListView;
-    @BindView(R.id.aif_ptf_refresh)
-    PullToRefreshLayout aifPtfRefresh;
     @BindView(R.id.aif_tip_close)
     ImageButton aifTipClose;
     @BindView(R.id.aif_tip_ll)
     LinearLayout aifTipLl;
     @BindView(R.id.emptyview)
     View emptyView;
+    @BindView(R.id.aif_side_veiw)
+    SideView aifSideView;   //字母表
 
     private static final String TAG = "ActivityInviteFriend";
 
     WaitInviteAdapter waitInviteAdapter;
-    List<GetRecommendsRespond.PayloadBean.FriendsBean> mDataList;
-    int mPageNum = 1;
+    List<ContactsInfo> mDataList;   //所有联系人的集合
+    private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
+    private List<String> sections;// 存放存在的汉语拼音首字母
+
     private int uin;
     private MyInfoDao myInfoDao;
     private MyInfo myInfo;
-
+    private ContactsInfoDao contactsInfoDao;
+    private ContactsInfo contactsInfo;
 
     @OnClick(R.id.aif_tip_close)
     public void tipClose() {
@@ -83,6 +89,7 @@ public class ActivityInviteFriend extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityInviteFriend.this, true);
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
         uin = (int) SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, (int) 0);
         myInfo = myInfoDao.queryBuilder()
@@ -94,8 +101,11 @@ public class ActivityInviteFriend extends BaseActivity {
         }
 
             mDataList = new ArrayList<>();
-        getRecommends(2, mPageNum);
-        loadMore();
+//        getRecommends(2, mPageNum);
+//        loadMore();
+        init();
+
+        aifSideView.setOnTouchingLetterChangedListener(new SideListViewListener());
     }
 
     @OnClick(R.id.aif_back)
@@ -103,18 +113,26 @@ public class ActivityInviteFriend extends BaseActivity {
         finish();
     }
 
-    private void init(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
+    private void init() {
+
+        mDataList = contactsInfoDao.queryBuilder()
+                .orderAsc(ContactsInfoDao.Properties.SortKey)
+                .list();
+        if (mDataList == null){
+            return;
+        }
+
         waitInviteAdapter = new WaitInviteAdapter(ActivityInviteFriend.this,
                 new WaitInviteAdapter.hideCallback() {
                     @Override
                     public void hideClick(View v) {
                         System.out.println("隐藏按钮被点击");
                         Button button = (Button) v;
-                        removeFriend(tempList.get((int) button.getTag()).getUin());
+                        removeFriend(mDataList.get((int) button.getTag()).getUin());
                         button.setVisibility(View.INVISIBLE);
-                        if (tempList.size() > 0) {
-                            System.out.println("tempList---" + tempList.size() + "----" + (int) v.getTag());
-                            tempList.remove((int) v.getTag());
+                        if (mDataList.size() > 0) {
+                            System.out.println("tempList---" + mDataList.size() + "----" + (int) v.getTag());
+                            mDataList.remove((int) v.getTag());
                             waitInviteAdapter.notifyDataSetChanged();
                         }
 
@@ -129,37 +147,22 @@ public class ActivityInviteFriend extends BaseActivity {
                 button.setEnabled(false);
                 //邀请好友的请求
 
-                String phone = GsonUtil.GsonString(tempList.get((int) v.getTag()).getPhone());
+                String phone = GsonUtil.GsonString(mDataList.get((int) v.getTag()).getPhone());
                 System.out.println("邀请的电话---" + phone);
                 String phoneStr = "[" + phone + "]";
                 String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
                 Log.i(TAG, "acceptClick: base64phone---" + base64phone);
                 invitefriendsbysms(base64phone);
             }
-        }, tempList);
+        }, mDataList);
+
+        waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
+
         aifListView.setEmptyView(emptyView);
         aifListView.setAdapter(waitInviteAdapter);
-
     }
 
-    //加载更多
-    private void loadMore() {
-        aifPtfRefresh.setCanRefresh(false);
-        aifPtfRefresh.setRefreshListener(new BaseRefreshListener() {
-            @Override
-            public void refresh() {
-
-            }
-
-            @Override
-            public void loadMore() {
-                mPageNum++;
-                System.out.println("pageNum---" + mPageNum);
-                getRecommends(2, mPageNum);
-            }
-        });
-    }
-
+    /*
     //拉取等待邀请
     private void getRecommends(final int type, int pageNum) {
 
@@ -203,10 +206,11 @@ public class ActivityInviteFriend extends BaseActivity {
 
                     }
                 });
-    }
+    }*/
 
     //通过短信邀请好友
     private void invitefriendsbysms(String friends) {
+
         Log.i(TAG, "invitefriendsbysms: friends---" + friends);
         Map<String, Object> invitefriendsMap = new HashMap<>();
         invitefriendsMap.put("friends", friends);
@@ -275,5 +279,25 @@ public class ActivityInviteFriend extends BaseActivity {
                 });
     }
 
+    /**
+     * 字母列表点击滑动监听器事件
+     */
+    private class SideListViewListener implements SideView.OnTouchingLetterChangedListener {
 
+        @Override
+        public void onTouchingLetterChanged(String s) {
+            if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
+                int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
+                aifListView.setSelection(position);
+
+            }
+        }
+
+    }
+
+    @Override
+    public void getAlphaIndexerAndSectionsListner(Map<String, Integer> alphaIndexer, List<String> sections) {
+        this.alphaIndexer = alphaIndexer;
+        this.sections = sections;
+    }
 }

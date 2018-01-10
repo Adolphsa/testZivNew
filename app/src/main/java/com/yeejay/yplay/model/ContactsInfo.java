@@ -12,7 +12,7 @@ public class ContactsInfo {
 
     public ContactsInfo(String name, String phone){
         setName(name);
-        setNumber(phone);
+        setPhone(phone);
     }
 
     public String getName() {
@@ -23,11 +23,11 @@ public class ContactsInfo {
         this.name = name;
     }
 
-    public String getNumber() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setNumber(String phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 

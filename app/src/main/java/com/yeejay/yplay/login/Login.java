@@ -1,9 +1,13 @@
 package com.yeejay.yplay.login;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -30,6 +34,7 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ContactsInfo;
 import com.yeejay.yplay.model.LoginRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -51,8 +56,6 @@ import io.reactivex.schedulers.Schedulers;
 public class Login extends BaseActivity {
 
     private static final String TAG = "Login";
-    private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 100;
-
 
     //    @BindView(R.id.login_scroll_view)
 //    ScrollView loginScrollView;
@@ -83,7 +86,7 @@ public class Login extends BaseActivity {
     //用户协议和隐私政策
     @OnClick(R.id.test_tv2)
     public void userPrivacy() {
-        startActivity(new Intent(Login.this,UserPrivacy.class));
+        startActivity(new Intent(Login.this, UserPrivacy.class));
     }
 
     MyInfoDao myInfoDao;
@@ -119,16 +122,18 @@ public class Login extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
 
         //删掉权限页面临时保存的数据
-        SharePreferenceUtil.remove(Login.this,"temp_lat");
-        SharePreferenceUtil.remove(Login.this,"temp_lon");
-        SharePreferenceUtil.remove(Login.this,"temp_book");
-        SharePreferenceUtil.remove(Login.this,"temp_location");
+        SharePreferenceUtil.remove(Login.this, "temp_lat");
+        SharePreferenceUtil.remove(Login.this, "temp_lon");
+        SharePreferenceUtil.remove(Login.this, "temp_book");
+        SharePreferenceUtil.remove(Login.this, "temp_location");
 
         mContactsList = new ArrayList<>();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         testTv2.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
 
         uuid = System.currentTimeMillis();
+
+        Log.i(TAG, "onCreate: unique code---" + BaseUtils.getUniquePsuedoID());
 
         if ((long) SharePreferenceUtil.get(Login.this, YPlayConstant.YPLAY_UUID, (long) 0) == 0) {
             uuidIsNull = true;

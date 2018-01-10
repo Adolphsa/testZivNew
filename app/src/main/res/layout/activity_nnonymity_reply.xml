@@ -49,6 +49,7 @@
             android:layout_below="@+id/non_ques_head_img"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:gravity="center"
             />
         <LinearLayout
             android:id="@+id/non_button12_ll"
