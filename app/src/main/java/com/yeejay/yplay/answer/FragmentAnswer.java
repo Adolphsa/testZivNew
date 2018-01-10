@@ -15,6 +15,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
@@ -49,6 +51,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import pl.droidsonroids.gif.GifImageView;
 
 /**
  * 答题
@@ -100,7 +103,7 @@ public class FragmentAnswer extends BaseFragment {
     @BindView(R.id.frgans_linear_layout)
     LinearLayout frgansLinlearLayout;
     @BindView(R.id.frans_progress)
-    ProgressBar frandProgress;
+    GifImageView frandProgress;
 
     int questionNum = 1;
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
@@ -151,7 +154,7 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn1)
     public void btn1(View view) {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             vote(questionBean.getQid(),
                     questionNum,
                     voteOptionsBeanList.get(0).getUin(),
@@ -179,7 +182,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
             System.out.println("返回异常1");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -187,7 +190,7 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn2)
     public void btn2(View view) {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             vote(questionBean.getQid(),
                     questionNum,
                     voteOptionsBeanList.get(1).getUin(),
@@ -212,14 +215,14 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
             System.out.println("返回异常2");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
     }
 
     @OnClick(R.id.frgans_btn3)
     public void btn3(View view) {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             vote(questionBean.getQid(),
                     questionNum,
                     voteOptionsBeanList.get(2).getUin(),
@@ -244,7 +247,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
             System.out.println("返回异常3");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -253,7 +256,7 @@ public class FragmentAnswer extends BaseFragment {
     public void btn4(View view) {
 
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             vote(questionBean.getQid(),
                     questionNum,
                     voteOptionsBeanList.get(3).getUin(),
@@ -278,7 +281,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((1 + btn4Cnt) * 100 / total, 4).execute();
         } else {
             System.out.println("返回异常4");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
 
         }
     }
@@ -289,12 +292,12 @@ public class FragmentAnswer extends BaseFragment {
         //换批人
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
 
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             Log.i(TAG, "nextPersons: 换一换--" + questionNum);
             getQuestionsCandidate(questionBean.getQid(), questionNum);
 
         } else {
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -346,7 +349,7 @@ public class FragmentAnswer extends BaseFragment {
         System.out.println("点击继续");
 
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
             questionNum++;
             changeCount = 0;
 
@@ -365,7 +368,7 @@ public class FragmentAnswer extends BaseFragment {
 
         } else {
             System.out.println("返回异常");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -375,7 +378,7 @@ public class FragmentAnswer extends BaseFragment {
     public void nextQuestion(View view) {
 
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
-            frandProgress.setVisibility(View.INVISIBLE);
+            frandProgress.setVisibility(View.VISIBLE);
 
             System.out.println("过questionNum----" + questionNum);
             changeCount = 0;
@@ -397,7 +400,7 @@ public class FragmentAnswer extends BaseFragment {
 
         } else {
             System.out.println("返回异常");
-            frandProgress.setVisibility(View.VISIBLE);
+            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -419,6 +422,8 @@ public class FragmentAnswer extends BaseFragment {
         getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color4));
         frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color4));
         baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color4));
+        //Glide.with(getActivity()).load(R.drawable.loading).asGif().
+        //        diskCacheStrategy(DiskCacheStrategy.NONE).into(frandProgressContent);
 
         voteOptionsBeanList = new ArrayList<VoteOptionsBean>();
 
@@ -708,17 +713,19 @@ public class FragmentAnswer extends BaseFragment {
                             frgansBtn2.setEnabled(true);
                             frgansBtn3.setEnabled(true);
                             frgansBtn4.setEnabled(true);
+
+                            frandProgress.setVisibility(View.INVISIBLE);
                         }
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        System.out.println("获取某个问题候选者异常---" + e.getMessage());
+                        frandProgress.setVisibility(View.VISIBLE);
                     }
 
                     @Override
                     public void onComplete() {
-
                     }
                 });
     }
@@ -748,6 +755,8 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onNext(@NonNull VoteRespond voteRespond) {
                         System.out.println("投票返回---" + voteRespond);
+
+                        frandProgress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
@@ -789,6 +798,8 @@ public class FragmentAnswer extends BaseFragment {
                         if (baseRespond.getCode() == 0) {
                             questionNum++;
                             getQuestion();
+
+                            frandProgress.setVisibility(View.INVISIBLE);
                         }
 
                     }
@@ -796,11 +807,11 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onError(Throwable e) {
                         System.out.println("跳过下个问题异常---" + e.getMessage());
+                        frandProgress.setVisibility(View.VISIBLE);
                     }
 
                     @Override
                     public void onComplete() {
-
                     }
                 });
 

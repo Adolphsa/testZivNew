@@ -102,6 +102,17 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -152,4 +163,5 @@ dependencies {
         // workaround issue #73
         exclude group: 'com.google.android', module: 'android'
     }
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.1'
 }
