@@ -94,6 +94,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     Button mainNavRight2;
     @BindView(R.id.mainnav_bar2)
     RelativeLayout mainnavBar2;
+    @BindView(R.id.mainnav_background)
+    RelativeLayout mainBottonBackground;
 
     //左一
     @OnClick(R.id.main_nav_bar_left)
@@ -216,10 +218,13 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             public void onPageSelected(int i) {
                 System.out.println("当前为第" + i + "页");
                 if (i == 0) {
+                    mainBottonBackground.setVisibility(View.VISIBLE);
                     feedsFragmentStatus();
                 } else if (i == 1) {
+                    mainBottonBackground.setVisibility(View.INVISIBLE);
                     playFragmentStatus();
                 } else if (i == 2) {
+                    mainBottonBackground.setVisibility(View.VISIBLE);
                     messageFragmentStatus();
                 }
 

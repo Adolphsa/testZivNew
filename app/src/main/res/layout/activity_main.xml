@@ -14,10 +14,18 @@
 
 
     <RelativeLayout
+        android:id="@+id/mainnav_background"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:visibility="invisible"
+        android:background="@drawable/main_bottom_background"
+        android:layout_alignParentBottom="true" />
+
+    <RelativeLayout
         android:id="@+id/mainnav_bar2"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@color/white"
+        android:background="@android:color/transparent"
         android:layout_alignParentBottom="true"
         >
         <Button
@@ -30,13 +38,13 @@
             android:layout_toLeftOf="@+id/main_nav_center2"
             />
         <Button
-        android:id="@+id/main_nav_center2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:drawableTop="@drawable/play"
-        android:background="@android:color/transparent"
-        android:layout_centerHorizontal="true" />
+            android:id="@+id/main_nav_center2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:drawableTop="@drawable/play"
+            android:background="@android:color/transparent"
+            android:layout_centerHorizontal="true" />
 
         <Button
             android:id="@+id/main_nav_right2"
