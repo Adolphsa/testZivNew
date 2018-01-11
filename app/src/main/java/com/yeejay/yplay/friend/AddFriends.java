@@ -292,7 +292,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
         dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) { //邀请好友开通
 
                 getContacts();
                 if (!numberBookAuthoritySuccess){    //如果没有权限  就申请权限
@@ -1240,9 +1240,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
-                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber);
+                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber,null,1,null,null,null);
                 ContactsInfo tempContactsInfo = contactsInfoDao.queryBuilder()
-                        .where(ContactsInfoDao.Properties.Phone.eq(contactName))
+                        .where(ContactsInfoDao.Properties.OrgPhone.eq(contactName))
                         .build().unique();
                 if (tempContactsInfo == null){
                     contactsInfoDao.insert(contactsInfo);

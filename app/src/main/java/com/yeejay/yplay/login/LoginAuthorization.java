@@ -2,6 +2,7 @@ package com.yeejay.yplay.login;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,6 +35,7 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.service.ContactsService;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -193,7 +195,7 @@ public class LoginAuthorization extends BaseActivity {
     //获取当前经纬度
     private void getLonLat() {
 
-        if(addressAuthoritySuccess){
+        if (addressAuthoritySuccess) {
             Log.i(TAG, "getLonLat: 已经成功过!! " + latitude + longitude);
             return;
         }
@@ -265,9 +267,9 @@ public class LoginAuthorization extends BaseActivity {
                 //获取经度信息
                 longitude = bdLocation.getLongitude();
 
-                SharePreferenceUtil.put(LoginAuthorization.this,"temp_lat",(float)latitude);
-                SharePreferenceUtil.put(LoginAuthorization.this,"temp_lon",(float)longitude);
-                SharePreferenceUtil.put(LoginAuthorization.this,"temp_location",1);
+                SharePreferenceUtil.put(LoginAuthorization.this, "temp_lat", (float) latitude);
+                SharePreferenceUtil.put(LoginAuthorization.this, "temp_lon", (float) longitude);
+                SharePreferenceUtil.put(LoginAuthorization.this, "temp_location", 1);
 
                 Log.i(TAG, "onReceiveLocation: 百度地图---lat---" + latitude + ",lon---" + longitude);
                 addressAuthoritySuccess = true;
@@ -294,7 +296,7 @@ public class LoginAuthorization extends BaseActivity {
     //获取通讯录联系人
     private void getContacts() {
 
-        if(numberBookAuthoritySuccess){
+        if (numberBookAuthoritySuccess) {
             Log.i(TAG, "getContacts: numberBookAuthoritySuccess 已经成功过!!");
             return;
         }
@@ -307,30 +309,43 @@ public class LoginAuthorization extends BaseActivity {
         }
 
         try {
-            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-            System.out.println("contactUri---" + contactUri);
-            Cursor cursor = getContentResolver().query(contactUri,
-                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
-                    null, null, "sort_key");
+
+            ContentResolver mContentResolver = getContentResolver();
+            Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+            Uri dataUri = Uri.parse("content://com.android.contacts/data");
+
+            setContactBackground();
+            String id;
             String contactName;
             String contactNumber;
-            //String contactSortKey;
+            String contactSortKey;
             //int contactId;
 
             int counter = 0;
 
             //如果有权限count就++
-            if (!TextUtils.isEmpty(contactUri.toString())){
+            if (!TextUtils.isEmpty(uri.toString())) {
                 counter++;
             }
 
+            Cursor cursor = mContentResolver.query(uri, null, null, null, null);
             while (cursor != null && cursor.moveToNext()) {
-                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                //contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-                //contactSortKey =getSortkey(cursor.getString(1));
-                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, contactNumber);
-                contactsInfoDao.insert(contactsInfo);
+
+                id = cursor.getString(cursor.getColumnIndex("_id"));
+                contactName = cursor.getString(cursor.getColumnIndex("display_name"));
+                contactSortKey = cursor.getString(cursor.getColumnIndex("phonebook_label"));
+
+                Cursor dataCursor = mContentResolver.query(dataUri, null, "raw_contact_id= ?", new String[]{id}, null);
+                while (dataCursor != null && dataCursor.moveToNext()) {
+                    String type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
+                    if (type.equals("vnd.android.cursor.item/phone_v2")) {//如果得到的mimeType类型为手机号码类型才去接收
+                        contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
+                        String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
+                        com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
+                        contactsInfoDao.insert(contactsInfo);
+                    }
+                }
+                dataCursor.close();
                 counter += 1;
             }
             cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
@@ -339,7 +354,7 @@ public class LoginAuthorization extends BaseActivity {
             if (counter > 0) {
                 setContactBackground();
                 numberBookAuthoritySuccess = true;
-                SharePreferenceUtil.put(LoginAuthorization.this,"temp_book",1);
+                SharePreferenceUtil.put(LoginAuthorization.this, "temp_book", 1);
                 //开启服务上传通讯录
                 startService(new Intent(LoginAuthorization.this, ContactsService.class));
             }
@@ -388,17 +403,17 @@ public class LoginAuthorization extends BaseActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "onResume: ");
-        float tempLat = (float)SharePreferenceUtil.get(LoginAuthorization.this,"temp_lat",0.0f);
-        float tempLon = (float)SharePreferenceUtil.get(LoginAuthorization.this,"temp_lon",0.0f);
-        int tempBook = (int)SharePreferenceUtil.get(LoginAuthorization.this,"temp_book",0);
-        int tempAddress = (int)SharePreferenceUtil.get(LoginAuthorization.this,"temp_location",0);
+        float tempLat = (float) SharePreferenceUtil.get(LoginAuthorization.this, "temp_lat", 0.0f);
+        float tempLon = (float) SharePreferenceUtil.get(LoginAuthorization.this, "temp_lon", 0.0f);
+        int tempBook = (int) SharePreferenceUtil.get(LoginAuthorization.this, "temp_book", 0);
+        int tempAddress = (int) SharePreferenceUtil.get(LoginAuthorization.this, "temp_location", 0);
 
-        if (tempBook == 1){
+        if (tempBook == 1) {
             setContactBackground();
             numberBookAuthoritySuccess = true;
         }
 
-        if (tempAddress == 1){
+        if (tempAddress == 1) {
             setLocationBackground();
             latitude = tempLat;
             longitude = tempLon;

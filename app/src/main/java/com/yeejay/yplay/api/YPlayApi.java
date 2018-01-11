@@ -17,6 +17,7 @@ import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.QuestionRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
+import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
@@ -66,12 +67,12 @@ public interface YPlayApi {
     //通讯录上传或更新
     @FormUrlEncoded
     @POST("/api/addr/update")
-    Observable<BaseRespond> updateContacts(@FieldMap Map<String,Object> filemap);
+    Observable<UpdateContactsRespond> updateContacts(@FieldMap Map<String,Object> filemap);
 
     //通讯录remove
     @FormUrlEncoded
     @POST("/api/addr/remove")
-    Observable<BaseRespond> removeContacts(@FieldMap Map<String,String> filemap);
+    Observable<UpdateContactsRespond> removeContacts(@FieldMap Map<String,Object> filemap);
 
     //搜索学校列表
     @FormUrlEncoded

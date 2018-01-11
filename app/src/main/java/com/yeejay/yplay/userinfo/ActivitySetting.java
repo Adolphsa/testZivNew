@@ -1033,10 +1033,9 @@ public class ActivitySetting extends BaseActivity {
                             }
                         });
 
-                        SharePreferenceUtil.clear(ActivitySetting.this);
-//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
-//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
-//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
+                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
                         AppManager.getAppManager().AppExit(ActivitySetting.this);
                         startActivity(new Intent(ActivitySetting.this, Login.class));
                     }
