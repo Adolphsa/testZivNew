@@ -249,19 +249,18 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         getMyFriendsList();
         Log.i(TAG, "onCreate: mainActivity");
 
-        //申请下读写内部SD卡的权限，然后创建记录日志的文件夹，路径为/storage/emulated/0/yplay/logs
-        if (Build.VERSION.SDK_INT >= 23 && MainActivity.this.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                PackageManager.PERMISSION_GRANTED) {
-            MainActivity.this.requestPermissions(new String[]{
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
-
         //创建记录日志的文件夹，路径为/storage/emulated/0/yplay/logs
         String dirStr = Environment.getExternalStorageDirectory().getAbsolutePath()
                 + File.separator + "yplay" + File.separator + "logs";
         File file = new File(dirStr);
         Log.i(TAG, "logs file dirStr = " + dirStr);
         if (!file.exists()) {
+            //申请下读写内部SD卡的权限，然后创建记录日志的文件夹，路径为/storage/emulated/0/yplay/logs
+            if (Build.VERSION.SDK_INT >= 23 && MainActivity.this.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                MainActivity.this.requestPermissions(new String[]{
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
             file.mkdirs();// 创建文件夹
             Log.i(TAG, "logs file created!");
         }
