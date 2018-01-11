@@ -25,11 +25,14 @@ public class FriendInfo {
     private int friendSchoolType;
     private String friendSchoolName;
     private int ts;
-    @Generated(hash = 306230009)
+    private String sortKey;
+    private String myselfUin;
+
+    @Generated(hash = 1861697744)
     public FriendInfo(Long id, int friendUin, String friendName,
             String friendHeadUrl, int friendGender, int friendGrade,
             int friendSchoolId, int friendSchoolType, String friendSchoolName,
-            int ts) {
+            int ts, String sortKey, String myselfUin) {
         this.id = id;
         this.friendUin = friendUin;
         this.friendName = friendName;
@@ -40,6 +43,8 @@ public class FriendInfo {
         this.friendSchoolType = friendSchoolType;
         this.friendSchoolName = friendSchoolName;
         this.ts = ts;
+        this.sortKey = sortKey;
+        this.myselfUin = myselfUin;
     }
     @Generated(hash = 459681999)
     public FriendInfo() {
@@ -103,6 +108,18 @@ public class FriendInfo {
     }
     public void setTs(int ts) {
         this.ts = ts;
+    }
+    public String getSortKey() {
+        return this.sortKey;
+    }
+    public void setSortKey(String sortKey) {
+        this.sortKey = sortKey;
+    }
+    public String getMyselfUin() {
+        return this.myselfUin;
+    }
+    public void setMyselfUin(String myselfUin) {
+        this.myselfUin = myselfUin;
     }
     
 

@@ -26,6 +26,7 @@ import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -171,7 +172,17 @@ public class ActivityFriendsInfo extends BaseActivity {
             //更新朋友数据
             FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
             if (friendInfo == null){
-                dbHelper.insertFriendInfo(new FriendInfo(null,infoBean.getUin(),infoBean.getNickName(),infoBean.getHeadImgUrl(),infoBean.getGender(),infoBean.getGrade(),infoBean.getSchoolId(),infoBean.getSchoolType(),infoBean.getSchoolName(),infoBean.getTs()));
+                dbHelper.insertFriendInfo(new FriendInfo(null,infoBean.getUin(),
+                        infoBean.getNickName(),
+                        infoBean.getHeadImgUrl(),
+                        infoBean.getGender(),
+                        infoBean.getGrade(),
+                        infoBean.getSchoolId(),
+                        infoBean.getSchoolType(),
+                        infoBean.getSchoolName(),
+                        infoBean.getTs(),
+                        BaseUtils.getSortKey(infoBean.getNickName()),
+                        String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
             }else {
                 friendInfo.setFriendUin(infoBean.getUin());
                 friendInfo.setFriendName(infoBean.getNickName());
@@ -188,10 +199,8 @@ public class ActivityFriendsInfo extends BaseActivity {
         }
     }
 
-
     //初始化钻石
     private void initDiamondList(UsersDiamondInfoRespond.PayloadBean payloadBean) {
-
 
         int total = payloadBean.getTotal();
         if (total == 0) {
@@ -199,66 +208,6 @@ public class ActivityFriendsInfo extends BaseActivity {
         } else {
             topList.setVisibility(View.VISIBLE);
         }
-//        if (total > 0) {
-//            amiDiamondNullImg.setVisibility(View.GONE);
-//            amiDiamonLine.setVisibility(View.GONE);
-//        }
-//        if (total >= 3) {
-//            amiDiamonLine.setVisibility(View.VISIBLE);
-//        }
-//        final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = payloadBean.getStats();
-//        amiDiamondListView.setAdapter(new BaseAdapter() {
-//            @Override
-//            public int getCount() {
-//                return tempList.size() >= 3 ? 3 : tempList.size();
-//            }
-//
-//            @Override
-//            public Object getItem(int position) {
-//                return tempList.get(position);
-//            }
-//
-//            @Override
-//            public long getItemId(int position) {
-//                return position;
-//            }
-//
-//            @Override
-//            public View getView(int position, View convertView, ViewGroup parent) {
-//                ViewHolder holder;
-//                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean;
-//                if (convertView == null) {
-//                    convertView = View.inflate(ActivityFriendsInfo.this, R.layout.item_user_info_diamond, null);
-//                    holder = new ViewHolder();
-//                    holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.item_diamond_top_img);
-//                    holder.itemAmiImg2 = (ImageView) convertView.findViewById(R.id.item_diamond_img);
-//                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.item_diamond_text);
-//                    convertView.setTag(holder);
-//                } else {
-//                    holder = (ViewHolder) convertView.getTag();
-//                }
-//                statsBean = tempList.get(position);
-//                if (position == 0) {
-//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top1));
-//                } else if (position == 1) {
-//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top2));
-//                } else if (position == 2) {
-//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
-//                } else {
-//                    holder.itemAmiImg.setImageDrawable(getDrawable(R.drawable.diamond_top3));
-//                }
-//
-//                String url = statsBean.getQiconUrl();
-//                if (!TextUtils.isEmpty(url)) {
-//                    Picasso.with(ActivityFriendsInfo.this).load(url).into(holder.itemAmiImg2);
-//                } else {
-//                    holder.itemAmiImg2.setImageDrawable(getDrawable(R.drawable.diamond));
-//                }
-//                holder.itemAmiText.setText(statsBean.getQtext());
-//                return convertView;
-//            }
-//        });
-
     }
 
     private static class ViewHolder {
@@ -354,17 +303,7 @@ public class ActivityFriendsInfo extends BaseActivity {
                             UsersDiamondInfoRespond.PayloadBean payloadBean = usersDiamondInfoRespond.getPayload();
 
                             if (payloadBean != null && payloadBean.getStats() != null) {
-
                                 initDiamondList(payloadBean);
-                                List<UsersDiamondInfoRespond.PayloadBean.StatsBean> statsBeanList =
-                                        usersDiamondInfoRespond.getPayload().getStats();
-//                                if (statsBeanList.size() >= 1){
-//                                    initDiamondDetail(statsBeanList.get(0),null,null);
-//                                }else if (statsBeanList.size() >= 2){
-//                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(1),null);
-//                                }if (statsBeanList.size() >= 3){
-//                                    initDiamondDetail(statsBeanList.get(0),statsBeanList.get(2),statsBeanList.get(3));
-//                                }
                             }
 
                         }

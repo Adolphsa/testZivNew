@@ -21,19 +21,19 @@ public class ContactsInfo {
     private String phone;
     private int uin;
     private String sortKey;
-    private String niclName;
+    private String nickName;
     private String headImgUrl;
 
-    @Generated(hash = 1806460702)
+    @Generated(hash = 2042693928)
     public ContactsInfo(Long id, String name, String orgPhone, String phone,
-            int uin, String sortKey, String niclName, String headImgUrl) {
+            int uin, String sortKey, String nickName, String headImgUrl) {
         this.id = id;
         this.name = name;
         this.orgPhone = orgPhone;
         this.phone = phone;
         this.uin = uin;
         this.sortKey = sortKey;
-        this.niclName = niclName;
+        this.nickName = nickName;
         this.headImgUrl = headImgUrl;
     }
     @Generated(hash = 9726432)
@@ -75,11 +75,11 @@ public class ContactsInfo {
     public void setSortKey(String sortKey) {
         this.sortKey = sortKey;
     }
-    public String getNiclName() {
-        return this.niclName;
+    public String getNickName() {
+        return this.nickName;
     }
-    public void setNiclName(String niclName) {
-        this.niclName = niclName;
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
     public String getHeadImgUrl() {
         return this.headImgUrl;

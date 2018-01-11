@@ -1,9 +1,16 @@
 package com.yeejay.yplay.data.db;
 
+import android.text.TextUtils;
+
+import com.github.promeg.pinyinhelper.Pinyin;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.greendao.DaoSession;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.model.FriendsListRespond;
+import com.yeejay.yplay.utils.BaseUtils;
+import com.yeejay.yplay.utils.SharePreferenceUtil;
+import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.List;
 
@@ -30,7 +37,8 @@ public class ImpDbHelper implements DbHelper{
 
     @Override
     public FriendInfo NetworkFriendInfo2DbFriendInfo(FriendsListRespond.PayloadBean.FriendsBean friendInfo) {
-//        Log.i(TAG, "NetworkFriendInfo2DbFriendInfo: ---" + friendInfo.toString());
+
+        String nickName = friendInfo.getNickName();
         return new FriendInfo(null,
                 friendInfo.getUin(),
                 friendInfo.getNickName(),
@@ -40,7 +48,9 @@ public class ImpDbHelper implements DbHelper{
                 friendInfo.getSchoolId(),
                 friendInfo.getSchoolType(),
                 friendInfo.getSchoolName(),
-                friendInfo.getTs());
+                friendInfo.getTs(),
+                BaseUtils.getSortKey(nickName),
+                String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0)));
     }
 
     @Override

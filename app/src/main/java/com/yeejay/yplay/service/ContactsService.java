@@ -117,7 +117,7 @@ public class ContactsService extends Service {
                 contactsInfo.setPhone(infosBean.getPhone());
                 contactsInfo.setUin(infosBean.getUin());
                 if (!TextUtils.isEmpty(infosBean.getNickName())){
-                    contactsInfo.setNiclName(infosBean.getNickName());
+                    contactsInfo.setNickName(infosBean.getNickName());
                 }
                 if (!TextUtils.isEmpty(infosBean.getHeadImgUrl())){
                     contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());
@@ -132,7 +132,7 @@ public class ContactsService extends Service {
     private List<ContactsInfo> queryContacts(){
 
          return contactsInfoDao.queryBuilder()
-                .orderAsc(ContactsInfoDao.Properties.Id)
+                .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .offset(offset*50)
                 .limit(50)
                 .list();

@@ -278,7 +278,9 @@ public class MessageUpdateUtil {
                                 msgsBean.getSchoolId(),
                                 msgsBean.getSchoolType(),
                                 msgsBean.getSchoolName(),
-                                msgsBean.getTs()));
+                                msgsBean.getTs(),
+                                BaseUtils.getSortKey(msgsBean.getNickName()),
+                                String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
                     } catch (Exception e) {
                         Log.i(TAG, "PushNotify: 7---" + e.getMessage());
                     }

@@ -11,36 +11,30 @@
         android:id="@+id/amf_title"
         />
 
-    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
-        android:id="@+id/amf_ptf_refresh"
+    <ListView
+        android:id="@+id/amf_list_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:divider="@color/feeds_search_color"
+        android:dividerHeight="0.3dp"
         android:layout_below="@+id/amf_title"
-        >
-        <ListView
-            android:id="@+id/amf_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@color/feeds_search_color"
-            android:dividerHeight="0.3dp"
-            />
-        <ImageView
-            android:id="@+id/amf_friend_null"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/friend_null"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            />
-    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
+        />
+
+    <ImageView
+        android:id="@+id/amf_friend_null"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/friend_null"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        />
 
     <com.yeejay.yplay.customview.SideView
         android:id="@+id/amf_side_veiw"
-        android:layout_width="30dp"
+        android:layout_width="15dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="60dp"
         android:layout_marginBottom="60dp"
         />
 

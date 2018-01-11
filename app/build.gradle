@@ -147,6 +147,7 @@ dependencies {
     compile 'com.huawei.android.hms:push:2.5.2.300'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.android.support:support-v4:25.4.0'
+    compile 'com.github.promeg:tinypinyin:2.0.3'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.4.0'

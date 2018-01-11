@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,69 +8,124 @@
     android:background="@color/edit_text_color2"
     tools:context="com.yeejay.yplay.login.AddFriendGuide">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/before_play_slice"
-        android:layout_gravity="center"
-        />
     <LinearLayout
+        android:id="@+id/aafd_title_ll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/before_play_bg"
+        android:layout_height="wrap_content"
         >
-
-        <TextView
+        <ImageButton
+            android:id="@+id/aafd_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="添加好友吧"
-            android:layout_gravity="center"
-            android:textSize="26sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="30dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="对好友匿名投票，说出心里话；"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="26dp"
-            android:layout_gravity="center"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="收到好友匿名投票，看大家对我的印象"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="4dp"
-            android:layout_gravity="center"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="添加越多好友，越好玩！"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="58dp"
-            android:layout_gravity="center"
-            />
-        <Button
-            android:id="@+id/aafg_enter"
-            android:layout_width="200dp"
-            android:layout_height="40dp"
-            android:text="添加好友"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            android:background="@drawable/selector_login_btn_background"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            />
-
+            android:layout_marginLeft="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/back_white" />
     </LinearLayout>
 
+    <com.yeejay.yplay.customview.LazyScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:layout_below="@+id/aafd_title_ll"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/before_play_slice"
+                android:layout_gravity="center"
+                />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/before_play_bg"
+                android:layout_marginBottom="25dp"
+                >
 
-</LinearLayout>
+                <TextView
+                    android:id="@+id/aafg_text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aafd_text1"
+                    android:layout_centerHorizontal="true"
+                    android:textSize="26sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="30dp"
+                    />
+
+                <LinearLayout
+                    android:id="@+id/aafg_contacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@+id/aafg_text1"
+                    android:layout_marginTop="23dp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/aafg_text2"
+                        android:textSize="12sp"
+                        android:textColor="@color/white"
+                        android:layout_marginLeft="20dp"
+                        />
+                    <com.yeejay.yplay.customview.MesureListView
+                        android:id="@+id/aafg_contacts_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/color_transparent"
+                        android:divider="@color/divider_color2"
+                        android:dividerHeight="0.5dp"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/aafg_same_school"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/aafg_contacts"
+                    android:layout_marginTop="23dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:text="@string/aafg_text3"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+
+                    <com.yeejay.yplay.customview.MesureListView
+                        android:id="@+id/aafg_same_school_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/color_transparent"
+                        android:divider="@color/divider_color2"
+                        android:dividerHeight="0.5dp"
+                        />
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+    </com.yeejay.yplay.customview.LazyScrollView>
+
+    <Button
+        android:id="@+id/aafg_enter"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="下一步"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        android:background="@drawable/selector_login_btn_background_new"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>

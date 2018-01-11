@@ -12,12 +12,15 @@ import android.widget.TextView;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MyFriendsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -37,7 +40,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityMyFriends extends BaseActivity {
+public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.OnGetAlphaIndexerAndSectionsListener{
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -47,8 +50,7 @@ public class ActivityMyFriends extends BaseActivity {
     ImageView friendNull;
     @BindView(R.id.amf_list_view)
     ListView amfListView;
-    @BindView(R.id.amf_ptf_refresh)
-    PullToRefreshLayout amfPtfRefresh;
+
     @BindView(R.id.amf_side_veiw)
     SideView amfSideView;
 
@@ -57,9 +59,10 @@ public class ActivityMyFriends extends BaseActivity {
         finish();
     }
 
-    private LoadMoreView loadMoreView;
-    List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
-    int mPageNum = 1;
+    private List<FriendInfo> mDataList;
+    private FriendInfoDao friendInfoDao;
+    private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
+    private List<String> sections;// 存放存在的汉语拼音首字母
     private MyFriendsAdapter mMyFriendsAdapter;
 
     @Override
@@ -71,114 +74,64 @@ public class ActivityMyFriends extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityMyFriends.this, true);
 
+        friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
+
         layoutTitle.setText(R.string.my_friends);
         mDataList = new ArrayList<>();
-
-        initAdapter();
-
-        getMyFriendsList(mPageNum);
-        loadMore();
+        initData();
     }
 
-    private void initAdapter() {
-        mMyFriendsAdapter = new MyFriendsAdapter(this, mDataList);
-        amfListView.setAdapter(mMyFriendsAdapter);
+    private void initData(){
+
+        String uin = String.valueOf(SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        mDataList = friendInfoDao.queryBuilder()
+                    .where(FriendInfoDao.Properties.MyselfUin.eq(uin))
+                    .orderAsc(FriendInfoDao.Properties.SortKey)
+                    .list();
+        if (mDataList != null && mDataList.size() > 0){
+            friendNull.setVisibility(View.GONE);
+            amfSideView.setVisibility(View.VISIBLE);
+            mMyFriendsAdapter = new MyFriendsAdapter(this, mDataList);
+            mMyFriendsAdapter.setOnGetAlphaIndeserAndSectionListener(this);
+            amfListView.setAdapter(mMyFriendsAdapter);
+        }else {
+            friendNull.setVisibility(View.VISIBLE);
+            amfSideView.setVisibility(View.GONE);
+        }
 
         amfListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mDataList != null && mDataList.size() > 0){
                     Intent intent = new Intent(ActivityMyFriends.this, ActivityFriendsInfo.class);
-                    intent.putExtra("yplay_friend_name", mDataList.get(position).getNickName());
-                    intent.putExtra("yplay_friend_uin",mDataList.get(position).getUin());
+                    intent.putExtra("yplay_friend_name", mDataList.get(position).getFriendName());
+                    intent.putExtra("yplay_friend_uin",mDataList.get(position).getFriendUin());
                     startActivity(intent);
                 }
             }
         });
+
+        amfSideView.setOnTouchingLetterChangedListener(new FriendSideListViewListener());
     }
 
-    private void initMyFriendsList(final List<FriendsListRespond.PayloadBean.FriendsBean> tempList) {
-        if (tempList.size() > 0){
-            friendNull.setVisibility(View.GONE);
-        }else {
-            friendNull.setVisibility(View.VISIBLE);
+    @Override
+    public void getAlphaIndexerAndSectionsListner(Map<String, Integer> alphaIndexer, List<String> sections) {
+        this.alphaIndexer = alphaIndexer;
+        this.sections = sections;
+    }
+
+    /**
+     * 字母列表点击滑动监听器事件
+     */
+    private class FriendSideListViewListener implements SideView.OnTouchingLetterChangedListener {
+
+        @Override
+        public void onTouchingLetterChanged(String s) {
+            if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
+                int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
+                amfListView.setSelection(position);
+            }
         }
 
-        mMyFriendsAdapter.notifyDataSetChanged();
-        //拉到第二页数据时，自动向上滚动两个item高度（如果第二页只有一个数据的话，则只滚动一个item高度）
-        //ListView需要先调用notifyDataSetChanged()再滚动
-        if (tempList.size() >= 2) {
-            amfListView.smoothScrollToPosition(mDataList.size() - tempList.size() + 1);
-        } else if (tempList.size() == 1) {
-            amfListView.smoothScrollToPosition(mDataList.size() - tempList.size());
-        }
-    }
-
-
-    private void loadMore() {
-        amfPtfRefresh.setCanRefresh(false);
-        loadMoreView = new LoadMoreView(ActivityMyFriends.this);
-        amfPtfRefresh.setFooterView(loadMoreView);
-        amfPtfRefresh.setRefreshListener(new BaseRefreshListener() {
-            @Override
-            public void refresh() {
-
-            }
-
-            @Override
-            public void loadMore() {
-                System.out.println("加载更多");
-                mPageNum++;
-                getMyFriendsList(mPageNum);
-            }
-        });
-    }
-
-
-    //获取好友列表
-    private void getMyFriendsList(int pageNum) {
-
-        Map<String, Object> myFriendsMap = new HashMap<>();
-        myFriendsMap.put("pageNum", pageNum);
-        myFriendsMap.put("uin", SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        myFriendsMap.put("token", SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        myFriendsMap.put("ver", SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyFriendsList(myFriendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<FriendsListRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull FriendsListRespond friendsListRespond) {
-                        System.out.println("获取我的好友列表---" + friendsListRespond.toString());
-                        if (friendsListRespond.getCode() == 0) {
-                            List<FriendsListRespond.PayloadBean.FriendsBean> tempList
-                                    = friendsListRespond.getPayload().getFriends();
-                            if(tempList.size() > 0) {
-                                mDataList.addAll(tempList);
-                                initMyFriendsList(tempList);
-                            } else {
-                                System.out.println("数据加载完毕");
-                                loadMoreView.noData();
-                            }
-                        }
-                        amfPtfRefresh.finishLoadMore();
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取我的好友列表异常---" + e.getMessage());
-                        amfPtfRefresh.finishLoadMore();
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
     }
 }

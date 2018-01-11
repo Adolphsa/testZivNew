@@ -88,4 +88,8 @@
     <string name="filter_girl">女生</string>
     <string name="filter_same_grade">同年级</string>
     <string name="username_colon_only">用户名：</string>
+    <string name="aif_message_invite_text">我们将会发短信，免费为你邀请朋友。请谨慎使用，避免对他人造成骚扰。</string>
+    <string name="aafd_text1">你想匿名跟谁悄悄话？</string>
+    <string name="aafg_text2">通讯录好友</string>
+    <string name="aafg_text3">同校好友</string>
 </resources>

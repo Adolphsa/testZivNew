@@ -9,9 +9,13 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.FriendsListRespond;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import tangxiaolv.com.library.EffectiveShapeView;
 
@@ -23,18 +27,42 @@ import tangxiaolv.com.library.EffectiveShapeView;
 public class MyFriendsAdapter extends BaseAdapter{
 
     private Context context;
+    private Map<String,Integer> alphaIndexer;
+    private List<String> sections;
+    private boolean flag;//标志用于只执行一次代码
+    private OnGetAlphaIndexerAndSectionsListener listener;
+    List<FriendInfo> friendsInfoList;
 
-    List<FriendsListRespond.PayloadBean.FriendsBean> friendsInfoList;
-
-    public MyFriendsAdapter(Context context,
-                              List<FriendsListRespond.PayloadBean.FriendsBean> list) {
+    public MyFriendsAdapter(Context context, List<FriendInfo> list) {
         this.context = context;
         this.friendsInfoList = list;
-    }
 
+        alphaIndexer = new HashMap<>();
+        sections=new ArrayList<>();
+
+        for (int i=0; i < list.size(); i++) {
+
+            //当前汉语拼音的首字母
+            String currentAlpha = list.get(i).getSortKey();
+            //上一个拼音的首字母，如果不存在则为""
+            String previewAlpha=(i-1)>=0?list.get(i-1).getSortKey():"";
+            if (!previewAlpha.equals(currentAlpha)){    //保存第一个字母出现的位置
+                String firstAlpha=list.get(i).getSortKey();
+                alphaIndexer.put(firstAlpha,i);
+                sections.add(firstAlpha);
+            }
+        }
+
+    }
 
     @Override
     public int getCount() {
+        if (!flag){
+            if (listener!=null){
+                listener.getAlphaIndexerAndSectionsListner(alphaIndexer,sections);
+            }
+            flag=true;
+        }
         return friendsInfoList.size();
     }
 
@@ -54,6 +82,7 @@ public class MyFriendsAdapter extends BaseAdapter{
         if (convertView == null){
             convertView = View.inflate(context, R.layout.item_my_friend,null);
             holder = new ViewHolder();
+            holder.itemMyFriendFirstName = (TextView) convertView.findViewById(R.id.item_my_friend_first_alpha);
             holder.itemMyFriendImg = (EffectiveShapeView) convertView.findViewById(R.id.item_my_friend_img);
             holder.itemMyFriendName = (TextView) convertView.findViewById(R.id.item_my_friend_name);
             convertView.setTag(holder);
@@ -61,7 +90,9 @@ public class MyFriendsAdapter extends BaseAdapter{
             holder = (ViewHolder) convertView.getTag();
         }
 
-        String url = friendsInfoList.get(position).getHeadImgUrl();
+        FriendInfo friendInfo = friendsInfoList.get(position);
+
+        String url = friendInfo.getFriendHeadUrl();
         holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
         if (!TextUtils.isEmpty(url)){
             Picasso.with(context).load(url).resizeDimen(R.dimen.item_my_friends_width,
@@ -69,13 +100,36 @@ public class MyFriendsAdapter extends BaseAdapter{
         }else {
             holder.itemMyFriendImg.setImageResource(R.drawable.header_deafult);
         }
-        String name = friendsInfoList.get(position).getNickName();
+        String name = friendInfo.getFriendName();
         holder.itemMyFriendName.setText(name);
 
+        if (position >= 1){
+            String currentAlpha = friendsInfoList.get(position).getSortKey();
+            String previewAlpha = friendsInfoList.get(position-1).getSortKey();
+            if (!previewAlpha.equals(currentAlpha)){ //不相等表示有新的字母项产生且为该类字母堆中的第一个字母索引项
+                holder.itemMyFriendFirstName.setText(currentAlpha);
+                holder.itemMyFriendFirstName.setVisibility(View.VISIBLE);
+            }else {
+                holder.itemMyFriendFirstName.setVisibility(View.GONE);
+            }
+
+        }else {
+            holder.itemMyFriendFirstName.setText(friendInfo.getSortKey());
+        }
         return convertView;
     }
 
+    public void setOnGetAlphaIndeserAndSectionListener(OnGetAlphaIndexerAndSectionsListener listener){
+        this.listener=listener;
+    }
+
+    public interface OnGetAlphaIndexerAndSectionsListener{
+        public void getAlphaIndexerAndSectionsListner(Map<String,Integer>alphaIndexer,List<String>sections);
+
+    }
+
     private static class ViewHolder{
+        TextView itemMyFriendFirstName;
         EffectiveShapeView itemMyFriendImg;
         TextView itemMyFriendName;
     }

@@ -163,7 +163,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
                                 startActivity(new Intent(LoadingActivity.this, Login.class));
 
                             } else {
-                                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
+                                startActivity(new Intent(LoadingActivity.this, Login.class));
                             }
 
                         } else if (userInfoResponde.getCode() == 11002) {

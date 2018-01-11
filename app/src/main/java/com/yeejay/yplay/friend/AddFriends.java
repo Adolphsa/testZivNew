@@ -108,9 +108,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
 
-        if (isFromAddFriend) {
-            startActivity(new Intent(AddFriends.this, MainActivity.class));
-        }
+//        if (isFromAddFriend) {
+//            startActivity(new Intent(AddFriends.this, MainActivity.class));
+//        }
 
         finish();
     }
@@ -240,7 +240,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     int mType = 1; //好友类型
     int buttonDirt = 1; //学校按钮朝向
-    boolean isFromAddFriend;
+//    boolean isFromAddFriend;
 
     ContactsAdapter contactsAdapter;
     SchoolmateAdapter schoolmateAdapter;//全部同学
@@ -263,10 +263,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
-        }
+//        Bundle bundle = getIntent().getExtras();
+//        if (bundle != null) {
+//            isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
+//        }
 
         initViewControls();
         initListAndAdapter();
@@ -958,13 +958,13 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         cardDialog.show();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend) {
-
-            startActivity(new Intent(AddFriends.this, MainActivity.class));
-            return true;//不执行父类点击事件
-        }
-        return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend) {
+//
+//            startActivity(new Intent(AddFriends.this, MainActivity.class));
+//            return true;//不执行父类点击事件
+//        }
+//        return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
+//    }
 }

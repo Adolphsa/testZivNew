@@ -326,6 +326,7 @@ public class LoginAuthorization extends BaseActivity {
             //如果有权限count就++
             if (!TextUtils.isEmpty(uri.toString())) {
                 counter++;
+                numberBookAuthoritySuccess = true;
             }
 
             Cursor cursor = mContentResolver.query(uri, null, null, null, null);
@@ -340,9 +341,12 @@ public class LoginAuthorization extends BaseActivity {
                     String type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
                     if (type.equals("vnd.android.cursor.item/phone_v2")) {//如果得到的mimeType类型为手机号码类型才去接收
                         contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
-                        String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
-                        com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
-                        contactsInfoDao.insert(contactsInfo);
+                        if (contactNumber.length() >2){
+                            Log.i(TAG, "getContacts: contactNumber---" + contactNumber);
+                            String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
+                            com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
+                            contactsInfoDao.insert(contactsInfo);
+                        }
                     }
                 }
                 dataCursor.close();

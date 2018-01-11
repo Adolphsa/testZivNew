@@ -787,6 +787,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             //如果有权限count就++
             if (!TextUtils.isEmpty(uri.toString())) {
                 counter++;
+                numberBookAuthoritySuccess = true;
             }
 
             String id;
@@ -807,9 +808,13 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                     String type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
                     if (type.equals("vnd.android.cursor.item/phone_v2")) {//如果得到的mimeType类型为手机号码类型才去接收
                         contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
-                        String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
-                        com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
-                        currentContactsList.add(contactsInfo);
+
+                        if (contactNumber.length() > 2){
+//                            Log.i(TAG, "getContacts: contactsNumber---" + contactNumber);
+                            String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
+                            com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
+                            currentContactsList.add(contactsInfo);
+                        }
                     }
                 }
                 dataCursor.close();
@@ -1036,7 +1041,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                 contactsInfo.setPhone(infosBean.getPhone());
                 contactsInfo.setUin(infosBean.getUin());
                 if (!TextUtils.isEmpty(infosBean.getNickName())){
-                    contactsInfo.setNiclName(infosBean.getNickName());
+                    contactsInfo.setNickName(infosBean.getNickName());
                 }
                 if (!TextUtils.isEmpty(infosBean.getHeadImgUrl())){
                     contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());

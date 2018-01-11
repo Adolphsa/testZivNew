@@ -4,7 +4,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
+
+import com.github.promeg.pinyinhelper.Pinyin;
 
 import java.io.File;
 import java.util.List;
@@ -120,5 +123,17 @@ public class BaseUtils {
         return resultStr;
 
     }
+
+    public static String getSortKey(String nickName){
+
+        String defaultSortkey = "#";
+        if (!TextUtils.isEmpty(nickName)){
+            char firstName = nickName.charAt(0);
+            defaultSortkey = String.valueOf(Pinyin.toPinyin(firstName).charAt(0)).toUpperCase() ;
+        }
+        return defaultSortkey;
+
+    }
+
 
 }

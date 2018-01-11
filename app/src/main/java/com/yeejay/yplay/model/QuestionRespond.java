@@ -44,6 +44,15 @@ public class QuestionRespond {
         this.payload = payload;
     }
 
+    @Override
+    public String toString() {
+        return "QuestionRespond{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", payload=" + payload +
+                '}';
+    }
+
     public static class PayloadBean {
         /**
          * freezeStatus : 0
@@ -129,6 +138,20 @@ public class QuestionRespond {
             this.options = options;
         }
 
+        @Override
+        public String toString() {
+            return "PayloadBean{" +
+                    "freezeStatus=" + freezeStatus +
+                    ", freezeTs=" + freezeTs +
+                    ", nowTs=" + nowTs +
+                    ", freezeDuration=" + freezeDuration +
+                    ", total=" + total +
+                    ", index=" + index +
+                    ", question=" + question +
+                    ", options=" + options +
+                    '}';
+        }
+
         public static class QuestionBean {
             /**
              * qid : 12253
@@ -203,6 +226,19 @@ public class QuestionRespond {
             public void setTs(int ts) {
                 this.ts = ts;
             }
+
+            @Override
+            public String toString() {
+                return "QuestionBean{" +
+                        "qid=" + qid +
+                        ", qtext='" + qtext + '\'' +
+                        ", qiconUrl='" + qiconUrl + '\'' +
+                        ", optionGender=" + optionGender +
+                        ", replyGender=" + replyGender +
+                        ", status=" + status +
+                        ", ts=" + ts +
+                        '}';
+            }
         }
 
         public static class OptionsBean {
@@ -238,6 +274,15 @@ public class QuestionRespond {
 
             public void setBeSelCnt(int beSelCnt) {
                 this.beSelCnt = beSelCnt;
+            }
+
+            @Override
+            public String toString() {
+                return "OptionsBean{" +
+                        "uin=" + uin +
+                        ", nickName='" + nickName + '\'' +
+                        ", beSelCnt=" + beSelCnt +
+                        '}';
             }
         }
     }

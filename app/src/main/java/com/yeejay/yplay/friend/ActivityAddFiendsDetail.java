@@ -28,6 +28,7 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyFriends;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -347,7 +348,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                                     msgsBean.getSchoolId(),
                                     msgsBean.getSchoolType(),
                                     msgsBean.getSchoolName(),
-                                    msgsBean.getTs()));
+                                    msgsBean.getTs(),
+                                    BaseUtils.getSortKey(msgsBean.getFromNickName()),
+                                    String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
                             Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
 
                         }

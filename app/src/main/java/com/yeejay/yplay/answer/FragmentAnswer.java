@@ -481,7 +481,8 @@ public class FragmentAnswer extends BaseFragment {
         fransTvQuestionCount.setText(questionNum + "/15");
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
-            Picasso.with(getActivity()).load(url).into(frgansImg);
+            Log.i(TAG, "nextQuestionUpdate: 加载的图片---" + url);
+            Picasso.with(getActivity()).load(url).resize(186,186).into(frgansImg);
         }
         frgansQuestion.setText(questionBean.getQtext());
 

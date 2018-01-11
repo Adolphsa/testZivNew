@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
@@ -23,7 +24,10 @@ import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.userinfo.ActivityMyFriends;
+import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -42,7 +46,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdapter.OnGetAlphaIndexerAndSectionsListener{
+public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdapter.OnGetAlphaIndexerAndSectionsListener {
 
     @BindView(R.id.aif_back)
     ImageButton aifBack;
@@ -96,13 +100,12 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
                 .where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
         int isInviteTipShow = myInfo.getIsInviteTipShow();
-        if (0 == isInviteTipShow){
+        if (0 == isInviteTipShow) {
             aifTipLl.setVisibility(View.VISIBLE);
         }
 
-            mDataList = new ArrayList<>();
-//        getRecommends(2, mPageNum);
-//        loadMore();
+        mDataList = new ArrayList<>();
+
         init();
 
         aifSideView.setOnTouchingLetterChangedListener(new SideListViewListener());
@@ -115,12 +118,13 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
     private void init() {
 
+        List<ContactsInfo> tempDataList = contactsInfoDao.loadAll();
+        if (tempDataList == null || tempDataList.size() == 0)
+            return;
+
         mDataList = contactsInfoDao.queryBuilder()
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .list();
-        if (mDataList == null){
-            return;
-        }
 
         waitInviteAdapter = new WaitInviteAdapter(ActivityInviteFriend.this,
                 new WaitInviteAdapter.hideCallback() {
@@ -141,18 +145,39 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
             @Override
             public void acceptClick(View v) {
                 System.out.println("邀请按钮被点击");
-                Button button = (Button) v;
-                //button.setText("已邀请");
-                button.setBackgroundResource(R.drawable.friend_invitation_done);
-                button.setEnabled(false);
-                //邀请好友的请求
+                if (NetWorkUtil.isNetWorkAvailable(ActivityInviteFriend.this)){
+                    Button button = (Button) v;
+                    button.setBackgroundResource(R.drawable.friend_invitation_done);
+                    button.setEnabled(false);
 
-                String phone = GsonUtil.GsonString(mDataList.get((int) v.getTag()).getPhone());
-                System.out.println("邀请的电话---" + phone);
-                String phoneStr = "[" + phone + "]";
-                String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
-                Log.i(TAG, "acceptClick: base64phone---" + base64phone);
-                invitefriendsbysms(base64phone);
+                    MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+                    int uin = (int) SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, (int) 0);
+                    MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                            .build().unique();
+
+                    if (myInfo != null && myInfo.getIsShowInviteDialogInfo() == 1){
+                        //邀请好友的请求
+                        String phone = GsonUtil.GsonString(mDataList.get((int) v.getTag()).getPhone());
+                        System.out.println("邀请的电话---" + phone);
+                        String phoneStr = "[" + phone + "]";
+                        String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
+                        Log.i(TAG, "acceptClick: base64phone---" + base64phone);
+                        invitefriendsbysms(base64phone);
+                    }else {
+                        if (myInfo != null){
+                            myInfo.setIsShowInviteDialogInfo(1);
+                            myInfoDao.update(myInfo);
+                        }
+
+                        DialogUtils.showInviteDialogInfo(ActivityInviteFriend.this,
+                                getString(R.string.aif_message_invite_text));
+                    }
+                }else {
+                    Toast.makeText(ActivityInviteFriend.this,"网络异常",Toast.LENGTH_SHORT).show();
+                }
+
+
+
             }
         }, mDataList);
 
@@ -289,7 +314,6 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
                 aifListView.setSelection(position);
-
             }
         }
 
