@@ -71,13 +71,11 @@ import io.reactivex.schedulers.Schedulers;
 public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "AddFriends";
-    private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
 
     private static final int CLASSMATE_TYPE_ALL = 0;
     private static final int CLASSMATE_MALE = 1;
     private static final int CLASSMATE_FEMALE = 2;
     private static final int CLASSMATE_SAME_GRADE = 3;
-    private static final String KEY_SHARED_PREFERENCE = "preferences_class_type";
 
     @BindView(R.id.af_btn_add_contacts)
     ImageButton btnAddContacts;
@@ -100,7 +98,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     @OnClick(R.id.filter_text)
     public void filterClick() {
         Drawable drawable = getResources().getDrawable(R.drawable.spinner_down);
-        drawable.setBounds(0, 0, drawable.getMinimumWidth(),drawable.getMinimumHeight());// 必须设置图片大小，否则不显示
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());// 必须设置图片大小，否则不显示
         filterText.setCompoundDrawables(null, null, drawable, null);
 
         mSpinerPopWindow.setWidth(filterText.getWidth());
@@ -110,7 +108,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
 
-        if (isFromAddFriend){
+        if (isFromAddFriend) {
             startActivity(new Intent(AddFriends.this, MainActivity.class));
         }
 
@@ -244,8 +242,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     int buttonDirt = 1; //学校按钮朝向
     boolean isFromAddFriend;
 
-    boolean numberBookAuthoritySuccess = false;
-    ContactsInfoDao contactsInfoDao;
     ContactsAdapter contactsAdapter;
     SchoolmateAdapter schoolmateAdapter;//全部同学
     SchoolmateAdapter sameGradeAdapter;//同年级
@@ -267,10 +263,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
 
-        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
-
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null){
+        if (bundle != null) {
             isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
         }
 
@@ -293,11 +287,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { //邀请好友开通
-
-                getContacts();
-                if (!numberBookAuthoritySuccess){    //如果没有权限  就申请权限
-                    getNumberBookAuthority();
-                }
+                //跳转到邀请好友界面
+                Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
+                startActivity(intent);
 
             }
         });
@@ -345,7 +337,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                             int position = (int) button.getTag();
                             positionList.add(position);
-                            addFriend(contactDredgeList.get(position).getUin(),mType);
+                            addFriend(contactDredgeList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
@@ -353,7 +345,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                     }
                 },
-                contactDredgeList,positionList);
+                contactDredgeList, positionList);
 
         dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -387,14 +379,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             int position = (int) button.getTag();
                             Log.i(TAG, "acceptClick: mType---" + mType);
                             positionList.add(position);
-                            addFriend(allSchoolMateList.get(position).getUin(),mType);
+                            addFriend(allSchoolMateList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                allSchoolMateList,positionList);
+                allSchoolMateList, positionList);
     }
 
     private void initSameGradeAdapter() {
@@ -412,14 +404,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             int position = (int) button.getTag();
                             Log.i(TAG, "acceptClick: mType---" + mType);
                             positionList.add(position);
-                            addFriend(sameGradeList.get(position).getUin(),mType);
+                            addFriend(sameGradeList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                sameGradeList,positionList);
+                sameGradeList, positionList);
     }
 
     private void initBoyAdapter() {
@@ -437,14 +429,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             int position = (int) button.getTag();
                             Log.i(TAG, "acceptClick: mType---" + mType);
                             positionList.add(position);
-                            addFriend(boyList.get(position).getUin(),mType);
+                            addFriend(boyList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                boyList,positionList);
+                boyList, positionList);
     }
 
     private void initGirlAdapter() {
@@ -462,14 +454,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             int position = (int) button.getTag();
                             Log.i(TAG, "acceptClick: mType---" + mType);
                             positionList.add(position);
-                            addFriend(girlList.get(position).getUin(),mType);
+                            addFriend(girlList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                girlList,positionList);
+                girlList, positionList);
     }
 
     private void initMaybeKnownAdapter() {
@@ -486,14 +478,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                             int position = (int) button.getTag();
                             positionList.add(position);
-                            addFriend(maybeKnowList.get(position).getUin(),mType);
+                            addFriend(maybeKnowList.get(position).getUin(), mType);
                         } else {
                             Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 },
-                maybeKnowList,positionList);
+                maybeKnowList, positionList);
 
         lmkListView.setAdapter(maybeKnownAdapter);
         lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -517,51 +509,51 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         int selectOpn = sharedFilter.getInt("position", 0);
         filterText.setText(typeList.get(selectOpn));
         mSpinerPopWindow = new SpinerPopWindow<String>(this, this, typeList,
-                new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences sharedFilterItem = getSharedPreferences("preferences_class_filter",
-                        Context.MODE_PRIVATE);
-                SharedPreferences.Editor editorsettings = sharedFilterItem.edit();
-                editorsettings.putInt("position", position);
-                editorsettings.commit();
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        SharedPreferences sharedFilterItem = getSharedPreferences("preferences_class_filter",
+                                Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editorsettings = sharedFilterItem.edit();
+                        editorsettings.putInt("position", position);
+                        editorsettings.commit();
 
-                filterText.setText(typeList.get(position));
-                switch (position) {
-                    case CLASSMATE_TYPE_ALL ://全部
-                        mType = 3;
-                        mPageNum = 1;
-                        positionList.clear();
-                        allSchoolMateList.clear();
-                        getRecommends(3, mPageNum);
-                        break;
-                    case CLASSMATE_MALE ://男同学
-                        mType = 5;
-                        mPageNum = 1;
-                        positionList.clear();
-                        boyList.clear();
-                        getRecommends(5, mPageNum);
-                        break;
-                    case CLASSMATE_FEMALE ://女同学
-                        mType = 6;
-                        mPageNum = 1;
-                        positionList.clear();
-                        girlList.clear();
-                        getRecommends(6, mPageNum);
-                        break;
-                    case CLASSMATE_SAME_GRADE ://同年级
-                        mType = 4;
-                        mPageNum = 1;
-                        positionList.clear();
-                        sameGradeList.clear();
-                        getRecommends(4, mPageNum);
-                        break;
-                    default :
-                }
+                        filterText.setText(typeList.get(position));
+                        switch (position) {
+                            case CLASSMATE_TYPE_ALL://全部
+                                mType = 3;
+                                mPageNum = 1;
+                                positionList.clear();
+                                allSchoolMateList.clear();
+                                getRecommends(3, mPageNum);
+                                break;
+                            case CLASSMATE_MALE://男同学
+                                mType = 5;
+                                mPageNum = 1;
+                                positionList.clear();
+                                boyList.clear();
+                                getRecommends(5, mPageNum);
+                                break;
+                            case CLASSMATE_FEMALE://女同学
+                                mType = 6;
+                                mPageNum = 1;
+                                positionList.clear();
+                                girlList.clear();
+                                getRecommends(6, mPageNum);
+                                break;
+                            case CLASSMATE_SAME_GRADE://同年级
+                                mType = 4;
+                                mPageNum = 1;
+                                positionList.clear();
+                                sameGradeList.clear();
+                                getRecommends(4, mPageNum);
+                                break;
+                            default:
+                        }
 
-                mSpinerPopWindow.dismiss();
-            }
-        });
+                        mSpinerPopWindow.dismiss();
+                    }
+                });
         mSpinerPopWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -606,45 +598,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     }
 
-//    //接受好友请求
-//    private void accepeAddFreind(int msgId) {
-//        Map<String, Object> accepeAddFreindMap = new HashMap<>();
-//        accepeAddFreindMap.put("msgId", msgId);
-//        accepeAddFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-//        accepeAddFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        accepeAddFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .acceptAddFriend(accepeAddFreindMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<BaseRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull BaseRespond baseRespond) {
-//                        System.out.println("接受好友请求---" + baseRespond.toString());
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("接受好友请求异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
-
     //发送加好友的请求
-    private void addFriend(int toUin,int srcType) {
+    private void addFriend(int toUin, int srcType) {
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
-        addFreindMap.put("srcType",srcType);
+        addFreindMap.put("srcType", srcType);
         addFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
@@ -675,75 +633,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 });
 
     }
-
-//    //删除好友
-//    private void removeFriend(int toUin) {
-//
-//        Map<String, Object> removeFreindMap = new HashMap<>();
-//        removeFreindMap.put("toUin", toUin);
-//        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-//        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .removeFriend(removeFreindMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<BaseRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull BaseRespond baseRespond) {
-//                        System.out.println("删除好友---" + baseRespond.toString());
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("删除好友异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
-
-//    //通过短信邀请好友
-//    private void invitefriendsbysms(String friends) {
-//        Map<String, Object> removeFreindMap = new HashMap<>();
-//        removeFreindMap.put("friends", friends);
-//        removeFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-//        removeFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        removeFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .removeFriend(removeFreindMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<BaseRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull BaseRespond baseRespond) {
-//                        System.out.println("短信邀请好友---" + baseRespond.toString());
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("短信邀请好友异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
 
     //拉取同校/通讯录好友
     private void getRecommends(int type, int pageNum) {
@@ -795,29 +684,31 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
                             } else {
                                 //针对同校同学的处理（拉第一把数据就没有时，要如此处理是因为四个同学类型公用一个ListView）
-                                if(mType == 3) {//全部同学
-                                    if(allSchoolMateList.size() == 0) {
+                                if (mType == 3) {//全部同学
+                                    if (allSchoolMateList.size() == 0) {
                                         allSchoolmateListView.setAdapter(null);
                                         schoolmateAdapter.notifyDataSetChanged();
 
                                         llNullView.setVisibility(View.VISIBLE);
                                     }
-                                } else if(mType == 4) {//同年级
-                                    if(sameGradeList.size() == 0) {
+                                } else if (mType == 4) {//同年级
+                                    if (sameGradeList.size() == 0) {
                                         allSchoolmateListView.setAdapter(null);
                                         sameGradeAdapter.notifyDataSetChanged();
 
                                         llNullView.setVisibility(View.VISIBLE);
                                     }
-                                } if(mType == 5) {//男生
-                                    if(boyList.size() == 0) {
+                                }
+                                if (mType == 5) {//男生
+                                    if (boyList.size() == 0) {
                                         allSchoolmateListView.setAdapter(null);
                                         boyAdapter.notifyDataSetChanged();
 
                                         llNullView.setVisibility(View.VISIBLE);
                                     }
-                                } if(mType == 6) {//女生
-                                    if(girlList.size() == 0) {
+                                }
+                                if (mType == 6) {//女生
+                                    if (girlList.size() == 0) {
                                         allSchoolmateListView.setAdapter(null);
                                         girlAdapter.notifyDataSetChanged();
 
@@ -860,7 +751,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         if (friendsBeanList.size() > 0) {
             nullLl.setVisibility(View.GONE);
         }
-
         contactsAdapter.notifyDataSetChanged();
     }
 
@@ -888,95 +778,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         });
 
         allSchoolmateListView.setAdapter(schoolmateAdapter);
-
         schoolmateAdapter.notifyDataSetChanged();
-/*        arrowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("箭头被点击");
-                if (buttonDirt == 1) {
-                    arrowButton.setImageResource(R.drawable.up_arrow);
-                    buttonDirt = 2;
-                    llButton.setVisibility(View.VISIBLE);
-                } else if (buttonDirt == 2) {
-                    arrowButton.setImageResource(R.drawable.down_arrow);
-                    buttonDirt = 1;
-                    llButton.setVisibility(View.GONE);
-                }
-            }
-        });
-
-
-        //全部
-        allImgButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                allImgButton.setImageResource(R.drawable.school_all_select);
-                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
-                boyButton.setImageResource(R.drawable.school_boy_unselect);
-                girlButton.setImageResource(R.drawable.school_girl_unselect);
-
-                mType = 3;
-                mPageNum = 1;
-
-                positionList.clear();
-                allSchoolMateList.clear();
-                getRecommends(3, mPageNum);
-            }
-        });
-
-        //同年级
-        sameGradeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                allImgButton.setImageResource(R.drawable.school_all_unselect);
-                sameGradeButton.setImageResource(R.drawable.school_same_grade_select);
-                boyButton.setImageResource(R.drawable.school_boy_unselect);
-                girlButton.setImageResource(R.drawable.school_girl_unselect);
-
-                mType = 4;
-                mPageNum = 1;
-
-                positionList.clear();
-                sameGradeList.clear();
-                getRecommends(4, mPageNum);
-            }
-        });
-
-        //男
-        boyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                allImgButton.setImageResource(R.drawable.school_all_unselect);
-                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
-                boyButton.setImageResource(R.drawable.school_boy_select);
-                girlButton.setImageResource(R.drawable.school_girl_unselect);
-
-                mType = 5;
-                mPageNum = 1;
-                positionList.clear();
-                boyList.clear();
-                getRecommends(5, mPageNum);
-            }
-        });
-
-        //女
-        girlButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                allImgButton.setImageResource(R.drawable.school_all_unselect);
-                sameGradeButton.setImageResource(R.drawable.school_same_grade_unselect);
-                boyButton.setImageResource(R.drawable.school_boy_unselect);
-                girlButton.setImageResource(R.drawable.school_gril_select);
-
-                mType = 6;
-                mPageNum = 1;
-                positionList.clear();
-                girlList.clear();
-                getRecommends(6, mPageNum);
-            }
-        });*/
     }
 
     //处理同年级同学
@@ -1003,7 +805,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         });
 
         allSchoolmateListView.setAdapter(sameGradeAdapter);
-
         sameGradeAdapter.notifyDataSetChanged();
     }
 
@@ -1031,7 +832,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         });
 
         allSchoolmateListView.setAdapter(boyAdapter);
-
         boyAdapter.notifyDataSetChanged();
     }
 
@@ -1089,7 +889,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {}
+                    public void onSubscribe(Disposable d) {
+                    }
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
@@ -1148,7 +949,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             freiendIcon.setBackgroundResource(R.drawable.add_friend_apply);
                         }
                     }
-                    addFriend(infoBean.getUin(),mType);
+                    addFriend(infoBean.getUin(), mType);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
@@ -1157,129 +958,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         cardDialog.show();
     }
 
-    //获取通讯录权限
-    private void getNumberBookAuthority() {
-
-        AndPermission.with(AddFriends.this)
-                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_CONTACTS)
-                .permission(Permission.CONTACTS)
-                .callback(mPermissionListener)
-                .rationale(new RationaleListener() {
-                    @Override
-                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-                        AndPermission.rationaleDialog(AddFriends.this, rationale).show();
-                    }
-                })
-                .start();
-    }
-
-    PermissionListener mPermissionListener = new PermissionListener() {
-        @Override
-        public void onSucceed(int requestCode, @NonNull List<String> grantPermissions) {
-            switch (requestCode) {
-                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
-                    Log.i(TAG, "onSucceed: 通讯录权限成功");
-                    getContacts();
-                    if (numberBookAuthoritySuccess){
-                        Log.i(TAG, "onSucceed: 通讯录有权限");
-                    }else {
-                        Log.i(TAG, "onSucceed: 通讯录无权限");
-                        AndPermission.defaultSettingDialog(AddFriends.this, 401).show();
-                    }
-                    break;
-            }
-
-        }
-
-        @Override
-        public void onFailed(int requestCode, @NonNull List<String> deniedPermissions) {
-            switch (requestCode) {
-                case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
-                    Log.i(TAG, "onFailed: 通讯录权限失败");
-                    getContacts();
-                    if (numberBookAuthoritySuccess){
-                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-                    }else {
-                        if (AndPermission.hasAlwaysDeniedPermission(AddFriends.this, deniedPermissions)) {
-                            if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
-                                AndPermission.defaultSettingDialog(AddFriends.this, 400).show();
-                            }
-
-                        }
-                    }
-                    break;
-            }
-        }
-    };
-
-    private void getContacts() {
-
-        if (Build.VERSION.SDK_INT >= 23
-                && AddFriends.this.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-                && AddFriends.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("无读取联系人权限");
-            return;
-        }
-
-        try {
-            Uri contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-            System.out.println("contactUri---" + contactUri);
-            if (contactUri != null) {
-
-                Log.i(TAG, "getContacts: 通讯录权限申请成功");
-
-            }
-            Cursor cursor = getContentResolver().query(contactUri,
-                    new String[]{"display_name", "sort_key", "contact_id", "data1"},
-                    null, null, "sort_key");
-            String contactName = "";
-            String contactNumber = "";
-            //String contactSortKey;
-            //int contactId;
-            while (cursor != null && cursor.moveToNext()) {
-                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-
-                com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null,contactName,contactNumber,null,1,null,null,null);
-                ContactsInfo tempContactsInfo = contactsInfoDao.queryBuilder()
-                        .where(ContactsInfoDao.Properties.OrgPhone.eq(contactName))
-                        .build().unique();
-                if (tempContactsInfo == null){
-                    contactsInfoDao.insert(contactsInfo);
-                }
-
-            }
-            cursor.close();//使用完后一定要将cursor关闭，不然会造成内存泄露等问题
-
-            if (!TextUtils.isEmpty(contactNumber)){
-                numberBookAuthoritySuccess = true;
-                //跳转到邀请好友界面
-                Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
-                startActivity(intent);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 400:
-                if (!numberBookAuthoritySuccess){
-                    getContacts();
-                }
-                Log.i(TAG, "onActivityResult: numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-                break;
-        }
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend){
+        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend) {
 
             startActivity(new Intent(AddFriends.this, MainActivity.class));
             return true;//不执行父类点击事件
