@@ -1,6 +1,8 @@
 package com.yeejay.yplay.userinfo;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -9,39 +11,28 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
-import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MyFriendsAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
-import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.FriendInfoDao;
-import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.OnGetAlphaIndexerAndSectionsListener{
-
+    
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
@@ -78,40 +69,78 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
 
         layoutTitle.setText(R.string.my_friends);
         mDataList = new ArrayList<>();
+        initDataFirst();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //调到其它页面再返回本页面时，重新从数据库中获取一次好友信息，保证好友信息是最新的；
         initData();
     }
 
-    private void initData(){
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        //保存listview当前滚动到的位置，下次进入listview界面时需要滚动到该位置;
+        View v = amfListView.getChildAt(0);
+        int top = (v == null) ? 0 : v.getTop();
+        SharedPreferences sharedPrefFriends = YplayApplication.getContext().
+                getSharedPreferences("friend_list_pos",
+                        Context.MODE_PRIVATE);
+        SharedPreferences.Editor editorsettings = sharedPrefFriends.edit();
+        editorsettings.putInt("pos", amfListView.getFirstVisiblePosition());
+        editorsettings.putInt("top", top);
+        editorsettings.commit();
+    }
+
+    private void initDataFirst() {
         String uin = String.valueOf(SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_UIN, 0));
         mDataList = friendInfoDao.queryBuilder()
-                    .where(FriendInfoDao.Properties.MyselfUin.eq(uin))
-                    .orderAsc(FriendInfoDao.Properties.SortKey)
-                    .list();
+                .where(FriendInfoDao.Properties.MyselfUin.eq(uin))
+                .orderAsc(FriendInfoDao.Properties.SortKey)
+                .list();
+
         if (mDataList != null && mDataList.size() > 0){
             friendNull.setVisibility(View.GONE);
             amfSideView.setVisibility(View.VISIBLE);
             mMyFriendsAdapter = new MyFriendsAdapter(this, mDataList);
             mMyFriendsAdapter.setOnGetAlphaIndeserAndSectionListener(this);
             amfListView.setAdapter(mMyFriendsAdapter);
+
+            amfListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (mDataList != null && mDataList.size() > 0){
+                        Intent intent = new Intent(ActivityMyFriends.this, ActivityFriendsInfo.class);
+                        intent.putExtra("yplay_friend_name", mDataList.get(position).getFriendName());
+                        intent.putExtra("yplay_friend_uin",mDataList.get(position).getFriendUin());
+                        startActivity(intent);
+                    }
+                }
+            });
+            amfSideView.setOnTouchingLetterChangedListener(new FriendSideListViewListener());
         }else {
             friendNull.setVisibility(View.VISIBLE);
             amfSideView.setVisibility(View.GONE);
         }
+    }
 
-        amfListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mDataList != null && mDataList.size() > 0){
-                    Intent intent = new Intent(ActivityMyFriends.this, ActivityFriendsInfo.class);
-                    intent.putExtra("yplay_friend_name", mDataList.get(position).getFriendName());
-                    intent.putExtra("yplay_friend_uin",mDataList.get(position).getFriendUin());
-                    startActivity(intent);
-                }
-            }
-        });
+    private void initData(){
+        View v = amfListView.getChildAt(0);
+        int top = (v == null) ? 0 : v.getTop();
 
-        amfSideView.setOnTouchingLetterChangedListener(new FriendSideListViewListener());
+        //防止数据有更新，因此重新从数据库中去一遍数据，通知adapter更新列表；
+        String uin = String.valueOf(SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        mDataList.clear();
+        List<FriendInfo> tempList = friendInfoDao.queryBuilder()
+                    .where(FriendInfoDao.Properties.MyselfUin.eq(uin))
+                    .orderAsc(FriendInfoDao.Properties.SortKey)
+                    .list();
+        mDataList.addAll(tempList);
+
+        mMyFriendsAdapter.notifyDataSetChanged();
     }
 
     @Override
