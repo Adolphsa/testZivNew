@@ -152,6 +152,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
             public void acceptClick(View v) {
                 System.out.println("邀请按钮被点击");
                 if (NetWorkUtil.isNetWorkAvailable(ActivityInviteFriend.this)){
+                    Log.i(TAG, "acceptClick: 11111");
                     Button button = (Button) v;
                     button.setBackgroundResource(R.drawable.friend_invitation_done);
                     button.setEnabled(false);
@@ -161,22 +162,28 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
                     MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                             .build().unique();
 
-                    if (myInfo != null && myInfo.getIsShowInviteDialogInfo() == 1){
+                    if (myInfo != null){
+                        int IsShowInviteDialogInfo = myInfo.getIsShowInviteDialogInfo();
+                        if (IsShowInviteDialogInfo == 0){
+                            myInfo.setIsShowInviteDialogInfo(1);
+                            myInfoDao.update(myInfo);
+                            DialogUtils.showInviteDialogInfo(ActivityInviteFriend.this,
+                                    getString(R.string.aif_message_invite_text));
+                        }
+
+                    }else {
+                        Log.i(TAG, "acceptClick: myinfo is null");
+                    }
+                    Log.i(TAG, "acceptClick: 222222");
+                    if (myInfo != null){
                         //邀请好友的请求
+
                         String phone = GsonUtil.GsonString(mDataList.get((int) v.getTag()).getPhone());
                         System.out.println("邀请的电话---" + phone);
                         String phoneStr = "[" + phone + "]";
                         String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
                         Log.i(TAG, "acceptClick: base64phone---" + base64phone);
                         invitefriendsbysms(base64phone);
-                    }else {
-                        if (myInfo != null){
-                            myInfo.setIsShowInviteDialogInfo(1);
-                            myInfoDao.update(myInfo);
-                        }
-
-                        DialogUtils.showInviteDialogInfo(ActivityInviteFriend.this,
-                                getString(R.string.aif_message_invite_text));
                     }
                 }else {
                     Toast.makeText(ActivityInviteFriend.this,"网络异常",Toast.LENGTH_SHORT).show();

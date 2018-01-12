@@ -482,7 +482,7 @@ public class FragmentAnswer extends BaseFragment {
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
             Log.i(TAG, "nextQuestionUpdate: 加载的图片---" + url);
-            Picasso.with(getActivity()).load(url).resize(186,186).into(frgansImg);
+            Picasso.with(getActivity()).load(url).into(frgansImg);
         }
         frgansQuestion.setText(questionBean.getQtext());
 

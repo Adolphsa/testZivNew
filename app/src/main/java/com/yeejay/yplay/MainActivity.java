@@ -75,6 +75,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import ch.qos.logback.core.rolling.helper.CompressionRunnable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -155,6 +156,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     boolean numberBookAuthoritySuccess = false;
     ContactsInfoDao contactsInfoDao;
+    Thread contactThread;
+    boolean threadIsExist = false;
 
     public int getmColor() {
         return mColor;
@@ -197,20 +200,13 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         ButterKnife.bind(this);
 
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
-
-//        Bundle bundle = getIntent().getExtras();
-//        if (bundle != null) {
-//            boolean uuidIsNull = bundle.getBoolean("uuid_is_null");
-//            if (uuidIsNull) {
-//                getNumberBookAuthority();
-//            }
-//        }
-
-        getNumberBookAuthority();
-
         dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+
+        insertUin();
+        contactThread = new Thread(new ContactsUpdateRunnable());
+        getNumberBookAuthority();
 
         initMainView();
         addFragment();
@@ -742,10 +738,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             switch (requestCode) {
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     Log.i(TAG, "onSucceed: 通讯录权限成功");
-                    getContacts();
+                    contactsAuthority();
                     break;
             }
-
         }
 
         @Override
@@ -753,31 +748,39 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             switch (requestCode) {
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     Log.i(TAG, "onFailed: 通讯录权限失败");
-                    getContacts();
+                    contactsAuthority();
                     break;
             }
 
-            if (numberBookAuthoritySuccess) {
-                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-            } else {
-                if (AndPermission.hasAlwaysDeniedPermission(MainActivity.this, deniedPermissions)) {
-                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
-                        AndPermission.defaultSettingDialog(MainActivity.this, 400).show();
-                    }
-
-                }
-            }
+//            if (numberBookAuthoritySuccess) {
+//                Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+//            } else {
+//                if (AndPermission.hasAlwaysDeniedPermission(MainActivity.this, deniedPermissions)) {
+//                    if (requestCode == REQUEST_CODE_PERMISSION_SINGLE_CONTACTS) {
+//                        AndPermission.defaultSettingDialog(MainActivity.this, 400).show();
+//                    }
+//
+//                }
+//            }
         }
     };
 
+    private void contactsAuthority(){
+
+        if (!threadIsExist && contactThread != null){
+            contactThread.start();
+        }
+
+    }
+
     private void getContacts() {
 
-        if (Build.VERSION.SDK_INT >= 23
-                && MainActivity.this.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-                && MainActivity.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("无读取联系人权限");
-            return;
-        }
+//        if (Build.VERSION.SDK_INT >= 23
+//                && MainActivity.this.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+//                && MainActivity.this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            System.out.println("无读取联系人权限");
+//            return;
+//        }
 
         try {
 
@@ -1065,6 +1068,30 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                 getContacts();
                 break;
             }
+        }
+    }
+
+
+    //插入uin到数据库
+    private void insertUin() {
+
+         int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
+         if (uin == 0) return;
+        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
+                .build().unique();
+
+        if (myInfo == null) {
+            MyInfo insert = new MyInfo(null, uin, 0, 0, 0, 0, 0);
+            myInfoDao.insert(insert);
+            System.out.println("插入数据库");
+        }
+    }
+
+    public class ContactsUpdateRunnable implements Runnable{
+
+        @Override
+        public void run() {
+            getContacts();
         }
     }
 

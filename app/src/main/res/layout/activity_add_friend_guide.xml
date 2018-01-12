@@ -111,6 +111,19 @@
                         />
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/aafg_list_is_null"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:text="你是你朋友圈中第一个发现我们的人！\n点“下一步”进入玩耍吧！"
+                    android:gravity="center"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="150dp"
+                    android:visibility="gone"
+                    />
+
             </RelativeLayout>
 
         </LinearLayout>
@@ -128,4 +141,5 @@
         android:layout_marginTop="10dp"
         android:layout_alignParentBottom="true"
         />
+
 </RelativeLayout>

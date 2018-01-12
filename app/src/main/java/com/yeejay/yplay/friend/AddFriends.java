@@ -631,7 +631,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
         recommendsMap.put("pageNum", pageNum);
-        recommendsMap.put("pageSize", 5);
+        recommendsMap.put("pageSize", 20);
         recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));

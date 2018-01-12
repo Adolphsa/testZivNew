@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yeejay.yplay.MainActivity;
@@ -60,6 +61,8 @@ public class AddFriendGuide extends AppCompatActivity {
     MesureListView aafgSameSchoolList;
     @BindView(R.id.aafg_same_school)
     LinearLayout aafgSameSchool;
+    @BindView(R.id.aafg_list_is_null)
+    TextView listIsNUll;
 
 
     @OnClick(R.id.aafd_back)
@@ -201,6 +204,14 @@ public class AddFriendGuide extends AppCompatActivity {
 
                             } else {
                                 aafgSameSchool.setVisibility(View.GONE);
+
+                                if (contactsList.size() == 0 && allSchoolMateList.size() == 0){
+                                    listIsNUll.setVisibility(View.VISIBLE);
+                                }else {
+                                    listIsNUll.setVisibility(View.GONE);
+                                }
+
+
                             }
 
                         }

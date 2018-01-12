@@ -374,7 +374,6 @@ public class Login extends BaseActivity {
         }
     }
 
-
     //登录
     private void login(final String phoneNumber, String code, long uuid, String deviceName, String os, String appVersion) {
         YPlayApiManger.getInstance().getZivApiService()
