@@ -2,7 +2,6 @@ package com.yeejay.yplay.message;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +21,7 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.LoadMoreView;
+import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.ImSession;
@@ -162,7 +162,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             messageAdapter = new MessageAdapter(getActivity(), mDataList, friendInfoDao);
         }
 
-        messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        messageRecyclerView.setLayoutManager(new MyLinearLayoutManager(getActivity()));
         messageRecyclerView.addItemDecoration(new DefaultItemDecoration(getResources().getColor(R.color.divider_color2)));
 
         messageRecyclerView.setSwipeItemClickListener(new SwipeItemClickListener() {

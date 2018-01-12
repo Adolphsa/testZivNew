@@ -189,7 +189,8 @@ public class ActivityNnonymityReply extends AppCompatActivity {
                 String questionText = questionInfoBean.getQtext();
 
                 if (!TextUtils.isEmpty(headUrl)) {
-                    Picasso.with(ActivityNnonymityReply.this).load(headUrl).into(nonQuesHeadImg);
+                    Picasso.with(ActivityNnonymityReply.this).load(headUrl)
+                            .resizeDimen(R.dimen.non_ques_head_img_width, R.dimen.non_ques_head_img_height).into(nonQuesHeadImg);
                     nonQuesText.setText(questionText);
                 }
 

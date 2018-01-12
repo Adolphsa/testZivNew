@@ -9,8 +9,8 @@
 
     <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/lui_header_img"
-        android:layout_width="122dp"
-        android:layout_height="122dp"
+        android:layout_width="@dimen/lui_header_img_width"
+        android:layout_height="@dimen/lui_header_img_height"
         android:scaleType="fitXY"
         app:shape="circle"
         android:src="@drawable/header_deafult"

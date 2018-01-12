@@ -27,6 +27,7 @@ import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
+import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
@@ -85,7 +86,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     FriendInfoDao friendInfoDao;
     List<DaoFriendFeeds> mDataList = new ArrayList<>();
     MainActivity mainActivity;
-    LinearLayoutManager linearLayoutMgr;
+    MyLinearLayoutManager linearLayoutMgr;
     DefaultItemDecoration defaultItemDecoration;
 
     int refreshOffset = 0;
@@ -123,7 +124,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         mDaoFriendFeedsDao = YplayApplication.getInstance().getDaoSession().getDaoFriendFeedsDao();
         friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
 
-        linearLayoutMgr = new LinearLayoutManager(getActivity());
+        linearLayoutMgr = new MyLinearLayoutManager(getActivity());
         ffSwipeRecyclerView.setLayoutManager(linearLayoutMgr);
 
         defaultItemDecoration = new DefaultItemDecoration(getResources().getColor(R.color.divider_color2));

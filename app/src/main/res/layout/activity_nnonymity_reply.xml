@@ -32,8 +32,8 @@
         
         <ImageView
             android:id="@+id/non_ques_head_img"
-            android:layout_width="186dp"
-            android:layout_height="186dp"
+            android:layout_width="@dimen/non_ques_head_img_width"
+            android:layout_height="@dimen/non_ques_head_img_height"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10.4dp"
             android:src="@drawable/header_deafult"
