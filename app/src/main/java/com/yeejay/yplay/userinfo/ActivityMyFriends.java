@@ -19,6 +19,7 @@ import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.FriendInfoDao;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -32,7 +33,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.OnGetAlphaIndexerAndSectionsListener{
-    
+    private static final String TAG = "ActivityMyFriends";
+
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
     @BindView(R.id.layout_title2)
@@ -120,6 +122,14 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
                     }
                 }
             });
+
+            SharedPreferences sharedPrefFriendsInfo = YplayApplication.getContext().
+                    getSharedPreferences("friend_list_pos", Context.MODE_PRIVATE);
+            int pos = sharedPrefFriendsInfo.getInt("pos", 0);
+            int top = sharedPrefFriendsInfo.getInt("top", 0);
+            LogUtils.getInstance().debug(TAG, " , pos = " + pos + " , top = " + top);
+            amfListView.setSelectionFromTop(pos, top);
+
             amfSideView.setOnTouchingLetterChangedListener(new FriendSideListViewListener());
         }else {
             friendNull.setVisibility(View.VISIBLE);
