@@ -62,6 +62,7 @@ import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
 import com.yeejay.yplay.friend.ActivityFriendsInfo;
 import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.ImMsg;
 import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
@@ -302,6 +303,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     String sessionId;
     ImMsgDao imMsgDao;
     ImSessionDao imSessionDao;
+    FriendInfoDao friendInfoDao;
     int dataOffset = 0;
     List<ImMsg> mDataList;
     ChatAdapter chatAdapter;
@@ -335,6 +337,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         mDbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+        friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
         uin = (int) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, (int) 0);
         myselfNickName = (String) SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_NICK_NAME, "");
 
@@ -442,6 +445,17 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         if (TextUtils.isEmpty(nickName) && !TextUtils.isEmpty(tempNickname)) {
             nickName = tempNickname;
         }
+
+        if (status == 2){
+            FriendInfo friendInfo = friendInfoDao.queryBuilder()
+                    .where(FriendInfoDao.Properties.MyselfUin.eq(String.valueOf(uin)))
+                    .where(FriendInfoDao.Properties.FriendUin.eq(mSender))
+                    .build().unique();
+            if (friendInfo != null){
+                nickName = friendInfo.getFriendName();
+            }
+        }
+
         layoutTitle2.setText(nickName);
         layoutSetting.setVisibility(View.VISIBLE);
         layoutSetting.setImageResource(R.drawable.message_more);
@@ -615,6 +629,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         if (status == 1 && uin != Integer.valueOf(imMsg.getSender())) {
             layoutTitle2.setText(tempNickname2);
+            acwImgChoice.setVisibility(View.VISIBLE);
         }
 
         if (1 == status && (uin != Integer.valueOf(imMsg.getSender())) && mDataList.size() == 2) {

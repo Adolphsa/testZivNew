@@ -166,6 +166,9 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
 
         @Override
         public void onTouchingLetterChanged(String s) {
+            if (alphaIndexer == null)
+                return;
+
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
                 amfListView.setSelection(position);

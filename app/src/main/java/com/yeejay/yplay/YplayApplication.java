@@ -31,7 +31,7 @@ public class YplayApplication extends Application {
 
     private static YplayApplication instance;
 
-    private DaoMaster.DevOpenHelper mHelper;
+//    private DaoMaster.DevOpenHelper mHelper;
     private DataBaseHelper dataBaseHelper;
     private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
@@ -104,12 +104,9 @@ public class YplayApplication extends Application {
 
     private void setDatabase() {
 
-//        dataBaseHelper = new DataBaseHelper(this,"yplay-db");
-
-        mHelper = new DaoMaster.DevOpenHelper(this,"yplay-db", null);
-        db = mHelper.getWritableDatabase();
-        mDaoMaster = new DaoMaster(db);
-        mDaoSession = mDaoMaster.newSession();
+        dataBaseHelper = new DataBaseHelper(this,"yplay-db");
+        mDaoMaster = DataBaseHelper.getDaoMaster(this);
+        mDaoSession = DataBaseHelper.getDaoSession(this);
     }
 
     public DaoSession getDaoSession() {

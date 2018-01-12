@@ -137,7 +137,7 @@ public class WaitInviteAdapter extends BaseAdapter implements View.OnClickListen
             holder.afiFirstAlpha.setText(contentList.get(position).getSortKey());
         }
 
-        String nickName = contentList.get(position).getName();
+        String nickName = contentList.get(position).getName().trim();
         if (!TextUtils.isEmpty(nickName)){
             holder.afItemFamilyName.setText(nickName.substring(0,1));
         }

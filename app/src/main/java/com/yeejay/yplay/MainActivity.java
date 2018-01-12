@@ -61,6 +61,7 @@ import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.PushUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -563,10 +564,12 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                             if (dataBaseFriendInfo == null) {
 //                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
                                 dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));
+                                LogUtils.getInstance().error("insert friendInfo---" + friendInfo.toString());
                             } else {
                                 Log.i(TAG, "onNext: updateFriendInfo---" + dataBaseFriendInfo);
 
                                 dbHelper.updateFriendInfo(dataBaseFriendInfo, friendInfo);
+                                LogUtils.getInstance().error("update friendInfo---" + friendInfo.toString());
                             }
                         }
                         if ((mPageNum * mPageSize) >= total) {
@@ -810,7 +813,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                         contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
 
                         if (contactNumber.length() > 2){
-//                            Log.i(TAG, "getContacts: contactsNumber---" + contactNumber);
                             String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
                             com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
                             currentContactsList.add(contactsInfo);
@@ -878,6 +880,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                         .where(ContactsInfoDao.Properties.OrgPhone.eq(str))
                         .build().unique();
                 if (contactsInfo != null) {
+                    LogUtils.getInstance().error("删除通讯录好友---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
                     contactsInfoDao.delete(contactsInfo);
                     deleteContactsList.add(new com.yeejay.yplay.model.ContactsInfo(contactsInfo.getName(), contactsInfo.getOrgPhone()));
                 }
@@ -889,7 +892,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         if (addList.size() > 0) {
             int hadleType = 3;
             for (String str : addList) {
-                Log.i(TAG, "compareContacts: 要增加元素---" + str);
+
                 for (int i = 0; i < currentSize; i++) {
                     com.yeejay.yplay.greendao.ContactsInfo contactsInfo = currentContactsList.get(i);
                     if (str.equals(contactsInfo.getOrgPhone())) {
@@ -898,11 +901,12 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                                 .where(ContactsInfoDao.Properties.OrgPhone.eq(contactsInfo.getOrgPhone()))
                                 .build().unique();
                         if (tempContacts == null) {
+                            Log.i(TAG, "compareContacts: addContactsInfo---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
+                            LogUtils.getInstance().error("增加通讯录好友---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
                             contactsInfoDao.insert(new ContactsInfo(null, contactsInfo.getName(), contactsInfo.getOrgPhone(), null, 1, contactsInfo.getSortKey(), null, null));
                         }
                         //加入到addList
                         addContactsList.add(new com.yeejay.yplay.model.ContactsInfo(contactsInfo.getName(), contactsInfo.getOrgPhone()));
-                        Log.i(TAG, "compareContacts: addContactsInfo---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
                     }
                 }
             }
@@ -910,8 +914,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             //更新通讯录
             dealBySubList(addContactsList, 100, hadleType);
         }
-
-
     }
 
     /**
@@ -1047,6 +1049,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                     contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());
                 }
                 contactsInfoDao.update(contactsInfo);
+                LogUtils.getInstance().error("更新通讯录好友---" + contactsInfo.getNickName() + "---" + contactsInfo.getPhone());
             }
         }
     }

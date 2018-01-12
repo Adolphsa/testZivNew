@@ -14,6 +14,7 @@ import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -123,6 +124,7 @@ public class ContactsService extends Service {
                     contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());
                 }
                 contactsInfoDao.update(contactsInfo);
+                LogUtils.getInstance().error("更新通讯录好友---" + infosBean.getNickName() + "---" + infosBean.getHeadImgUrl());
             }
         }
     }

@@ -107,11 +107,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     @OnClick(R.id.layout_title_back2)
     public void back(View view) {
-
-//        if (isFromAddFriend) {
-//            startActivity(new Intent(AddFriends.this, MainActivity.class));
-//        }
-
         finish();
     }
 
@@ -262,11 +257,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
-
-//        Bundle bundle = getIntent().getExtras();
-//        if (bundle != null) {
-//            isFromAddFriend = bundle.getBoolean("from_add_friend_guide");
-//        }
 
         initViewControls();
         initListAndAdapter();

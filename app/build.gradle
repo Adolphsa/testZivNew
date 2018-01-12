@@ -59,7 +59,7 @@ android {
     productFlavors {}
 
     greendao {
-        schemaVersion 1
+        schemaVersion 4
         targetGenDir 'src/main/java'
         daoPackage 'com.yeejay.yplay.greendao'
     }

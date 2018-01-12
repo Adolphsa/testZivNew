@@ -33,6 +33,7 @@ import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,6 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
     private MyInfoDao myInfoDao;
     private MyInfo myInfo;
     private ContactsInfoDao contactsInfoDao;
-    private ContactsInfo contactsInfo;
 
     @OnClick(R.id.aif_tip_close)
     public void tipClose() {
@@ -99,9 +99,11 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         myInfo = myInfoDao.queryBuilder()
                 .where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
-        int isInviteTipShow = myInfo.getIsInviteTipShow();
-        if (0 == isInviteTipShow) {
-            aifTipLl.setVisibility(View.VISIBLE);
+        if (myInfo != null){
+            int isInviteTipShow = myInfo.getIsInviteTipShow();
+            if (0 == isInviteTipShow) {
+                aifTipLl.setVisibility(View.VISIBLE);
+            }
         }
 
         mDataList = new ArrayList<>();
@@ -118,13 +120,17 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
     private void init() {
 
-        List<ContactsInfo> tempDataList = contactsInfoDao.loadAll();
-        if (tempDataList == null || tempDataList.size() == 0)
-            return;
-
         mDataList = contactsInfoDao.queryBuilder()
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .list();
+
+        if (mDataList == null || mDataList.size() == 0){
+            Log.i(TAG, "init: mDataList为空");
+            aifSideView.setVisibility(View.GONE);
+        }else {
+            Log.i(TAG, "init: mDataList不为空---" + mDataList.size());
+            aifSideView.setVisibility(View.VISIBLE);
+        }
 
         waitInviteAdapter = new WaitInviteAdapter(ActivityInviteFriend.this,
                 new WaitInviteAdapter.hideCallback() {
@@ -176,8 +182,6 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
                     Toast.makeText(ActivityInviteFriend.this,"网络异常",Toast.LENGTH_SHORT).show();
                 }
 
-
-
             }
         }, mDataList);
 
@@ -186,52 +190,6 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         aifListView.setEmptyView(emptyView);
         aifListView.setAdapter(waitInviteAdapter);
     }
-
-    /*
-    //拉取等待邀请
-    private void getRecommends(final int type, int pageNum) {
-
-        Map<String, Object> recommendsMap = new HashMap<>();
-        recommendsMap.put("type", type);
-        recommendsMap.put("pageNum", pageNum);
-        recommendsMap.put("uin", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, 0));
-        recommendsMap.put("token", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        recommendsMap.put("ver", SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getSchoolmates(recommendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-                        System.out.println("等待邀请---" + getRecommendsRespond.toString());
-                        if (getRecommendsRespond.getCode() == 0) {
-                            List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList = getRecommendsRespond.getPayload().getFriends();
-                            mDataList.addAll(tempList);
-                            init(mDataList);
-                        } else {
-                            //如果服务器返回失败;
-                            aifListView.setAdapter(null);
-                        }
-                        aifPtfRefresh.finishLoadMore();
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("等待邀请异常---" + e.getMessage());
-                        aifPtfRefresh.finishLoadMore();
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }*/
 
     //通过短信邀请好友
     private void invitefriendsbysms(String friends) {

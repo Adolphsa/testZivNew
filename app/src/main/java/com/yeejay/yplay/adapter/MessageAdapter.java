@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMElemType;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.model.MsgContent1;
 import com.yeejay.yplay.model.MsgContent2;
@@ -42,10 +44,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
     Context context;
     List<ImSession> imSessionList;
+    FriendInfoDao friendInfoDao;
 
-    public MessageAdapter(Context context, List<ImSession> imSessionList) {
+    public MessageAdapter(Context context, List<ImSession> imSessionList, FriendInfoDao friendInfoDao) {
         this.context = context;
         this.imSessionList = imSessionList;
+        this.friendInfoDao = friendInfoDao;
     }
 
     @Override
@@ -135,7 +139,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
                     holder.msgItemName.setTextColor(context.getResources().getColor(R.color.girl_color));
                 }
 
-                holder.msgItemName.setText(gradeAndSchool + genderStr);
+                holder.msgItemName.setText("收到" + gradeAndSchool + genderStr);
                 holder.msgItemCuo.setVisibility(View.VISIBLE);
                 holder.msgItemContent.setText("来自：投票");
                 holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
@@ -171,7 +175,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
                     holder.msgItemName.setTextColor(context.getResources().getColor(R.color.girl_color));
                 }
 
-                holder.msgItemName.setText(gradeAndSchool + genderStr);
+                holder.msgItemName.setText("收到" + gradeAndSchool + genderStr);
                 holder.msgItemCuo.setVisibility(View.VISIBLE);
                 holder.msgItemContent.setText(content);
                 holder.msgItemTvTime.setText(YplayTimeUtils.format(imSession.getMsgTs()*1000));
@@ -227,16 +231,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
         if (msgType == TIMElemType.Image.ordinal()){
             msgContent = "[图片]";
         }
+
         String headerUrl = imSession.getHeaderImgUrl();
         String nickName = imSession.getNickName();
         long msgTime = imSession.getMsgTs();
+        String chater = imSession.getChater();
+        int uin = imSession.getUin();
+        FriendInfo friendInfo = friendInfoDao.queryBuilder()
+                .where(FriendInfoDao.Properties.MyselfUin.eq(String.valueOf(uin)))
+                .where(FriendInfoDao.Properties.FriendUin.eq(Integer.valueOf(chater)))
+                .build().unique();
+        if (friendInfo != null){
+            headerUrl = friendInfo.getFriendHeadUrl();
+            nickName = friendInfo.getFriendName();
+        }
         //String msgTime = YplayTimeUtils.format(imSession.getMsgTs());
 
         if (TextUtils.isEmpty(headerUrl)) {
             holder.msgItemHeaderImg.setImageResource(R.drawable.header_deafult);
         } else {
-            Picasso.with(context).load(headerUrl).into(holder.msgItemHeaderImg);
-
+            Picasso.with(context).load(headerUrl)
+                    .resize(50,50)
+                    .into(holder.msgItemHeaderImg);
         }
         holder.msgItemName.setText(nickName);
         holder.msgItemName.setTextColor(context.getResources().getColor(R.color.text_color_gray));

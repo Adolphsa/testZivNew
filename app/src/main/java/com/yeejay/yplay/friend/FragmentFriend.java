@@ -30,6 +30,8 @@ import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
@@ -80,6 +82,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     FriendFeedsAdapter feedsAdapter;
     DaoFriendFeedsDao mDaoFriendFeedsDao;
+    FriendInfoDao friendInfoDao;
     List<DaoFriendFeeds> mDataList = new ArrayList<>();
     MainActivity mainActivity;
     LinearLayoutManager linearLayoutMgr;
@@ -118,6 +121,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         mainActivity = (MainActivity) getActivity();
 
         mDaoFriendFeedsDao = YplayApplication.getInstance().getDaoSession().getDaoFriendFeedsDao();
+        friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
 
         linearLayoutMgr = new LinearLayoutManager(getActivity());
         ffSwipeRecyclerView.setLayoutManager(linearLayoutMgr);
@@ -128,7 +132,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         if(feedsAdapter == null) {
             feedsAdapter = new FriendFeedsAdapter(getActivity(),
                     mDataList,
-                    mDaoFriendFeedsDao);
+                    friendInfoDao);
         }
         ffSwipeRecyclerView.setAdapter(feedsAdapter);
         feedsAdapter.addRecycleImageListener(this);

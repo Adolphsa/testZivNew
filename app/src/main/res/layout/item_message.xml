@@ -32,7 +32,7 @@
         android:id="@+id/msg_item_cuo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="送钻"
+        android:text="钻石"
         android:layout_toRightOf="@+id/msg_item_name"
         android:textColor="@color/text_color_gray"
         android:textSize="18sp"

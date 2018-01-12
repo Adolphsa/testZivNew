@@ -18,6 +18,7 @@
         android:divider="@color/feeds_search_color"
         android:dividerHeight="0.3dp"
         android:layout_below="@+id/amf_title"
+        android:scrollbars="none"
         />
 
     <ImageView

@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.utils.YplayTimeUtils;
 
 import java.util.List;
@@ -38,15 +40,16 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
 
     private OnRecycleImageListener listener;
     private Context mContext;
-    private DaoFriendFeedsDao mDaoFriendFeedsDao;
+//    private DaoFriendFeedsDao mDaoFriendFeedsDao;
+    private FriendInfoDao friendInfoDao;
     private List<DaoFriendFeeds> daoFriendFeedsList;
 
     public FriendFeedsAdapter(Context context,
                               List<DaoFriendFeeds> daoFriendFeedsList,
-                              DaoFriendFeedsDao mDaoFriendFeedsDao) {
+                              FriendInfoDao friendInfoDao) {
         this.mContext = context;
         this.daoFriendFeedsList = daoFriendFeedsList;
-        this.mDaoFriendFeedsDao = mDaoFriendFeedsDao;
+        this.friendInfoDao = friendInfoDao;
     }
 
     @Override
@@ -61,8 +64,20 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         DaoFriendFeeds daoFriendFeeds = daoFriendFeedsList.get(position);
 //        System.out.println("position---" + position + ",是否已读---" + daoFriendFeeds.getIsReaded());
 
-        holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         String url = daoFriendFeeds.getFriendHeadImgUrl();
+        String nickName = daoFriendFeeds.getFriendNickName();
+
+        int friendUin = daoFriendFeeds.getFriendUin();
+        int uin = daoFriendFeeds.getUin();
+        FriendInfo friendInfo = friendInfoDao.queryBuilder()
+                .where(FriendInfoDao.Properties.MyselfUin.eq(String.valueOf(uin)))
+                .where(FriendInfoDao.Properties.FriendUin.eq(friendUin))
+                .build().unique();
+        if (friendInfo != null){
+            url = friendInfo.getFriendHeadUrl();
+            nickName = friendInfo.getFriendName();
+        }
+        holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         holder.ffItemHeaderImg.setTag(url);
 
         if (!TextUtils.isEmpty(url)){
@@ -78,8 +93,7 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
             }
         });
 
-
-        holder.ffItemName.setText(daoFriendFeeds.getFriendNickName());
+        holder.ffItemName.setText(nickName);
         holder.ffItemTvTime.setText(YplayTimeUtils.format(daoFriendFeeds.getTs()));
         holder.ffItemQuestionContent.setText(daoFriendFeeds.getQtext());
         if (daoFriendFeeds.getVoteFromGender() == 1){//男

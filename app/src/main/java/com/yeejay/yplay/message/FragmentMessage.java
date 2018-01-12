@@ -23,6 +23,7 @@ import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.UpRefreshView;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -43,7 +44,7 @@ import butterknife.OnClick;
  * Created by Administrator on 2017/10/26.
  */
 
-public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.SessionUpdateListener{
+public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.SessionUpdateListener {
 
     private static final String TAG = "FragmentMessage";
 
@@ -65,7 +66,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     ImageView messageNull;
 
     @OnClick(R.id.frg_user_info)
-    public void userInfo(View view){
+    public void userInfo(View view) {
         System.out.println("跳转到我的资料");
         startActivity(new Intent(getActivity(), ActivityMyInfo.class));
     }
@@ -75,6 +76,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     MessageAdapter messageAdapter;
     List<ImSession> mDataList = new ArrayList<>();
     ImSessionDao imSessionDao;
+    FriendInfoDao friendInfoDao;
     private LoadMoreView loadMoreView;
     private UpRefreshView upRefreshView;
     private RelativeLayout rlRefreshLayout;
@@ -95,29 +97,44 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         MessageUpdateUtil.getMsgUpdateInstance().setSessionUpdateListener(this);
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+        friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
 
         initMessageView();
     }
 
-    private void loadMoreData(){
+    private void loadMoreData() {
 
         Log.d("msg", "begin loadMoreData, dataOffset--" + dataOffset);
 
         List<ImSession> tempImSessinList = queryDatabaseForImsession(dataOffset++);
 
-        if (tempImSessinList != null && tempImSessinList.size() > 0){
+        if (tempImSessinList != null && tempImSessinList.size() > 0) {
 
-            for(int i = 0; i < tempImSessinList.size(); ++i){
+            for (int i = 0; i < tempImSessinList.size(); ++i) {
                 Log.d("msg", "queryFromDatabase index " + i + ", info--" + tempImSessinList.get(i).getSessionId() + ",content--" + tempImSessinList.get(i).getMsgContent());
+
+                boolean find = false;
+                String curSessionId = tempImSessinList.get(i).getSessionId();
+
+                for(int j = 0; j < mDataList.size(); j++){
+                    if(curSessionId.equals(mDataList.get(j).getSessionId())){
+                        find = true;
+                        break;
+                    }
+                }
+
+                if(!find){
+                    mDataList.add(tempImSessinList.get(i));
+                }
             }
 
-            mDataList.addAll(tempImSessinList);
+            //mDataList.addAll(tempImSessinList);
 
             Log.d("msg", "loadMoreData, allDataSize--" + mDataList.size() + " fromDataBase size--" + tempImSessinList.size());
 
             //底部刷新的时候才需要将新加载的页面外露一部分
             //dataOffset == 1表示顶部更新，>1表示底部更新
-            if(dataOffset > 1) {
+            if (dataOffset > 1) {
                 if (tempImSessinList.size() >= 2) {
                     Log.d("msg", "smoothScroll to position---" + (mDataList.size() - tempImSessinList.size() + 1) + "  mDatalist.size()---" + mDataList.size());
                     messageRecyclerView.smoothScrollToPosition(mDataList.size() - tempImSessinList.size() + 1);
@@ -128,7 +145,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             }
             messageAdapter.notifyDataSetChanged();
 
-        }else {
+        } else {
             dataOffset--;
             //Toast.makeText(getActivity(),"没有更多数据了",Toast.LENGTH_LONG).show();
             //没有更多数据了
@@ -139,10 +156,10 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         messageRefreshView.finishLoadMore();
     }
 
-    private void initMessageView(){
+    private void initMessageView() {
 
-        if(messageAdapter == null){
-            messageAdapter = new MessageAdapter(getActivity(),mDataList);
+        if (messageAdapter == null) {
+            messageAdapter = new MessageAdapter(getActivity(), mDataList, friendInfoDao);
         }
 
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -160,8 +177,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 String nickName = imSession.getNickName();
 
                 imSession.setUnreadMsgNum(0);
-                View tmp = (View)itemView.findViewById(R.id.msg_item_new_msg);
-                if(tmp != null){
+                View tmp = (View) itemView.findViewById(R.id.msg_item_new_msg);
+                if (tmp != null) {
                     tmp.setVisibility(View.GONE);
                 }
 
@@ -169,22 +186,22 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 int uin = (int) SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, (int) 0);
 
                 Intent intent = new Intent();
-                intent.putExtra("yplay_sessionId",sessionId);
-                intent.putExtra("yplay_session_status",status);
-                intent.putExtra("yplay_sender",sender);
-                intent.putExtra("yplay_msg_content",msgContent);
-                intent.putExtra("yplay_nick_name",nickName);
+                intent.putExtra("yplay_sessionId", sessionId);
+                intent.putExtra("yplay_session_status", status);
+                intent.putExtra("yplay_sender", sender);
+                intent.putExtra("yplay_msg_content", msgContent);
+                intent.putExtra("yplay_nick_name", nickName);
 
                 Log.d(TAG, "sessionId: " + sessionId);
 
-                if (status == 0){
-                    intent.setClass(getActivity(),ActivityNnonymityReply.class);
-                }else if (status == 1 && !TextUtils.isEmpty(sender) && sender.equals(String.valueOf(uin))){
-                    intent.setClass(getActivity(),ActivityChatWindow.class);
-                }else if (status == 1 && !TextUtils.isEmpty(sender) && !sender.equals(String.valueOf(uin))){
-                    intent.setClass(getActivity(),ActivityChatWindow.class);
-                }else if (status == 2){
-                    intent.setClass(getActivity(),ActivityChatWindow.class);
+                if (status == 0) {
+                    intent.setClass(getActivity(), ActivityNnonymityReply.class);
+                } else if (status == 1 && !TextUtils.isEmpty(sender) && sender.equals(String.valueOf(uin))) {
+                    intent.setClass(getActivity(), ActivityChatWindow.class);
+                } else if (status == 1 && !TextUtils.isEmpty(sender) && !sender.equals(String.valueOf(uin))) {
+                    intent.setClass(getActivity(), ActivityChatWindow.class);
+                } else if (status == 2) {
+                    intent.setClass(getActivity(), ActivityChatWindow.class);
                 }
 
                 System.out.println("message----sessionId---" + sessionId);
@@ -194,10 +211,10 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         messageRecyclerView.setAdapter(messageAdapter);
 
-        if(loadMoreView == null) {
+        if (loadMoreView == null) {
             loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
-        if(upRefreshView == null) {
+        if (upRefreshView == null) {
             upRefreshView = new UpRefreshView(getActivity());
             rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
             rlRefreshLayout.setBackgroundColor(getActivity().getResources().
@@ -217,24 +234,24 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 loadMoreData();
                 //messageRefreshView.finishLoadMore();
             }
-            });
+        });
     }
 
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
-        if (isVisibleToUser){
+        if (isVisibleToUser) {
 
-            System.out.println("FragmentMessage---消息可见" + "--dataOffset--"+ dataOffset);
+            System.out.println("FragmentMessage---消息可见" + "--dataOffset--" + dataOffset);
             frgEdit.setVisibility(View.GONE);
 
-            if(dataOffset == 0) {
+            if (dataOffset == 0) {
                 loadMoreData();
-            }else {
-                System.out.println("FragmentMessage---消息可见" + "--allDataSize--"+ mDataList.size());
+            } else {
+                System.out.println("FragmentMessage---消息可见" + "--allDataSize--" + mDataList.size());
             }
 
-            MainActivity mainActivity = (MainActivity)getActivity();
+            MainActivity mainActivity = (MainActivity) getActivity();
             mainActivity.setMessageIcon();
 
             setFriendCount();
@@ -244,16 +261,16 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     }
 
     //从数据库中查找会话列表
-    private List<ImSession> queryDatabaseForImsession(int pageNumber){
+    private List<ImSession> queryDatabaseForImsession(int pageNumber) {
 
-        Log.i(TAG, "queryDatabaseForImsession: uin---" + uin + " ---pageNum---" +pageNumber);
+        Log.i(TAG, "queryDatabaseForImsession: uin---" + uin + " ---pageNum---" + pageNumber);
 
-        if(pageNumber < 0){
+        if (pageNumber < 0) {
             return null;
         }
 
         long ts = 3000000000000L;
-        if(mDataList.size()>0) {
+        if (mDataList.size() > 0) {
             ts = mDataList.get(mDataList.size() - 1).getMsgTs();
         }
 
@@ -266,7 +283,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     }
 
     //更新UI 判断是否数据为空
-    private void updateUi(){
+    private void updateUi() {
 
         if (messageNull != null) {
             if (mDataList.size() > 0) {
@@ -280,50 +297,52 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
     @Override
     public void onSessionUpdate(ImSession imSession) {
-        String sessionId =  imSession.getSessionId();
+        String sessionId = imSession.getSessionId();
         Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId---" + sessionId + ", uin--" + imSession.getUin());
 
-        if(uin != imSession.getUin()){
+        if (uin != imSession.getUin()) {
             return;
         }
 
         int idx = 0;
         boolean find = false;
 
-        for(; idx < mDataList.size();++idx){
-            if(mDataList.get(idx).getSessionId() == sessionId){
+        for (; idx < mDataList.size(); ++idx) {
+            if (mDataList.get(idx).getSessionId() == sessionId) {
                 find = true;
                 break;
             }
         }
 
-        if(find){
-            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId已经存在回话列表中--" + sessionId );
+        if (find) {
+            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId已经存在回话列表中--" + sessionId);
             mDataList.remove(idx);
-            mDataList.add(0,imSession);
-        }else{
-            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId是新回话--" + sessionId );
-            mDataList.add(0,imSession);
+            mDataList.add(0, imSession);
+        } else {
+            Log.d(TAG, "会话列表更新了onSessionUpdate: sessionId是新回话--" + sessionId);
+            mDataList.add(0, imSession);
+            if (messageNull.isShown()) {
+                messageNull.setVisibility(View.GONE);
+            }
         }
-
         messageAdapter.notifyDataSetChanged();
     }
 
-    public void setFriendCount(){
+    public void setFriendCount() {
 
         MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         int uin = (int) SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, (int) 0);
         MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
                 .build().unique();
-        if (myInfo != null){
+        if (myInfo != null) {
             int addFriendNum = myInfo.getAddFriendNum();
-            if (addFriendNum == 0){
-                if (addFriendCount != null){
+            if (addFriendNum == 0) {
+                if (addFriendCount != null) {
                     addFriendCount.setText("");
                 }
 
-            }else {
-                if (addFriendCount != null){
+            } else {
+                if (addFriendCount != null) {
                     addFriendCount.setText(addFriendNum + "");
                 }
 

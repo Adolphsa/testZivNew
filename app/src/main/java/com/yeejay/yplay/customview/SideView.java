@@ -91,7 +91,7 @@ public class SideView extends View{
         switch (action) {
             case MotionEvent.ACTION_DOWN://监听按下事件
                 if (oldChoose != c && listener != null) {//如果此次点击的字母数组下标不等于上一次的且已经注册了监听事件的,
-                    if (c >= 0 && c <= b.length) {//并且点击得到数组下标在字母数组范围内的，我们就将此时的字母回调出去
+                    if (c >= 0 && c < b.length) {//并且点击得到数组下标在字母数组范围内的，我们就将此时的字母回调出去
                         listener.onTouchingLetterChanged(b[c]);//我们就将此时的对应在字母数组中的字母回调出去
                         choose = c;//并且更新当前选中的字母下标存储在choose变量中
                         invalidate();//最后通知canvas重新绘制
@@ -101,7 +101,7 @@ public class SideView extends View{
                 break;
             case MotionEvent.ACTION_MOVE://监听移动事件,因为按下的时候已经把背景showBkg设置true,这里就不需要重新设置,其他操作与按下的事件一致
                 if (oldChoose != c && listener != null) {
-                    if (c >= 0 && c <= b.length) {
+                    if (c >= 0 && c < b.length) {
                         listener.onTouchingLetterChanged(b[c]);
                         choose = c;
                         invalidate();

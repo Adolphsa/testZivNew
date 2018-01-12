@@ -36,6 +36,7 @@ import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.BaseUtils;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -346,6 +347,7 @@ public class LoginAuthorization extends BaseActivity {
                             String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
                             com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
                             contactsInfoDao.insert(contactsInfo);
+                            LogUtils.getInstance().error("插入通讯录好友---" + contactName + "---" + contactNumber);
                         }
                     }
                 }

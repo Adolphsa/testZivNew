@@ -210,12 +210,6 @@ public class ActivityFriendsInfo extends BaseActivity {
         }
     }
 
-    private static class ViewHolder {
-        ImageView itemAmiImg;
-        ImageView itemAmiImg2;
-        TextView itemAmiText;
-    }
-
     private void showNormalDialog() {
 
         final AlertDialog.Builder normalDialog =

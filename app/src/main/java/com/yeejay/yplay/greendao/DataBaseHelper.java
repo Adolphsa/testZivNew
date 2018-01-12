@@ -3,6 +3,8 @@ package com.yeejay.yplay.greendao;
 import android.content.Context;
 import android.util.Log;
 
+import com.yeejay.yplay.utils.LogUtils;
+
 import org.greenrobot.greendao.database.Database;
 
 /**
@@ -26,9 +28,13 @@ public class DataBaseHelper extends DaoMaster.DevOpenHelper{
     public void onUpgrade(Database db, int oldVersion, int newVersion) {
         super.onUpgrade(db, oldVersion, newVersion);
         Log.i("version", oldVersion + "---先前和更新之后的版本---" + newVersion);
+        LogUtils.getInstance().error(oldVersion + "---先前和更新之后的版本---" + newVersion);
         if (oldVersion < newVersion) {
             Log.i("version", oldVersion + "---先前和更新之后的版本---" + newVersion);
-            MigrationHelper.getInstance().migrate(db, DaoFriendFeedsDao.class,
+            MigrationHelper.getInstance().migrate(db,
+                    ContactsInfoDao.class,
+                    DaoFriendFeedsDao.class,
+                    FriendInfoDao.class,
                     ImMsgDao.class,
                     ImSessionDao.class,
                     MyInfoDao.class);
