@@ -42,10 +42,6 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         @Override
         public void onClick(View v) {
             acceptCallback.acceptClick(v);
-            if (NetWorkUtil.isNetWorkAvailable(context)){
-                holder.afBtnHide.setVisibility(View.GONE);
-            }
-
         }
     };
 
@@ -91,8 +87,9 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+
         if (convertView == null) {
-            convertView = View.inflate(context, R.layout.item_add_friends, null);
+            convertView = View.inflate(context, R.layout.item_accept_item, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         }else {
@@ -110,7 +107,6 @@ public class FriendsDetailAdapter extends BaseAdapter implements View.OnClickLis
         holder.afItemName.setText(contentList.get(position).getFromNickName());
         holder.afBtnHide.setOnClickListener(hideListener);
         holder.afBtnHide.setTag(position);
-        holder.afBtnHide.setVisibility(View.VISIBLE);
         int status = contentList.get(position).getStatus();
         if (status == 1){
             holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);

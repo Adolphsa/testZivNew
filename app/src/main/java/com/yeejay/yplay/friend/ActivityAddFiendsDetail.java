@@ -119,6 +119,13 @@ public class ActivityAddFiendsDetail extends BaseActivity {
             public void acceptClick(View v) {
                 System.out.println("接受按钮被点击");
                 Button button = (Button) v;
+                View parent = (View)v.getParent();
+                if (parent != null) {
+                    Button cancelBtn = (Button)parent.findViewById(R.id.af_btn_hide);
+                    if (cancelBtn != null) {
+                        cancelBtn.setVisibility(View.GONE);
+                    }
+                }
 
                 if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)){
                     button.setBackgroundResource(R.drawable.be_as_friends);
@@ -352,7 +359,6 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                                     BaseUtils.getSortKey(msgsBean.getFromNickName()),
                                     String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
                             Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
-
                         }
                     }
 
