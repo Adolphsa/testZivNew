@@ -127,7 +127,7 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
                     getSharedPreferences("friend_list_pos", Context.MODE_PRIVATE);
             int pos = sharedPrefFriendsInfo.getInt("pos", 0);
             int top = sharedPrefFriendsInfo.getInt("top", 0);
-            LogUtils.getInstance().debug(TAG, " , pos = " + pos + " , top = " + top);
+            LogUtils.getInstance().debug(" pos = " + String.valueOf(pos) + " , top = " + String.valueOf(top));
             amfListView.setSelectionFromTop(pos, top);
 
             amfSideView.setOnTouchingLetterChangedListener(new FriendSideListViewListener());
