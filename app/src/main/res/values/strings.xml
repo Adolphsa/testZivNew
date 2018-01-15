@@ -51,7 +51,7 @@
     <string name="people_maybe_known">可能认识的人</string>
     <string name="classmate_in_same_school">同校同学</string>
     <string name="filter">筛选</string>
-    <string name="invite_friends">邀请好友开通</string>
+    <string name="invite_friends">未开通好友</string>
     <string name="already_registered">已开通</string>
     <string name="invite_tips">邀请更多好友来玩吧</string>
     <string name="my_item_friend">好友</string>
@@ -91,4 +91,5 @@
     <string name="aafd_text1">你想匿名跟谁悄悄话？</string>
     <string name="aafg_text2">通讯录好友</string>
     <string name="aafg_text3">同校好友</string>
+    <string name="guide_finish_text2">人缘不要太好!</string>
 </resources>

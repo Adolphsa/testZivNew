@@ -174,7 +174,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
                     }else {
                         Log.i(TAG, "acceptClick: myinfo is null");
                     }
-                    Log.i(TAG, "acceptClick: 222222");
+
                     if (myInfo != null){
                         //邀请好友的请求
 

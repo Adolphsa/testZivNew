@@ -123,13 +123,13 @@ public class GuideContactsAdapter extends BaseAdapter implements View.OnClickLis
         holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
 
-        for (Integer temp : positionList){
-            if (temp == position){
-                Log.i(TAG, "getView: 已经接受的item---" + temp);
-                holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_yes);
-                holder.afBtnAccept.setOnClickListener(acceptListener);
-            }
-        }
+//        for (Integer temp : positionList){
+//            if (temp == position){
+//                Log.i(TAG, "getView: 已经接受的item---" + temp);
+//                holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_yes);
+//                holder.afBtnAccept.setOnClickListener(acceptListener);
+//            }
+//        }
         return convertView;
     }
 

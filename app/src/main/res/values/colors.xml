@@ -88,6 +88,7 @@
     <color name="feeds_search_color">#F9F9F9</color>
     <color name="feeds_text_color">#52E0AF</color>
     <color name="feeds_text_color50">#8052E0AF</color>
+    <color name="feeds_text_color80">#51E0A0</color>
 
     <color name="boy_color">#91C1EE</color>
     <color name="girl_color">#DF83B9</color>

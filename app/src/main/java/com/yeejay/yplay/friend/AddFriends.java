@@ -7,13 +7,17 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -21,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,18 +41,22 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
+import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MesureListView;
+import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.customview.SpinerPopWindow;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
+import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -68,7 +77,8 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener {
+public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener,
+        WaitInviteAdapter.OnGetAlphaIndexerAndSectionsListener {
 
     private static final String TAG = "AddFriends";
 
@@ -89,6 +99,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     TextView layoutTitle;
     @BindView(R.id.searchView)
     TextView searchView;
+    @BindView(R.id.aafd_scroll_view)
+    ScrollView scrollView;
+
 
     @BindView(R.id.friend_pll_refresh)
     PullToRefreshLayout pullToRefreshLayout;
@@ -211,10 +224,21 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     }
 
     private LoadMoreView loadMoreView;
-    private LinearLayout contactRoot; //通讯录好友
+    private RelativeLayout contactRoot; //通讯录好友
     private LinearLayout nullLl;
     private MesureListView dredgeListView;
     private RelativeLayout dredgeNoRl;
+    private MesureListView notOpenListView; //未开通好友
+    private SideView sideView;              //字母表
+
+
+    WaitInviteAdapter waitInviteAdapter;
+    List<ContactsInfo> notOpenList;   //所有联系人的集合
+    private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
+    private List<String> sections;// 存放存在的汉语拼音首字母
+    private ContactsInfoDao contactsInfoDao;
+    int moffset = 0;
+
 
     private LinearLayout schoolRoot;    //同校同学
     private LinearLayout llNullView;
@@ -235,7 +259,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     int mType = 1; //好友类型
     int buttonDirt = 1; //学校按钮朝向
-//    boolean isFromAddFriend;
 
     ContactsAdapter contactsAdapter;
     SchoolmateAdapter schoolmateAdapter;//全部同学
@@ -257,6 +280,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
+        contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
 
         initViewControls();
         initListAndAdapter();
@@ -265,16 +289,21 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         initClassmatesTypePop();
 
         getRecommends(1, 1);
+
     }
 
     private void initViewControls() {
+
         loadMoreView = new LoadMoreView(this);
         //通讯录联系人相关的UI控件
-        contactRoot = (LinearLayout) findViewById(R.id.layout_contact);
+        contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
         nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
         dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
         dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
-        dredgeNoRl.setOnClickListener(new View.OnClickListener() {
+        notOpenListView = (MesureListView) findViewById(R.id.lcn_not_open_list);
+        sideView = (SideView) findViewById(R.id.lcn_side_view);
+
+        /*dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { //邀请好友开通
                 //跳转到邀请好友界面
@@ -282,7 +311,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 startActivity(intent);
 
             }
-        });
+        });*/
 
         //同校同学相关的UI控件
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
@@ -297,6 +326,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private void initListAndAdapter() {
         contactDredgeList = new ArrayList<>();
+        notOpenList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
         sameGradeList = new ArrayList<>();
         boyList = new ArrayList<>();
@@ -305,6 +335,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         positionList = new ArrayList();
 
         initContactsAdapter();
+        initNotOpenContactsAdapter();
         initAllSchoolMateAdapter();
         initSameGradeAdapter();
         initBoyAdapter();
@@ -313,6 +344,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     }
 
+    //通讯录已开通
     private void initContactsAdapter() {
         //联系人；
         contactsAdapter = new ContactsAdapter(AddFriends.this,
@@ -353,6 +385,51 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
         dredgeListView.setAdapter(contactsAdapter);
     }
+
+    //通讯录未开通
+    private void initNotOpenContactsAdapter() {
+
+        notOpenList = queryNotOpenContactsData();
+
+        if (notOpenList == null || notOpenList.size() == 0) {
+            Log.i(TAG, "initNotOpenContactsAdapter: null");
+            sideView.setVisibility(View.GONE);
+        } else {
+            Log.i(TAG, "initNotOpenContactsAdapter: not null");
+            sideView.setVisibility(View.VISIBLE);
+            sideView.setOnTouchingLetterChangedListener(new notOpenSideViewListener());
+        }
+
+        waitInviteAdapter = new WaitInviteAdapter(AddFriends.this, new WaitInviteAdapter.hideCallback() {
+            @Override
+            public void hideClick(View v) {
+
+            }
+        }, new WaitInviteAdapter.acceptCallback() {
+            @Override
+            public void acceptClick(View v) {
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    Button button = (Button) v;
+                    button.setBackgroundResource(R.drawable.friend_invitation_done);
+                    button.setEnabled(false);
+
+                    String phone = GsonUtil.GsonString(notOpenList.get((int) v.getTag()).getPhone());
+                    System.out.println("邀请的电话---" + phone);
+                    String phoneStr = "[" + phone + "]";
+                    String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
+                    Log.i(TAG, "acceptClick: base64phone---" + base64phone);
+                    invitefriendsbysms(base64phone);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, notOpenList);
+        Log.i(TAG, "initNotOpenContactsAdapter: 通讯录未开通加载完毕");
+        waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
+        notOpenListView.setAdapter(waitInviteAdapter);
+    }
+
 
     private void initAllSchoolMateAdapter() {
         Log.d(TAG, "initAllSchoolMateAdapter(), allSchoolMateList = " + allSchoolMateList.toString());
@@ -622,6 +699,42 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                     }
                 });
 
+    }
+
+    //通过短信邀请好友
+    private void invitefriendsbysms(String friends) {
+
+        Log.i(TAG, "invitefriendsbysms: friends---" + friends);
+        Map<String, Object> invitefriendsMap = new HashMap<>();
+        invitefriendsMap.put("friends", friends);
+        invitefriendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        invitefriendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        invitefriendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+        YPlayApiManger.getInstance().getZivApiService()
+                .smsInviteFriends(invitefriendsMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseRespond>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull BaseRespond baseRespond) {
+                        System.out.println("短信邀请好友---" + baseRespond.toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        System.out.println("短信邀请好友异常---" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     //拉取同校/通讯录好友
@@ -946,6 +1059,30 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             }
         });
         cardDialog.show();
+    }
+
+    @Override
+    public void getAlphaIndexerAndSectionsListner(Map<String, Integer> alphaIndexer, List<String> sections) {
+        this.alphaIndexer = alphaIndexer;
+        this.sections = sections;
+    }
+
+    private class notOpenSideViewListener implements SideView.OnTouchingLetterChangedListener {
+
+        @Override
+        public void onTouchingLetterChanged(String s) {
+            if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
+                int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
+                notOpenListView.setSelection(position);
+            }
+        }
+    }
+
+
+    private List<ContactsInfo> queryNotOpenContactsData() {
+        return contactsInfoDao.queryBuilder()
+                .orderAsc(ContactsInfoDao.Properties.SortKey)
+                .list();
     }
 
 //    @Override

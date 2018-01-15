@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -15,14 +14,10 @@ import android.widget.Toast;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.GuideContactsAdapter;
 import com.yeejay.yplay.adapter.GuideSchoolmateAdapter;
-import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
-import com.yeejay.yplay.customview.LazyScrollView;
 import com.yeejay.yplay.customview.MesureListView;
-import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
@@ -63,16 +58,20 @@ public class AddFriendGuide extends AppCompatActivity {
     LinearLayout aafgSameSchool;
     @BindView(R.id.aafg_list_is_null)
     TextView listIsNUll;
+    @BindView(R.id.aafd_friend_number)
+    TextView aafdFriendNumber;
+    @BindView(R.id.aafd_finish_view)
+    LinearLayout aafdFinishView;
 
 
     @OnClick(R.id.aafd_back)
-    public void back(){
+    public void back() {
         finish();
     }
 
     @OnClick(R.id.aafg_enter)
     public void aafgEnter() {
-        startActivity(new Intent(AddFriendGuide.this, MainActivity.class));
+//        startActivity(new Intent(AddFriendGuide.this, MainActivity.class));
     }
 
     private ContactsInfoDao contactsInfoDao;
@@ -86,6 +85,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
     int mPageNum = 1;
     int mType = 3;
+    int sumFriendNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,20 +103,20 @@ public class AddFriendGuide extends AppCompatActivity {
 
         initContactAdapter();
         initSameSchoolAdapter();
-        getRecommends(mType,mPageNum);
+        getRecommends(mType, mPageNum);
     }
 
     //通讯录好友
-    private void initContactAdapter(){
+    private void initContactAdapter() {
 
         contactsList = contactsInfoDao.queryBuilder()
                 .where(ContactsInfoDao.Properties.Uin.gt(1000))
                 .list();
-        if (contactsList != null && contactsList.size() > 0){
+        if (contactsList != null && contactsList.size() > 0) {
             Log.i(TAG, "initContactAdapter: contactsListSize---" + contactsList.size());
             aafgContacts.setVisibility(View.VISIBLE);
 
-        }else {
+        } else {
             aafgContacts.setVisibility(View.GONE);
         }
 
@@ -128,12 +128,21 @@ public class AddFriendGuide extends AppCompatActivity {
                     public void acceptClick(View v) {
                         if (NetWorkUtil.isNetWorkAvailable(AddFriendGuide.this)) {
                             Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.add_friend_apply);
+//                            button.setBackgroundResource(R.drawable.add_friend_apply);
                             button.setEnabled(false);
+
+                            sumFriendNumber++;
 
                             int position = (int) button.getTag();
                             contactsPositionList.add(position);
                             addFriend(contactsList.get(position).getUin(), mType);
+
+                            contactsList.remove(position);
+                            contactsAdapter.notifyDataSetChanged();
+
+                            bothNull();
+
+
                         } else {
                             Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
@@ -143,7 +152,7 @@ public class AddFriendGuide extends AppCompatActivity {
         aafgContactsList.setAdapter(contactsAdapter);
     }
 
-    private void initSameSchoolAdapter(){
+    private void initSameSchoolAdapter() {
 
         //同校好友
         schoolmateAdapter = new GuideSchoolmateAdapter(AddFriendGuide.this,
@@ -153,12 +162,20 @@ public class AddFriendGuide extends AppCompatActivity {
                     public void acceptClick(View v) {
                         if (NetWorkUtil.isNetWorkAvailable(AddFriendGuide.this)) {
                             Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.add_friend_apply);
+//                            button.setBackgroundResource(R.drawable.add_friend_apply);
                             button.setEnabled(false);
+
+                            sumFriendNumber++;
+
                             int position = (int) button.getTag();
 
                             sameSchoolPositionList.add(position);
                             addFriend(allSchoolMateList.get(position).getUin(), mType);
+
+                            allSchoolMateList.remove(position);
+                            schoolmateAdapter.notifyDataSetChanged();
+
+                            bothNull();
                         } else {
                             Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
                         }
@@ -169,6 +186,26 @@ public class AddFriendGuide extends AppCompatActivity {
 
         aafgSameSchoolList.setAdapter(schoolmateAdapter);
     }
+
+    //判断同校好友和通讯录好友是否为空
+    private void bothNull() {
+
+        if (contactsList.size() == 0){
+            aafgContacts.setVisibility(View.GONE);
+        }
+
+        if (allSchoolMateList.size() == 0){
+            aafgSameSchool.setVisibility(View.GONE);
+        }
+
+        if (contactsList.size() == 0 && allSchoolMateList.size() == 0){
+            aafdFinishView.setVisibility(View.VISIBLE);
+            aafdFriendNumber.setText("已选择了" + sumFriendNumber + "个好友！");
+        }else {
+            aafdFinishView.setVisibility(View.GONE);
+        }
+    }
+
 
     //拉取同校/通讯录好友
     private void getRecommends(int type, int pageNum) {
@@ -205,9 +242,9 @@ public class AddFriendGuide extends AppCompatActivity {
                             } else {
                                 aafgSameSchool.setVisibility(View.GONE);
 
-                                if (contactsList.size() == 0 && allSchoolMateList.size() == 0){
+                                if (contactsList.size() == 0 && allSchoolMateList.size() == 0) {
                                     listIsNUll.setVisibility(View.VISIBLE);
-                                }else {
+                                } else {
                                     listIsNUll.setVisibility(View.GONE);
                                 }
 

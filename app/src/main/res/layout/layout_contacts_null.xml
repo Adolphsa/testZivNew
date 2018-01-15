@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white">
 
     <LinearLayout
@@ -37,6 +36,7 @@
         android:id="@+id/lcn_dredge_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/lcn_ll_null"
         />
 
     <View
@@ -44,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="0.3dp"
         android:background="@color/feeds_search_color"
+        android:layout_below="@+id/lcn_dredge_list"
         />
 
     <!--
@@ -59,8 +60,9 @@
         android:id="@+id/lcn_rl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector_myinfo_item_background">
-
+        android:background="@drawable/selector_myinfo_item_background"
+        android:layout_below="@+id/lcn_line2"
+        >
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,15 +75,21 @@
             android:text="@string/invite_friends"
             style="@style/add_friends_subtitle_style" />
 
-        <ImageView
-            android:id="@+id/lcn_arrow"
-            android:layout_width="4.5dp"
-            android:layout_height="7.8dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="20.4dp"
-            android:layout_marginTop="19.1dp"
-            android:src="@drawable/item_arrows"
-            />
     </RelativeLayout>
 
-</LinearLayout>
+    <com.yeejay.yplay.customview.MesureListView
+        android:id="@+id/lcn_not_open_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lcn_rl"
+        android:layout_marginTop="5dp"
+        />
+    <com.yeejay.yplay.customview.SideView
+        android:id="@+id/lcn_side_view"
+        android:layout_width="15dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/lcn_rl"
+        android:layout_marginBottom="50dp"
+        />
+</RelativeLayout>
