@@ -127,8 +127,6 @@ public class ActivityContribute1 extends BaseActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                System.out.println("count---" + count);
-                conTextCount.setText(count + "/30");
             }
 
             @Override

@@ -94,12 +94,9 @@ public class ActivityContribute2 extends BaseActivity {
 
             int resID = getResources().getIdentifier(field.getName(),
                     "drawable", applicationInfo.packageName);
-//            System.out.println("fileName = " + field.getName()
-//                    + "    resId = " + resID + "," + applicationInfo.packageName);
 
-            String fName = field.getName();
-            if (fName.startsWith("c_")) {
-                mDatas.add(new EmojiImgBean(fName, resID, false));
+            if (field.getName().startsWith("c_")) {
+                mDatas.add(new EmojiImgBean(field.getName(), resID, false));
             }
         }
     }
