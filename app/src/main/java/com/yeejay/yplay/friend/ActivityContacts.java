@@ -1,9 +1,12 @@
 package com.yeejay.yplay.friend;
 
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -41,7 +44,7 @@ public class ActivityContacts extends BaseActivity {
     @BindView(R.id.layout_title2)
     TextView layoutTitle;
     @BindView(R.id.aafd_list_view)
-    ListView aafdListView;
+    RecyclerView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
 
@@ -64,6 +67,9 @@ public class ActivityContacts extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContacts.this,true);
         positionList = new ArrayList<>();
+
+        LinearLayoutManager linearLayoutMgr = new LinearLayoutManager(ActivityContacts.this);
+        aafdListView.setLayoutManager(linearLayoutMgr);
 
         layoutTitle.setText("通讯录好友");
         mDataList = new ArrayList<>();

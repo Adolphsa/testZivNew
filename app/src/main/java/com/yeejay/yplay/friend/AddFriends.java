@@ -11,6 +11,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -42,12 +45,10 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
-import com.yeejay.yplay.answer.ActivityInviteFriend;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
-import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.customview.SpinerPopWindow;
 import com.yeejay.yplay.greendao.ContactsInfo;
@@ -99,12 +100,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     TextView layoutTitle;
     @BindView(R.id.searchView)
     TextView searchView;
-    @BindView(R.id.aafd_scroll_view)
-    ScrollView scrollView;
+//    @BindView(R.id.aafd_scroll_view)
+//    ScrollView scrollView;
 
 
-    @BindView(R.id.friend_pll_refresh)
-    PullToRefreshLayout pullToRefreshLayout;
+//    @BindView(R.id.friend_pll_refresh)
+//    PullToRefreshLayout pullToRefreshLayout;
     @BindView(R.id.filter_text)
     TextView filterText;
 
@@ -226,9 +227,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private LoadMoreView loadMoreView;
     private RelativeLayout contactRoot; //通讯录好友
     private LinearLayout nullLl;
-    private MesureListView dredgeListView;
+    private RecyclerView dredgeListView;
     private RelativeLayout dredgeNoRl;
-    private MesureListView notOpenListView; //未开通好友
+    private RecyclerView notOpenListView; //未开通好友
     private SideView sideView;              //字母表
 
 
@@ -242,11 +243,13 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private LinearLayout schoolRoot;    //同校同学
     private LinearLayout llNullView;
-    private MesureListView allSchoolmateListView;
+    private RecyclerView allSchoolmateListView;
+    private int schoolPageNum = 1;
 
     private LinearLayout maybeRoot;     //可能认识的人
     private LinearLayout lmklLlNull;
-    private MesureListView lmkListView;
+    private RecyclerView lmkListView;
+    private int lmkPageNum = 1;
 
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contactDredgeList;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
@@ -298,10 +301,17 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //通讯录联系人相关的UI控件
         contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
         nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
-        dredgeListView = (MesureListView) contactRoot.findViewById(R.id.lcn_dredge_list);
+        dredgeListView = (RecyclerView) contactRoot.findViewById(R.id.lcn_dredge_list);
         dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
-        notOpenListView = (MesureListView) findViewById(R.id.lcn_not_open_list);
+        notOpenListView = (RecyclerView) findViewById(R.id.lcn_not_open_list);
         sideView = (SideView) findViewById(R.id.lcn_side_view);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        dredgeListView.setNestedScrollingEnabled(false);
+        dredgeListView.setLayoutManager(linearLayoutManager);
+        LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(this);
+        notOpenListView.setNestedScrollingEnabled(false);
+        notOpenListView.setLayoutManager(linearLayoutManager2);
 
         /*dredgeNoRl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -316,12 +326,60 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //同校同学相关的UI控件
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
         llNullView = (LinearLayout) schoolRoot.findViewById(R.id.lsm_ll_null);
-        allSchoolmateListView = (MesureListView) schoolRoot.findViewById(R.id.lsm_list);
+        allSchoolmateListView = (RecyclerView) schoolRoot.findViewById(R.id.lsm_list);
+        LinearLayoutManager linearLayoutManager3 = new LinearLayoutManager(this);
+        allSchoolmateListView.setNestedScrollingEnabled(false);
+        allSchoolmateListView.setLayoutManager(linearLayoutManager3);
+
+        allSchoolmateListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                boolean isbootom = allSchoolmateListView.canScrollVertically(1); //false表示已经到底部
+                if (!isbootom){
+                    Log.i(TAG, "onScrolled: 滚动到底部了");
+                    mPageNum++;
+                    if (mType == 3) {    //同校所有
+                        getRecommends(3, mPageNum);
+                    } else if (mType == 4) {    //同校同年级
+                        getRecommends(4, mPageNum);
+                    } else if (mType == 5) {    //同校男生
+                        getRecommends(5, mPageNum);
+                    } else if (mType == 6) {    //同校女生
+                        getRecommends(6, mPageNum);
+                    }
+                }
+            }
+        });
 
         //可能认识的人相关的UI控件
         maybeRoot = (LinearLayout) findViewById(R.id.layout_maybe_know);
         lmklLlNull = (LinearLayout) maybeRoot.findViewById(R.id.lmk_ll_null);
-        lmkListView = (MesureListView) maybeRoot.findViewById(R.id.lmk_list);
+        lmkListView = (RecyclerView) maybeRoot.findViewById(R.id.lmk_list);
+        LinearLayoutManager linearLayoutManager4 = new LinearLayoutManager(this);
+        lmkListView.setNestedScrollingEnabled(false);
+        lmkListView.setLayoutManager(linearLayoutManager4);
+
+        lmkListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                boolean isbootom = lmkListView.canScrollVertically(1); //false表示已经到底部
+                if (!isbootom){
+                    Log.i(TAG, "onScrolled: 滚动到底部了");
+                    mPageNum++;
+                    if (mType == 7){
+                        getRecommends(7, mPageNum);
+                    }
+                }
+            }
+        });
+
     }
 
     private void initListAndAdapter() {
@@ -369,20 +427,18 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 },
                 contactDredgeList, positionList);
 
-        dredgeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        contactsAdapter.addRecycleItemListener(new ContactsAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = contactDredgeList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
-
         });
-
         dredgeListView.setAdapter(contactsAdapter);
     }
 
@@ -554,19 +610,20 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 },
                 maybeKnowList, positionList);
 
-        lmkListView.setAdapter(maybeKnownAdapter);
-        lmkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        maybeKnownAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("点击事件");
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = maybeKnowList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        lmkListView.setAdapter(maybeKnownAdapter);
     }
 
     private void initClassmatesTypePop() {
@@ -633,35 +690,35 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private void initPullRefresh() {
 
-        pullToRefreshLayout.setCanRefresh(false);
-        pullToRefreshLayout.setFooterView(loadMoreView);
-        pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
-            @Override
-            public void refresh() {
-                //刷新
-            }
-
-            @Override
-            public void loadMore() {
-                //加载更多
-                mPageNum++;
-                Log.i(TAG, "loadMore: pageNum---" + mPageNum);
-
-                if (mType == 1) {    //通讯录已开通
-                    getRecommends(1, mPageNum);
-                } else if (mType == 3) {    //同校所有
-                    getRecommends(3, mPageNum);
-                } else if (mType == 4) {    //同校同年级
-                    getRecommends(4, mPageNum);
-                } else if (mType == 5) {    //同校男生
-                    getRecommends(5, mPageNum);
-                } else if (mType == 6) {    //同校女生
-                    getRecommends(6, mPageNum);
-                } else if (mType == 7) {    //可能认识的人
-                    getRecommends(7, mPageNum);
-                }
-            }
-        });
+//        pullToRefreshLayout.setCanRefresh(false);
+//        pullToRefreshLayout.setFooterView(loadMoreView);
+//        pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
+//            @Override
+//            public void refresh() {
+//                //刷新
+//            }
+//
+//            @Override
+//            public void loadMore() {
+//                //加载更多
+//                mPageNum++;
+//                Log.i(TAG, "loadMore: pageNum---" + mPageNum);
+//
+//                if (mType == 1) {    //通讯录已开通
+//                    getRecommends(1, mPageNum);
+//                } else if (mType == 3) {    //同校所有
+//                    getRecommends(3, mPageNum);
+//                } else if (mType == 4) {    //同校同年级
+//                    getRecommends(4, mPageNum);
+//                } else if (mType == 5) {    //同校男生
+//                    getRecommends(5, mPageNum);
+//                } else if (mType == 6) {    //同校女生
+//                    getRecommends(6, mPageNum);
+//                } else if (mType == 7) {    //可能认识的人
+//                    getRecommends(7, mPageNum);
+//                }
+//            }
+//        });
 
     }
 
@@ -823,14 +880,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                             }
 
                         }
-                        pullToRefreshLayout.finishLoadMore();
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         System.out.println("拉取好友异常---" + e.getMessage());
                         Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                        pullToRefreshLayout.finishLoadMore();
                     }
 
                     @Override
@@ -865,23 +920,20 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             filterText.setVisibility(View.VISIBLE);
             llNullView.setVisibility(View.GONE);
         }
-
-        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        schoolmateAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = allSchoolMateList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
-
         });
-
         allSchoolmateListView.setAdapter(schoolmateAdapter);
-        schoolmateAdapter.notifyDataSetChanged();
+//        schoolmateAdapter.notifyDataSetChanged();
     }
 
     //处理同年级同学
@@ -893,22 +945,20 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             llNullView.setVisibility(View.GONE);
         }
 
-        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        sameGradeAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = sameGradeList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
-
         });
-
         allSchoolmateListView.setAdapter(sameGradeAdapter);
-        sameGradeAdapter.notifyDataSetChanged();
+//        sameGradeAdapter.notifyDataSetChanged();
     }
 
     //处理男同学
@@ -920,22 +970,21 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             llNullView.setVisibility(View.GONE);
         }
 
-        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        boyAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = boyList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
-
         });
 
         allSchoolmateListView.setAdapter(boyAdapter);
-        boyAdapter.notifyDataSetChanged();
+//        boyAdapter.notifyDataSetChanged();
     }
 
     //处理女同学
@@ -947,23 +996,22 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             llNullView.setVisibility(View.GONE);
         }
 
-        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        girlAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int)o;
                 int uin = girlList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, view);
+                    getFriendInfo(uin, v);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
-
         });
 
         allSchoolmateListView.setAdapter(girlAdapter);
 
-        girlAdapter.notifyDataSetChanged();
+//        girlAdapter.notifyDataSetChanged();
     }
 
 
@@ -1073,7 +1121,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         public void onTouchingLetterChanged(String s) {
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
-                notOpenListView.setSelection(position);
+                notOpenListView.smoothScrollToPosition(position);
             }
         }
     }

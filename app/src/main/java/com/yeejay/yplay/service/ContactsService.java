@@ -18,6 +18,7 @@ import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,14 +55,22 @@ public class ContactsService extends Service {
     private void upLoadingContacts() {
 
         List<ContactsInfo> contactsInfoList = queryContacts();
+        List<com.yeejay.yplay.model.ContactsInfo> waitUploadingContactsList = new ArrayList<>();
 
         if (contactsInfoList == null || contactsInfoList.size() <= 0){
             Log.i(TAG, "upLoadingContacts: 没有查询到数据");
             return;
+        }else {
+            waitUploadingContactsList.clear();
+            for (ContactsInfo contactsInfo : contactsInfoList){
+                Log.i(TAG, "upLoadingContacts: name---" + contactsInfo.getName() + "orgPhone---" + contactsInfo.getOrgPhone());
+                waitUploadingContactsList.add(new com.yeejay.yplay.model.ContactsInfo(contactsInfo.getName(), contactsInfo.getOrgPhone()));
+            }
+
         }
 
         Map<String, Object> contactsMap = new HashMap<>();
-        String contactString = GsonUtil.GsonString(contactsInfoList);
+        String contactString = GsonUtil.GsonString(waitUploadingContactsList);
         String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
         contactsMap.put("data", encodedString);
         contactsMap.put("uin", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, 0));
@@ -92,13 +101,13 @@ public class ContactsService extends Service {
                             upLoadingContacts();
 
                         } else {
-                            System.out.println("上传通讯录失败---" + baseRespond.toString());
+                            Log.i(TAG, "onNext: 上传通讯录失败---" + baseRespond.toString());
                         }
                     }
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("上传通讯录失败---" + e.getMessage());
+                        Log.i(TAG, "onError: 上传通讯录失败---" + e.getMessage());
                     }
 
                     @Override
@@ -124,7 +133,10 @@ public class ContactsService extends Service {
                     contactsInfo.setHeadImgUrl(infosBean.getHeadImgUrl());
                 }
                 contactsInfoDao.update(contactsInfo);
+                Log.i(TAG, "updateSuccessHandle: ---" + infosBean.getNickName() + "---" + infosBean.getHeadImgUrl());
                 LogUtils.getInstance().error("更新通讯录好友---" + infosBean.getNickName() + "---" + infosBean.getHeadImgUrl());
+            }else {
+                Log.i(TAG, "updateSuccessHandle: 查询到的orgPhone为空---" + infosBean.getOrgPhone());
             }
         }
     }

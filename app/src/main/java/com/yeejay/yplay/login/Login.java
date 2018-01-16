@@ -405,6 +405,7 @@ public class Login extends BaseActivity {
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
+                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
                             SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
                             insertUin(loginRespond.getPayload());
                             if (loginRespond.getPayload().getIsNewUser() == 1) {

@@ -1,6 +1,8 @@
 package com.yeejay.yplay.answer;
 
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -54,7 +56,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
     //    @BindView(R.id.aif_tv_search_view)
 //    TextView aifTvSearchView;
     @BindView(R.id.aif_list_view)
-    ListView aifListView;
+    RecyclerView aifListView;
     @BindView(R.id.aif_tip_close)
     ImageButton aifTipClose;
     @BindView(R.id.aif_tip_ll)
@@ -120,6 +122,10 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
     private void init() {
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ActivityInviteFriend.this);
+        aifListView.setLayoutManager(linearLayoutManager);
+
+
         mDataList = contactsInfoDao.queryBuilder()
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .list();
@@ -127,9 +133,11 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         if (mDataList == null || mDataList.size() == 0){
             Log.i(TAG, "init: mDataList为空");
             aifSideView.setVisibility(View.GONE);
+            emptyView.setVisibility(View.VISIBLE);
         }else {
             Log.i(TAG, "init: mDataList不为空---" + mDataList.size());
             aifSideView.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
         }
 
         waitInviteAdapter = new WaitInviteAdapter(ActivityInviteFriend.this,
@@ -194,7 +202,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
         waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
 
-        aifListView.setEmptyView(emptyView);
+//        aifListView.setEmptyView(emptyView);
         aifListView.setAdapter(waitInviteAdapter);
     }
 
@@ -278,7 +286,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         public void onTouchingLetterChanged(String s) {
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
-                aifListView.setSelection(position);
+                aifListView.smoothScrollToPosition(position);
             }
         }
 

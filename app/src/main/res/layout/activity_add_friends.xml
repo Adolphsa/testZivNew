@@ -9,16 +9,13 @@
 
     <include layout="@layout/layout_title_bar2" />
 
-    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
-        android:id="@+id/friend_pll_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+    <!--<com.jwenfeng.library.pulltorefresh.PullToRefreshLayout-->
+        <!--android:id="@+id/friend_pll_refresh"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--&gt;-->
 
-        <ScrollView
-            android:id="@+id/aafd_scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,11 +124,11 @@
                     />
             </LinearLayout>
 
-        </ScrollView>
 
 
 
-    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
+
+    <!--</com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>-->
 
 
 

@@ -119,8 +119,8 @@
             android:layout_gravity="center_horizontal"
             />
     </LinearLayout>
-    
-    <com.yeejay.yplay.customview.MesureListView
+
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/lsm_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

@@ -342,12 +342,31 @@ public class LoginAuthorization extends BaseActivity {
                     String type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
                     if (type.equals("vnd.android.cursor.item/phone_v2")) {//如果得到的mimeType类型为手机号码类型才去接收
                         contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
-                        if (contactNumber.length() >2){
+                        if (contactNumber.length() > 2){
                             Log.i(TAG, "getContacts: contactNumber---" + contactNumber);
                             String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
+                            Log.i(TAG, "getContacts: filterContactNumber--" + filterContactNumber);
                             com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
-                            contactsInfoDao.insert(contactsInfo);
-                            LogUtils.getInstance().error("插入通讯录好友---" + contactName + "---" + contactNumber);
+                            com.yeejay.yplay.greendao.ContactsInfo queryContactsInfo = contactsInfoDao.queryBuilder()
+                                    .where(ContactsInfoDao.Properties.OrgPhone.eq(filterContactNumber))
+                                    .build().unique();
+                            if (queryContactsInfo == null){
+                                contactsInfoDao.insert(contactsInfo);
+                                LogUtils.getInstance().error("插入通讯录好友---" + contactName + "---" + contactNumber);
+                            }else {
+//                                Log.i(TAG, "getContacts: queryContactsInfo not null--" + queryContactsInfo.getOrgPhone() + "---" + queryContactsInfo.getName());
+                                queryContactsInfo.setName(contactName);
+                                queryContactsInfo.setOrgPhone(filterContactNumber);
+                                queryContactsInfo.setUin(1);
+                                queryContactsInfo.setSortKey(contactSortKey);
+                                contactsInfoDao.update(queryContactsInfo);
+
+                                Log.i(TAG, "getContacts: update queryContactsInfo---" + queryContactsInfo.getName()
+                                        + "---" +queryContactsInfo.getUin()
+                                        + "---" +queryContactsInfo.getOrgPhone()
+                                        + "---" +queryContactsInfo.getSortKey());
+                            }
+
                         }
                     }
                 }

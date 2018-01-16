@@ -1,12 +1,15 @@
 package com.yeejay.yplay.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -24,7 +27,7 @@ import tangxiaolv.com.library.EffectiveShapeView;
  * Created by Administrator on 2017/10/27.
  */
 
-public class ContactsAdapter extends BaseAdapter implements View.OnClickListener {
+public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHolder> implements View.OnClickListener {
 
     private static final String TAG = "ContactsAdapter";
 
@@ -46,6 +49,12 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
             acceptCallback.acceptClick(v);
         }
     };
+
+    public interface OnRecycleItemListener <T>{
+        void onRecycleItemClick(View v,T o);
+    }
+
+    private OnRecycleItemListener listener;
 
     public interface hideCallback {
         void hideClick(View v);
@@ -73,30 +82,13 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
     }
 
     @Override
-    public int getCount() {
-        return contentList.size();
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new ViewHolder(LayoutInflater.from(context)
+                .inflate(R.layout.item_add_friends, parent, false));
     }
 
     @Override
-    public Object getItem(int position) {
-        return null;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-        if (convertView == null) {
-            convertView = View.inflate(context, R.layout.item_add_friends, null);
-            holder = new ViewHolder(convertView);
-            convertView.setTag(holder);
-        }else {
-            holder = (ViewHolder) convertView.getTag();
-        }
+    public void onBindViewHolder(ViewHolder holder, final int position) {
 
         String url = contentList.get(position).getHeadImgUrl();
         String nickName = contentList.get(position).getNickName();
@@ -104,6 +96,14 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         String str = contentList.get(position).getRecommendDesc();
 
         Log.i(TAG, "getView: status---" + status);
+
+        holder.afItemRoot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onRecycleItemClick(v,position);
+            }
+        });
+
 
         holder.afItemName.setText(contentList.get(position).getNickName());
         holder.afItemTvSharesFriends.setText(str);
@@ -139,10 +139,27 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
                 holder.afBtnAccept.setOnClickListener(acceptListener);
             }
         }
-        return convertView;
+
     }
 
-    static class ViewHolder {
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        return contentList.size();
+    }
+
+    public void addRecycleItemListener(OnRecycleItemListener listener){
+        this.listener = listener;
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder{
+
+        @BindView(R.id.af_item_root)
+        RelativeLayout afItemRoot;
         @BindView(R.id.af_item_header_img)
         EffectiveShapeView afItemHeaderImg;
         @BindView(R.id.af_item_text_family_name)
@@ -159,6 +176,7 @@ public class ContactsAdapter extends BaseAdapter implements View.OnClickListener
         Button afBtnHide;
 
         ViewHolder(View view) {
+            super(view);
             ButterKnife.bind(this, view);
         }
     }

@@ -10,6 +10,7 @@ public class YPlayConstant {
     public static final String YPLAY_UUID = "yplay_uuid";
     public static final String YPLAY_UIN = "yplay_uin";
     public static final String YPLAY_TOKEN = "yplay_token";
+    public static final String YPLAY_PHONE_NUMBER = "yplay_phone_number";
     public static final String YPLAY_VER = "yplay_ver";
     public static final String YPLAY_USER_NAME = "yplay_user_name";
     public static final String YPLAY_NICK_NAME = "yplay_nick_name";

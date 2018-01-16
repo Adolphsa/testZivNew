@@ -2,6 +2,7 @@ package com.yeejay.yplay.friend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -57,7 +58,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     @BindView(R.id.layout_title2)
     TextView layoutTitle;
     @BindView(R.id.aafd_list_view)
-    ListView aafdListView;
+    RecyclerView aafdListView;
     @BindView(R.id.aafd_ptf_refresh)
     PullToRefreshLayout aafdPtfRefresh;
     @BindView(R.id.emptyview)
@@ -141,24 +142,41 @@ public class ActivityAddFiendsDetail extends BaseActivity {
             }
         }, mDataList);
 
-        aafdListView.setEmptyView(emptyView);
+//        aafdListView.setEmptyView(emptyView);
         aafdListView.setAdapter(friendsDetailAdapter);
 
-        aafdListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        friendsDetailAdapter.addRecycleItemListener(new FriendsDetailAdapter.OnRecycleItemListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onRecycleItemClick(View v, Object o) {
+
+                int position = (int)o;
+
                 int userUin = mDataList.get(position).getFromUin();
                 if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)) {
-                    getFriendInfo(userUin, view);
+                    getFriendInfo(userUin, v);
                 } else {
                     Toast.makeText(ActivityAddFiendsDetail.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
+
+//        aafdListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//
+//
+//            }
+//        });
     }
 
     private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
+
+        if (mDataList.size() == 0){
+            emptyView.setVisibility(View.VISIBLE);
+        }else{
+            emptyView.setVisibility(View.GONE);
+        }
+
         friendsDetailAdapter.notifyDataSetChanged();
         //拉到第二页数据时，自动向上滚动两个item高度（如果第二页只有一个数据的话，则只滚动一个item高度）
         //ListView需要先调用notifyDataSetChanged()再滚动

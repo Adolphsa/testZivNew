@@ -71,7 +71,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
     @OnClick(R.id.aafg_enter)
     public void aafgEnter() {
-//        startActivity(new Intent(AddFriendGuide.this, MainActivity.class));
+        startActivity(new Intent(AddFriendGuide.this, MainActivity.class));
     }
 
     private ContactsInfoDao contactsInfoDao;
@@ -86,6 +86,7 @@ public class AddFriendGuide extends AppCompatActivity {
     int mPageNum = 1;
     int mType = 3;
     int sumFriendNumber = 0;
+    String phoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +96,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.edit_text_color2));
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
+        phoneNumber = (String) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_PHONE_NUMBER, "");
 
         contactsList = new ArrayList<>();
         contactsPositionList = new ArrayList();
@@ -111,12 +113,14 @@ public class AddFriendGuide extends AppCompatActivity {
 
         contactsList = contactsInfoDao.queryBuilder()
                 .where(ContactsInfoDao.Properties.Uin.gt(1000))
+                .where(ContactsInfoDao.Properties.Phone.notEq(phoneNumber))
                 .list();
         if (contactsList != null && contactsList.size() > 0) {
             Log.i(TAG, "initContactAdapter: contactsListSize---" + contactsList.size());
             aafgContacts.setVisibility(View.VISIBLE);
 
         } else {
+            Log.i(TAG, "initContactAdapter: contactsListSize null");
             aafgContacts.setVisibility(View.GONE);
         }
 
@@ -141,7 +145,6 @@ public class AddFriendGuide extends AppCompatActivity {
                             contactsAdapter.notifyDataSetChanged();
 
                             bothNull();
-
 
                         } else {
                             Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
@@ -200,7 +203,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
         if (contactsList.size() == 0 && allSchoolMateList.size() == 0){
             aafdFinishView.setVisibility(View.VISIBLE);
-            aafdFriendNumber.setText("已选择了" + sumFriendNumber + "个好友！");
+            aafdFriendNumber.setText("已添加了" + sumFriendNumber + "个好友！");
         }else {
             aafdFinishView.setVisibility(View.GONE);
         }
@@ -273,23 +276,6 @@ public class AddFriendGuide extends AppCompatActivity {
     private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
         Log.d(TAG, ", handleSchoolMate(), allSchoolMateList.size() = " + allSchoolMateList.size()
                 + allSchoolMateList.toString());
-
-
-//        allSchoolmateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                int uin = allSchoolMateList.get(position).getUin();
-//                if (NetWorkUtil.isNetWorkAvailable(AddFriendGuide.this)) {
-//                    getFriendInfo(uin, view);
-//                } else {
-//                    Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
-//                }
-//
-//            }
-//
-//        });
-
-
     }
 
     //发送加好友的请求

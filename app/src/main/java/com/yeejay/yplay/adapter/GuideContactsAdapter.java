@@ -104,7 +104,7 @@ public class GuideContactsAdapter extends BaseAdapter implements View.OnClickLis
         String nickName = contactsInfo.getNickName();
         String phone = contactsInfo.getPhone();
 
-        Log.i(TAG, "getView: nickname---" + nickName + "---" + phone);
+        Log.i(TAG, "getView: nickname---" + nickName + "---" + phone + "url");
 
         holder.afItemName.setText(nickName);
         holder.afItemTvSharesFriends.setText(phone);
