@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.tencent.imsdk.TIMCallBack;
 import com.xiaomi.mipush.sdk.MiPushClient;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
@@ -125,7 +126,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
                                 startActivity(new Intent(LoadingActivity.this, Login.class));
 
                             } else {
-                                startActivity(new Intent(LoadingActivity.this, Login.class));
+                                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
                             }
 
                         } else if (userInfoResponde.getCode() == 11002) {

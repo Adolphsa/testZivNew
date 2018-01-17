@@ -408,13 +408,13 @@ public class Login extends BaseActivity {
                                 startActivity(new Intent(Login.this, LoginAge.class));
                             } else {
                                 //逻辑跳转
-//                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
-//                                        loginRespond.getPayload().getInfo().getGrade(),
-//                                        loginRespond.getPayload().getInfo().getSchoolId(),
-//                                        loginRespond.getPayload().getInfo().getGender(),
-//                                        loginRespond.getPayload().getInfo().getNickName()
-//                                );
-                                startActivity(new Intent(Login.this, LoginAge.class));
+                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
+                                        loginRespond.getPayload().getInfo().getGrade(),
+                                        loginRespond.getPayload().getInfo().getSchoolId(),
+                                        loginRespond.getPayload().getInfo().getGender(),
+                                        loginRespond.getPayload().getInfo().getNickName()
+                                );
+//                                startActivity(new Intent(Login.this, LoginAge.class));
                             }
                         } else {
                             Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();
