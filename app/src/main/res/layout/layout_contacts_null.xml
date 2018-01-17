@@ -32,20 +32,20 @@
             />
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/lcn_dredge_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/lcn_ll_null"
-        />
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/lcn_dredge_list"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/lcn_ll_null"-->
+        <!--/>-->
 
-    <View
-        android:id="@+id/lcn_line2"
-        android:layout_width="match_parent"
-        android:layout_height="0.3dp"
-        android:background="@color/feeds_search_color"
-        android:layout_below="@+id/lcn_dredge_list"
-        />
+    <!--<View-->
+        <!--android:id="@+id/lcn_line2"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.3dp"-->
+        <!--android:background="@color/feeds_search_color"-->
+        <!--android:layout_below="@+id/lcn_dredge_list"-->
+        <!--/>-->
 
     <!--
     <View
@@ -56,32 +56,32 @@
         android:layout_marginTop="13.5dp"
         />
         -->
-    <RelativeLayout
-        android:id="@+id/lcn_rl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/selector_myinfo_item_background"
-        android:layout_below="@+id/lcn_line2"
-        >
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/lcn_rl"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@drawable/selector_myinfo_item_background"-->
+        <!--android:layout_below="@+id/lcn_line2"-->
+        <!--&gt;-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_alignParentStart="true"
-            android:text="@string/invite_friends"
-            style="@style/add_friends_subtitle_style" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:paddingStart="16dp"-->
+            <!--android:paddingEnd="8dp"-->
+            <!--android:paddingTop="10dp"-->
+            <!--android:paddingBottom="10dp"-->
+            <!--android:layout_alignParentStart="true"-->
+            <!--android:text="@string/invite_friends"-->
+            <!--style="@style/add_friends_subtitle_style" />-->
 
-    </RelativeLayout>
+    <!--</RelativeLayout>-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/lcn_not_open_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lcn_rl"
+        android:layout_below="@+id/lcn_ll_null"
         android:layout_marginTop="5dp"
         />
     <com.yeejay.yplay.customview.SideView
@@ -89,7 +89,7 @@
         android:layout_width="15dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/lcn_rl"
+        android:layout_below="@+id/lcn_ll_null"
         android:layout_marginBottom="30dp"
         />
 </RelativeLayout>

@@ -9,129 +9,117 @@
 
     <include layout="@layout/layout_title_bar2" />
 
-    <!--<com.jwenfeng.library.pulltorefresh.PullToRefreshLayout-->
-        <!--android:id="@+id/friend_pll_refresh"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--&gt;-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="10dp"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:src="@drawable/add_friend_search" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:gravity="center_vertical"
-                    android:background="@color/white"
-                    android:orientation="horizontal">
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_marginStart="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
-                        android:src="@drawable/add_friend_search"/>
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical" >
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="15dp"
-                            android:layout_marginStart="15dp"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/search"
-                            android:textColor="#3B3C40"
-                            android:textSize="16sp" />
-                        <TextView
-                            android:id="@+id/searchView"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:cursorVisible="false"
-                            android:text="@string/hint_search_gate"
-                            android:singleLine="true"
-                            android:textSize="22sp"
-                            android:textColor="#9A9FA7"
-                            android:alpha="0.5"
-                            android:layout_marginStart="15dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/search"
+                    android:textColor="#3B3C40"
+                    android:textSize="16sp" />
 
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/add_friend_line_color" />
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/searchView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="14dp"
-                    android:background="@color/white"
-                    android:paddingBottom="14dp"
-                    >
+                    android:layout_marginStart="15dp"
+                    android:alpha="0.5"
+                    android:background="@null"
+                    android:cursorVisible="false"
+                    android:singleLine="true"
+                    android:text="@string/hint_search_gate"
+                    android:textColor="#9A9FA7"
+                    android:textSize="22sp" />
 
-                    <ImageButton
-                        android:id="@+id/af_btn_add_contacts"
-                        android:layout_width="0dp"
-                        android:layout_height="30dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/selector_add_friends_contacts"
-                        android:layout_weight="1"
-                        />
-                    <ImageButton
-                        android:id="@+id/af_btn_add_schoolmate"
-                        android:layout_width="0dp"
-                        android:layout_height="30dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/selector_add_friends_class_school"
-                        android:layout_weight="1"
-                        />
-                    <ImageButton
-                        android:id="@+id/af_btn_wait_invite"
-                        android:layout_width="0dp"
-                        android:layout_height="30dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/selector_add_friends_maybe_known"
-                        android:layout_weight="1"
-                        />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/add_friend_line_color" />
-
-                <include layout="@layout/layout_contacts_null"
-                    android:id="@+id/layout_contact"
-
-                    />
-                <include layout="@layout/layout_school_mate"
-                    android:id="@+id/layout_school_mate"
-                    android:visibility="gone"
-                    />
-                <include layout="@layout/layout_maybe_know"
-                    android:id="@+id/layout_maybe_know"
-                    android:visibility="gone"
-                    />
             </LinearLayout>
+        </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/add_friend_line_color" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:paddingBottom="14dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="14dp">
 
+            <ImageButton
+                android:id="@+id/af_btn_add_contacts"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/selector_add_friends_contacts" />
 
+            <ImageButton
+                android:id="@+id/af_btn_add_schoolmate"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/selector_add_friends_class_school" />
 
-    <!--</com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>-->
+            <ImageButton
+                android:id="@+id/af_btn_wait_invite"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/selector_add_friends_maybe_known" />
+        </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/add_friend_line_color" />
 
+        <include
+            android:id="@+id/layout_contact"
+            layout="@layout/layout_contacts_null"
+            />
 
+        <include
+            android:id="@+id/layout_school_mate"
+            layout="@layout/layout_school_mate"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/layout_maybe_know"
+            layout="@layout/layout_maybe_know"
+            android:visibility="gone" />
+    </LinearLayout>
 
 
 </LinearLayout>

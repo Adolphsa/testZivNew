@@ -10,11 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.donkingliang.imageselector.entry.Image;
-import com.donkingliang.imageselector.utils.ImageUtil;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
@@ -25,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImagePagerAdapter extends PagerAdapter {
+
+    private static final String TAG = "ImagePagerAdapter";
 
     private Context mContext;
     private List<PhotoView> viewList = new ArrayList<>(4);
@@ -68,26 +66,33 @@ public class ImagePagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
         final PhotoView currentView = viewList.remove(0);
+        currentView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         final Image image = mImgList.get(position);
         container.addView(currentView);
-        Glide.with(mContext).load(new File(image.getPath()))
-                .asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).into(new SimpleTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                if (resource != null) {
-                    int bw = resource.getWidth();
-                    int bh = resource.getHeight();
-                    if (bw > 8192 || bh > 8192) {
-                        Bitmap bitmap = ImageUtil.zoomBitmap(resource, 8192, 8192);
-                        setBitmap(currentView, bitmap);
-                    } else {
-                        setBitmap(currentView, resource);
-                    }
-                } else {
-                    currentView.setImageBitmap(null);
-                }
-            }
-        });
+        Log.i(TAG, "instantiateItem: ");
+
+        Glide.with(mContext).load(new File(image.getPath())).asBitmap().into(currentView);
+//        Glide.with(mContext).load(new File(image.getPath()))
+//                .asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).into(new SimpleTarget<Bitmap>() {
+//            @Override
+//            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+//                if (resource != null) {
+//                    int bw = resource.getWidth();
+//                    int bh = resource.getHeight();
+//                    if (bw > 8192 || bh > 8192) {
+//                        Log.i(TAG, "onResourceReady: 大于8192");
+//                        Bitmap bitmap = ImageUtil.zoomBitmap(resource, 8192, 8192);
+//                        setBitmap(currentView, bitmap);
+//                    } else {
+//                        Log.i(TAG, "onResourceReady: 小于8192");
+//                        setBitmap(currentView, resource);
+//                    }
+//                } else {
+//                    Log.i(TAG, "onResourceReady: resource为空");
+//                    currentView.setImageBitmap(null);
+//                }
+//            }
+//        });
         currentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,11 +113,13 @@ public class ImagePagerAdapter extends PagerAdapter {
             int vh = imageView.getHeight();
             if (bw != 0 && bh != 0 && vw != 0 && vh != 0) {
                 if (1.0f * bh / bw > 1.0f * vh / vw) {
+                    Log.i(TAG, "setBitmap: ");
                     imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     float offset = (1.0f * bh * vw / bw - vh) / 2;
                     adjustOffset(imageView, offset);
                 } else {
-                    imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    Log.i(TAG, "setBitmap: FIT_CENTER");
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 }
             }
         }

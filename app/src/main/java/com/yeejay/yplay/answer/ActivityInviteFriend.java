@@ -9,11 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
-import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
@@ -25,8 +22,6 @@ import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
-import com.yeejay.yplay.model.GetRecommendsRespond;
-import com.yeejay.yplay.userinfo.ActivityMyFriends;
 import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -35,7 +30,6 @@ import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +121,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
 
         mDataList = contactsInfoDao.queryBuilder()
+                .where(ContactsInfoDao.Properties.Uin.eq(0))
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .list();
 
@@ -286,7 +281,8 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         public void onTouchingLetterChanged(String s) {
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
-                aifListView.smoothScrollToPosition(position);
+                LinearLayoutManager llm = (LinearLayoutManager) aifListView.getLayoutManager();
+                llm.scrollToPositionWithOffset(position, 0);
             }
         }
 

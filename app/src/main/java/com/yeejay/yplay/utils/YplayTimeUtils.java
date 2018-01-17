@@ -1,5 +1,6 @@
 package com.yeejay.yplay.utils;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -8,6 +9,8 @@ import java.util.Date;
  */
 
 public class YplayTimeUtils {
+
+    private static final String TAG = "YplayTimeUtils";
 
     private static final long ONE_MINUTE_SENCOND = 60L;
     private static final long ONE_HOUR_SENCOND = 3600L;
@@ -35,25 +38,28 @@ public class YplayTimeUtils {
      * @return 距离现在多长时间
      */
     public static String format(Long time) {
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        Date date = null;
-//        try {
-//            date = format.parse(time);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        String dataStr = "";
+        try {
+            dataStr = format.format(new Date(time));
+            dataStr = dataStr.substring(11,16);
+//            Log.i(TAG, "format: date---" + dataStr + "---" + dataStr.substring(11,16));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         long delta = new Date().getTime() - time;
-        if (delta < 1L * ONE_MINUTE) {
-            long seconds = toSeconds(delta);
-            return (seconds <= 0 ? 1 : seconds) + ONE_SECOND_AGO;
-        }
-        if (delta < 45L * ONE_MINUTE) {
-            long minutes = toMinutes(delta);
-            return (minutes <= 0 ? 1 : minutes) + ONE_MINUTE_AGO;
-        }
+//        if (delta < 1L * ONE_MINUTE) {
+//            long seconds = toSeconds(delta);
+//            return (seconds <= 0 ? 1 : seconds) + ONE_SECOND_AGO;
+//        }
+//        if (delta < 45L * ONE_MINUTE) {
+//            long minutes = toMinutes(delta);
+//            return (minutes <= 0 ? 1 : minutes) + ONE_MINUTE_AGO;
+//        }
         if (delta < 24L * ONE_HOUR) {
-            long hours = toHours(delta);
-            return (hours <= 0 ? 1 : hours) + ONE_HOUR_AGO;
+
+            return dataStr;
         }
         if (delta < 48L * ONE_HOUR) {
             return "昨天";

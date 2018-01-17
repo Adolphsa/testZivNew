@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/afi_item_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
@@ -20,6 +21,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <tangxiaolv.com.library.EffectiveShapeView
+            android:id="@+id/afi_item_header_img"
+            android:layout_width="@dimen/item_add_friends_width"
+            android:layout_height="@dimen/item_add_friends_height"
+            android:src="@drawable/header_deafult"
+            android:layout_centerVertical="true"
+            android:scaleType="fitXY"
+            app:shape="circle"
+            android:layout_marginLeft="19dp"
+            android:visibility="gone"
+            />
         <TextView
             android:id="@+id/afi_item_text_family_name"
             android:layout_width="50dp"

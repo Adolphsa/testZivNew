@@ -3,24 +3,13 @@ package com.yeejay.yplay.friend;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -28,18 +17,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
-import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.yanzhenjie.permission.AndPermission;
-import com.yanzhenjie.permission.Permission;
-import com.yanzhenjie.permission.PermissionListener;
-import com.yanzhenjie.permission.Rationale;
-import com.yanzhenjie.permission.RationaleListener;
-import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContactsAdapter;
@@ -104,7 +84,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 //    ScrollView scrollView;
 
 
-//    @BindView(R.id.friend_pll_refresh)
+    //    @BindView(R.id.friend_pll_refresh)
 //    PullToRefreshLayout pullToRefreshLayout;
     @BindView(R.id.filter_text)
     TextView filterText;
@@ -152,12 +132,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.GONE);
 
-        positionList.clear();
-        contactDredgeList.clear();
-
-        if (contactRoot != null && contactRoot.isShown()) {
-            getRecommends(1, mPageNum);
-        }
+//        positionList.clear();
+//        contactDredgeList.clear();
+//
+//        if (contactRoot != null && contactRoot.isShown()) {
+//            getRecommends(1, mPageNum);
+//        }
 
     }
 
@@ -227,14 +207,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private LoadMoreView loadMoreView;
     private RelativeLayout contactRoot; //通讯录好友
     private LinearLayout nullLl;
-    private RecyclerView dredgeListView;
-    private RelativeLayout dredgeNoRl;
+//    private RecyclerView dredgeListView;
+//    private RelativeLayout dredgeNoRl;
     private RecyclerView notOpenListView; //未开通好友
     private SideView sideView;              //字母表
 
 
     WaitInviteAdapter waitInviteAdapter;
-    List<ContactsInfo> notOpenList;   //所有联系人的集合
+    List<ContactsInfo> allContactsList; //所有联系人的集合
+
+    List<ContactsInfo> notOpenList;   //未开通的联系人
     private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
     private List<String> sections;// 存放存在的汉语拼音首字母
     private ContactsInfoDao contactsInfoDao;
@@ -244,14 +226,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private LinearLayout schoolRoot;    //同校同学
     private LinearLayout llNullView;
     private RecyclerView allSchoolmateListView;
-    private int schoolPageNum = 1;
 
     private LinearLayout maybeRoot;     //可能认识的人
     private LinearLayout lmklLlNull;
     private RecyclerView lmkListView;
-    private int lmkPageNum = 1;
 
-    List<GetRecommendsRespond.PayloadBean.FriendsBean> contactDredgeList;
+    List<ContactsInfo> contactDredgeList;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
     List<GetRecommendsRespond.PayloadBean.FriendsBean> sameGradeList;       //同年级
     List<GetRecommendsRespond.PayloadBean.FriendsBean> boyList;             //男
@@ -301,14 +281,14 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //通讯录联系人相关的UI控件
         contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
         nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
-        dredgeListView = (RecyclerView) contactRoot.findViewById(R.id.lcn_dredge_list);
-        dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
+//        dredgeListView = (RecyclerView) contactRoot.findViewById(R.id.lcn_dredge_list);
+//        dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
         notOpenListView = (RecyclerView) findViewById(R.id.lcn_not_open_list);
         sideView = (SideView) findViewById(R.id.lcn_side_view);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        dredgeListView.setNestedScrollingEnabled(false);
-        dredgeListView.setLayoutManager(linearLayoutManager);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+//        dredgeListView.setNestedScrollingEnabled(false);
+//        dredgeListView.setLayoutManager(linearLayoutManager);
         LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(this);
         notOpenListView.setNestedScrollingEnabled(false);
         notOpenListView.setLayoutManager(linearLayoutManager2);
@@ -341,7 +321,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 boolean isbootom = allSchoolmateListView.canScrollVertically(1); //false表示已经到底部
-                if (!isbootom){
+                if (!isbootom) {
                     Log.i(TAG, "onScrolled: 滚动到底部了");
                     mPageNum++;
                     if (mType == 3) {    //同校所有
@@ -370,10 +350,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 boolean isbootom = lmkListView.canScrollVertically(1); //false表示已经到底部
-                if (!isbootom){
+                if (!isbootom) {
                     Log.i(TAG, "onScrolled: 滚动到底部了");
                     mPageNum++;
-                    if (mType == 7){
+                    if (mType == 7) {
                         getRecommends(7, mPageNum);
                     }
                 }
@@ -385,15 +365,15 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private void initListAndAdapter() {
         contactDredgeList = new ArrayList<>();
         notOpenList = new ArrayList<>();
+        allContactsList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
         sameGradeList = new ArrayList<>();
         boyList = new ArrayList<>();
         girlList = new ArrayList<>();
         maybeKnowList = new ArrayList<>();
         positionList = new ArrayList();
-
+        
         initContactsAdapter();
-        initNotOpenContactsAdapter();
         initAllSchoolMateAdapter();
         initSameGradeAdapter();
         initBoyAdapter();
@@ -402,49 +382,22 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     }
 
-    //通讯录已开通
+    //通讯录
     private void initContactsAdapter() {
-        //联系人；
-        contactsAdapter = new ContactsAdapter(AddFriends.this,
-                null,
-                new ContactsAdapter.acceptCallback() {
-                    @Override
-                    public void acceptClick(View v) {
-                        if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                            Button button = (Button) v;
-                            button.setBackgroundResource(R.drawable.add_friend_apply);
-                            button.setEnabled(false);
 
-                            int position = (int) button.getTag();
-                            positionList.add(position);
-                            addFriend(contactDredgeList.get(position).getUin(), mType);
-                        } else {
-                            Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                        }
+        //查询通讯录已开通
+        String phoneNumber = (String) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_PHONE_NUMBER, "");
+        contactDredgeList = contactsInfoDao.queryBuilder()
+                .where(ContactsInfoDao.Properties.Uin.gt(1000))
+                .where(ContactsInfoDao.Properties.Phone.notEq(phoneNumber))
+                .list();
+        if (contactDredgeList != null && contactDredgeList.size() > 0){
+            nullLl.setVisibility(View.GONE);
+            allContactsList.add(new ContactsInfo(null,"已开通好友",null,null,2,null,null,null));
+            allContactsList.addAll(contactDredgeList);
+        }
 
-
-                    }
-                },
-                contactDredgeList, positionList);
-
-        contactsAdapter.addRecycleItemListener(new ContactsAdapter.OnRecycleItemListener() {
-            @Override
-            public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
-                int uin = contactDredgeList.get(position).getUin();
-                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    getFriendInfo(uin, v);
-                } else {
-                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        dredgeListView.setAdapter(contactsAdapter);
-    }
-
-    //通讯录未开通
-    private void initNotOpenContactsAdapter() {
-
+        //查询通讯录未开通
         notOpenList = queryNotOpenContactsData();
 
         if (notOpenList == null || notOpenList.size() == 0) {
@@ -452,6 +405,10 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             sideView.setVisibility(View.GONE);
         } else {
             Log.i(TAG, "initNotOpenContactsAdapter: not null");
+
+            allContactsList.add(new ContactsInfo(null,"未开通好友",null,null,3,null,null,null));
+            allContactsList.addAll(notOpenList);
+
             sideView.setVisibility(View.VISIBLE);
             sideView.setOnTouchingLetterChangedListener(new notOpenSideViewListener());
         }
@@ -480,9 +437,22 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 }
 
             }
-        }, notOpenList);
-        Log.i(TAG, "initNotOpenContactsAdapter: 通讯录未开通加载完毕");
+        }, allContactsList);
+
         waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
+        waitInviteAdapter.addRecycleItemListener(new WaitInviteAdapter.OnRecycleItemListener() {
+            @Override
+            public void onRecycleItemClick(View v, Object o) {
+                int position = (int) o;
+                int uin = allContactsList.get(position).getUin();
+                if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+                    getFriendInfo(uin, v);
+                } else {
+                    Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         notOpenListView.setAdapter(waitInviteAdapter);
     }
 
@@ -613,7 +583,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         maybeKnownAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
             public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
+                int position = (int) o;
                 int uin = maybeKnowList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, v);
@@ -822,10 +792,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                                     getRecommendsRespond.getPayload().getFriends();
                             if (friendsBeanList != null && friendsBeanList.size() > 0) {
 
-                                if (mType == 1) { //通讯录已开通
-                                    contactDredgeList.addAll(friendsBeanList);
-                                    handleContactDredge(friendsBeanList);
-                                } else if (mType == 3) {  //全部
+//                                if (mType == 1) { //通讯录已开通
+//                                    contactDredgeList.addAll(friendsBeanList);
+//                                    handleContactDredge(friendsBeanList);
+//                                } else
+
+                                if (mType == 3) {  //全部
                                     allSchoolMateList.addAll(friendsBeanList);
                                     handleSchoolMate(friendsBeanList);
                                 } else if (mType == 4) {  //同年级
@@ -923,7 +895,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         schoolmateAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
             public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
+                int position = (int) o;
                 int uin = allSchoolMateList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, v);
@@ -948,7 +920,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         sameGradeAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
             public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
+                int position = (int) o;
                 int uin = sameGradeList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, v);
@@ -973,7 +945,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         boyAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
             public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
+                int position = (int) o;
                 int uin = boyList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, v);
@@ -999,7 +971,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         girlAdapter.addRecycleItemListener(new SchoolmateAdapter.OnRecycleItemListener() {
             @Override
             public void onRecycleItemClick(View v, Object o) {
-                int position = (int)o;
+                int position = (int) o;
                 int uin = girlList.get(position).getUin();
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
                     getFriendInfo(uin, v);
@@ -1121,7 +1093,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         public void onTouchingLetterChanged(String s) {
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
-                notOpenListView.smoothScrollToPosition(position);
+//                notOpenListView.scrollToPosition(position);
+                LinearLayoutManager llm = (LinearLayoutManager) notOpenListView.getLayoutManager();
+                llm.scrollToPositionWithOffset(position, 0);
             }
         }
     }
@@ -1129,6 +1103,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private List<ContactsInfo> queryNotOpenContactsData() {
         return contactsInfoDao.queryBuilder()
+                .where(ContactsInfoDao.Properties.Uin.eq(0))
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .list();
     }

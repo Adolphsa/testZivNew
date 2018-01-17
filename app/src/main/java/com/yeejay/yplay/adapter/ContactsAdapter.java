@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,7 +52,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
     public interface OnRecycleItemListener <T>{
         void onRecycleItemClick(View v,T o);
     }
-
     private OnRecycleItemListener listener;
 
     public interface hideCallback {

@@ -2,14 +2,13 @@ package com.yeejay.yplay.friend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +27,6 @@ import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.UserInfoResponde;
-import com.yeejay.yplay.userinfo.ActivityMyFriends;
 import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -93,6 +91,10 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     }
 
     private void initAdapter() {
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ActivityAddFiendsDetail.this);
+        aafdListView.setLayoutManager(linearLayoutManager);
+
         friendsDetailAdapter = new FriendsDetailAdapter(ActivityAddFiendsDetail.this,
                 new FriendsDetailAdapter.hideCallback() {
                     @Override

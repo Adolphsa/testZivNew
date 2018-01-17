@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.donkingliang.imageselector.entry.Image;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMElemType;
 import com.tencent.imsdk.TIMImageElem;
@@ -133,7 +131,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 if (dataType == 2) {
                     content = msgContent2.getContent();
-                    System.out.println("chatAdapter消息---" + content);
+//                    System.out.println("chatAdapter消息---" + content);
                 }
 
                 if (holder instanceof LeftMsgViewHolder) {      //左边的聊天框
@@ -143,7 +141,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 } else if (holder instanceof RightMsgViewHolder) {    //右边的聊天框
 
-                    System.out.println("chatAdapter右边---" + content);
+//                    System.out.println("chatAdapter右边---" + content);
                     ((RightMsgViewHolder) holder).msgRight.setText(content);
 
 
@@ -360,10 +358,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             JSONObject jsonObject = new JSONObject(msgContent);
             int dataType = jsonObject.getInt("DataType");
             String data = jsonObject.getString("Data");
-            System.out.println("DataType---" + dataType + "，Data---" + data);
+//            Log.i(TAG, "initVoteCard: DataType---" + dataType + "，Data---" + data);
 
             MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-            System.out.println("投票卡片---" + msgContent2.toString());
+//            System.out.println("投票卡片---" + msgContent2.toString());
             int selectIndex = msgContent2.getSelIndex();
             MsgContent2.QuestionInfoBean questionInfoBean = msgContent2.getQuestionInfo();
             List<MsgContent2.OptionsBean> optionsBeanList = msgContent2.getOptions();

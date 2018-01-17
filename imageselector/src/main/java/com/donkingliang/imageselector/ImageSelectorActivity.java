@@ -45,7 +45,6 @@ import com.donkingliang.imageselector.entry.Image;
 import com.donkingliang.imageselector.model.ImageModel;
 import com.donkingliang.imageselector.utils.DateUtils;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
-import com.donkingliang.imageselector.utils.ImageUtil;
 import com.donkingliang.imageselector.utils.PhotoUtils;
 import com.donkingliang.imageselector.utils.ToastUtils;
 
@@ -275,12 +274,14 @@ public class ImageSelectorActivity extends AppCompatActivity {
         mAdapter.setOnImageSelectListener(new ImageAdapter.OnImageSelectListener() {
             @Override
             public void OnImageSelect(Image image, boolean isSelect, int selectCount) {
+                Log.i(TAG, "OnImageSelect: ---" + selectCount);
                 setSelectImageCount(selectCount);
             }
         });
         mAdapter.setOnItemClickListener(new ImageAdapter.OnItemClickListener() {
             @Override
             public void OnItemClick(Image image, int position) {
+                Log.i(TAG, "OnItemClick: ---" + position);
                 toPreviewActivity(mAdapter.getData(), position);
             }
         });

@@ -1,13 +1,9 @@
 package com.yeejay.yplay.login;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -412,13 +408,13 @@ public class Login extends BaseActivity {
                                 startActivity(new Intent(Login.this, LoginAge.class));
                             } else {
                                 //逻辑跳转
-                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
-                                        loginRespond.getPayload().getInfo().getGrade(),
-                                        loginRespond.getPayload().getInfo().getSchoolId(),
-                                        loginRespond.getPayload().getInfo().getGender(),
-                                        loginRespond.getPayload().getInfo().getNickName()
-                                );
-//                                startActivity(new Intent(Login.this, LoginAge.class));
+//                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
+//                                        loginRespond.getPayload().getInfo().getGrade(),
+//                                        loginRespond.getPayload().getInfo().getSchoolId(),
+//                                        loginRespond.getPayload().getInfo().getGender(),
+//                                        loginRespond.getPayload().getInfo().getNickName()
+//                                );
+                                startActivity(new Intent(Login.this, LoginAge.class));
                             }
                         } else {
                             Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();

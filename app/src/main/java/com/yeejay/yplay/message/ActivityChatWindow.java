@@ -162,7 +162,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         //点击之后立马变为不可点状态
         acwSend.setClickable(false);
         acwSend.setImageResource(R.drawable.feather_no);
-        acwEdit.setText("");
+//        acwEdit.setText("");
         System.out.println("发送消息");
         if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             String str = acwEdit.getText().toString().trim();
@@ -523,24 +523,34 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
                         MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
                         nickName = receiverInfoBean.getNickName();
+                        Log.i(TAG, "receiveBundleData: dataType为1---" + nickName);
 
                     } else if (dataType == 2) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
-                        MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
-                        MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
-                        tempNickname2 = receiverInfoBean.getNickName();
-                        nickName = senderInfoBean.getNickName();
 
-                        int gender = senderInfoBean.getGender();
-                        String genderStr = gender == 1 ? "男生" : "女生";
-                        Log.i(TAG, "receiveBundleData: genderStr---" + genderStr);
-                        int grade = senderInfoBean.getGrade();
-                        int schoolType = senderInfoBean.getSchoolType();
-                        Log.i(TAG, "receiveBundleData: grade---" + grade);
-                        String gradeAndSchool = FriendFeedsUtil.schoolType(schoolType, grade);
-                        gradeAndGenderStr = new StringBuilder(gradeAndSchool);
+                        if (uin != mSender){
+                            MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
+                            nickName = senderInfoBean.getNickName();
+                            tempNickname2 = senderInfoBean.getNickName();
+
+                        }else {
+                            MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+                            tempNickname2 = receiverInfoBean.getNickName();
+                            nickName = receiverInfoBean.getNickName();
+
+                            int gender = receiverInfoBean.getGender();
+                            String genderStr = gender == 1 ? "男生" : "女生";
+                            Log.i(TAG, "receiveBundleData: genderStr---" + genderStr);
+                            int grade = receiverInfoBean.getGrade();
+                            int schoolType = receiverInfoBean.getSchoolType();
+                            Log.i(TAG, "receiveBundleData: grade---" + grade);
+                            String gradeAndSchool = FriendFeedsUtil.schoolType(schoolType, grade);
+                            gradeAndGenderStr = new StringBuilder(gradeAndSchool);
 //                        gradeAndGenderStr.append(gradeAndSchool);
-                        gradeAndGenderStr.append(genderStr);
+                            gradeAndGenderStr.append(genderStr);
+                        }
+
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -670,12 +680,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 switch (v.getId()) {
                     case R.id.message_profile:
                         Log.i(TAG, "onClick: 查看资料");
-//                        Intent intent = new Intent(ActivityChatWindow.this, ActivityFriendsInfo.class);
-//                        intent.putExtra("yplay_friend_name", nickName);
-//                        intent.putExtra("yplay_friend_uin", mSender);
-//                        bottomDialog.dismiss();
-//                        startActivity(intent);
-                        getFriendInfo(mSender);
+                        ImSession imSession = imSessionDao.queryBuilder()
+                                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                                .build().unique();
+                        getFriendInfo(Integer.valueOf(imSession.getChater()));
+                        bottomDialog.dismiss();
                         break;
                     case R.id.message_delete:
                         Log.i(TAG, "onClick: 删除对话");
@@ -842,8 +851,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             Log.i(TAG, "onActivityResult: imagePath---" + imagePath);
             sendMessage(imagePath);
         }
-
-
     }
 
     //显示图片的dialog

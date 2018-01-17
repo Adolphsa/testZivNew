@@ -8,14 +8,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-
-import java.io.IOException;
 
 /**
  * Created by Adolph on 2017/12/28.
@@ -91,6 +88,8 @@ public class PhotoUtils {
      */
     public static Bitmap getBitmapFromUri(Uri uri, Context mContext) {
         try {
+//            Bitmap bitmap = Glide.with(mContext).load(uri).asBitmap().centerCrop().into(500,500).get();
+
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), uri);
             return bitmap;
         } catch (Exception e) {

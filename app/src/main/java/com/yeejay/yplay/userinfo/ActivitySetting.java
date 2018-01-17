@@ -13,10 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -43,21 +41,15 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
-import com.donkingliang.imageselector.utils.ImageUtil;
-import com.donkingliang.imageselector.utils.PhotoUtils;
-import com.donkingliang.imageselector.utils.ToastUtils;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMManager;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
-import com.yanzhenjie.permission.Rationale;
-import com.yanzhenjie.permission.RationaleListener;
 import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.BuildConfig;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
@@ -90,7 +82,6 @@ import butterknife.OnClick;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -155,8 +146,6 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("头像");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
-//            applyForAlbumAuthority();
-//            ImageSelectorUtils.openPhoto(ActivitySetting.this,REQUEST_CODE,true,true,0);
             ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this,REQUEST_CODE);
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
@@ -425,21 +414,6 @@ public class ActivitySetting extends BaseActivity {
         }
     }
 
-    //跳转到系统相册
-    private void applyForAlbumAuthority() {
-        AndPermission.with(ActivitySetting.this)
-                .requestCode(REQUEST_CODE_PERMISSION_SINGLE_IMAGE)
-                .permission(Permission.STORAGE)
-                .callback(mPermissionListener)
-                .rationale(new RationaleListener() {
-                    @Override
-                    public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-                        AndPermission.rationaleDialog(ActivitySetting.this, rationale).show();
-                    }
-                })
-                .start();
-    }
-
     /**
      * 选择图片文件
      */
@@ -501,17 +475,6 @@ public class ActivitySetting extends BaseActivity {
 
                     }
                 });
-
-//        YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-//                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Consumer<ImageUploadRespond>() {
-//                    @Override
-//                    public void accept(ImageUploadRespond imageUploadRespond) throws Exception {
-//                        Log.i(TAG, "accept: 图片上传返回imageUploadRespond---" + imageUploadRespond.toString());
-//                    }
-//                });
     }
 
 
