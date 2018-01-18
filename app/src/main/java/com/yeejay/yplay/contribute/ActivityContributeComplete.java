@@ -22,6 +22,7 @@ public class ActivityContributeComplete extends BaseActivity {
 
     @OnClick(R.id.con_submit_complete)
     public void submitComplete() {
+        setResult(3);
         finish();
     }
 

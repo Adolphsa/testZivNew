@@ -103,7 +103,6 @@ public class ActivityContribute1 extends BaseActivity {
 
     @OnClick(R.id.con_apply_button)
     public void submit() {
-        System.out.println("提交");
         if(NetWorkUtil.isNetWorkAvailable(ActivityContribute1.this)){
 
             String questionText = conEdit.getText().toString();
@@ -225,11 +224,15 @@ public class ActivityContribute1 extends BaseActivity {
                 System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
                         + "current_emoji_index" + emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
-                Picasso.with(ActivityContribute1.this).load(demojiUrl).resize(120, 120).
-                        into(selectedImg);
+                Picasso.with(ActivityContribute1.this).load(demojiUrl).into(selectedImg);
 
                 enableButton(conEdit.getText().toString().trim());
             }
+        } else if(requestCode == 3 && resultCode == 3) {
+            selectedImg.setVisibility(View.GONE);
+            conImg.setVisibility(View.VISIBLE);
+
+            conEdit.setText("");
         }
     }
 
@@ -271,8 +274,8 @@ public class ActivityContribute1 extends BaseActivity {
                             //conEdit.setEnabled(false);
 
                             //投稿成功，跳转到投稿完成页面;
-                            startActivity(new Intent(ActivityContribute1.this,
-                                    ActivityContributeComplete.class));
+                            startActivityForResult(new Intent(ActivityContribute1.this,
+                                    ActivityContributeComplete.class), 3);
                         }else {
                             Toast.makeText(ActivityContribute1.this,"提交失败",Toast.LENGTH_SHORT).show();
                         }
