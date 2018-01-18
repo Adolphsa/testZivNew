@@ -1,13 +1,12 @@
 package com.yeejay.yplay.userinfo;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +14,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -22,6 +24,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +44,9 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
+import com.donkingliang.imageselector.utils.PhotoUtils;
+import com.donkingliang.imageselector.utils.ToastUtils;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMCallBack;
 import com.tencent.imsdk.TIMManager;
@@ -62,6 +68,7 @@ import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
+import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -88,6 +95,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import tangxiaolv.com.library.EffectiveShapeView;
 
+import static com.donkingliang.imageselector.ImageSelectorActivity.hasSdcard;
 import static com.yeejay.yplay.R.layout.activity_setting;
 
 public class ActivitySetting extends BaseActivity {
@@ -146,7 +154,8 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("头像");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
-            ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this,REQUEST_CODE);
+//            ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this,REQUEST_CODE);
+            showImageBottomDialog();
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
@@ -259,22 +268,28 @@ public class ActivitySetting extends BaseActivity {
 
     private static final String TAG = "ActivitySetting";
     private static final int REQ_CODE_SEL_IMG = 15;
-    private static final int CROP_IMAGE = 11;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 200;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_IMAGE = 201;
     private static final int REQUEST_CODE_CHOICE_GENDER = 201;
     private static final int REQUEST_CODE_SCHOOL = 202;
-    private static final int REQUEST_CODE = 0x00000022;
+
+    private static final int REQUEST_CODE = 0x00000011;
+    private static final int CODE_CAMERA_REQUEST = 0xa01;
+    private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0xa03;
+
+    private File fileUri;
+    private Uri imageUri;
+
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
-    private  final int INVALID_NUM = 100000;
-    private  static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
+    private final int INVALID_NUM = 100000;
+    private static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
     private final static int GENDER_MALE = 1;
     private final static int GENDER_FEMALE = 2;
     private final static int TYPE_NICKNAME = 1;
     private final static int TYPE_USERNAME = 2;
     private final static int TYPE_CLASSSCHOOL = 3;
-    private final static int  TYPE_GENDER = 4;
+    private final static int TYPE_GENDER = 4;
 
     String dirStr;
     boolean addressAuthoritySuccess = false;
@@ -296,7 +311,7 @@ public class ActivitySetting extends BaseActivity {
                         ActivitySetting.this.requestPermissions(new String[]{
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                     } else {
-                        selectImage();
+
                     }
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
@@ -344,15 +359,6 @@ public class ActivitySetting extends BaseActivity {
         versionText.setText(ver);
     }
 
-    private void initData() {
-        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-        dirStr = root + File.separator + "yplay" + File.separator + "image";
-        File dir = new File(dirStr);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-    }
 
     //初始化资料
     private void initView(UserInfoResponde.PayloadBean.InfoBean infoBean) {
@@ -376,28 +382,26 @@ public class ActivitySetting extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQ_CODE_SEL_IMG:
-                    //获取选择的图片的URI
-                    if (data != null) {
-                        Uri uri = data.getData();
-//                        cropImage(uri);
-                    }
-                    break;
-                case CROP_IMAGE:
-                    break;
-                case REQUEST_CODE:
-                    ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
-                    String imagePath = images.get(0);
-                    Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
-                    Bitmap bm1 = BitmapFactory.decodeFile(imagePath);
-                    System.out.println("图片位置---" + imagePath);
-                    String imageName = imagePath.substring(imagePath.length()-17,imagePath.length());
-                    uploadImage(imagePath,imageName);
-                    settingImgHeader.setImageBitmap(bm1);
-                    break;
-            }
+        if (requestCode == REQUEST_CODE) {
+
+            ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
+            String imagePath = images.get(0);
+            Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
+            System.out.println("图片位置---" + imagePath);
+            String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+            Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
+            settingImgHeader.setImageBitmap(bm1);
+            uploadImage(imagePath, imageName,bm1);
+
+        } else if (requestCode == CODE_CAMERA_REQUEST) {
+
+            String imagePath = fileUri.getAbsolutePath();
+            String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+            Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
+            Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
+            settingImgHeader.setImageBitmap(bm1);
+            uploadImage(imagePath, imageName,bm1);
+
         } else if (requestCode == REQUEST_CODE_CHOICE_GENDER) {
             if (data != null) {
                 String gender = data.getStringExtra("activity_setting_gender");
@@ -417,18 +421,18 @@ public class ActivitySetting extends BaseActivity {
     /**
      * 选择图片文件
      */
-    private void selectImage() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, REQ_CODE_SEL_IMG);
-    }
+//    private void selectImage() {
+//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.setType("image/*");
+//        startActivityForResult(intent, REQ_CODE_SEL_IMG);
+//    }
 
     //上传图头像
-    private void uploadImage(String imagePath, final String imageName){
+    private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
 
         System.out.println("imageName---" + imageName);
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+//        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] datas = baos.toByteArray();
@@ -446,7 +450,7 @@ public class ActivitySetting extends BaseActivity {
         body.setFilecontent(datas);
 
         YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName , upload,aa)
+                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName, upload, aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
@@ -458,7 +462,7 @@ public class ActivitySetting extends BaseActivity {
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
                         System.out.println("图片上传返回---" + imageUploadRespond.toString());
-                        if (imageUploadRespond.getCode() == 0){
+                        if (imageUploadRespond.getCode() == 0) {
                             //保存图片id
                             SharePreferenceUtil.put(ActivitySetting.this, YPlayConstant.YPLAY_HEADER_IMG, imageName);
                             updateHeaderImg(imageName, null, 0, null);
@@ -688,9 +692,9 @@ public class ActivitySetting extends BaseActivity {
     }
 
     private void showDialogTips(int tag, int letCount) {
-        LayoutInflater inflater=(LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch (tag) {
-            case TYPE_NICKNAME ://nick name
+            case TYPE_NICKNAME://nick name
                 View userNameLayout = inflater.inflate(R.layout.dialog_content_username_layout, null);
                 TextView tips1 = (TextView) userNameLayout.findViewById(R.id.tips1);
                 tips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -734,13 +738,13 @@ public class ActivitySetting extends BaseActivity {
                         });
 
                 CustomDialog customDlg = userBuilder.create();
-                final Button positiveBtn = (Button)userBuilder.getCustomView().findViewById(R.id.positiveButton);
+                final Button positiveBtn = (Button) userBuilder.getCustomView().findViewById(R.id.positiveButton);
                 positiveBtn.setEnabled(false);
 
                 userNameView.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if(s.toString().trim().length() <= 0) {
+                        if (s.toString().trim().length() <= 0) {
                             positiveBtn.setEnabled(false);
                         } else {
                             positiveBtn.setEnabled(true);
@@ -753,7 +757,7 @@ public class ActivitySetting extends BaseActivity {
 
                     @Override
                     public void afterTextChanged(Editable s) {
-                        if(s.toString().trim().length() <= 0) {
+                        if (s.toString().trim().length() <= 0) {
                             positiveBtn.setEnabled(false);
                         } else {
                             positiveBtn.setEnabled(true);
@@ -764,7 +768,7 @@ public class ActivitySetting extends BaseActivity {
                 customDlg.show();
 
                 break;
-            case TYPE_USERNAME ://userkname
+            case TYPE_USERNAME://userkname
                 View nickNameLayout = inflater.inflate(R.layout.dialog_content_nickname_layout, null);
                 TextView nickNameTips1 = (TextView) nickNameLayout.findViewById(R.id.tips1);
                 nickNameTips1.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -804,13 +808,13 @@ public class ActivitySetting extends BaseActivity {
                             }
                         });
                 CustomDialog usernameDlg = nickBuilder.create();
-                final Button usernamePosBtn = (Button)nickBuilder.getCustomView().findViewById(R.id.positiveButton);
+                final Button usernamePosBtn = (Button) nickBuilder.getCustomView().findViewById(R.id.positiveButton);
                 usernamePosBtn.setEnabled(false);
 
                 nickNameView.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if(s.toString().trim().length() <= 0) {
+                        if (s.toString().trim().length() <= 0) {
                             usernamePosBtn.setEnabled(false);
                         } else {
                             usernamePosBtn.setEnabled(true);
@@ -823,7 +827,7 @@ public class ActivitySetting extends BaseActivity {
 
                     @Override
                     public void afterTextChanged(Editable s) {
-                        if(s.toString().trim().length() <= 0) {
+                        if (s.toString().trim().length() <= 0) {
                             usernamePosBtn.setEnabled(false);
                         } else {
                             usernamePosBtn.setEnabled(true);
@@ -834,10 +838,10 @@ public class ActivitySetting extends BaseActivity {
                 usernameDlg.show();
 
                 break;
-            case TYPE_CLASSSCHOOL :
+            case TYPE_CLASSSCHOOL:
 
                 break;
-            case TYPE_GENDER ://gender
+            case TYPE_GENDER://gender
 //                View GenderLayout = inflater.inflate(R.layout.dialog_content_gender_layout, null);
 //                TextView genderTips = (TextView) GenderLayout.findViewById(R.id.tips1);
 //                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
@@ -848,7 +852,7 @@ public class ActivitySetting extends BaseActivity {
 //                CustomDialog.Builder genderBuilder = new CustomDialog.Builder(this);
 //                genderBuilder.setContentView(GenderLayout);
 //                genderBuilder.create().show();
-                CustomGenderDialog.Builder  genderBuilder = new CustomGenderDialog.Builder(this);
+                CustomGenderDialog.Builder genderBuilder = new CustomGenderDialog.Builder(this);
                 final CustomGenderDialog genderDialog = genderBuilder.create();
                 final View genderContentView = genderBuilder.getContentView();
                 TextView genderTips = (TextView) genderContentView.findViewById(R.id.tips1);
@@ -906,15 +910,15 @@ public class ActivitySetting extends BaseActivity {
     }
 
     //选择性别
-    private void choiceSex(final int gender){
+    private void choiceSex(final int gender) {
 
-        Map<String,Object> sexMap = new HashMap<>();
+        Map<String, Object> sexMap = new HashMap<>();
         System.out.println("gender---" + gender);
-        sexMap.put("gender",gender);
-        sexMap.put("flag",1);
-        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN,0));
-        sexMap.put("token",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_TOKEN,"yplay"));
-        sexMap.put("ver",SharePreferenceUtil.get(this,YPlayConstant.YPLAY_VER,0));
+        sexMap.put("gender", gender);
+        sexMap.put("flag", 1);
+        sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN, 0));
+        sexMap.put("token", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        sexMap.put("ver", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .choiceSex(sexMap)
@@ -928,7 +932,7 @@ public class ActivitySetting extends BaseActivity {
 
                     @Override
                     public void onNext(@NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0){
+                        if (baseRespond.getCode() == 0) {
                             System.out.println("gender set successfully---" + baseRespond.toString());
 //                            if (isActivitySetting == 1){
 //                                Intent intent = new Intent();
@@ -941,7 +945,7 @@ public class ActivitySetting extends BaseActivity {
 //                                //jumpToWhere();
 //                            }
 
-                        }else {
+                        } else {
                             System.out.println("gender set error---" + baseRespond.toString());
                         }
                     }
@@ -1187,7 +1191,7 @@ public class ActivitySetting extends BaseActivity {
                 if (isFirstShowDialog) {
                     Log.i(TAG, "onReceiveLocation: isFirstShowDialog---" + isFirstShowDialog);
                     isFirstShowDialog = false;
-                    SettingDialog  settingDialog = AndPermission.defaultSettingDialog(ActivitySetting.this, 402);
+                    SettingDialog settingDialog = AndPermission.defaultSettingDialog(ActivitySetting.this, 402);
                     settingDialog.setTitle("开启位置权限");
                     settingDialog.setMessage("通过您的位置定位离您最近的学校");
                     settingDialog.show();
@@ -1195,6 +1199,118 @@ public class ActivitySetting extends BaseActivity {
             }
         }
     };
+
+    //显示底部对话框
+    private void showImageBottomDialog() {
+
+        final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
+        View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
+        bottomDialog.setContentView(contentView);
+
+        Button msgProBt = (Button) contentView.findViewById(R.id.message_profile);
+        msgProBt.setText("相册");
+        Button msgDeleteBt = (Button) contentView.findViewById(R.id.message_delete);
+        msgDeleteBt.setText("拍照");
+        msgDeleteBt.setTextColor(getResources().getColor(R.color.message_profile_blue));
+        Button msgCancelBt = (Button) contentView.findViewById(R.id.message_cancel);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.message_profile:
+                        Log.i(TAG, "onClick: 相册");
+                        ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this, REQUEST_CODE);
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_delete:
+                        Log.i(TAG, "onClick: 拍照");
+                        initData();
+                        autoObtainCameraPermission();
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_cancel:
+                        Log.i(TAG, "onClick: 取消");
+                        bottomDialog.dismiss();
+                        break;
+                }
+            }
+        };
+
+        msgProBt.setOnClickListener(onClickListener);
+        msgDeleteBt.setOnClickListener(onClickListener);
+        msgCancelBt.setOnClickListener(onClickListener);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentView.getLayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels - DensityUtil.dp2px(this, 16f);
+        params.bottomMargin = DensityUtil.dp2px(this, 8f);
+        contentView.setLayoutParams(params);
+        bottomDialog.setCanceledOnTouchOutside(true);
+        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        bottomDialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
+        bottomDialog.show();
+    }
+
+    /**
+     * 自动获取相机权限
+     */
+    private void autoObtainCameraPermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                ToastUtils.showShort(this, "您已经拒绝过一次");
+            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSIONS_REQUEST_CODE);
+        } else {//有权限直接调用系统相机拍照
+            if (hasSdcard()) {
+                imageUri = Uri.fromFile(fileUri);
+                //通过FileProvider创建一个content类型的Uri
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    imageUri = FileProvider.getUriForFile(ActivitySetting.this, "com.donkingliang.imageselector", fileUri);
+                }
+                PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                Log.i(TAG, "autoObtainCameraPermission: CODE_CAMERA_REQUEST---" + CODE_CAMERA_REQUEST);
+            } else {
+                ToastUtils.showShort(this, "设备没有SD卡！");
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (hasSdcard()) {
+                    imageUri = Uri.fromFile(fileUri);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        imageUri = FileProvider.getUriForFile(ActivitySetting.this, "com.donkingliang.imageselector", fileUri);//通过FileProvider创建一个content类型的Uri
+                    PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                } else {
+                    ToastUtils.showShort(this, "设备没有SD卡！");
+                }
+            } else {
+
+                ToastUtils.showShort(this, "请允许打开相机！！");
+            }
+        }
+    }
+
+    private void initData() {
+
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String dirStr = root + File.separator + "yplay" + File.separator + "image";
+        File dir = new File(dirStr);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        String tempImage = String.valueOf(System.currentTimeMillis());
+        fileUri = new File(dirStr, tempImage + ".jpg");
+
+    }
+
 
     @Override
     protected void onStop() {

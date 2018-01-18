@@ -162,7 +162,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         //点击之后立马变为不可点状态
         acwSend.setClickable(false);
         acwSend.setImageResource(R.drawable.feather_no);
-//        acwEdit.setText("");
+
         System.out.println("发送消息");
         if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             String str = acwEdit.getText().toString().trim();
@@ -206,7 +206,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         (System.currentTimeMillis() / 1000),
                         1);
                 imMsgDao.insert(imMsg2);
-
 
                 mDataList.add(0, imMsg0);
                 mDataList.add(0, imMsg1);
@@ -433,8 +432,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
 
             @Override
-            public void loadMore() {
-            }
+            public void loadMore() {}
         });
 
     }
@@ -616,6 +614,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @Override
     public void onMessageUpdate(ImMsg imMsg) {
+
         String content = imMsg.getMsgContent();
         System.out.println("聊天窗口收到了content---" + content);
         String tempSessionId = imMsg.getSessionId();
@@ -777,6 +776,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     //发送加好友的请求
     private void addFriend(int toUin,int srcType) {
+
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
         addFreindMap.put("srcType",srcType);
@@ -890,6 +890,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         });
         if (!TextUtils.isEmpty(imagePath)) {
             Picasso.with(ActivityChatWindow.this).load(imagePath)
+                    .resize(screenWidth,largeHeight * screenWidth / largeWidth)
                     .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                     .into(imageView);
         }
@@ -899,6 +900,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     //显示底部对话框
     private void showImageBottomDialog() {
+
         final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
         View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
         bottomDialog.setContentView(contentView);

@@ -20,9 +20,7 @@ import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observer;
@@ -40,8 +38,6 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
     private int uin;
     private String token;
     private int ver;
-
-    private final int REQUEST_PHONE_PERMISSIONS = 0;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -68,7 +64,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
-        final List<String> permissionsList = new ArrayList<>();
+
         getWindow().setStatusBarColor(getResources().getColor(R.color.loading_color));
 
         clearNotification();

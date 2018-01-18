@@ -259,7 +259,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                     ViewGroup.LayoutParams lp = ((RightImageViewHolder)holder).msgImageRight.getLayoutParams();
                     ViewGroup.LayoutParams lpUp = ((RightImageViewHolder)holder).msgImageRightUp.getLayoutParams();
 
-
                     if (width > height){
                         lp.width = DensityUtil.dp2px(context,200);
                         lp.height = DensityUtil.dp2px(context,200*height/width);

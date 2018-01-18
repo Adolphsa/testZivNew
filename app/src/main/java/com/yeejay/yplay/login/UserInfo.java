@@ -1,14 +1,25 @@
 package com.yeejay.yplay.login;
 
+import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,13 +27,16 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
+import com.donkingliang.imageselector.utils.PhotoUtils;
+import com.donkingliang.imageselector.utils.ToastUtils;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
-import com.yeejay.yplay.utils.NetWorkUtil;
+import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -41,16 +55,22 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import tangxiaolv.com.library.EffectiveShapeView;
 
+import static com.donkingliang.imageselector.ImageSelectorActivity.hasSdcard;
+
 public class UserInfo extends BaseActivity {
 
     private static final String TAG = "UserInfo";
     private static final int REQUEST_CODE = 0x00000011;
+    private static final int CODE_CAMERA_REQUEST = 0xa01;
+    private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0xa03;
+
+    private File fileUri;
+    private Uri imageUri;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
     private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
 
     EffectiveShapeView userHeadImage;
     EditText userName;
-    String dirStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +94,8 @@ public class UserInfo extends BaseActivity {
         userHeadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //跳转到系统相册
-                if (NetWorkUtil.isNetWorkAvailable(UserInfo.this)) {
-                    ImageSelectorUtils.openPhotoAndClip(UserInfo.this, REQUEST_CODE);
-                } else {
-                    Toast.makeText(UserInfo.this, "网络异常", Toast.LENGTH_SHORT).show();
-                }
+                //显示拍照和相册选项
+                showImageBottomDialog();
 
             }
         });
@@ -92,16 +108,19 @@ public class UserInfo extends BaseActivity {
             }
         });
 
-        initData();
+
     }
 
     private void initData() {
+
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-        dirStr = root + File.separator + "yplay" + File.separator + "image";
+        String dirStr = root + File.separator + "yplay" + File.separator + "image";
         File dir = new File(dirStr);
         if (!dir.exists()) {
             dir.mkdirs();
         }
+        String tempImage = String.valueOf(System.currentTimeMillis());
+        fileUri = new File(dirStr,tempImage + ".jpg");
 
     }
 
@@ -109,17 +128,26 @@ public class UserInfo extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        String imagePath = "";
+        String imageName = "";
+
         if (requestCode == REQUEST_CODE && data != null) {
             ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
-            Log.i(TAG, "onActivityResult: images_url---" + images.get(0));
-            String imagePath = images.get(0);
-            Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
-            Bitmap bm1 = BitmapFactory.decodeFile(imagePath);
-            System.out.println("图片位置---" + imagePath);
-            String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
-            uploadImage(imagePath, imageName);
-            userHeadImage.setImageBitmap(bm1);
+
+            imagePath = images.get(0);
+            imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+            Log.i(TAG, "onActivityResult: 相册imagePath---" + imagePath + ",imageName---" + imageName);
+
+        } else if (requestCode == CODE_CAMERA_REQUEST) {
+
+            imagePath = fileUri.getAbsolutePath();
+            imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+            Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
+
         }
+        Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
+        userHeadImage.setImageBitmap(bm1);
+        uploadImage(imagePath, imageName,bm1);
     }
 
     @Override
@@ -137,11 +165,11 @@ public class UserInfo extends BaseActivity {
     }
 
     //上传图头像
-    private void uploadImage(String imagePath, final String imageName) {
+    private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
 
         System.out.println("imageName---" + imageName);
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+//        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] datas = baos.toByteArray();
@@ -150,8 +178,7 @@ public class UserInfo extends BaseActivity {
         RequestBody requestFile =
                 RequestBody.create(
                         MediaType.parse("image/*"),
-                        new File(imagePath)
-                );
+                        new File(imagePath));
         MultipartBody.Part aa = MultipartBody.Part.createFormData("filecontent", imageName, requestFile);
 
         ImageUploadBody body = new ImageUploadBody();
@@ -275,5 +302,103 @@ public class UserInfo extends BaseActivity {
 
                     }
                 });
+    }
+
+    //显示底部对话框
+    private void showImageBottomDialog() {
+
+        final Dialog bottomDialog = new Dialog(this, R.style.BottomDialog);
+        View contentView = LayoutInflater.from(this).inflate(R.layout.layout_dialog_content_circle, null);
+        bottomDialog.setContentView(contentView);
+
+        Button msgProBt = (Button) contentView.findViewById(R.id.message_profile);
+        msgProBt.setText("相册");
+        Button msgDeleteBt = (Button) contentView.findViewById(R.id.message_delete);
+        msgDeleteBt.setText("拍照");
+        msgDeleteBt.setTextColor(getResources().getColor(R.color.message_profile_blue));
+        Button msgCancelBt = (Button) contentView.findViewById(R.id.message_cancel);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.message_profile:
+                        Log.i(TAG, "onClick: 相册");
+                        ImageSelectorUtils.openPhotoAndClip(UserInfo.this, REQUEST_CODE);
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_delete:
+                        Log.i(TAG, "onClick: 拍照");
+                        initData();
+                        autoObtainCameraPermission();
+                        bottomDialog.dismiss();
+                        break;
+                    case R.id.message_cancel:
+                        Log.i(TAG, "onClick: 取消");
+                        bottomDialog.dismiss();
+                        break;
+                }
+            }
+        };
+
+        msgProBt.setOnClickListener(onClickListener);
+        msgDeleteBt.setOnClickListener(onClickListener);
+        msgCancelBt.setOnClickListener(onClickListener);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentView.getLayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels - DensityUtil.dp2px(this, 16f);
+        params.bottomMargin = DensityUtil.dp2px(this, 8f);
+        contentView.setLayoutParams(params);
+        bottomDialog.setCanceledOnTouchOutside(true);
+        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        bottomDialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
+        bottomDialog.show();
+    }
+
+    /**
+     * 自动获取相机权限
+     */
+    private void autoObtainCameraPermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                ToastUtils.showShort(this, "您已经拒绝过一次");
+            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSIONS_REQUEST_CODE);
+        } else {//有权限直接调用系统相机拍照
+            if (hasSdcard()) {
+                imageUri = Uri.fromFile(fileUri);
+                //通过FileProvider创建一个content类型的Uri
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    imageUri = FileProvider.getUriForFile(UserInfo.this, "com.donkingliang.imageselector", fileUri);
+                }
+                PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                Log.i(TAG, "autoObtainCameraPermission: CODE_CAMERA_REQUEST---" + CODE_CAMERA_REQUEST);
+            } else {
+                ToastUtils.showShort(this, "设备没有SD卡！");
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (hasSdcard()) {
+                    imageUri = Uri.fromFile(fileUri);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        imageUri = FileProvider.getUriForFile(UserInfo.this, "com.donkingliang.imageselector", fileUri);//通过FileProvider创建一个content类型的Uri
+                    PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
+                } else {
+                    ToastUtils.showShort(this, "设备没有SD卡！");
+                }
+            } else {
+
+                ToastUtils.showShort(this, "请允许打开相机！！");
+            }
+        }
     }
 }

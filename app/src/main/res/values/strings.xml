@@ -92,26 +92,4 @@
     <string name="aafg_text2">通讯录好友</string>
     <string name="aafg_text3">同校好友</string>
     <string name="guide_finish_text2">人缘不要太好!</string>
-    <string name="contribute_selecte_img">选择图片</string>
-    <string name="contribute_note">匿名投稿你的问题, 让同校同年级同学回答</string>
-    <string name="contribute_commit_hint">输入投稿标题, 最多30个字</string>
-    <string name="contribute_commit_text_count_hint">0/30</string>
-    <string name="contribute_title">投稿</string>
-    <string name="contribute_submit">提交</string>
-    <string name="contribute_submit_complete">完成</string>
-    <string name="contribute_submit_query">查看投稿</string>
-    <string name="contribute_submit_verify">匿名投稿成功，审核中(*^__^*)</string>
-    <string name="contribute_offline">未上线</string>
-    <string name="contribute_online">已上线</string>
-    <string name="contribute_offline_reviewing">审核中</string>
-    <string name="contribute_offline_refused">审核未通过</string>
-    <string name="contribute_offline_reviewing_warning">正在急速审核中~</string>
-    <string name="delete">删除</string>
-    <string name="re_edit">重新编辑</string>
-    <string name="question_delete_contribute_msg">是否删除投稿</string>
-    <string name="contribute_answer_num_note_msg1">本校同年级一共有</string>
-    <string name="contribute_answer_num_note_msg2">人回答了你的题目啦</string>
-    <string name="contribute_answer_num_note_msg">本校同年级一共有0人回答了你的题目啦</string>
-    <string name="hot">热度</string>
-    <string name="zero">0</string>
 </resources>

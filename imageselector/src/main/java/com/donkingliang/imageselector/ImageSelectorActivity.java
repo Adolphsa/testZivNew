@@ -34,7 +34,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.donkingliang.imageselector.adapter.FolderAdapter;
@@ -59,7 +58,7 @@ public class ImageSelectorActivity extends AppCompatActivity {
     private TextView tvFolderName;
 //    private TextView tvConfirm;
     private TextView tvPreview;
-    private ImageButton ibCamera;
+//    private ImageButton ibCamera;
 //    private FrameLayout btnConfirm;
     private FrameLayout btnPreview;
     private RecyclerView rvImage;
@@ -78,7 +77,9 @@ public class ImageSelectorActivity extends AppCompatActivity {
 //    private static final int CODE_RESULT_REQUEST = 0xa2;
     private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0x03;
 //    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x04;
-    private File fileUri = new File(Environment.getExternalStorageDirectory().getPath() + "/photo.jpg");
+    String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+    String dirStr = root + File.separator + "yplay" + File.separator + "image";
+    private File fileUri = new File(dirStr +  "/" + System.currentTimeMillis() + ".jpg");
     private File fileCropUri = new File(Environment.getExternalStorageDirectory().getPath() + "/crop_photo.jpg");
     private Uri imageUri;
 
@@ -149,14 +150,14 @@ public class ImageSelectorActivity extends AppCompatActivity {
         rvFolder = (RecyclerView) findViewById(R.id.rv_folder);
 //        tvConfirm = (TextView) findViewById(R.id.tv_confirm);
         tvPreview = (TextView) findViewById(R.id.tv_preview);
-        ibCamera = (ImageButton) findViewById(R.id.ib_camera);
+//        ibCamera = (ImageButton) findViewById(R.id.ib_camera);
 //        btnConfirm = (FrameLayout) findViewById(R.id.btn_confirm);
         btnPreview = (FrameLayout) findViewById(R.id.btn_preview);
         tvFolderName = (TextView) findViewById(R.id.tv_folder_name);
         tvTime = (TextView) findViewById(R.id.tv_time);
         masking = findViewById(R.id.masking);
         if (isSettingHeader){
-            ibCamera.setVisibility(View.VISIBLE);
+//            ibCamera.setVisibility(View.VISIBLE);
         }
     }
 
@@ -183,13 +184,13 @@ public class ImageSelectorActivity extends AppCompatActivity {
 //                confirm();
 //            }
 //        });
-        ibCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "onClick: 开启相机");
-                autoObtainCameraPermission();
-            }
-        });
+//        ibCamera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.i(TAG, "onClick: 开启相机");
+//                autoObtainCameraPermission();
+//            }
+//        });
         findViewById(R.id.btn_folder).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

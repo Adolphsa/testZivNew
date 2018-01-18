@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/shape_con1_edit_background" android:state_focused="false"/>
-    <item android:drawable="@drawable/shape_con1_edit_selected_background" android:state_focused="true"/>
-</selector>

@@ -16,8 +16,6 @@ import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.QuestionRespond;
-import com.yeejay.yplay.model.SubmitQueryDetailRespond;
-import com.yeejay.yplay.model.SubmitQueryListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
@@ -262,23 +260,4 @@ public interface YPlayApi {
                                             @Part("op") RequestBody upload,
                                             @Part MultipartBody.Part file);
 
-    //查询所有类型的投稿列表
-    @FormUrlEncoded
-    @POST("/api/submit/querylist")
-    Observable<SubmitQueryListRespond> getContributeList(@FieldMap Map<String,Object> filemap);
-
-    //查询未上线的投稿列表
-    @FormUrlEncoded
-    @POST("/api/submit/querylistnotonline")
-    Observable<SubmitQueryListRespond> getContributeOfflineList(@FieldMap Map<String,Object> filemap);
-
-    //删除选择的未审核通过列表项
-    @FormUrlEncoded
-    @POST("/api/submit/delete")
-    Observable<SubmitQueryListRespond> deleteContributeItem(@FieldMap Map<String,Object> filemap);
-
-    //查询已经上线的题目投票详情
-    @FormUrlEncoded
-    @POST("/api/submit/querydetail")
-    Observable<SubmitQueryDetailRespond> getSubmitQueryDetail(@FieldMap Map<String,Object> filemap);
 }

@@ -165,6 +165,7 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             ((ViewHolder) holder).afItemHeaderImg.setVisibility(View.VISIBLE);
             ((ViewHolder) holder).afItemFamilyName.setVisibility(View.INVISIBLE);
+            ((ViewHolder) holder).afiFirstAlpha.setVisibility(View.GONE);
 
             ContactsInfo contactsInfo = contentList.get(position);
 

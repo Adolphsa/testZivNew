@@ -2,7 +2,6 @@ package com.yeejay.yplay.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -32,7 +31,6 @@ public class GuideSchoolmateAdapter extends BaseAdapter implements View.OnClickL
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> contentList;
-    List<Integer> positionList;
 
 
     View.OnClickListener hideListener = new View.OnClickListener() {
@@ -60,13 +58,11 @@ public class GuideSchoolmateAdapter extends BaseAdapter implements View.OnClickL
     public GuideSchoolmateAdapter(Context context,
                                   hideCallback hideCallback,
                                   acceptCallback acceptCallback,
-                                  List<GetRecommendsRespond.PayloadBean.FriendsBean> list,
-                                  List positionList) {
+                                  List<GetRecommendsRespond.PayloadBean.FriendsBean> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
-        this.positionList = positionList;
     }
 
     @Override
@@ -104,10 +100,7 @@ public class GuideSchoolmateAdapter extends BaseAdapter implements View.OnClickL
 
         String url = friendsBean.getHeadImgUrl();
         String nickName = friendsBean.getNickName();
-        int status = friendsBean.getStatus();
         String str = friendsBean.getRecommendDesc();
-
-//        Log.i(TAG, "getView: status---" + status);
 
         if (!TextUtils.isEmpty(url)) {
             Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
@@ -125,15 +118,6 @@ public class GuideSchoolmateAdapter extends BaseAdapter implements View.OnClickL
         holder.afBtnAccept.setEnabled(true);
         holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_no);
         holder.afBtnAccept.setOnClickListener(acceptListener);
-
-//        for (Integer temp : positionList){
-//            if (temp == position){
-//                Log.i(TAG, "getView: 已经接受的item---" + temp);
-//                holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_yes);
-//                holder.afBtnAccept.setOnClickListener(acceptListener);
-//            }
-//        }
-
         holder.afBtnAccept.setTag(position);
         return convertView;
     }

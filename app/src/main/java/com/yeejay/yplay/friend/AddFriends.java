@@ -422,16 +422,26 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             @Override
             public void acceptClick(View v) {
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
+
                     Button button = (Button) v;
-                    button.setBackgroundResource(R.drawable.friend_invitation_done);
+                    int position = (int) v.getTag();
+                    int uin = allContactsList.get(position).getUin();
+
+                    if (uin == 0){  //未开通
+                        button.setBackgroundResource(R.drawable.friend_invitation_done);
+                        String phone = GsonUtil.GsonString(allContactsList.get(position).getPhone());
+                        System.out.println("邀请的电话---" + phone);
+                        String phoneStr = "[" + phone + "]";
+                        String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
+                        Log.i(TAG, "acceptClick: base64phone---" + base64phone);
+                        invitefriendsbysms(base64phone);
+                    }else if (uin > 1000){  //已开通
+                        button.setBackgroundResource(R.drawable.add_friend_apply);
+                        addFriend(allContactsList.get(position).getUin(), mType);
+                    }
+
                     button.setEnabled(false);
 
-                    String phone = GsonUtil.GsonString(notOpenList.get((int) v.getTag()).getPhone());
-                    System.out.println("邀请的电话---" + phone);
-                    String phoneStr = "[" + phone + "]";
-                    String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
-                    Log.i(TAG, "acceptClick: base64phone---" + base64phone);
-                    invitefriendsbysms(base64phone);
                 } else {
                     Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }

@@ -366,19 +366,24 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                         if (baseRespond.getCode() == 0){
                             Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
                             DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
-                            dbHelper.insertFriendInfo(new FriendInfo(null,
-                                    msgsBean.getFromUin(),
-                                    msgsBean.getFromNickName(),
-                                    msgsBean.getFromHeadImgUrl(),
-                                    msgsBean.getFromGender(),
-                                    msgsBean.getFromGrade(),
-                                    msgsBean.getSchoolId(),
-                                    msgsBean.getSchoolType(),
-                                    msgsBean.getSchoolName(),
-                                    msgsBean.getTs(),
-                                    BaseUtils.getSortKey(msgsBean.getFromNickName()),
-                                    String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
-                            Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
+                            if (dbHelper.queryFriendInfo(msgsBean.getFromUin()) == null){
+                                dbHelper.insertFriendInfo(new FriendInfo(null,
+                                        msgsBean.getFromUin(),
+                                        msgsBean.getFromNickName(),
+                                        msgsBean.getFromHeadImgUrl(),
+                                        msgsBean.getFromGender(),
+                                        msgsBean.getFromGrade(),
+                                        msgsBean.getSchoolId(),
+                                        msgsBean.getSchoolType(),
+                                        msgsBean.getSchoolName(),
+                                        msgsBean.getTs(),
+                                        BaseUtils.getSortKey(msgsBean.getFromNickName()),
+                                        String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
+                                Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
+                            }else {
+                                Log.i(TAG, "onNext: 已添加---" + msgsBean.getFromUin());
+                            }
+
                         }
                     }
 

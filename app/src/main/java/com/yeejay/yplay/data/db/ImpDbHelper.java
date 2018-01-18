@@ -1,8 +1,5 @@
 package com.yeejay.yplay.data.db;
 
-import android.text.TextUtils;
-
-import com.github.promeg.pinyinhelper.Pinyin;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.greendao.DaoSession;
 import com.yeejay.yplay.greendao.FriendInfo;

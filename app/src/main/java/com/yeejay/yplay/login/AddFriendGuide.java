@@ -80,8 +80,6 @@ public class AddFriendGuide extends AppCompatActivity {
 
     private GuideSchoolmateAdapter schoolmateAdapter;//全部同学适配器
     List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
-    List<Integer> contactsPositionList;
-    List<Integer> sameSchoolPositionList;
 
     int mPageNum = 1;
     int mType = 3;
@@ -99,8 +97,6 @@ public class AddFriendGuide extends AppCompatActivity {
         phoneNumber = (String) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_PHONE_NUMBER, "");
 
         contactsList = new ArrayList<>();
-        contactsPositionList = new ArrayList();
-        sameSchoolPositionList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
 
         initContactAdapter();
@@ -138,7 +134,6 @@ public class AddFriendGuide extends AppCompatActivity {
                             sumFriendNumber++;
 
                             int position = (int) button.getTag();
-                            contactsPositionList.add(position);
                             addFriend(contactsList.get(position).getUin(), mType);
 
                             contactsList.remove(position);
@@ -151,7 +146,7 @@ public class AddFriendGuide extends AppCompatActivity {
                         }
                     }
                 },
-                contactsList, contactsPositionList);
+                contactsList);
         aafgContactsList.setAdapter(contactsAdapter);
     }
 
@@ -171,8 +166,6 @@ public class AddFriendGuide extends AppCompatActivity {
                             sumFriendNumber++;
 
                             int position = (int) button.getTag();
-
-                            sameSchoolPositionList.add(position);
                             addFriend(allSchoolMateList.get(position).getUin(), mType);
 
                             allSchoolMateList.remove(position);
@@ -185,7 +178,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
                     }
                 },
-                allSchoolMateList, sameSchoolPositionList);
+                allSchoolMateList);
 
         aafgSameSchoolList.setAdapter(schoolmateAdapter);
     }

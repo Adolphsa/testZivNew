@@ -1,14 +1,10 @@
 package com.yeejay.yplay.contribute;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -17,7 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +21,6 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
-import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -44,18 +38,15 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ActivityContribute1 extends BaseActivity {
-    private static final String TAG = "ActivityContribute1";
 
     private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
-    @BindView(R.id.contribute_history)
-    ImageButton contributeHistory;
+    @BindView(R.id.layout_title2)
+    TextView layoutTitle2;
     @BindView(R.id.con_img)
-    LinearLayout conImg;
-    @BindView(R.id.con_selected_img)
-    ImageView selectedImg;
+    ImageView conImg;
     @BindView(R.id.con_edit)
     EditText conEdit;
     @BindView(R.id.con_text_count)
@@ -64,30 +55,17 @@ public class ActivityContribute1 extends BaseActivity {
     Button conApplyButton;
     @BindView(R.id.con_apply_ll)
     LinearLayout conApplyLl;
-    @BindView(R.id.rl_edittext)
-    RelativeLayout rlEditText;
-    @BindView(R.id.contribute_new)
-    ImageView contributeNew;
+    @BindView(R.id.con_complet_button)
+    Button conCompletButton;
+    @BindView(R.id.con_complete_ll)
+    LinearLayout conCompleteLl;
 
-    @OnClick(R.id.con_edit)
-    public void clickEdit() {
-        Log.d(TAG, "con_edit clicked!");
-        rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
-        conEdit.setCursorVisible(true);
-    }
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
         finish();
     }
 
-    @OnClick(R.id.contribute_history)
-    public void toContributeHistory() {
-        //点击后，如果上次处于有新投稿的状态，则隐藏红旗图标;
-        contributeNew.setVisibility(View.GONE);
-
-        startActivity(new Intent(ActivityContribute1.this, ActivityContributeQuery.class));
-    }
 
     @OnClick(R.id.con_img)
     public void conEmojiImg() {
@@ -95,14 +73,10 @@ public class ActivityContribute1 extends BaseActivity {
         startActivityForResult(intent, 2);
     }
 
-    @OnClick(R.id.con_selected_img)
-    public void clickSelected_img() {
-        Intent intent = new Intent(ActivityContribute1.this, ActivityContribute2.class);
-        startActivityForResult(intent, 2);
-    }
-
     @OnClick(R.id.con_apply_button)
     public void submit() {
+
+        System.out.println("提交");
         if(NetWorkUtil.isNetWorkAvailable(ActivityContribute1.this)){
 
             String questionText = conEdit.getText().toString();
@@ -117,66 +91,33 @@ public class ActivityContribute1 extends BaseActivity {
 
     }
 
+    @OnClick(R.id.con_complet_button)
+    public void conComplete() {
+        System.out.println("完成");
+        finish();
+    }
+
     int emojiIndex = -1;
-
-    private BroadcastReceiver mContributeBr = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int flag = intent.getIntExtra("contribute_flag", 0);
-            LogUtils.getInstance().debug(TAG + " , mContributeBr, flag = " + String.valueOf(flag));
-            if (1 == flag) { //表示有新的投稿消息;
-                contributeNew.setVisibility(View.VISIBLE);
-            }
-        }
-    };
-
-    private void registerBr() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.yeejay.br.contribute");
-        registerReceiver(mContributeBr, intentFilter);
-    }
-
-    private void unregisterBr() {
-        unregisterReceiver(mContributeBr);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contribute1);
-
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContribute1.this, true);
+        layoutTitleBack2.setImageResource(R.drawable.con_back);
+        layoutTitle2.setText("投稿");
+        layoutTitle2.setTextColor(getResources().getColor(R.color.contribute_color));
 
-        registerBr();
         conApplyButton.setEnabled(false);
 
         initEdit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterBr();
-    }
-
 
     private void initEdit() {
-        rlEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                Log.d(TAG, "rl_edittext focused!, hasFocus = " + hasFocus);
-                if (hasFocus) {
-                    rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
-                    conEdit.setCursorVisible(true);
-                } else {
-                    rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_background);
-                    conEdit.setCursorVisible(false);
-                }
-            }
-        });
 
         conEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -216,23 +157,16 @@ public class ActivityContribute1 extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 2 && resultCode == 1) {
             if (data != null) {
-                conImg.setVisibility(View.GONE);
-                selectedImg.setVisibility(View.VISIBLE);
-
                 int currentSelectEmoji = data.getIntExtra("current_select_emoji", 0);
                 emojiIndex = data.getIntExtra("current_emoji_index", 0);
                 System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
                         + "current_emoji_index" + emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
-                Picasso.with(ActivityContribute1.this).load(demojiUrl).into(selectedImg);
+                Picasso.with(ActivityContribute1.this).load(demojiUrl).into(conImg);
+                //conImg.setImageResource(currentSelectEmoji);
 
                 enableButton(conEdit.getText().toString().trim());
             }
-        } else if(requestCode == 3 && resultCode == 3) {
-            selectedImg.setVisibility(View.GONE);
-            conImg.setVisibility(View.VISIBLE);
-
-            conEdit.setText("");
         }
     }
 
@@ -271,11 +205,10 @@ public class ActivityContribute1 extends BaseActivity {
                     public void onNext(BaseRespond baseRespond) {
                         System.out.println("投稿---" + baseRespond.toString());
                         if (baseRespond.getCode() == 0){
-                            //conEdit.setEnabled(false);
-
-                            //投稿成功，跳转到投稿完成页面;
-                            startActivityForResult(new Intent(ActivityContribute1.this,
-                                    ActivityContributeComplete.class), 3);
+                            layoutTitleBack2.setVisibility(View.INVISIBLE);
+                            conEdit.setEnabled(false);
+                            conApplyLl.setVisibility(View.GONE);
+                            conCompleteLl.setVisibility(View.VISIBLE);
                         }else {
                             Toast.makeText(ActivityContribute1.this,"提交失败",Toast.LENGTH_SHORT).show();
                         }

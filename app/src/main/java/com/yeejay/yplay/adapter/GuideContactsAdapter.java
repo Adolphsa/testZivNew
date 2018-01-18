@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.ContactsInfo;
-import com.yeejay.yplay.model.GetRecommendsRespond;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class GuideContactsAdapter extends BaseAdapter implements View.OnClickLis
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     List<ContactsInfo> contentList;
-    List<Integer> positionList;
+
 
     View.OnClickListener hideListener = new View.OnClickListener() {
         @Override
@@ -59,13 +58,12 @@ public class GuideContactsAdapter extends BaseAdapter implements View.OnClickLis
     public GuideContactsAdapter(Context context,
                                 hideCallback hideCallback,
                                 acceptCallback acceptCallback,
-                                List<ContactsInfo> list,
-                                List positionList) {
+                                List<ContactsInfo> list) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
-        this.positionList = positionList;
+
     }
 
     @Override
@@ -119,17 +117,11 @@ public class GuideContactsAdapter extends BaseAdapter implements View.OnClickLis
 //        holder.afBtnHide.setTag(position);
 //        holder.afBtnHide.setVisibility(View.VISIBLE);
         //holder.afBtnAccept2.setVisibility(View.GONE);
+        holder.afBtnAccept.setEnabled(true);
         holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_no);
         holder.afBtnAccept.setOnClickListener(acceptListener);
         holder.afBtnAccept.setTag(position);
 
-//        for (Integer temp : positionList){
-//            if (temp == position){
-//                Log.i(TAG, "getView: 已经接受的item---" + temp);
-//                holder.afBtnAccept.setBackgroundResource(R.drawable.guide_add_friend_yes);
-//                holder.afBtnAccept.setOnClickListener(acceptListener);
-//            }
-//        }
         return convertView;
     }
 
