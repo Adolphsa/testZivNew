@@ -11,7 +11,7 @@ public class PushNotifyRespond {
     /**
      * code : 0
      * msg : succ
-     * payload : {"newFeedCnt":0,"newAddFriendMsgCnt":0}
+     * payload : {"newFeedCnt":0,"newAddFriendMsgCnt":0,"newOnlineSubmitQustionCnt":0}
      */
 
     private int code;
@@ -55,10 +55,12 @@ public class PushNotifyRespond {
         /**
          * newFeedCnt : 0
          * newAddFriendMsgCnt : 0
+         * newOnlineSubmitQustionCnt : 0
          */
 
         private int newFeedCnt;
         private int newAddFriendMsgCnt;
+        private int newOnlineSubmitQustionCnt;
 
         public int getNewFeedCnt() {
             return newFeedCnt;
@@ -76,11 +78,20 @@ public class PushNotifyRespond {
             this.newAddFriendMsgCnt = newAddFriendMsgCnt;
         }
 
+        public int getNewOnlineSubmitQustionCnt() {
+            return newOnlineSubmitQustionCnt;
+        }
+
+        public void setNewOnlineSubmitQustionCnt(int newOnlineSubmitQustionCnt) {
+            this.newOnlineSubmitQustionCnt = newOnlineSubmitQustionCnt;
+        }
+
         @Override
         public String toString() {
             return "PayloadBean{" +
                     "newFeedCnt=" + newFeedCnt +
                     ", newAddFriendMsgCnt=" + newAddFriendMsgCnt +
+                    ", newOnlineSubmitQustionCnt=" + newOnlineSubmitQustionCnt +
                     '}';
         }
     }

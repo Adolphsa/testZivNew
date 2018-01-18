@@ -1,6 +1,9 @@
 package com.yeejay.yplay.answer;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -34,6 +37,7 @@ import com.yeejay.yplay.model.VoteOptionsBean;
 import com.yeejay.yplay.model.VoteRespond;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -148,6 +152,9 @@ public class FragmentAnswer extends BaseFragment {
     //投稿
     @OnClick(R.id.frg_edit)
     public void contribute(View view) {
+        //如果上次为有新投稿信息高亮状态，则重置成非高亮状态;
+        frgEdit.setImageResource(R.drawable.contribute_normal);
+
         startActivity(new Intent(getActivity(), ActivityContribute1.class));
     }
 
@@ -411,6 +418,27 @@ public class FragmentAnswer extends BaseFragment {
         startActivity(new Intent(getActivity(), ActivityInviteFriend.class));
     }
 
+    private BroadcastReceiver mContributeBr = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int flag = intent.getIntExtra("contribute_flag", 0);
+            LogUtils.getInstance().debug(TAG + " , mContributeBr, flag = " + String.valueOf(flag));
+            if (1 == flag) { //表示有新的投稿消息;
+                frgEdit.setImageResource(R.drawable.contribute_light);
+            }
+        }
+    };
+
+    private void registerBr() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.yeejay.br.contribute");
+        getActivity().registerReceiver(mContributeBr, intentFilter);
+    }
+
+    private void unregisterBr() {
+        getActivity().unregisterReceiver(mContributeBr);
+    }
+
     @Override
     public int getContentViewId() {
         return R.layout.fragment_answer;
@@ -418,6 +446,7 @@ public class FragmentAnswer extends BaseFragment {
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
+        registerBr();
 
         getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color4));
         frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color4));
@@ -841,5 +870,6 @@ public class FragmentAnswer extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        unregisterBr();
     }
 }
