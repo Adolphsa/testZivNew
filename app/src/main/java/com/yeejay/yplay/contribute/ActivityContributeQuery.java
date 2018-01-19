@@ -70,6 +70,7 @@ public class ActivityContributeQuery extends BaseActivity {
     private FragmentConOnline fragOnline;
     private FragmentConOffline fragOffline;
     private int mIndex;
+    DisplayMetrics dm;
     private int mIndicatorOffSet;
     private int mIndicatorWidth;
     private int mPageOffset;
@@ -118,22 +119,26 @@ public class ActivityContributeQuery extends BaseActivity {
     /*
      * 用户设置图片指示器的初始位置；
      */
-    private void initView() {
-        DisplayMetrics dm=new DisplayMetrics();
-        // 把屏幕尺寸信息赋值给DisplayMetrics dm，注意不是set
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        // 屏幕宽度
-        int screenWidth = dm.widthPixels;
-
-        int offset = (screenWidth / 2 - indicatorView.getWidth())/2;
-        int offsetDp = offset / (int)dm.density;
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) indicatorView
-                .getLayoutParams();// 获取当前横线的布局参数
-        params.leftMargin = offsetDp;// 设置左边距
-        indicatorView.setLayoutParams(params);// 重新给横线指示器设置布局参数
-    }
+//    private void initView() {
+//        DisplayMetrics dm=new DisplayMetrics();
+//        // 把屏幕尺寸信息赋值给DisplayMetrics dm，注意不是set
+//        getWindowManager().getDefaultDisplay().getMetrics(dm);
+//        // 屏幕宽度
+//        int screenWidth = dm.widthPixels;
+//
+//        int offset = (screenWidth / 2 - indicatorView.getWidth())/2;
+//        int offsetDp = offset / (int)dm.density;
+//        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) indicatorView
+//                .getLayoutParams();// 获取当前横线的布局参数
+//        params.leftMargin = offsetDp;// 设置左边距
+//        indicatorView.setLayoutParams(params);// 重新给横线指示器设置布局参数
+//    }
 
     private void initFragmentAndViewPager() {
+        dm = new DisplayMetrics();
+        // 把屏幕尺寸信息赋值给DisplayMetrics dm，注意不是set
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+
         //构造适配器
         fragOnline = new FragmentConOnline();
         fragOffline = new FragmentConOffline();
@@ -160,9 +165,6 @@ public class ActivityContributeQuery extends BaseActivity {
 
             @Override
             public void onPageSelected(int i) {
-                DisplayMetrics dm=new DisplayMetrics();
-                // 把屏幕尺寸信息赋值给DisplayMetrics dm，注意不是set
-                getWindowManager().getDefaultDisplay().getMetrics(dm);
                 // 屏幕宽度
                 int screenWidth = dm.widthPixels;//像素宽度
                 int screenWidthDp = screenWidth / (int)dm.density;//dp宽度
@@ -179,19 +181,6 @@ public class ActivityContributeQuery extends BaseActivity {
                 mIndex = i; //当前页跟着变
                 anima.setFillAfter(true); // 动画终止时停留在最后一帧，不然会回到没有执行前的状态
                 anima.setDuration(200);// 动画持续时间0.2秒
-                anima.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                    }
-                });
                 indicatorView.startAnimation(anima);
 
                 if (i == 0) {
