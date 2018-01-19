@@ -234,6 +234,14 @@ public class ActivityContribute1 extends BaseActivity {
 
             conEdit.setText("");
         }
+
+        //判断源头页面是否从查询投稿页面返回的;
+        if(resultCode == 4) {
+            selectedImg.setVisibility(View.GONE);
+            conImg.setVisibility(View.VISIBLE);
+
+            conEdit.setText("");
+        }
     }
 
     private void enableButton(String s){

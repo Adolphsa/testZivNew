@@ -189,11 +189,8 @@ public class ActivityContributeReedit extends BaseActivity {
 
                 int currentSelectEmoji = data.getIntExtra("current_select_emoji", 0);
                 emojiIndex = data.getIntExtra("current_emoji_index", 0);
-                System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
-                        + "current_emoji_index" + emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
-                Picasso.with(ActivityContributeReedit.this).load(demojiUrl).resize(120, 120).
-                        into(selectedImg);
+                Picasso.with(ActivityContributeReedit.this).load(demojiUrl).into(selectedImg);
 
                 enableButton(conEdit.getText().toString().trim());
             }
@@ -237,9 +234,9 @@ public class ActivityContributeReedit extends BaseActivity {
                         if (baseRespond.getCode() == 0){
                             //conEdit.setEnabled(false);
 
-                            //投稿成功，跳转到投稿完成页面;
-                            startActivity(new Intent(ActivityContributeReedit.this,
-                                    ActivityContributeComplete.class));
+                            Toast.makeText(ActivityContributeReedit.this,R.string.contribute_success,
+                                    Toast.LENGTH_SHORT).show();
+                            finish();
                         }else {
                             Toast.makeText(ActivityContributeReedit.this,"提交失败",Toast.LENGTH_SHORT).show();
                         }

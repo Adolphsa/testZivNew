@@ -4,31 +4,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FragmentAdapter;
-import com.yeejay.yplay.answer.FragmentAnswer;
 import com.yeejay.yplay.base.BaseActivity;
-import com.yeejay.yplay.friend.FragmentFriend;
-import com.yeejay.yplay.message.FragmentMessage;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.StatuBarUtil;
 
@@ -59,6 +49,9 @@ public class ActivityContributeQuery extends BaseActivity {
 
     @OnClick(R.id.layout_title_back2)
     public void toBack() {
+        //页面返回时需要回退到投稿编辑界面;
+        setResult(4);
+
         finish();
     }
 
@@ -215,5 +208,13 @@ public class ActivityContributeQuery extends BaseActivity {
 
         //目的是为了进入该页面时，指示器图片的初始位置可以处在正确的位置;
         viewPager.setCurrentItem(0);
+    }
+
+    @Override
+    public void onBackPressed(){
+        //按导航键返回时，需要回退到投稿编辑界面;
+        setResult(4);
+
+        super.onBackPressed();
     }
 }

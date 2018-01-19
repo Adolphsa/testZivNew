@@ -28,9 +28,8 @@ public class ActivityContributeComplete extends BaseActivity {
 
     @OnClick(R.id.con_query_contribute)
     public void queryContribute() {
-        startActivity(new Intent(ActivityContributeComplete.this,
-                ActivityContributeQuery.class));
-        finish();
+        startActivityForResult(new Intent(ActivityContributeComplete.this,
+                ActivityContributeQuery.class), 4);
     }
 
     @Override
@@ -41,5 +40,14 @@ public class ActivityContributeComplete extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContributeComplete.this, true);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 4 && resultCode == 4) {
+            setResult(4);
+            finish();
+        }
     }
 }
