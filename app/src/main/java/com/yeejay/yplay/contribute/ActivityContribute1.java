@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -71,7 +72,6 @@ public class ActivityContribute1 extends BaseActivity {
 
     @OnClick(R.id.con_edit)
     public void clickEdit() {
-        Log.d(TAG, "con_edit clicked!");
         rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
         conEdit.setCursorVisible(true);
     }
@@ -204,6 +204,12 @@ public class ActivityContribute1 extends BaseActivity {
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
                         && KeyEvent.ACTION_DOWN == event.getAction())){
                     System.out.println("回车键被点击");
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm.isActive()) {
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                                InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
+
                     return true;
                 }
                 return false;
