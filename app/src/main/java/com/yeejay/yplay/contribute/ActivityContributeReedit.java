@@ -68,6 +68,7 @@ public class ActivityContributeReedit extends BaseActivity {
     private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
 
     private String mQiconUrl;
+    private int mPosition;
 
     @OnClick(R.id.con_edit)
     public void clickEdit() {
@@ -141,6 +142,7 @@ public class ActivityContributeReedit extends BaseActivity {
         //设置之前选择的未通过审核投稿的文本和图片；
         conEdit.setText(getIntent().getStringExtra("selected_con_qtext"));
         mQiconUrl = getIntent().getStringExtra("selected_con_qiconurl");
+        mPosition = getIntent().getIntExtra("selected_con_position", 0);
         conImg.setVisibility(View.GONE);
         selectedImg.setVisibility(View.VISIBLE);
         Picasso.with(ActivityContributeReedit.this).load(mQiconUrl).into(selectedImg);
@@ -242,6 +244,11 @@ public class ActivityContributeReedit extends BaseActivity {
 
                             Toast.makeText(ActivityContributeReedit.this,R.string.contribute_success,
                                     Toast.LENGTH_SHORT).show();
+                            //通知查询投稿页面中的未上线子页面，更新未上线列表信息;
+                            Intent dataIntent = new Intent();
+                            dataIntent.putExtra("position", mPosition);
+                            setResult(6, dataIntent);
+
                             finish();
                         }else {
                             Toast.makeText(ActivityContributeReedit.this,"提交失败",Toast.LENGTH_SHORT).show();

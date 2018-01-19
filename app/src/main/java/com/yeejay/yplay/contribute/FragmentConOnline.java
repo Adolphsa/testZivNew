@@ -140,10 +140,10 @@ public class FragmentConOnline extends BaseFragment implements
                     LinearLayout ll = (LinearLayout)parentView.findViewById(R.id.expand_ll);
                     if(ll != null) {
                         if(ll.isShown()) {
-                            arrowView.setImageResource(R.drawable.contribute_up_arrow);
+                            arrowView.setImageResource(R.drawable.contribute_down_arrow);
                             ll.setVisibility(View.GONE);
                         } else if (!ll.isShown()){
-                            arrowView.setImageResource(R.drawable.contribute_down_arrow);
+                            arrowView.setImageResource(R.drawable.contribute_up_arrow);
                             ll.setVisibility(View.VISIBLE);
                             //扩展布局展开后，向里面加入拉取的数据进行显示；
                             handleLoadQueryDetailList(ll, (int)o);

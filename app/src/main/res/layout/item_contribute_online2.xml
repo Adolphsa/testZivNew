@@ -89,7 +89,7 @@
         android:id="@+id/arrow"
         android:layout_width="22dp"
         android:layout_height="6dp"
-        android:src="@drawable/contribute_up_arrow"
+        android:src="@drawable/contribute_down_arrow"
         android:layout_marginBottom="4dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"/>
