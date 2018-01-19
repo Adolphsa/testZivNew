@@ -1,9 +1,6 @@
 package com.yeejay.yplay.contribute;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -43,11 +40,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ActivityContribute1 extends BaseActivity {
-    private static final String TAG = "ActivityContribute1";
-
-    private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
-
+public class ActivityContributeReedit extends BaseActivity {
+    @BindView(R.id.layout_title2)
+    TextView titleView;
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
     @BindView(R.id.contribute_history)
@@ -66,12 +61,20 @@ public class ActivityContribute1 extends BaseActivity {
     LinearLayout conApplyLl;
     @BindView(R.id.rl_edittext)
     RelativeLayout rlEditText;
-    @BindView(R.id.contribute_new)
-    ImageView contributeNew;
+
+    private static final String TAG = "ContributeReedit";
+    private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
+
+    private String mQiconUrl;
 
     @OnClick(R.id.con_edit)
     public void clickEdit() {
-        Log.d(TAG, "con_edit clicked!");
+        rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
+        conEdit.setCursorVisible(true);
+    }
+
+    @OnClick(R.id.rl_edittext)
+    public void clickRlEdittext() {
         rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
         conEdit.setCursorVisible(true);
     }
@@ -81,102 +84,68 @@ public class ActivityContribute1 extends BaseActivity {
         finish();
     }
 
-    @OnClick(R.id.contribute_history)
-    public void toContributeHistory() {
-        //点击后，如果上次处于有新投稿的状态，则隐藏红旗图标;
-        contributeNew.setVisibility(View.GONE);
-
-        startActivity(new Intent(ActivityContribute1.this, ActivityContributeQuery.class));
-    }
-
     @OnClick(R.id.con_img)
     public void conEmojiImg() {
-        Intent intent = new Intent(ActivityContribute1.this, ActivityContribute2.class);
+        Intent intent = new Intent(ActivityContributeReedit.this, ActivityContribute2.class);
         startActivityForResult(intent, 2);
     }
 
     @OnClick(R.id.con_selected_img)
-    public void clickSelected_img() {
-        Intent intent = new Intent(ActivityContribute1.this, ActivityContribute2.class);
+    public void conSelectedEmojiImg() {
+        Intent intent = new Intent(ActivityContributeReedit.this, ActivityContribute2.class);
         startActivityForResult(intent, 2);
     }
 
     @OnClick(R.id.con_apply_button)
     public void submit() {
-        if(NetWorkUtil.isNetWorkAvailable(ActivityContribute1.this)){
+        System.out.println("提交");
+        if(NetWorkUtil.isNetWorkAvailable(ActivityContributeReedit.this)){
 
             String questionText = conEdit.getText().toString();
             if (!TextUtils.isEmpty(questionText)){
-                submitQuestion(questionText,emojiIndex);
-                System.out.println("问题不为空");
+                System.out.println("问题不为空" + "v, emojiIndex = " + emojiIndex
+                        + " , getQiconId(mQiconUrl) = " + getQiconId(mQiconUrl));
+                submitQuestion(questionText, emojiIndex != -1 ? emojiIndex : getQiconId(mQiconUrl));
             }
 
         }else {
-            Toast.makeText(ActivityContribute1.this,"网络异常",Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityContributeReedit.this,"网络异常",Toast.LENGTH_SHORT).show();
         }
 
     }
 
     int emojiIndex = -1;
 
-    private BroadcastReceiver mContributeBr = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int flag = intent.getIntExtra("contribute_flag", 0);
-            LogUtils.getInstance().debug(TAG + " , mContributeBr, flag = " + String.valueOf(flag));
-            if (1 == flag) { //表示有新的投稿消息;
-                contributeNew.setVisibility(View.VISIBLE);
-            }
-        }
-    };
-
-    private void registerBr() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.yeejay.br.contribute");
-        registerReceiver(mContributeBr, intentFilter);
-    }
-
-    private void unregisterBr() {
-        unregisterReceiver(mContributeBr);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contribute1);
-
         ButterKnife.bind(this);
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
-        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContribute1.this, true);
+        StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContributeReedit.this, true);
 
-        registerBr();
         conApplyButton.setEnabled(false);
 
+        initOthers();
         initEdit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterBr();
+    private void initOthers() {
+        layoutTitleBack2.setImageResource(R.drawable.back_black);
+        titleView.setText(R.string.re_edit);
+        contributeHistory.setVisibility(View.GONE);
+
+        //设置之前选择的未通过审核投稿的文本和图片；
+        conEdit.setText(getIntent().getStringExtra("selected_con_qtext"));
+        mQiconUrl = getIntent().getStringExtra("selected_con_qiconurl");
+        conImg.setVisibility(View.GONE);
+        selectedImg.setVisibility(View.VISIBLE);
+        Picasso.with(ActivityContributeReedit.this).load(mQiconUrl)
+                .resize(120, 120).into(selectedImg);
     }
 
-
     private void initEdit() {
-        rlEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                Log.d(TAG, "rl_edittext focused!, hasFocus = " + hasFocus);
-                if (hasFocus) {
-                    rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
-                    conEdit.setCursorVisible(true);
-                } else {
-                    rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_background);
-                    conEdit.setCursorVisible(false);
-                }
-            }
-        });
 
         conEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -192,7 +161,6 @@ public class ActivityContribute1 extends BaseActivity {
             public void afterTextChanged(Editable s) {
                 conTextCount.setText(s.toString().length() + "/30");
                 enableButton(s.toString());
-
             }
         });
 
@@ -224,20 +192,16 @@ public class ActivityContribute1 extends BaseActivity {
                 System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
                         + "current_emoji_index" + emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
-                Picasso.with(ActivityContribute1.this).load(demojiUrl).into(selectedImg);
+                Picasso.with(ActivityContributeReedit.this).load(demojiUrl).resize(120, 120).
+                        into(selectedImg);
 
                 enableButton(conEdit.getText().toString().trim());
             }
-        } else if(requestCode == 3 && resultCode == 3) {
-            selectedImg.setVisibility(View.GONE);
-            conImg.setVisibility(View.VISIBLE);
-
-            conEdit.setText("");
         }
     }
 
     private void enableButton(String s){
-        if (s.length() > 0 && emojiIndex != (-1)) {
+        if (s.length() > 0 && (!TextUtils.isEmpty(mQiconUrl) || emojiIndex != -1)) {
             conApplyButton.setBackgroundResource(R.drawable.shape_purple_btn_backround);
             conApplyButton.setTextColor(getResources().getColor(R.color.white));
             conApplyButton.setEnabled(true);
@@ -254,9 +218,9 @@ public class ActivityContribute1 extends BaseActivity {
         Map<String, Object> conMap = new HashMap<>();
         conMap.put("qtext", qtext);
         conMap.put("qiconId", qiconId);
-        conMap.put("uin", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_UIN, 0));
-        conMap.put("token", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        conMap.put("ver", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_VER, 0));
+        conMap.put("uin", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_UIN, 0));
+        conMap.put("token", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        conMap.put("ver", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_VER, 0));
         YPlayApiManger.getInstance().getZivApiService()
                 .submiteQuestion(conMap)
                 .subscribeOn(Schedulers.io())
@@ -274,10 +238,10 @@ public class ActivityContribute1 extends BaseActivity {
                             //conEdit.setEnabled(false);
 
                             //投稿成功，跳转到投稿完成页面;
-                            startActivityForResult(new Intent(ActivityContribute1.this,
-                                    ActivityContributeComplete.class), 3);
+                            startActivity(new Intent(ActivityContributeReedit.this,
+                                    ActivityContributeComplete.class));
                         }else {
-                            Toast.makeText(ActivityContribute1.this,"提交失败",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivityContributeReedit.this,"提交失败",Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -292,5 +256,22 @@ public class ActivityContribute1 extends BaseActivity {
                     }
                 });
 
+    }
+
+    private int getQiconId(String qIconUrl) {
+        int ret = -1;
+        if (!TextUtils.isEmpty(qIconUrl)) {
+            //format:     http://yplay-1253229355.image.myqcloud.com/qicon/118.png'
+            int start = qIconUrl.lastIndexOf('/');
+            int end = qIconUrl.lastIndexOf('.');
+            try {
+                ret = Integer.parseInt(qIconUrl.substring(start + 1, end - 1));
+                LogUtils.getInstance().debug(qIconUrl.substring(start + 1, end - 1));
+            } catch (NumberFormatException e) {
+                LogUtils.getInstance().debug(e.getMessage());
+            }
+        }
+
+        return ret;
     }
 }

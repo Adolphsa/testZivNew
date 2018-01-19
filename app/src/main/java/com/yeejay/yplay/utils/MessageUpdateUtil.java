@@ -312,6 +312,12 @@ public class MessageUpdateUtil {
                         handleUploadLogs();
                     }
                 }
+            } else if (9 == customType) {//表示有新的提交问题被审核通过了
+                //发广播，通知相关界面更新投稿图标为高亮；
+                LogUtils.getInstance().debug("new contribute msg arrived!");
+                Intent ContributeIntent = new Intent("com.yeejay.br.contribute");
+                ContributeIntent.putExtra("contribute_flag", 1);
+                YplayApplication.getContext().sendBroadcast(ContributeIntent);
             }
 
             PushUtil.getInstance().PushNotify(timMessage);

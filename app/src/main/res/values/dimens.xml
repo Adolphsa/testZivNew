@@ -22,4 +22,6 @@
     <dimen name="non_ques_head_img_height">186dp</dimen>
     <dimen name="lui_header_img_width">122dp</dimen>
     <dimen name="lui_header_img_height">122dp</dimen>
+    <dimen name="item_contribute_reviewing_width">50dp</dimen>
+    <dimen name="item_contribute_reviewing_height">50dp</dimen>
 </resources>

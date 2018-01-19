@@ -185,9 +185,19 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".contribute.ActivityContribute1"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".contribute.ActivityContribute2"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".contribute.ActivityContributeComplete"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".contribute.ActivityContributeQuery"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".contribute.ActivityContributeReedit"
             android:screenOrientation="portrait" />
         <activity
             android:name=".message.ActivityNnonymityReply"
