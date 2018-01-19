@@ -55,7 +55,7 @@
             android:id="@+id/ll_heat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:orientation="vertical">
 
             <TextView
@@ -63,6 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_gravity="center_horizontal"
                 android:text="@string/hot"
                 android:textColor="#27282C"
                 android:textSize="8sp"
@@ -74,6 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_gravity="center_horizontal"
                 android:text="@string/zero"
                 android:textColor="#27282C"
                 android:textSize="12sp"

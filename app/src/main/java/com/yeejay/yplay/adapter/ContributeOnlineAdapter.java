@@ -76,20 +76,23 @@ public class ContributeOnlineAdapter extends
         holder.hotValue.setText(String.valueOf(mDataList.get(position).getVotedCnt()));
 
         //扩展的箭头图片焦点区域太小不好点击，放大到整个RelaytiveLayout;
-        holder.rlLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //如果是高亮的新投稿项,则点击后去掉高亮背景;
-                View parentView = (View)v.getParent();
-                if (mDataList.get(position).getFlag() == 1) {
-                    if (parentView != null) {
-                        parentView.setBackgroundResource(R.drawable.item_contribute_list_big_background);
+        //热度值不为0才能点击展开;
+        if(mDataList.get(position).getVotedCnt() > 0) {
+            holder.rlLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //如果是高亮的新投稿项,则点击后去掉高亮背景;
+                    View parentView = (View) v.getParent();
+                    if (mDataList.get(position).getFlag() == 1) {
+                        if (parentView != null) {
+                            parentView.setBackgroundResource(R.drawable.item_contribute_list_big_background);
+                        }
                     }
-                }
 
-                listener.OnRecycleImageClick(v, position);
-            }
-        });
+                    listener.OnRecycleImageClick(v, position);
+                }
+            });
+        }
     }
 
     @Override
