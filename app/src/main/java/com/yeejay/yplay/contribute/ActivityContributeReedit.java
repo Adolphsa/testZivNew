@@ -1,5 +1,6 @@
 package com.yeejay.yplay.contribute;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -141,8 +143,7 @@ public class ActivityContributeReedit extends BaseActivity {
         mQiconUrl = getIntent().getStringExtra("selected_con_qiconurl");
         conImg.setVisibility(View.GONE);
         selectedImg.setVisibility(View.VISIBLE);
-        Picasso.with(ActivityContributeReedit.this).load(mQiconUrl)
-                .resize(120, 120).into(selectedImg);
+        Picasso.with(ActivityContributeReedit.this).load(mQiconUrl).into(selectedImg);
     }
 
     private void initEdit() {
@@ -172,6 +173,11 @@ public class ActivityContributeReedit extends BaseActivity {
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
                         && KeyEvent.ACTION_DOWN == event.getAction())){
                     System.out.println("回车键被点击");
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm.isActive()) {
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                                InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
                     return true;
                 }
                 return false;
