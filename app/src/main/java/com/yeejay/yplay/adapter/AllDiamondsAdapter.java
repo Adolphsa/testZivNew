@@ -5,22 +5,14 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.model.GetRecommendAll;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
-import com.yeejay.yplay.userinfo.ActivityAllDiamond;
-import com.yeejay.yplay.utils.FriendFeedsUtil;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import tangxiaolv.com.library.EffectiveShapeView;
 
 /**
  * 个人信息中钻石列表的适配器
@@ -92,8 +84,11 @@ public class AllDiamondsAdapter extends BaseAdapter{
         } else if(position == 2) {
             holder.itemAmiIndex.setBackgroundResource(R.drawable.bronze_medal);
             holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.brozne_diamond_color));
-        } else {
+        } else if(position > 2 && position < 99){
             holder.itemAmiIndex.setBackgroundResource(R.drawable.normal_medal);
+            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.play_color2));
+        } else {
+            holder.itemAmiIndex.setBackgroundResource(R.drawable.shape_diamond_normal_background);
             holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.play_color2));
         }
 
