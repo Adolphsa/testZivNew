@@ -106,7 +106,8 @@ public class ActivityContributeReedit extends BaseActivity {
 
             String questionText = conEdit.getText().toString();
             if (!TextUtils.isEmpty(questionText)){
-                System.out.println("问题不为空" + "v, emojiIndex = " + emojiIndex
+                System.out.println("问题不为空" + "v, emojiIndex = " + emojiIndex +
+                        " , mQiconUrl = " + mQiconUrl
                         + " , getQiconId(mQiconUrl) = " + getQiconId(mQiconUrl));
                 submitQuestion(questionText, emojiIndex != -1 ? emojiIndex : getQiconId(mQiconUrl));
             }
@@ -197,6 +198,8 @@ public class ActivityContributeReedit extends BaseActivity {
 
                 int currentSelectEmoji = data.getIntExtra("current_select_emoji", 0);
                 emojiIndex = data.getIntExtra("current_emoji_index", 0);
+                System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
+                        + "current_emoji_index" + emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
                 Picasso.with(ActivityContributeReedit.this).load(demojiUrl).into(selectedImg);
 
@@ -271,14 +274,13 @@ public class ActivityContributeReedit extends BaseActivity {
     private int getQiconId(String qIconUrl) {
         int ret = -1;
         if (!TextUtils.isEmpty(qIconUrl)) {
-            //format:     http://yplay-1253229355.image.myqcloud.com/qicon/118.png'
             int start = qIconUrl.lastIndexOf('/');
             int end = qIconUrl.lastIndexOf('.');
             try {
-                ret = Integer.parseInt(qIconUrl.substring(start + 1, end - 1));
-                LogUtils.getInstance().debug(qIconUrl.substring(start + 1, end - 1));
+                LogUtils.getInstance().debug(qIconUrl.substring(start + 1, end));
+                ret = Integer.parseInt(qIconUrl.substring(start + 1, end));
             } catch (NumberFormatException e) {
-                LogUtils.getInstance().debug(e.getMessage());
+                LogUtils.getInstance().error("exception happend; + " + e.getMessage());
             }
         }
 
