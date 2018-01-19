@@ -22,7 +22,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.adapter.ContributeOnlineAdapter2;
+import com.yeejay.yplay.adapter.ContributeOnlineAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.CardBigDialog;
@@ -56,7 +56,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 public class FragmentConOnline extends BaseFragment implements
-                                        ContributeOnlineAdapter2.OnRecycleImageListener{
+                                        ContributeOnlineAdapter.OnRecycleImageListener{
     @BindView(R.id.message_null)
     ImageView nullView;
     @BindView(R.id.message_refresh_view)
@@ -72,7 +72,7 @@ public class FragmentConOnline extends BaseFragment implements
     private int mPageSize = 10;
     private List<SubmitQueryListRespond.PayloadBean.ContributesBean> mReviewedList =  new ArrayList<>();
     private List<SubmitQueryDetailRespond.PayloadBean.InfosBean> mQueryDetailList =  new ArrayList<>();
-    private ContributeOnlineAdapter2 reviewedAdapter;
+    private ContributeOnlineAdapter reviewedAdapter;
     private MyLinearLayoutManager reviewedLtManager;
     private HeadRefreshView headRefreshView;
     private Context mContext;
@@ -99,7 +99,7 @@ public class FragmentConOnline extends BaseFragment implements
         divider.setDrawable(getActivity().getDrawable(R.drawable.shape_divider_item_contribute_list));
 
         //审核中的adapter初始化;
-        reviewedAdapter = new ContributeOnlineAdapter2(getActivity(),this, mReviewedList);
+        reviewedAdapter = new ContributeOnlineAdapter(getActivity(),this, mReviewedList);
         recyclerView.setLayoutManager(reviewedLtManager);
         recyclerView.setAdapter(reviewedAdapter);
         recyclerView.addItemDecoration(divider);
@@ -241,9 +241,8 @@ public class FragmentConOnline extends BaseFragment implements
                     @Override
                     public void onNext(SubmitQueryDetailRespond submitQueryDetailRespond) {
                         if (submitQueryDetailRespond.getCode() == 0) {
-                            totalView.setText(mContext.getResources().getString(R.string.contribute_answer_num_note_msg1) +
-                                    String.valueOf(submitQueryDetailRespond.getPayload().getTotal()) +
-                                    mContext.getResources().getString(R.string.contribute_answer_num_note_msg2));
+                            totalView.setText(String.valueOf(submitQueryDetailRespond.getPayload().getTotal()) +
+                                    mContext.getResources().getString(R.string.contribute_answer_num_note_msg1));
 
                             List<SubmitQueryDetailRespond.PayloadBean.InfosBean> contributesBeanList =
                                     submitQueryDetailRespond.getPayload().getInfos();

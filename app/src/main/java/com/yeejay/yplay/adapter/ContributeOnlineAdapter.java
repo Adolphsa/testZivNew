@@ -28,8 +28,8 @@ import butterknife.ButterKnife;
  * Created by xjg on 2018/01/16.
  */
 
-public class ContributeOnlineAdapter2 extends
-        RecyclerView.Adapter<ContributeOnlineAdapter2.ContributeViewHolder> {
+public class ContributeOnlineAdapter extends
+        RecyclerView.Adapter<ContributeOnlineAdapter.ContributeViewHolder> {
 
     public interface OnRecycleImageListener <T>{
         void OnRecycleImageClick(View v,T o);
@@ -39,9 +39,9 @@ public class ContributeOnlineAdapter2 extends
     private Context mContext;
     List<SubmitQueryListRespond.PayloadBean.ContributesBean> mDataList =  new ArrayList<>();
 
-    public ContributeOnlineAdapter2(Context context,
-                                             OnRecycleImageListener listener,
-                                             List<SubmitQueryListRespond.PayloadBean.ContributesBean> dataList) {
+    public ContributeOnlineAdapter(Context context,
+                                    OnRecycleImageListener listener,
+                                    List<SubmitQueryListRespond.PayloadBean.ContributesBean> dataList) {
         this.mContext = context;
         this.listener = listener;
         this.mDataList = dataList;

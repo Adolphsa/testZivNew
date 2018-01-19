@@ -30,6 +30,7 @@ public class ActivityContributeComplete extends BaseActivity {
     public void queryContribute() {
         startActivity(new Intent(ActivityContributeComplete.this,
                 ActivityContributeQuery.class));
+        finish();
     }
 
     @Override
