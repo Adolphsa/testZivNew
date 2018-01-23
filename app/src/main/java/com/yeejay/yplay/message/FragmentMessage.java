@@ -114,10 +114,9 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 Log.d("msg", "queryFromDatabase index " + i + ", info--" + tempImSessinList.get(i).getSessionId() + ",content--" + tempImSessinList.get(i).getMsgContent());
 
                 boolean find = false;
-                String curSessionId = tempImSessinList.get(i).getSessionId();
 
                 for(int j = 0; j < mDataList.size(); j++){
-                    if(curSessionId.equals(mDataList.get(j).getSessionId())){
+                    if(tempImSessinList.get(i).getSessionId().equals(mDataList.get(j).getSessionId())){
                         find = true;
                         break;
                     }
@@ -159,7 +158,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     private void initMessageView() {
 
         if (messageAdapter == null) {
-            messageAdapter = new MessageAdapter(getActivity(), mDataList, friendInfoDao);
+            messageAdapter = new MessageAdapter(YplayApplication.getContext(), mDataList, friendInfoDao);
         }
 
         messageRecyclerView.setLayoutManager(new MyLinearLayoutManager(getActivity()));
@@ -215,7 +214,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
             loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
         if (upRefreshView == null) {
-            upRefreshView = new UpRefreshView(getActivity());
+            upRefreshView = new UpRefreshView(YplayApplication.getContext());
             rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
             rlRefreshLayout.setBackgroundColor(getActivity().getResources().
                     getColor(R.color.message_title_color));

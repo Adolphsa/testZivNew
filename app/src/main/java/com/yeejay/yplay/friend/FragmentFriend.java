@@ -129,7 +129,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         ffSwipeRecyclerView.addItemDecoration(defaultItemDecoration);
 
         if (feedsAdapter == null) {
-            feedsAdapter = new FriendFeedsAdapter(getActivity(),
+            feedsAdapter = new FriendFeedsAdapter(YplayApplication.getContext(),
                     mDataList,
                     friendInfoDao);
         }
@@ -137,7 +137,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         feedsAdapter.addRecycleImageListener(this);
 
         if (loadMoreView == null) {
-            loadMoreView = new LoadMoreView(getActivity());
+            loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
         if (upRefreshView == null) {
             upRefreshView = new UpRefreshView(getActivity());

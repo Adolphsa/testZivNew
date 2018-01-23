@@ -800,6 +800,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             String contactName;
             String contactNumber;
             String contactSortKey;
+            String type = null;
+            String filterContactNumber = null;
+            Cursor dataCursor = null;
             List<com.yeejay.yplay.greendao.ContactsInfo> currentContactsList = new ArrayList<>();
 
             Cursor cursor = mContentResolver.query(uri, null, null, null, null);
@@ -809,14 +812,14 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                 contactName = cursor.getString(cursor.getColumnIndex("display_name"));
                 contactSortKey = cursor.getString(cursor.getColumnIndex("phonebook_label"));
 
-                Cursor dataCursor = mContentResolver.query(dataUri, null, "raw_contact_id= ?", new String[]{id}, null);
+                dataCursor = mContentResolver.query(dataUri, null, "raw_contact_id= ?", new String[]{id}, null);
                 while (dataCursor != null && dataCursor.moveToNext()) {
-                    String type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
+                    type = dataCursor.getString(dataCursor.getColumnIndex("mimetype"));
                     if (type.equals("vnd.android.cursor.item/phone_v2")) {//如果得到的mimeType类型为手机号码类型才去接收
                         contactNumber = dataCursor.getString(dataCursor.getColumnIndex("data1"));//获取手机号码
 
                         if (contactNumber.length() > 2){
-                            String filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
+                            filterContactNumber = BaseUtils.filterUnNumber(contactNumber);
                             com.yeejay.yplay.greendao.ContactsInfo contactsInfo = new com.yeejay.yplay.greendao.ContactsInfo(null, contactName, filterContactNumber, null, 1, contactSortKey, null, null);
                             currentContactsList.add(contactsInfo);
                         }
@@ -851,8 +854,10 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         for (com.yeejay.yplay.greendao.ContactsInfo contactsInfo : localContactsList) {
             map.put(contactsInfo.getOrgPhone(), 1);
         }
+
+        Integer cc = null;
         for (com.yeejay.yplay.greendao.ContactsInfo contactsInfo : currentContactsList) {
-            Integer cc = map.get(contactsInfo.getOrgPhone());
+             cc = map.get(contactsInfo.getOrgPhone());
             if (cc != null) {
                 map.put(contactsInfo.getOrgPhone(), ++cc);
                 continue;
@@ -932,9 +937,10 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         Log.i(TAG, "dealBySubList: 循环上传的次数---" + subCount);
         int startIndext = 0;
         int stopIndext = 0;
+        List<com.yeejay.yplay.model.ContactsInfo> tempList = null;
         for (int i = 0; i < subCount; i++) {
             stopIndext = (i == subCount - 1) ? stopIndext + sourListSize % batchCount : stopIndext + batchCount;
-            List<com.yeejay.yplay.model.ContactsInfo> tempList = new ArrayList<>(sourList.subList(startIndext, stopIndext));
+            tempList = new ArrayList<>(sourList.subList(startIndext, stopIndext));
             startIndext = stopIndext;
             if (handleType == 1) {       //删除
                 deleteContacts(tempList);

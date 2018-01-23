@@ -96,9 +96,10 @@ public class GetOfflineMsg {
 
         Iterator iter = sessions.entrySet().iterator();
 
+        Map.Entry entry = null;
         while (iter.hasNext()) {
 
-            Map.Entry entry = (Map.Entry) iter.next();
+            entry = (Map.Entry) iter.next();
             TIMConversationExt conExt = (TIMConversationExt) entry.getKey();
 
             conExt.setReadMessage(null, new TIMCallBack() {

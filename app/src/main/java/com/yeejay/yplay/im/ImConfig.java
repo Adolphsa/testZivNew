@@ -1,6 +1,7 @@
 package com.yeejay.yplay.im;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -136,7 +137,7 @@ public class ImConfig {
                     public void onRefresh() {
                         Log.i(tag, "onRefresh");
                         isOffline = false;
-                        GetOfflineMsg.getOfflineMsgs();
+                        handleOfflineMsg();
                     }
 
                     @Override
@@ -167,8 +168,8 @@ public class ImConfig {
             public boolean onNewMessages(List<TIMMessage> list) {//收到新消息
                 //消息的内容解析请参考消息收发文档中的消息解析说明
                 Log.i(tag, "onNewMessages: 收到新消息");
-                onLineUpdateSession(list);
-                sendBroadcast();
+                handleNewMsg(list);
+
                 return true;//返回true将终止回调链，不再调用下一个新消息监听器
             }
         });
@@ -176,6 +177,40 @@ public class ImConfig {
         System.out.println("用户配置完毕");
     }
 
+    private void handleOfflineMsg() {
+        AsyncTask task  = new HandleOfflineMsgTask();
+        task.execute();
+    }
+
+    private void handleNewMsg(final List<TIMMessage> list) {
+        AsyncTask task  = new HandleOnlineMsgTask(list);
+        task.execute();
+    }
+
+    private static class HandleOnlineMsgTask extends AsyncTask<Object,Integer,Integer> {
+        private List<TIMMessage> list;
+
+        public HandleOnlineMsgTask (List<TIMMessage> lt) {
+            list = lt;
+        }
+
+        @Override
+        protected Integer doInBackground(Object... voids) {
+            onLineUpdateSession(list);
+            sendBroadcast();
+
+            return null;
+        }
+    }
+
+    private static class HandleOfflineMsgTask extends AsyncTask<Object,Integer,Integer> {
+        @Override
+        protected Integer doInBackground(Object... voids) {
+            GetOfflineMsg.getOfflineMsgs();
+
+            return null;
+        }
+    }
 
     //获取im签名
     private void getImSignature() {
@@ -249,7 +284,7 @@ public class ImConfig {
     }
 
     //会话消息插入或更新
-    public void updateSession(List<TIMMessage> list) {
+    public static void updateSession(List<TIMMessage> list) {
 
         System.out.println("消息长度---" + list.size());
 
@@ -258,7 +293,7 @@ public class ImConfig {
         }
     }
 
-    public void onLineUpdateSession(List<TIMMessage> list) {
+    public static void onLineUpdateSession(List<TIMMessage> list) {
 
         System.out.println("在线消息长度---" + list.size());
 
@@ -274,9 +309,10 @@ public class ImConfig {
 
         HashMap<TIMConversationExt, Integer> sessions = new HashMap<>();
 
+        String sid = null;
         for (TIMMessage timMessage : list) {
 
-            String sid = timMessage.getMsg().session().sid();
+            sid = timMessage.getMsg().session().sid();
             TIMConversation con = TIMManager.getInstance().getConversation(TIMConversationType.Group, sid);
 
             TIMConversationExt conExt = new TIMConversationExt(con);
@@ -285,9 +321,10 @@ public class ImConfig {
 
         Iterator iter = sessions.entrySet().iterator();
 
+        Map.Entry entry = null;
         while (iter.hasNext()) {
 
-            Map.Entry entry = (Map.Entry) iter.next();
+            entry = (Map.Entry) iter.next();
             TIMConversationExt conExt = (TIMConversationExt) entry.getKey();
 
             conExt.setReadMessage(null, new TIMCallBack() {
@@ -305,7 +342,7 @@ public class ImConfig {
     }
 
     //发送广播
-    private void sendBroadcast(){
+    private static void sendBroadcast(){
         Intent intent = new Intent("messageService");
         intent.putExtra("broadcast_type",1);
         YplayApplication.getInstance().sendBroadcast(intent);
