@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.AllDiamondsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
@@ -82,7 +83,7 @@ public class ActivityAllDiamond extends BaseActivity {
     }
 
     private void initAdapter() {
-        diamondsAdapter = new AllDiamondsAdapter(this, mDataList);
+        diamondsAdapter = new AllDiamondsAdapter(YplayApplication.getContext(), mDataList);
         aadListView.setEmptyView(emptyView);
         aadListView.setAdapter(diamondsAdapter);
     }
@@ -103,7 +104,7 @@ public class ActivityAllDiamond extends BaseActivity {
     private void loadMore(){
 
         aadPtfRefresh.setCanRefresh(false);
-        loadMoreView = new LoadMoreView(ActivityAllDiamond.this);
+        loadMoreView = new LoadMoreView(YplayApplication.getContext());
         aadPtfRefresh.setFooterView(loadMoreView);
         aadPtfRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
@@ -146,7 +147,6 @@ public class ActivityAllDiamond extends BaseActivity {
                             if (tempList.size() > 0){
                                 mPageNum++;
                                 mDataList.addAll(tempList);
-                                int total = usersDiamondInfoRespond.getPayload().getTotal();
                                 initDiamondList(tempList);
                             }else {
                                 System.out.println("数据加载完毕");
@@ -171,12 +171,5 @@ public class ActivityAllDiamond extends BaseActivity {
 
                     }
                 });
-    }
-
-    private static class ViewHolder {
-        TextView itemAmiIndex;
-        ImageView itemAmiImg;
-        TextView itemAmiText;
-        TextView itemAmiCount;
     }
 }

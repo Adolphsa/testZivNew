@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -146,7 +147,10 @@ public class ActivityContributeReedit extends BaseActivity {
         mPosition = getIntent().getIntExtra("selected_con_position", 0);
         conImg.setVisibility(View.GONE);
         selectedImg.setVisibility(View.VISIBLE);
-        Picasso.with(ActivityContributeReedit.this).load(mQiconUrl).into(selectedImg);
+        Picasso.with(ActivityContributeReedit.this).load(mQiconUrl).resizeDimen(
+                R.dimen.non_ques_head_img_width, R.dimen.non_ques_head_img_height)
+                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                .into(selectedImg);
     }
 
     private void initEdit() {

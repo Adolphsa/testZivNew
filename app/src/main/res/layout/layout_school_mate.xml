@@ -43,6 +43,7 @@
             />
     </RelativeLayout>
 
+    <!--
     <LinearLayout
         android:id="@+id/lsm_ll_button"
         android:layout_width="match_parent"
@@ -86,6 +87,7 @@
             android:layout_marginLeft="20dp"
             />
     </LinearLayout>
+    -->
     
     <View
         android:layout_width="match_parent"

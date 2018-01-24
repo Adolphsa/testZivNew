@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.customview.RecyclerImageView;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class AllDiamondsAdapter extends BaseAdapter{
             convertView = View.inflate(context, R.layout.item_afi, null);
             holder = new ViewHolder();
             holder.itemAmiIndex = (TextView) convertView.findViewById(R.id.afi_item_index);
-            holder.itemAmiImg = (ImageView) convertView.findViewById(R.id.afi_item_img);
+            holder.itemAmiImg = (RecyclerImageView) convertView.findViewById(R.id.afi_item_img);
             holder.itemAmiText = (TextView) convertView.findViewById(R.id.afi_item_text);
             holder.itemAmiCount = (TextView) convertView.findViewById(R.id.afi_item_count);
             convertView.setTag(holder);
@@ -97,7 +98,7 @@ public class AllDiamondsAdapter extends BaseAdapter{
 
     private static class ViewHolder {
         TextView itemAmiIndex;
-        ImageView itemAmiImg;
+        RecyclerImageView itemAmiImg;
         TextView itemAmiText;
         TextView itemAmiCount;
     }

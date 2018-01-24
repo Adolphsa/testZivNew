@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.SearchFriendsAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
@@ -117,7 +118,7 @@ public class ActivitySearchFriends extends BaseActivity {
         asfNoFound.setVisibility(View.INVISIBLE);
         asfNoFoundImg.setVisibility(View.INVISIBLE);
         asfListView.setVisibility(View.VISIBLE);
-        searchFriendsAdapter = new SearchFriendsAdapter(ActivitySearchFriends.this,
+        searchFriendsAdapter = new SearchFriendsAdapter(YplayApplication.getContext(),
                 new SearchFriendsAdapter.hideCallback() {
                     @Override
                     public void hideClick(View v) {

@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.model.GetRecommendsRespond;
@@ -99,7 +100,9 @@ public class SearchFriendsAdapter extends BaseAdapter implements View.OnClickLis
         }
         String url = contentList.get(position).getHeadImgUrl();
         if (!TextUtils.isEmpty(url)) {
-            Picasso.with(context).load(url).into(holder.afItemHeaderImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).memoryPolicy(MemoryPolicy.NO_CACHE).
+                    into(holder.afItemHeaderImg);
         }else {
             holder.afItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }

@@ -102,10 +102,8 @@ public class SchoolmateAdapter extends RecyclerView.Adapter<SchoolmateAdapter.Vi
 
         String url = friendsBean.getHeadImgUrl();
         String nickName = friendsBean.getNickName();
-        int status = friendsBean.getStatus();
         String str = friendsBean.getRecommendDesc();
 
-//        Log.i(TAG, "getView: status---" + status);
         holder.afItemRoot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

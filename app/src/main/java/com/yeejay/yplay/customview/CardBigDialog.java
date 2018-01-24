@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -187,7 +188,9 @@ public class CardBigDialog extends Dialog {
 
                 String url = statsBean.getQiconUrl();
                 if (!TextUtils.isEmpty(url)){
-                    Picasso.with(context).load(url).into(holder.itemAmiImg);
+                    Picasso.with(context).load(url).resizeDimen(R.dimen.card_info_diamond_width,
+                            R.dimen.card_info_diamond_height).memoryPolicy(MemoryPolicy.NO_CACHE)
+                            .into(holder.itemAmiImg);
                 }else {
                     holder.itemAmiImg.setImageResource(R.drawable.diamond_null);
                 }

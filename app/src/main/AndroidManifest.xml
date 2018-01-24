@@ -163,9 +163,6 @@
             android:name=".friend.ActivityContacts"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".friend.ActivityWaitInvite"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />

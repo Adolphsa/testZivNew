@@ -71,9 +71,10 @@ public class ActivityContributeQuery extends BaseActivity {
     private FragmentConOffline fragOffline;
     private int mIndex;
     DisplayMetrics dm;
-    private int mIndicatorOffSet;
-    private int mIndicatorWidth;
-    private int mPageOffset;
+//    private int mIndicatorOffSet;
+//    private int mIndicatorWidth;
+//    private int mPageOffset;
+    Animation anima;
 
     private BroadcastReceiver mContributeBr = new BroadcastReceiver() {
         @Override
@@ -175,7 +176,7 @@ public class ActivityContributeQuery extends BaseActivity {
                 //相邻页面的偏移量
                 int pageOffset = offset * 2 + indicatorView.getWidth();
 
-                Animation anima = new TranslateAnimation(mIndex * pageOffset + offset,
+                anima = new TranslateAnimation(mIndex * pageOffset + offset,
                         i * pageOffset + offset,0,0);
 
                 mIndex = i; //当前页跟着变
@@ -184,7 +185,7 @@ public class ActivityContributeQuery extends BaseActivity {
                 indicatorView.startAnimation(anima);
 
                 if (i == 0) {
-
+                    //nothing to do;
                 } else if (i == 1) {
                     contributeNew.setVisibility(View.INVISIBLE);
                 }

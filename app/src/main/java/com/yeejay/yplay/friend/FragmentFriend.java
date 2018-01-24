@@ -2,6 +2,7 @@ package com.yeejay.yplay.friend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +16,6 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.widget.DefaultItemDecoration;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
@@ -70,7 +70,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     @BindView(R.id.ff_message_count)
     TextView addFriendTextView;
     @BindView(R.id.ff_swipe_recycler_view)
-    SwipeMenuRecyclerView ffSwipeRecyclerView;
+    RecyclerView ffSwipeRecyclerView;
     @BindView(R.id.ff_ptf)
     PullToRefreshLayout ffPtfRefreshLayout;
 
@@ -91,7 +91,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     private RelativeLayout rl;
     private LoadMoreView loadMoreView;
-    private UpRefreshView upRefreshView;
+//    private UpRefreshView upRefreshView;
     private RelativeLayout rlRefreshLayout;
 
     @Override
@@ -139,24 +139,22 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         if (loadMoreView == null) {
             loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
-        if (upRefreshView == null) {
+/*        if (upRefreshView == null) {
             upRefreshView = new UpRefreshView(getActivity());
             rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
             rlRefreshLayout.setBackgroundColor(mainActivity.getResources().
                     getColor(R.color.feeds_title_color));
-        }
+        }*/
         ffPtfRefreshLayout.setFooterView(loadMoreView);
-        ffPtfRefreshLayout.setHeaderView(upRefreshView);
+        //ffPtfRefreshLayout.setHeaderView(upRefreshView);
         ffPtfRefreshLayout.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
                 long ts = System.currentTimeMillis();
                 System.out.println("顶部刷新--" + ts);
 
-                resetData();
-
                 //拉取新数据
-                getFriendFeeds(ts, 10, false);
+                getFriendFeeds(ts, 20, false);
 
             }
 
@@ -336,8 +334,8 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         List<DaoFriendFeeds> tempDataBasefeedsList = mDaoFriendFeedsDao.queryBuilder()
                 .where(DaoFriendFeedsDao.Properties.Uin.eq(uin))
                 .orderDesc(DaoFriendFeedsDao.Properties.Ts)
-                .offset(refreshOffset * 10)
-                .limit(10)
+                .offset(refreshOffset * 20)
+                .limit(20)
                 .list();
         System.out.println("查询到到的个数---" + tempDataBasefeedsList.size());
         return tempDataBasefeedsList;
@@ -502,7 +500,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 public void refresh() {
                     System.out.println("刷新");
                     long ts = System.currentTimeMillis();
-                    getFriendFeeds(ts, 10, false);
+                    getFriendFeeds(ts, 20, false);
                     recommendPullView.finishRefresh();
                 }
 
@@ -527,7 +525,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     private void initRecommendList(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
 
-        recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(getActivity(),
+        recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(YplayApplication.getContext(),
                 new RecommendFriendForNullAdapter.hideCallback() {
                     @Override
                     public void hideClick(View v) {

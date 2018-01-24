@@ -57,6 +57,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import pl.droidsonroids.gif.GifImageView;
 
+import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
+import static com.squareup.picasso.MemoryPolicy.NO_STORE;
+
 /**
  * 答题
  * Created by Administrator on 2017/10/26.
@@ -511,7 +514,8 @@ public class FragmentAnswer extends BaseFragment {
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
             Log.i(TAG, "nextQuestionUpdate: 加载的图片---" + url);
-            Picasso.with(getActivity()).load(url).into(frgansImg);
+            Picasso.with(getActivity()).load(url).resizeDimen(R.dimen.non_ques_head_img_width,
+                    R.dimen.non_ques_head_img_height).memoryPolicy(NO_CACHE, NO_STORE).into(frgansImg);
         }
         frgansQuestion.setText(questionBean.getQtext());
 

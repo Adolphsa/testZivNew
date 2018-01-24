@@ -16,7 +16,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //将Activity实例添加到AppManager的堆栈
-        AppManager.getAppManager().addActivity(this);
+ //       AppManager.getAppManager().addActivity(this);
     }
 
     @Override
@@ -33,6 +33,6 @@ public class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         //将Activity实例从AppManager的堆栈中移除
-        AppManager.getAppManager().finishActivity(this);
+  //      AppManager.getAppManager().finishActivity(this);
     }
 }

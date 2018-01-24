@@ -85,7 +85,7 @@ public class YPlayApiManger {
 
     private YPlayApi yplayApi;
     private  YPlayApi yPlayParametersApi;
-    private Object yplayMonitor = new Object();
+    private final Object yplayMonitor = new Object();
 
     public static YPlayApiManger getInstance(){
         if (mYplayManger == null){

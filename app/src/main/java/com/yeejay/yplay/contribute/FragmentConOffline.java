@@ -20,6 +20,7 @@ import com.donkingliang.imageselector.utils.ImageSelectorUtils;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContributeOfflineRefusedAdapter;
 import com.yeejay.yplay.adapter.ContributeOfflineReviewingAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -97,23 +98,23 @@ public class FragmentConOffline extends BaseFragment implements
     }
 
     private void initControlsAndAdapter() {
-        reviewingLtManager = new MyLinearLayoutManager(getActivity());
-        refusedLtManager = new MyLinearLayoutManager(getActivity());
+        reviewingLtManager = new MyLinearLayoutManager(YplayApplication.getContext());
+        refusedLtManager = new MyLinearLayoutManager(YplayApplication.getContext());
 
         //设置recyclerView的分割线；
-        DividerItemDecoration divider = new DividerItemDecoration(getActivity(),
+        DividerItemDecoration divider = new DividerItemDecoration(YplayApplication.getContext(),
                 DividerItemDecoration.VERTICAL);
         divider.setDrawable(getActivity().getDrawable(R.drawable.shape_divider_item_contribute_list));
 
         //审核中的adapter初始化;
-        reviewingAdapter = new ContributeOfflineReviewingAdapter(getActivity(),
+        reviewingAdapter = new ContributeOfflineReviewingAdapter(YplayApplication.getContext(),
                 this, mReviewingList);
         recyclerViewReviewing.setLayoutManager(reviewingLtManager);
         recyclerViewReviewing.setAdapter(reviewingAdapter);
         recyclerViewReviewing.addItemDecoration(divider);
 
         //审核未通过的adapter初始化;
-        refusedAdapter = new ContributeOfflineRefusedAdapter(getActivity(), this, mRefusedList);
+        refusedAdapter = new ContributeOfflineRefusedAdapter(YplayApplication.getContext(), this, mRefusedList);
         recyclerViewRefused.setLayoutManager(refusedLtManager);
         recyclerViewRefused.setAdapter(refusedAdapter);
         recyclerViewRefused.addItemDecoration(divider);

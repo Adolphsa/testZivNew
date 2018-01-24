@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
@@ -134,7 +135,7 @@ public class ActivityFriendsInfo extends BaseActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            String friendName = bundle.getString("yplay_friend_name");
+//            String friendName = bundle.getString("yplay_friend_name");
             friendUin = bundle.getInt("yplay_friend_uin");
 
 //            layoutTitle.setText(friendName);
@@ -153,7 +154,10 @@ public class ActivityFriendsInfo extends BaseActivity {
         if (infoBean != null) {
             String url = infoBean.getHeadImgUrl();
             if (!TextUtils.isEmpty(url)) {
-                Picasso.with(this).load(url).into(luiHeaderImg);
+                Picasso.with(this).load(url).resizeDimen(R.dimen.lui_header_img_width,
+                        R.dimen.lui_header_img_height).
+                        memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .into(luiHeaderImg);
             }
             luiName.setText(infoBean.getNickName());
             luiUserName.setText(infoBean.getUserName());

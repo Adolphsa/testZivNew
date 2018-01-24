@@ -31,8 +31,8 @@
 
     <ImageView
         android:id="@+id/item_diamond_lable"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/card_info_diamond_width"
+        android:layout_height="@dimen/card_info_diamond_height"
         android:minWidth="50dp"
         android:minHeight="50dp"
         android:layout_centerVertical="true"

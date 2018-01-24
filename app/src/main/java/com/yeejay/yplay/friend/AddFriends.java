@@ -220,7 +220,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
     private List<String> sections;// 存放存在的汉语拼音首字母
     private ContactsInfoDao contactsInfoDao;
-    int moffset = 0;
 
 
     private LinearLayout schoolRoot;    //同校同学
@@ -241,7 +240,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     int mPageNum = 1;
 
     int mType = 1; //好友类型
-    int buttonDirt = 1; //学校按钮朝向
 
     ContactsAdapter contactsAdapter;
     SchoolmateAdapter schoolmateAdapter;//全部同学
@@ -252,7 +250,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     List<Integer> positionList;
 
     private SpinerPopWindow<String> mSpinerPopWindow;
-    private List<String> typeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -569,7 +566,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private void initMaybeKnownAdapter() {
         //可能认识的人；
-        maybeKnownAdapter = new SchoolmateAdapter(AddFriends.this,
+        maybeKnownAdapter = new SchoolmateAdapter(YplayApplication.getContext(),
                 null,
                 new SchoolmateAdapter.acceptCallback() {
                     @Override

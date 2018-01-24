@@ -78,7 +78,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     ImSessionDao imSessionDao;
     FriendInfoDao friendInfoDao;
     private LoadMoreView loadMoreView;
-    private UpRefreshView upRefreshView;
+//    private UpRefreshView upRefreshView;
     private RelativeLayout rlRefreshLayout;
 
     @Override
@@ -213,15 +213,15 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         if (loadMoreView == null) {
             loadMoreView = new LoadMoreView(YplayApplication.getContext());
         }
-        if (upRefreshView == null) {
-            upRefreshView = new UpRefreshView(YplayApplication.getContext());
-            rlRefreshLayout = (RelativeLayout) upRefreshView.findViewById(R.id.anim_up_background);
+/*        if (upRefreshView2 == null) {
+            upRefreshView2 = new UpRefreshView2(YplayApplication.getContext());
+            rlRefreshLayout = (RelativeLayout) upRefreshView2.findViewById(R.id.anim_up_background);
             rlRefreshLayout.setBackgroundColor(getActivity().getResources().
                     getColor(R.color.message_title_color));
-        }
+        }*/
 
         messageRefreshView.setFooterView(loadMoreView);
-        messageRefreshView.setHeaderView(upRefreshView);
+//        messageRefreshView.setHeaderView(upRefreshView);
         messageRefreshView.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
@@ -349,5 +349,4 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
 
         }
     }
-
 }

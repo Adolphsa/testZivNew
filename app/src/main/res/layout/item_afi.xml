@@ -20,7 +20,7 @@
 
         />
 
-    <ImageView
+    <com.yeejay.yplay.customview.RecyclerImageView
         android:id="@+id/afi_item_img"
         android:layout_width="@dimen/item_diamonds_list_img_width"
         android:layout_height="@dimen/item_diamonds_list_img_height"

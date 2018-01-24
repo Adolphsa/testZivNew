@@ -40,14 +40,17 @@ public class MyFriendsAdapter extends BaseAdapter{
         alphaIndexer = new HashMap<>();
         sections=new ArrayList<>();
 
+        String currentAlpha = null;
+        String previewAlpha = null;
+        String firstAlpha = null;
         for (int i=0; i < list.size(); i++) {
 
             //当前汉语拼音的首字母
-            String currentAlpha = list.get(i).getSortKey();
+            currentAlpha = list.get(i).getSortKey();
             //上一个拼音的首字母，如果不存在则为""
-            String previewAlpha=(i-1)>=0?list.get(i-1).getSortKey():"";
+            previewAlpha=(i-1)>=0?list.get(i-1).getSortKey():"";
             if (!previewAlpha.equals(currentAlpha)){    //保存第一个字母出现的位置
-                String firstAlpha=list.get(i).getSortKey();
+                firstAlpha=list.get(i).getSortKey();
                 alphaIndexer.put(firstAlpha,i);
                 sections.add(firstAlpha);
             }

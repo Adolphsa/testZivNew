@@ -61,7 +61,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
     @Override
     public void onBindViewHolder(messageHolder holder, int position) {
         ImSession imSession = imSessionList.get(position);
-        String msgContent = imSession.getMsgContent();
         int status = imSession.getStatus();
         int unreadMsgNum = imSession.getUnreadMsgNum();
         if (unreadMsgNum > 0){
@@ -70,19 +69,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             holder.msgItemNewMsg.setVisibility(View.GONE);
         }
         if (0 == status) {   //投票
-            setStatusIs0View(holder, msgContent, imSession);
+            setStatusIs0View(holder, imSession.getMsgContent(), imSession);
         } else if (status == 1) {
-            String lastSender = imSession.getLastSender();
             int uin = (int) SharePreferenceUtil.get(context, YPlayConstant.YPLAY_UIN, (int) 0);
             // if lastSend == self
-            if (lastSender.equals(String.valueOf(uin))) {
-                initItem2(holder, msgContent, imSession);
+            if (imSession.getLastSender().equals(String.valueOf(uin))) {
+                initItem2(holder, imSession.getMsgContent(), imSession);
             } else {
-                initItem3(holder, msgContent, imSession);
+                initItem3(holder, imSession.getMsgContent(), imSession);
             }
 
         } else if (status == 2) {
-            initItem4(holder, msgContent, imSession);
+            initItem4(holder, imSession.getMsgContent(), imSession);
         }
     }
 
@@ -205,7 +203,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
                 if (TextUtils.isEmpty(headerUrl)) {
                     holder.msgItemHeaderImg.setImageResource(R.drawable.header_deafult);
                 } else {
-                    Picasso.with(context).load(headerUrl).into(holder.msgItemHeaderImg);
+                    Picasso.with(context).load(headerUrl).resizeDimen(R.dimen.item_add_friends_width,
+                            R.dimen.item_add_friends_height).into(holder.msgItemHeaderImg);
 
                 }
                 holder.msgItemName.setText(nickName);

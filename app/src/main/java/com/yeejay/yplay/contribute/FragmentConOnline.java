@@ -22,6 +22,7 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContributeOnlineAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
@@ -91,15 +92,15 @@ public class FragmentConOnline extends BaseFragment implements
     }
 
     private void initControlsAndAdapter() {
-        reviewedLtManager = new MyLinearLayoutManager(getActivity());
+        reviewedLtManager = new MyLinearLayoutManager(YplayApplication.getContext());
 
         //设置recyclerView的分割线；
-        DividerItemDecoration divider = new DividerItemDecoration(getActivity(),
+        DividerItemDecoration divider = new DividerItemDecoration(YplayApplication.getContext(),
                 DividerItemDecoration.VERTICAL);
         divider.setDrawable(getActivity().getDrawable(R.drawable.shape_divider_item_contribute_list));
 
         //审核中的adapter初始化;
-        reviewedAdapter = new ContributeOnlineAdapter(getActivity(),this, mReviewedList);
+        reviewedAdapter = new ContributeOnlineAdapter(YplayApplication.getContext(),this, mReviewedList);
         recyclerView.setLayoutManager(reviewedLtManager);
         recyclerView.setAdapter(reviewedAdapter);
         recyclerView.addItemDecoration(divider);
@@ -225,9 +226,9 @@ public class FragmentConOnline extends BaseFragment implements
 
         Map<String, Object> contributesMap = new HashMap<>();
         contributesMap.put("qid", qid);
-        contributesMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        contributesMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        contributesMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        contributesMap.put("uin", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_UIN, 0));
+        contributesMap.put("token", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        contributesMap.put("ver", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .getSubmitQueryDetail(contributesMap)
@@ -280,9 +281,9 @@ public class FragmentConOnline extends BaseFragment implements
         contributesMap.put("type", type);
         contributesMap.put("pageNum", pageNum);
         contributesMap.put("pageSize", pageSize);
-        contributesMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        contributesMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        contributesMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        contributesMap.put("uin", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_UIN, 0));
+        contributesMap.put("token", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        contributesMap.put("ver", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_VER, 0));
 
         YPlayApiManger.getInstance().getZivApiService()
                 .getContributeList(contributesMap)
@@ -346,7 +347,6 @@ public class FragmentConOnline extends BaseFragment implements
     }
 
     private static class ViewHolder {
-        TextView itemTotal;
         ImageView itemHeadImg;
         TextView itemTitle;
         TextView itemMsg;

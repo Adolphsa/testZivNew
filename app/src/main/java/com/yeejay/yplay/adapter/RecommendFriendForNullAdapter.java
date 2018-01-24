@@ -99,7 +99,8 @@ public class RecommendFriendForNullAdapter extends BaseAdapter implements View.O
         String url = friendsBean.getHeadImgUrl();
         int recommendType = friendsBean.getRecommendType();
         if (!TextUtils.isEmpty(url)) {
-            Picasso.with(context).load(url).into(holder.rfHeaderImg);
+            Picasso.with(context).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).into(holder.rfHeaderImg);
             holder.afiTvFamilyName.setVisibility(View.INVISIBLE);
         } else {
             String nickName = friendsBean.getNickName();
