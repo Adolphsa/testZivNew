@@ -3,17 +3,17 @@ package com.yeejay.yplay.model;
 import java.util.List;
 
 /**
- * 获取我的好友列表
- * Created by Administrator on 2017/11/3.
+ * 查询通讯录注册状态的返回
+ * Created by Adolph on 2018/1/23.
  */
 
-public class FriendsListRespond {
+public class ContactsRegisterStateRespond {
 
 
     /**
      * code : 0
      * msg : succ
-     * payload : {"total":2,"friends":[{"uin":100002,"nickName":"胡小说","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png","gender":1,"grade":3,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校"},{"uin":100007,"nickName":"蒙大顺","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509192590102.png","gender":2,"grade":1,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校"}]}
+     * payload : {"infos":[{"uin":100328,"userName":"frankshi","phone":"13590457127","nickName":"frankshi","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1514887797855.png","gender":2,"age":19,"grade":2,"schoolId":54400,"schoolType":1,"schoolName":"学府中学","country":"中国","province":"广东","city":"深圳市","ts":0}]}
      */
 
     private int code;
@@ -46,7 +46,7 @@ public class FriendsListRespond {
 
     @Override
     public String toString() {
-        return "FriendsListRespond{" +
+        return "ContactsRegisterStateRespond{" +
                 "code=" + code +
                 ", msg='" + msg + '\'' +
                 ", payload=" + payload +
@@ -54,60 +54,56 @@ public class FriendsListRespond {
     }
 
     public static class PayloadBean {
-        /**
-         * total : 2
-         * friends : [{"uin":100002,"nickName":"胡小说","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png","gender":1,"grade":3,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校"},{"uin":100007,"nickName":"蒙大顺","headImgUrl":"http://yplay-1253229355.image.myqcloud.com/headimgs/1509192590102.png","gender":2,"grade":1,"schoolId":1,"schoolType":1,"schoolName":"南山第二外国语学校"}]
-         */
+        private List<InfosBean> infos;
 
-        private int total;
-        private List<FriendsBean> friends;
-
-        public int getTotal() {
-            return total;
+        public List<InfosBean> getInfos() {
+            return infos;
         }
 
-        public void setTotal(int total) {
-            this.total = total;
-        }
-
-        public List<FriendsBean> getFriends() {
-            return friends;
-        }
-
-        public void setFriends(List<FriendsBean> friends) {
-            this.friends = friends;
+        public void setInfos(List<InfosBean> infos) {
+            this.infos = infos;
         }
 
         @Override
         public String toString() {
             return "PayloadBean{" +
-                    "total=" + total +
-                    ", friends=" + friends +
+                    "infos=" + infos +
                     '}';
         }
 
-        public static class FriendsBean {
+        public static class InfosBean {
             /**
-             * uin : 100002
-             * nickName : 胡小说
-             * headImgUrl : http://yplay-1253229355.image.myqcloud.com/headimgs/1509122247953.png
-             * gender : 1
-             * grade : 3
-             * schoolId : 1
+             * uin : 100328
+             * userName : frankshi
+             * phone : 13590457127
+             * nickName : frankshi
+             * headImgUrl : http://yplay-1253229355.image.myqcloud.com/headimgs/1514887797855.png
+             * gender : 2
+             * age : 19
+             * grade : 2
+             * schoolId : 54400
              * schoolType : 1
-             * schoolName : 南山第二外国语学校
-             * int ts : 好友的时间
+             * schoolName : 学府中学
+             * country : 中国
+             * province : 广东
+             * city : 深圳市
+             * ts : 0
              */
 
             private int uin;
+            private String userName;
             private String phone;
             private String nickName;
             private String headImgUrl;
             private int gender;
+            private int age;
             private int grade;
             private int schoolId;
             private int schoolType;
             private String schoolName;
+            private String country;
+            private String province;
+            private String city;
             private int ts;
 
             public int getUin() {
@@ -116,6 +112,14 @@ public class FriendsListRespond {
 
             public void setUin(int uin) {
                 this.uin = uin;
+            }
+
+            public String getUserName() {
+                return userName;
+            }
+
+            public void setUserName(String userName) {
+                this.userName = userName;
             }
 
             public String getPhone() {
@@ -150,6 +154,14 @@ public class FriendsListRespond {
                 this.gender = gender;
             }
 
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
             public int getGrade() {
                 return grade;
             }
@@ -182,6 +194,30 @@ public class FriendsListRespond {
                 this.schoolName = schoolName;
             }
 
+            public String getCountry() {
+                return country;
+            }
+
+            public void setCountry(String country) {
+                this.country = country;
+            }
+
+            public String getProvince() {
+                return province;
+            }
+
+            public void setProvince(String province) {
+                this.province = province;
+            }
+
+            public String getCity() {
+                return city;
+            }
+
+            public void setCity(String city) {
+                this.city = city;
+            }
+
             public int getTs() {
                 return ts;
             }
@@ -190,19 +226,23 @@ public class FriendsListRespond {
                 this.ts = ts;
             }
 
-
             @Override
             public String toString() {
-                return "FriendsBean{" +
+                return "InfosBean{" +
                         "uin=" + uin +
+                        ", userName='" + userName + '\'' +
                         ", phone='" + phone + '\'' +
                         ", nickName='" + nickName + '\'' +
                         ", headImgUrl='" + headImgUrl + '\'' +
                         ", gender=" + gender +
+                        ", age=" + age +
                         ", grade=" + grade +
                         ", schoolId=" + schoolId +
                         ", schoolType=" + schoolType +
                         ", schoolName='" + schoolName + '\'' +
+                        ", country='" + country + '\'' +
+                        ", province='" + province + '\'' +
+                        ", city='" + city + '\'' +
                         ", ts=" + ts +
                         '}';
             }

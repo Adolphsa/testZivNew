@@ -2,6 +2,7 @@ package com.yeejay.yplay.api;
 
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.ContactsRegisterStateRespond;
 import com.yeejay.yplay.model.FriendFeedsMakesureRespond;
 import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
@@ -16,6 +17,7 @@ import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
 import com.yeejay.yplay.model.QuestionListRespond;
 import com.yeejay.yplay.model.QuestionRespond;
+import com.yeejay.yplay.model.ReqAddFriendUinRespond;
 import com.yeejay.yplay.model.SubmitQueryDetailRespond;
 import com.yeejay.yplay.model.SubmitQueryListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
@@ -75,6 +77,11 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/addr/remove")
     Observable<UpdateContactsRespond> removeContacts(@FieldMap Map<String,Object> filemap);
+
+    //查询用户的注册状态
+    @FormUrlEncoded
+    @POST("/api/addr/querybyphone")
+    Observable<ContactsRegisterStateRespond> queryUserRegisterState(@FieldMap Map<String,Object> filemap);
 
     //搜索学校列表
     @FormUrlEncoded
@@ -158,6 +165,11 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/sns/getaddfriendnewmsgcnt")
     Observable<UnReadMsgCountRespond> getUnreadMessageCount(@FieldMap Map<String,Object> filemap);
+
+    //获取已点击加好友按钮的列表
+    @FormUrlEncoded
+    @POST("/api/sns/getreqaddfrienduins")
+    Observable<ReqAddFriendUinRespond> getReqAddFriendUin(@FieldMap Map<String,Object> filemap);
 
     //拉取添加好友消息数组
     @FormUrlEncoded

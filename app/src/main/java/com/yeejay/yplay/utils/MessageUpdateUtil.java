@@ -384,6 +384,10 @@ public class MessageUpdateUtil {
         //收到图片消息
         if (msgType == TIMElemType.Image.ordinal()){
 
+            if (String.valueOf(uin).equals(sender)){ //是图片消息并且是自己发送的
+                return;
+            }
+
             String root = Environment.getExternalStorageDirectory().getAbsolutePath();
             String dirStr = root + File.separator + "yplay" + File.separator + "image";
             File dir = new File(dirStr);

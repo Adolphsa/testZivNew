@@ -164,7 +164,7 @@ public class ActivityMyInfo extends BaseActivity {
         getMyInfo();
         getAddFriendMessageCount();
         System.out.println("我的资料resume");
-        recommendFriends();
+//        recommendFriends();
     }
 
     //初始化标题

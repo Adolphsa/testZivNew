@@ -131,9 +131,6 @@
             android:name=".answer.ActivityInviteFriend"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".answer.ActivityInvite"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".friend.ActivityFriendsInfo"
             android:screenOrientation="portrait" />
         <activity

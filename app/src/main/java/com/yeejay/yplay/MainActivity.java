@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -54,7 +53,7 @@ import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.message.FragmentMessage;
-import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.ContactsRegisterStateRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
@@ -75,7 +74,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import ch.qos.logback.core.rolling.helper.CompressionRunnable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -234,7 +232,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                 }
 
                 setMessageIcon();
-
             }
 
             @Override
@@ -501,17 +498,11 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-
-                    }
+                    public void onError(Throwable e) {}
 
                     @Override
-                    public void onComplete() {
-
-                    }
+                    public void onComplete() {}
                 });
-
-
     }
 
     //插入我的好友列表到数据库
@@ -866,12 +857,22 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         }
 
         List<String> deleteList = new ArrayList<>();
+        List<String> unchangedList = new ArrayList<>();
         List<String> addList = new ArrayList<>();
+        String tempUnchangedStr = "";
+        String unchangedStr = "";
 
         //  1 删除  2 不变   3 新增
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             if (entry.getValue() == 1) {             //删除的记录
                 deleteList.add(entry.getKey());
+            }else if (entry.getValue() == 2){       //保持不变记录的需要重新查询是否已注册
+                Log.i(TAG, "compareContacts: 保持不变的记录---" + entry.getKey());
+                tempUnchangedStr = entry.getKey();
+                if (tempUnchangedStr.length() > 3){
+                    unchangedStr = tempUnchangedStr.substring(3,tempUnchangedStr.length());
+                    unchangedList.add(unchangedStr);
+                }
             } else if (entry.getValue() == 3) {       //新增的记录
                 addList.add(entry.getKey());
             }
@@ -880,10 +881,16 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         List<com.yeejay.yplay.model.ContactsInfo> deleteContactsList = new ArrayList<>();
         List<com.yeejay.yplay.model.ContactsInfo> addContactsList = new ArrayList<>();
 
+        //查询更新通讯录好友是否有已注册的
+        if (unchangedList.size() > 0){
+            Log.i(TAG, "compareContacts: unchangedList size" + unchangedList.size());
+            dealBySubList(unchangedList,100);
+        }
+
         if (deleteList.size() > 0) {
             int hadleType = 1;
             for (String str : deleteList) {
-                Log.i(TAG, "compareContacts: 要删除元素---" + str);
+//                Log.i(TAG, "compareContacts: 要删除元素---" + str);
                 ContactsInfo contactsInfo = contactsInfoDao.queryBuilder()
                         .where(ContactsInfoDao.Properties.OrgPhone.eq(str))
                         .build().unique();
@@ -909,7 +916,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                                 .where(ContactsInfoDao.Properties.OrgPhone.eq(contactsInfo.getOrgPhone()))
                                 .build().unique();
                         if (tempContacts == null) {
-                            Log.i(TAG, "compareContacts: addContactsInfo---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
+//                            Log.i(TAG, "compareContacts: addContactsInfo---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
                             LogUtils.getInstance().error("增加通讯录好友---" + contactsInfo.getName() + "---" + contactsInfo.getOrgPhone());
                             contactsInfoDao.insert(new ContactsInfo(null, contactsInfo.getName(), contactsInfo.getOrgPhone(), null, 1, contactsInfo.getSortKey(), null, null));
                         }
@@ -950,6 +957,22 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         }
     }
+
+    private void dealBySubList(List<String> sourList, int batchCount) {
+        int sourListSize = sourList.size();
+        Log.i(TAG, "dealBySubList: 查询通讯录注册状态sourListSize---" + sourListSize);
+        int subCount = sourListSize % batchCount == 0 ? sourListSize / batchCount : sourListSize / batchCount + 1;
+        Log.i(TAG, "dealBySubList: 查询通讯录注册状态循环上传的次数---" + subCount);
+        int startIndext = 0;
+        int stopIndext = 0;
+        for (int i = 0; i < subCount; i++) {
+            stopIndext = (i == subCount - 1) ? stopIndext + sourListSize % batchCount : stopIndext + batchCount;
+            List<String> tempList = new ArrayList<>(sourList.subList(startIndext, stopIndext));
+            startIndext = stopIndext;
+            queryByPhone(tempList);
+        }
+    }
+
 
     //更新通讯录
     private void updateContacts(List<com.yeejay.yplay.model.ContactsInfo> contactsInfoList) {
@@ -996,6 +1019,55 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
                     }
                 });
     }
+
+    //不变的记录需要查询更新
+    private void queryByPhone(List<String> unchangedList){
+
+        Map<String, Object> queryContactsMap = new HashMap<>();
+        String queryContactStr = GsonUtil.GsonString(unchangedList);
+        Log.i(TAG, "queryByPhone: queryContactStr---" + queryContactStr);
+        String encodedString = Base64.encodeToString(queryContactStr.getBytes(), Base64.DEFAULT);
+        queryContactsMap.put("data", encodedString);
+        queryContactsMap.put("uin", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, 0));
+        queryContactsMap.put("token", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        queryContactsMap.put("ver", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_VER, 0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .queryUserRegisterState(queryContactsMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ContactsRegisterStateRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ContactsRegisterStateRespond friendsListRespond) {
+                        Log.i(TAG, "onNext: friendsListRespond---" + friendsListRespond.toString());
+                        if (friendsListRespond.getCode() == 0){
+                            Log.i(TAG, "onNext: 查询通讯录是否已注册---" + friendsListRespond.toString());
+                            List<ContactsRegisterStateRespond.PayloadBean.InfosBean> friendsBeanList = friendsListRespond.getPayload().getInfos();
+                            if (friendsBeanList != null && friendsBeanList.size() > 0){
+                                //更新返回的数据在数据库中
+                                updateContactRegister(friendsBeanList);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
 
     //删除通讯录记录
     private void deleteContacts(List<com.yeejay.yplay.model.ContactsInfo> contactsInfoList) {
@@ -1062,6 +1134,26 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             }
         }
     }
+
+
+    //更新通讯录中已注册的资料
+    private void updateContactRegister(List<ContactsRegisterStateRespond.PayloadBean.InfosBean> friendsBeanList){
+
+        Log.i(TAG, "updateContactRegister: 更新通讯录中已注册的资料" + friendsBeanList.size());
+
+        for (ContactsRegisterStateRespond.PayloadBean.InfosBean friendsBean : friendsBeanList){
+            ContactsInfo contactsInfo = contactsInfoDao.queryBuilder()
+                    .where(ContactsInfoDao.Properties.Phone.eq(friendsBean.getPhone()))
+                    .build().unique();
+            if (contactsInfo != null){
+                contactsInfo.setUin(friendsBean.getUin());
+                contactsInfo.setNickName(friendsBean.getNickName());
+                contactsInfo.setHeadImgUrl(friendsBean.getHeadImgUrl());
+                contactsInfoDao.update(contactsInfo);
+            }
+        }
+    }
+
 
 
     @Override

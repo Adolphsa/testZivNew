@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.greendao.ContactInvite;
 import com.yeejay.yplay.greendao.ContactsInfo;
 
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private hideCallback hideCallback;
     private acceptCallback acceptCallback;
     private List<ContactsInfo> contentList;
+    List<Integer> addFriendUinList;
+    private List<ContactInvite> contactAlreadyInviteList;
     private Map<String, Integer> alphaIndexer;
     private List<String> sections;
     private boolean flag;//标志用于只执行一次代码
@@ -73,11 +76,15 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public WaitInviteAdapter(Context context,
                              hideCallback hideCallback,
                              acceptCallback acceptCallback,
-                             List<ContactsInfo> list) {
+                             List<ContactsInfo> list,
+                             List<ContactInvite> contactAlreadyInviteList,
+                             List<Integer> addFriendUinList) {
         this.hideCallback = hideCallback;
         this.acceptCallback = acceptCallback;
         this.context = context;
         this.contentList = list;
+        this.contactAlreadyInviteList = contactAlreadyInviteList;
+        this.addFriendUinList = addFriendUinList;
 
         alphaIndexer = new HashMap<>();
         sections = new ArrayList<>();
@@ -144,16 +151,27 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((ViewHolder) holder).afItemFamilyName.setVisibility(View.VISIBLE);
 
             String nickName = contentList.get(position).getName().trim();
+            String phone = contentList.get(position).getPhone();
             if (!TextUtils.isEmpty(nickName)) {
                 ((ViewHolder) holder).afItemFamilyName.setText(nickName.substring(0, 1));
             }
             ((ViewHolder) holder).afItemName.setText(nickName);
-            ((ViewHolder) holder).afItemTvSharesFriends.setText(contentList.get(position).getPhone());
+            ((ViewHolder) holder).afItemTvSharesFriends.setText(phone);
 
             ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.friend_invitation);
             ((ViewHolder) holder).afBtnAccept.setEnabled(true);
             ((ViewHolder) holder).afBtnAccept.setOnClickListener(acceptListener);
 
+            //查找对比已经邀请的人
+            if (contactAlreadyInviteList != null && contactAlreadyInviteList.size() > 0){
+                for (ContactInvite contactInvite : contactAlreadyInviteList) {
+                        if (contactInvite.getFriendPhone().equals(phone)){
+//                            Log.i(TAG, "onBindViewHolder: 找到了---" + phone);
+                            ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.friend_invitation_done);
+                            ((ViewHolder) holder).afBtnAccept.setEnabled(false);
+                        }
+                }
+            }
             ((ViewHolder) holder).afBtnAccept.setTag(position);
         } else if (uin == 2) {   //已开通文字
             String contactTitle = contentList.get(position).getName();
@@ -172,6 +190,7 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             String url = contactsInfo.getHeadImgUrl();
             String nickName = contactsInfo.getNickName().trim();
 
+
             ((ViewHolder) holder).afItemName.setText(nickName);
             ((ViewHolder) holder).afItemTvSharesFriends.setText("通讯录好友");
 
@@ -185,8 +204,17 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((ViewHolder) holder).afBtnAccept.setEnabled(true);
             ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.add_friend_icon);
             ((ViewHolder) holder).afBtnAccept.setOnClickListener(acceptListener);
-            ((ViewHolder) holder).afBtnAccept.setTag(position);
 
+            if (addFriendUinList != null && addFriendUinList.size() > 0){
+                for (Integer tempUin : addFriendUinList){
+                    if (tempUin == uin){
+                        ((ViewHolder) holder).afBtnAccept.setEnabled(false);
+                        ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.add_friend_apply);
+                    }
+                }
+            }
+
+            ((ViewHolder) holder).afBtnAccept.setTag(position);
             ((ViewHolder) holder).afiItenRootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

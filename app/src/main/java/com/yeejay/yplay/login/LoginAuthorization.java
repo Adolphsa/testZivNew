@@ -12,7 +12,8 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -48,6 +49,7 @@ public class LoginAuthorization extends BaseActivity {
 
     private static final int REQUEST_CODE_PERMISSION_SINGLE_LOCATION = 100;
     private static final int REQUEST_CODE_PERMISSION_SINGLE_CONTACTS = 101;
+    private static final int CONTACTS_BOOLEAN = 102;
 
     Button mBtnGetAddressAuthority;
     Button mBtnGetNumberBookAuthority;
@@ -60,9 +62,36 @@ public class LoginAuthorization extends BaseActivity {
     public LocationClient mLocationClient = null;
     private double latitude;
     private double longitude;
+    private Thread contactThread;
 
     LocationManager mLocationManager;
     ContactsInfoDao contactsInfoDao;
+
+
+    private Handler handler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+
+                    Log.i(TAG, "handleMessage: handle---" + numberBookAuthoritySuccess);
+                    if (numberBookAuthoritySuccess) {
+                        setContactBackground();
+                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+                    } else {
+
+                            SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
+                            settingDialog.setTitle("开启通讯录权限");
+                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
+                            settingDialog.show();
+
+                    }
+                    authorizationSuccess();
+
+
+        }
+    };
 
     PermissionListener mPermissionListener = new PermissionListener() {
         @Override
@@ -74,17 +103,17 @@ public class LoginAuthorization extends BaseActivity {
                     getLonLat();
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
-                    getContacts();
-                    if (numberBookAuthoritySuccess) {
-                        Log.i(TAG, "onSucceed: 通讯录有权限");
-                    } else {
-                        Log.i(TAG, "onSucceed: 通讯录无权限");
-                        SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
-                        settingDialog.setTitle("开启通讯录权限");
-                        settingDialog.setMessage("方便您找到正在使用本产品的好友");
-                        settingDialog.show();
-
-                    }
+                    contactsAuthority();
+//                    if (numberBookAuthoritySuccess) {
+//                        Log.i(TAG, "onSucceed: 通讯录有权限");
+//                    } else {
+//                        Log.i(TAG, "onSucceed: 通讯录无权限");
+//                        SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
+//                        settingDialog.setTitle("开启通讯录权限");
+//                        settingDialog.setMessage("方便您找到正在使用本产品的好友");
+//                        settingDialog.show();
+//
+//                    }
                     break;
             }
             //授权成功跳转
@@ -101,17 +130,17 @@ public class LoginAuthorization extends BaseActivity {
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     System.out.println("回调失败的通讯录权限申请失败");
-                    getContacts();
-                    if (numberBookAuthoritySuccess) {
-                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-                    } else {
-                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-                            SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
-                            settingDialog.setTitle("开启通讯录权限");
-                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
-                            settingDialog.show();
-                        }
-                    }
+                    contactsAuthority();
+//                    if (numberBookAuthoritySuccess) {
+//                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
+//                    } else {
+//                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
+//                            SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
+//                            settingDialog.setTitle("开启通讯录权限");
+//                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
+//                            settingDialog.show();
+//                        }
+//                    }
                     break;
             }
             authorizationSuccess();
@@ -122,7 +151,7 @@ public class LoginAuthorization extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case 401:
-                getContacts();
+                contactsAuthority();
                 break;
             case 402:
                 getLonLat();
@@ -143,6 +172,8 @@ public class LoginAuthorization extends BaseActivity {
         mLocationClient = new LocationClient(getApplicationContext());
 
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
+        contactThread = new Thread(new LoginContactsUpdateRunnable());
+
 
         mBtnGetAddressAuthority = (Button) findViewById(R.id.laz_btn_address);
         mBtnGetNumberBookAuthority = (Button) findViewById(R.id.laz_btn_address_book);
@@ -294,6 +325,15 @@ public class LoginAuthorization extends BaseActivity {
         }
     };
 
+
+    private void contactsAuthority(){
+
+        if (contactThread != null){
+            contactThread.start();
+        }
+
+    }
+
     //获取通讯录联系人
     private void getContacts() {
 
@@ -315,7 +355,7 @@ public class LoginAuthorization extends BaseActivity {
             Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
             Uri dataUri = Uri.parse("content://com.android.contacts/data");
 
-            setContactBackground();
+//            setContactBackground();
             String id;
             String contactName;
             String contactNumber;
@@ -377,17 +417,19 @@ public class LoginAuthorization extends BaseActivity {
 
             Log.i(TAG, "getContacts: 通讯录长度---" + counter);
             if (counter > 0) {
-                setContactBackground();
+//                setContactBackground();
                 numberBookAuthoritySuccess = true;
                 SharePreferenceUtil.put(LoginAuthorization.this, "temp_book", 1);
                 //开启服务上传通讯录
                 startService(new Intent(LoginAuthorization.this, ContactsService.class));
             }
 
+            handler.sendEmptyMessage(CONTACTS_BOOLEAN);
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-
+//            handler.sendEmptyMessage(CONTACTS_BOOLEAN);
         }
     }
 
@@ -448,6 +490,19 @@ public class LoginAuthorization extends BaseActivity {
         authorizationSuccess();
     }
 
+
+
+    public class LoginContactsUpdateRunnable implements Runnable{
+
+        @Override
+        public void run() {
+            Log.i(TAG, "run: 在线程中获取通讯录");
+            getContacts();
+        }
+    }
+
+
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -457,11 +512,7 @@ public class LoginAuthorization extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.i(TAG, "onNewIntent: ");
-    }
+
 
     @Override
     protected void onDestroy() {

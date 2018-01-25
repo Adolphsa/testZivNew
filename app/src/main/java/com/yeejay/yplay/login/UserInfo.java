@@ -130,24 +130,25 @@ public class UserInfo extends BaseActivity {
 
         String imagePath = "";
         String imageName = "";
+        if (data != null){
+            if (requestCode == REQUEST_CODE) {
+                ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
 
-        if (requestCode == REQUEST_CODE && data != null) {
-            ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
+                imagePath = images.get(0);
+                imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+                Log.i(TAG, "onActivityResult: 相册imagePath---" + imagePath + ",imageName---" + imageName);
 
-            imagePath = images.get(0);
-            imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
-            Log.i(TAG, "onActivityResult: 相册imagePath---" + imagePath + ",imageName---" + imageName);
+            } else if (requestCode == CODE_CAMERA_REQUEST) {
 
-        } else if (requestCode == CODE_CAMERA_REQUEST) {
+                imagePath = fileUri.getAbsolutePath();
+                imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+                Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
 
-            imagePath = fileUri.getAbsolutePath();
-            imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
-            Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
-
+            }
+            Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
+            userHeadImage.setImageBitmap(bm1);
+            uploadImage(imagePath, imageName,bm1);
         }
-        Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
-        userHeadImage.setImageBitmap(bm1);
-        uploadImage(imagePath, imageName,bm1);
     }
 
     @Override

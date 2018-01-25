@@ -383,16 +383,16 @@ public class ActivitySetting extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE) {
-
-            ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
-            String imagePath = images.get(0);
-            Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
-            System.out.println("图片位置---" + imagePath);
-            String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
-            Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
-            settingImgHeader.setImageBitmap(bm1);
-            uploadImage(imagePath, imageName,bm1);
-
+            if (data != null){
+                ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
+                String imagePath = images.get(0);
+                Log.i(TAG, "onActivityResult: 图片URL---" + imagePath);
+                System.out.println("图片位置---" + imagePath);
+                String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+                Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
+                settingImgHeader.setImageBitmap(bm1);
+                uploadImage(imagePath, imageName,bm1);
+            }
         } else if (requestCode == CODE_CAMERA_REQUEST) {
 
             String imagePath = fileUri.getAbsolutePath();

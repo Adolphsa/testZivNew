@@ -156,7 +156,7 @@ public class PushUtil implements Observer {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }else if (7 == dataType){
+            }else if (7 == dataType){ //加好友
 
                 try{
                     String data = imCustomMsgData.getData();

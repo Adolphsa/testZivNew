@@ -3,6 +3,7 @@ package com.yeejay.yplay.answer;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,8 @@ import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.SideView;
+import com.yeejay.yplay.greendao.ContactInvite;
+import com.yeejay.yplay.greendao.ContactInviteDao;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -64,6 +67,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
     WaitInviteAdapter waitInviteAdapter;
     List<ContactsInfo> mDataList;   //所有联系人的集合
+    List<ContactInvite> contactAlreadyInviteList;
     private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
     private List<String> sections;// 存放存在的汉语拼音首字母
 
@@ -71,6 +75,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
     private MyInfoDao myInfoDao;
     private MyInfo myInfo;
     private ContactsInfoDao contactsInfoDao;
+    private ContactInviteDao contactInviteDao;
 
     @OnClick(R.id.aif_tip_close)
     public void tipClose() {
@@ -90,6 +95,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityInviteFriend.this, true);
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
+        contactInviteDao = YplayApplication.getInstance().getDaoSession().getContactInviteDao();
 
         uin = (int) SharePreferenceUtil.get(ActivityInviteFriend.this, YPlayConstant.YPLAY_UIN, (int) 0);
         myInfo = myInfoDao.queryBuilder()
@@ -103,6 +109,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         }
 
         mDataList = new ArrayList<>();
+        contactAlreadyInviteList = new ArrayList<>();
 
         init();
 
@@ -123,6 +130,9 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
         mDataList = contactsInfoDao.queryBuilder()
                 .where(ContactsInfoDao.Properties.Uin.eq(0))
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
+                .list();
+        contactAlreadyInviteList = contactInviteDao.queryBuilder()
+                .where(ContactInviteDao.Properties.Uin.eq(String.valueOf(uin)))
                 .list();
 
         if (mDataList == null || mDataList.size() == 0){
@@ -183,6 +193,9 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
 
                         String phone = GsonUtil.GsonString(mDataList.get((int) v.getTag()).getPhone());
                         System.out.println("邀请的电话---" + phone);
+                        if (!TextUtils.isEmpty(phone)){
+                            contactInviteDao.insert(new ContactInvite(null,String.valueOf(uin),mDataList.get((int) v.getTag()).getPhone()));
+                        }
                         String phoneStr = "[" + phone + "]";
                         String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
                         Log.i(TAG, "acceptClick: base64phone---" + base64phone);
@@ -193,7 +206,7 @@ public class ActivityInviteFriend extends BaseActivity implements WaitInviteAdap
                 }
 
             }
-        }, mDataList);
+        }, mDataList,contactAlreadyInviteList,null);
 
         waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
 

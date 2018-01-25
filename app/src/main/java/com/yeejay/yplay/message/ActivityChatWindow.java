@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -36,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.donkingliang.imageselector.utils.ImageSelectorUtils;
+import com.donkingliang.imageselector.utils.ImageUtil;
 import com.donkingliang.imageselector.utils.PhotoUtils;
 import com.donkingliang.imageselector.utils.ToastUtils;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -44,7 +47,9 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.tencent.imsdk.TIMConversation;
 import com.tencent.imsdk.TIMConversationType;
+import com.tencent.imsdk.TIMElemType;
 import com.tencent.imsdk.TIMImageElem;
+import com.tencent.imsdk.TIMImageType;
 import com.tencent.imsdk.TIMManager;
 import com.tencent.imsdk.TIMMessage;
 import com.tencent.imsdk.TIMMessageOfflinePushSettings;
@@ -106,7 +111,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     private static final int REQUEST_CODE = 0x00000011;
     private static final int CODE_CAMERA_REQUEST = 0xa01;
     private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0xa03;
-    private File fileUri = new File(Environment.getExternalStorageDirectory().getPath() + "/photo.jpg");
+    private File fileUri;
     private Uri imageUri;
 
     @BindView(R.id.layout_title_back2)
@@ -127,6 +132,10 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     ImageButton acwSend;
     @BindView(R.id.acw_pull_refresh)
     PullToRefreshLayout acwRefreshView;
+    private LinearLayoutManager linearLayoutManager;
+    private ImMsg selfImageMsg;
+    private ImSession imSessionImage;
+    private long imageMsgTs;
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
@@ -264,6 +273,61 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
                 Log.i(TAG, "send: sessionId---" + sessionId);
 
+
+                Log.i(TAG, "sendMessage: msender---" + mSender + ",uin---" + uin);
+                if (!TextUtils.isEmpty(imagePath)) {
+
+                    msgId = System.currentTimeMillis();
+
+                    ImageInfo imageInfo = new ImageInfo();
+                    Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+                    int imageFormat = getImageFormat(imagePath);
+                    imageInfo.setImageFormat(imageFormat);
+
+
+                    ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
+                    originalImage.setImageType(TIMImageType.Original);
+                    originalImage.setImageWidth(bitmap.getWidth());
+                    originalImage.setImageHeight(bitmap.getHeight());
+                    originalImage.setImageUrl(imagePath);
+                    imageInfo.setOriginalImage(originalImage);
+
+                    ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
+                    thumbImage.setImageType(TIMImageType.Thumb);
+                    thumbImage.setImageWidth(bitmap.getWidth());
+                    thumbImage.setImageHeight(bitmap.getHeight());
+                    thumbImage.setImageUrl(imagePath);
+                    imageInfo.setThumbImage(thumbImage);
+
+                    ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
+                    largeImage.setImageType(TIMImageType.Large);
+                    largeImage.setImageWidth(bitmap.getWidth());
+                    largeImage.setImageHeight(bitmap.getHeight());
+                    largeImage.setImageUrl(imagePath);
+                    imageInfo.setLargeImage(largeImage);
+
+                    String imageInfoStr = GsonUtil.GsonString(imageInfo);
+                    imageMsgTs = System.currentTimeMillis() / 1000;
+                    selfImageMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Image.ordinal(), imageInfoStr, imageMsgTs, -1);
+                    imMsgDao.insert(selfImageMsg);
+
+                    //更新会话的最近一条消息
+                    imSessionImage = imSessionDao.queryBuilder()
+                            .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                            .build().unique();
+                    if (imSessionImage != null) {
+                        imSessionImage.setLastMsgId(msgId);
+                        imSessionImage.setLastSender(String.valueOf(uin));
+                        imSessionImage.setMsgType(TIMElemType.Image.ordinal());
+                        imSessionImage.setMsgTs(imageMsgTs);
+                        imSessionDao.update(imSessionImage);
+                    }
+
+                    mDataList.add(0, selfImageMsg);
+                    chatAdapter.notifyItemInserted(mDataList.size() - 1);
+                    acwRecycleView.scrollToPosition(mDataList.size() - 1);
+                }
+
                 //发送消息
                 conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
 
@@ -285,6 +349,28 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         Log.e(TAG, "SendMsg ok");
                         System.out.println("发送成功");
 
+                        long tmsgId = msg.getMsgUniqueId();
+                        long tmsgTs = msg.getMsg().time();
+
+                        ImMsg imMsg = imMsgDao.queryBuilder()
+                                .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                                .where(ImMsgDao.Properties.MsgId.eq(imageMsgTs))
+                                .build().unique();
+                        if (imMsg != null) {
+                            imMsg.setMsgId(tmsgId);
+                            imMsg.setMsgTs(tmsgTs);
+                            imMsgDao.update(imMsg);
+                        }
+
+                        ImSession imSession1 = imSessionDao.queryBuilder()
+                                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                                .build().unique();
+                        if (imSession1 != null) {
+                            imSession1.setLastMsgId(tmsgId);
+                            imSession1.setMsgTs(tmsgTs);
+                            imSessionDao.update(imSession1);
+                        }
+
                         //更新会话列表
                         MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 1, false);
                         acwEdit.setText("");
@@ -301,6 +387,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
 
     String sessionId;
+    long msgId;
     ImMsgDao imMsgDao;
     ImSessionDao imSessionDao;
     FriendInfoDao friendInfoDao;
@@ -345,7 +432,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         initTitle();
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager = new LinearLayoutManager(this);
         acwRecycleView.setLayoutManager(linearLayoutManager);
 
         Log.i(TAG, "onCreate: status---" + status + ",uin---" + uin + ",mSender---" + mSender);
@@ -395,13 +482,44 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         + ",position---" + position
                         + ",realPosition---" + realPosition);
                 String imageInfoStr = mDataList.get(realPosition).getMsgContent();
+                String currentSender = mDataList.get(realPosition).getSender();
                 ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
                 String url = imageInfo.getLargeImage().getImageUrl();
                 int imageFormat = imageInfo.getImageFormat();
                 int largeWidth = imageInfo.getLargeImage().getImageWidth();
                 int largeHeight = imageInfo.getLargeImage().getImageHeight();
                 if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF) {
-                    showImageDialog(url, largeWidth, largeHeight);
+                    showImageDialog(url, largeWidth, largeHeight, currentSender);
+                }
+
+                View llView = linearLayoutManager.findViewByPosition(position);
+
+                if (llView == null) return;
+                if (uin == Integer.valueOf(currentSender)) {    //发送者是自己
+//                    RelativeLayout rightRl = (RelativeLayout) llView;
+//                    ImageView rightImgView = (ImageView) rightRl.findViewById(R.id.msg_item_image_right);
+//
+//                    ViewGroup.LayoutParams lp = rightImgView.getLayoutParams();
+//                    if (lp == null) return;
+//                    Picasso.with(ActivityChatWindow.this).load(url)
+//                            .resize(lp.width, lp.height)
+//                            .config(Bitmap.Config.RGB_565)
+//                            .centerCrop()
+//                            .into(rightImgView);
+
+                    Log.i(TAG, "onItemClick: 右设置大图");
+                } else {                 //非自己
+                    RelativeLayout leftRl = (RelativeLayout) llView;
+                    ImageView leftImgView = (ImageView) leftRl.findViewById(R.id.msg_item_image_left);
+
+                    ViewGroup.LayoutParams lp = leftImgView.getLayoutParams();
+                    if (lp == null) return;
+                    Picasso.with(ActivityChatWindow.this).load(url)
+                            .resize(lp.width, lp.height)
+                            .config(Bitmap.Config.RGB_565)
+                            .centerCrop()
+                            .into(leftImgView);
+                    Log.i(TAG, "onItemClick: 左设置大图");
                 }
             }
         });
@@ -432,7 +550,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             }
 
             @Override
-            public void loadMore() {}
+            public void loadMore() {
+            }
         });
 
     }
@@ -445,12 +564,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             nickName = tempNickname;
         }
 
-        if (status == 2){
+        if (status == 2) {
             FriendInfo friendInfo = friendInfoDao.queryBuilder()
                     .where(FriendInfoDao.Properties.MyselfUin.eq(String.valueOf(uin)))
                     .where(FriendInfoDao.Properties.FriendUin.eq(mSender))
                     .build().unique();
-            if (friendInfo != null){
+            if (friendInfo != null) {
                 nickName = friendInfo.getFriendName();
             }
         }
@@ -526,12 +645,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     } else if (dataType == 2) {
                         MsgContent2 msgContent2 = GsonUtil.GsonToBean(data, MsgContent2.class);
 
-                        if (uin != mSender){
+                        if (uin != mSender) {
                             MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
                             nickName = senderInfoBean.getNickName();
                             tempNickname2 = senderInfoBean.getNickName();
 
-                        }else {
+                        } else {
                             MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
                             tempNickname2 = receiverInfoBean.getNickName();
                             nickName = receiverInfoBean.getNickName();
@@ -565,12 +684,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     private ImMsg insertMsg(TIMMessage msg, int MsgSucess) {
 
-        long msgId = msg.getMsgUniqueId();
+        long tempMsgId = msg.getMsgUniqueId();
         int msgType = msg.getElement(0).getType().ordinal();
         long msgTs = msg.getMsg().time();
         ImMsg imMsg = new ImMsg(null,
                 sessionId,
-                msgId,
+                tempMsgId,
                 String.valueOf(uin),
                 msgType,
                 acwEdit.getText().toString().trim(),
@@ -740,7 +859,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserInfoResponde>() {
                     @Override
-                    public void onSubscribe(Disposable d) {}
+                    public void onSubscribe(Disposable d) {
+                    }
 
                     @Override
                     public void onNext(UserInfoResponde userInfoResponde) {
@@ -769,17 +889,16 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
                     @Override
                     public void onComplete() {
-
                     }
                 });
     }
 
     //发送加好友的请求
-    private void addFriend(int toUin,int srcType) {
+    private void addFriend(int toUin, int srcType) {
 
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
-        addFreindMap.put("srcType",srcType);
+        addFreindMap.put("srcType", srcType);
         addFreindMap.put("uin", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(ActivityChatWindow.this, YPlayConstant.YPLAY_VER, 0));
@@ -827,13 +946,25 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 ImageView button = (ImageView) v;
                 if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
                     button.setImageResource(R.drawable.peer_friend_requested);
-                    addFriend(infoBean.getUin(),8);
+                    addFriend(infoBean.getUin(), 8);
                 } else {
                     Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         cardDialog.show();
+    }
+
+    private void initData() {
+
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String dirStr = root + File.separator + "yplay" + File.separator + "image";
+        File dir = new File(dirStr);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        String tempImage = String.valueOf(System.currentTimeMillis());
+        fileUri = new File(dirStr, tempImage + ".jpg");
     }
 
     @Override
@@ -844,18 +975,34 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         if (requestCode == REQUEST_CODE && data != null) {
             ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
             Log.i(TAG, "onActivityResult: images_url---" + images.get(0));
-            sendMessage(images.get(0));
+
+            String imagePath = images.get(0);
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+            String dirStr = root + File.separator + "yplay" + File.separator + "image";
+            String localImagePath = "";
+            if (bitmap != null) {
+                localImagePath = ImageUtil.saveImage(bitmap, dirStr);
+                bitmap.recycle();
+                bitmap = null;
+            }
+            Log.i(TAG, "onActivityResult: local imagePATH---" + localImagePath);
+
+            sendMessage(localImagePath);
+
         } else if (requestCode == CODE_CAMERA_REQUEST) {
             Log.i(TAG, "onActivityResult: 拍照的url---" + imageUri);
             String imagePath = fileUri.getAbsolutePath();
             Log.i(TAG, "onActivityResult: imagePath---" + imagePath);
+
             sendMessage(imagePath);
         }
     }
 
     //显示图片的dialog
-    private void showImageDialog(String imagePath, int largeWidth, int largeHeight) {
+    private void showImageDialog(String imagePath, int largeWidth, int largeHeight, String currentSender) {
 
+        Log.i(TAG, "showImageDialog: currentSender--" + currentSender);
         final AlertDialog dialog = new AlertDialog.Builder(ActivityChatWindow.this, R.style.StyleDialog).create();
         dialog.show();
 
@@ -880,7 +1027,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         imageView.setLayoutParams(imageLp);
 
         imageView.setMaxWidth(screenWidth);
-        imageView.setMaxHeight(largeHeight * screenWidth / largeWidth);
+        //imageView.setMaxHeight(largeHeight * screenWidth / largeWidth);
+//        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -888,9 +1036,13 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 dialog.dismiss();
             }
         });
+
         if (!TextUtils.isEmpty(imagePath)) {
+            if (uin == Integer.valueOf(currentSender)){
+                imagePath = "file://" + imagePath;
+            }
             Picasso.with(ActivityChatWindow.this).load(imagePath)
-                    .resize(screenWidth,largeHeight * screenWidth / largeWidth)
+                    .resize(screenWidth, largeHeight * screenWidth / largeWidth)
                     .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                     .into(imageView);
         }
@@ -923,6 +1075,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         break;
                     case R.id.message_delete:
                         Log.i(TAG, "onClick: 拍照");
+                        initData();
                         autoObtainCameraPermission();
                         bottomDialog.dismiss();
                         break;
@@ -993,5 +1146,31 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 ToastUtils.showShort(this, "请允许打开相机！！");
             }
         }
+    }
+
+    private int getImageFormat(String imagePath) {
+
+        Log.i(TAG, "getImageFormat: imagePath---" + imagePath);
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+        String type = options.outMimeType;
+
+        if (TextUtils.isEmpty(type)) {
+            Log.i(TAG, "getImageFormat: 图片类型无法识别");
+            return 255;
+        } else if (type.equals("image/jpeg") || type.equals("image/jpg")) {
+            return TIMImageElem.TIM_IMAGE_FORMAT_JPG;
+        } else if (type.equals("image/gif")) {
+            return TIMImageElem.TIM_IMAGE_FORMAT_GIF;
+        } else if (type.equals("image/png")) {
+            return TIMImageElem.TIM_IMAGE_FORMAT_PNG;
+        } else if (type.equals("image/bmp")) {
+            return TIMImageElem.TIM_IMAGE_FORMAT_BMP;
+        }
+
+        return 255;
+
     }
 }

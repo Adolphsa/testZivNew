@@ -5,7 +5,7 @@ package com.yeejay.yplay.wns;
  * Created by Administrator on 2017/12/18.
  */
 
-public interface WnsRequestListener<T> {
+public interface WnsRequestListener {
 
     /**
      * 当前无网络时回调该方法，回调后，该接口的其他方法都不会被调用
@@ -21,7 +21,7 @@ public interface WnsRequestListener<T> {
      * 只有加载成功时，才会调用该方法
      * @param result： 返回该次请求结果
      */
-    void onComplete(T result);
+    void onComplete(String result);
 
     /**
      * 超时时调用该方法

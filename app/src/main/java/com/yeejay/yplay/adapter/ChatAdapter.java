@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -240,6 +241,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }else if (holder instanceof RightImageViewHolder){      //右边的图片
                 ((RightImageViewHolder)holder).msgImageRight.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
+                if (imageInfo == null || imageInfo.getThumbImage() == null) return;
                 String url;
                 int imageFormat = imageInfo.getImageFormat();
                 int width;
@@ -284,7 +286,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                                 .into(((RightImageViewHolder)holder).msgImageRight);
 //                        Log.i(TAG, "onBindViewHolder: right gif---" + url);
                     }else {
-                        Picasso.with(context).load(url)
+
+
+                        Log.i(TAG, "onBindViewHolder: imagePath---" + url);
+                        Picasso.with(context).load("file://" + url)
                                 .resize(lp.width,lp.height)
                                 .config(Bitmap.Config.RGB_565)
                                 .centerCrop()

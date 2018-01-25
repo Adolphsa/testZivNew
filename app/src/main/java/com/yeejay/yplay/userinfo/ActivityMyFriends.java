@@ -81,21 +81,6 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
         initData();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        //保存listview当前滚动到的位置，下次进入listview界面时需要滚动到该位置;
-        View v = amfListView.getChildAt(0);
-        int top = (v == null) ? 0 : v.getTop();
-        SharedPreferences sharedPrefFriends = YplayApplication.getContext().
-                getSharedPreferences("friend_list_pos",
-                        Context.MODE_PRIVATE);
-        SharedPreferences.Editor editorsettings = sharedPrefFriends.edit();
-        editorsettings.putInt("pos", amfListView.getFirstVisiblePosition());
-        editorsettings.putInt("top", top);
-        editorsettings.commit();
-    }
 
     private void initDataFirst() {
         String uin = String.valueOf(SharePreferenceUtil.get(ActivityMyFriends.this, YPlayConstant.YPLAY_UIN, 0));
@@ -175,5 +160,21 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
             }
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //保存listview当前滚动到的位置，下次进入listview界面时需要滚动到该位置;
+        View v = amfListView.getChildAt(0);
+        int top = (v == null) ? 0 : v.getTop();
+        SharedPreferences sharedPrefFriends = YplayApplication.getContext().
+                getSharedPreferences("friend_list_pos",
+                        Context.MODE_PRIVATE);
+        SharedPreferences.Editor editorsettings = sharedPrefFriends.edit();
+        editorsettings.putInt("pos", amfListView.getFirstVisiblePosition());
+        editorsettings.putInt("top", top);
+        editorsettings.commit();
     }
 }

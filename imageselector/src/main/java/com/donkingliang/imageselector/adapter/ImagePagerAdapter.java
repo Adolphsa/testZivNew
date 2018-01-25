@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.donkingliang.imageselector.entry.Image;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
@@ -71,7 +72,7 @@ public class ImagePagerAdapter extends PagerAdapter {
         container.addView(currentView);
         Log.i(TAG, "instantiateItem: ");
 
-        Glide.with(mContext).load(new File(image.getPath())).asBitmap().into(currentView);
+        Glide.with(mContext).load(new File(image.getPath())).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).into(currentView);
 //        Glide.with(mContext).load(new File(image.getPath()))
 //                .asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).into(new SimpleTarget<Bitmap>() {
 //            @Override

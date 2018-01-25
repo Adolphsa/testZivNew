@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +23,6 @@ import android.widget.Toast;
 
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.adapter.ContactsAdapter;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -31,11 +31,14 @@ import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.SideView;
 import com.yeejay.yplay.customview.SpinerPopWindow;
+import com.yeejay.yplay.greendao.ContactInvite;
+import com.yeejay.yplay.greendao.ContactInviteDao;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.model.ReqAddFriendUinRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -80,12 +83,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     TextView layoutTitle;
     @BindView(R.id.searchView)
     TextView searchView;
-//    @BindView(R.id.aafd_scroll_view)
-//    ScrollView scrollView;
-
-
-    //    @BindView(R.id.friend_pll_refresh)
-//    PullToRefreshLayout pullToRefreshLayout;
     @BindView(R.id.filter_text)
     TextView filterText;
 
@@ -131,13 +128,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         contactRoot.setVisibility(View.VISIBLE);
         schoolRoot.setVisibility(View.GONE);
         maybeRoot.setVisibility(View.GONE);
-
-//        positionList.clear();
-//        contactDredgeList.clear();
-//
-//        if (contactRoot != null && contactRoot.isShown()) {
-//            getRecommends(1, mPageNum);
-//        }
 
     }
 
@@ -207,11 +197,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private LoadMoreView loadMoreView;
     private RelativeLayout contactRoot; //通讯录好友
     private LinearLayout nullLl;
-//    private RecyclerView dredgeListView;
-//    private RelativeLayout dredgeNoRl;
-    private RecyclerView notOpenListView; //未开通好友
+    private RecyclerView notOpenListView; //未开通好友View
     private SideView sideView;              //字母表
-
 
     WaitInviteAdapter waitInviteAdapter;
     List<ContactsInfo> allContactsList; //所有联系人的集合
@@ -220,7 +207,8 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private Map<String, Integer> alphaIndexer;// 存放存在的汉语拼音首字母和与之对应的列表位置
     private List<String> sections;// 存放存在的汉语拼音首字母
     private ContactsInfoDao contactsInfoDao;
-
+    private ContactInviteDao contactInviteDao;
+    int mUin;
 
     private LinearLayout schoolRoot;    //同校同学
     private LinearLayout llNullView;
@@ -231,6 +219,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private RecyclerView lmkListView;
 
     List<ContactsInfo> contactDredgeList;
+    List<ContactInvite> contactAlreadyInviteList;
     List<GetRecommendsRespond.PayloadBean.FriendsBean> allSchoolMateList;   //全部
     List<GetRecommendsRespond.PayloadBean.FriendsBean> sameGradeList;       //同年级
     List<GetRecommendsRespond.PayloadBean.FriendsBean> boyList;             //男
@@ -241,7 +230,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     int mType = 1; //好友类型
 
-    ContactsAdapter contactsAdapter;
     SchoolmateAdapter schoolmateAdapter;//全部同学
     SchoolmateAdapter sameGradeAdapter;//同年级
     SchoolmateAdapter boyAdapter;//男同学
@@ -250,6 +238,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     List<Integer> positionList;
 
     private SpinerPopWindow<String> mSpinerPopWindow;
+    private List<String> typeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,15 +250,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
         layoutTitle.setText("添加好友");
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
+        contactInviteDao = YplayApplication.getInstance().getDaoSession().getContactInviteDao();
+
+        mUin = (int) SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, (int) 0);
 
         initViewControls();
         initListAndAdapter();
 
-        initPullRefresh();
         initClassmatesTypePop();
 
-        getRecommends(1, 1);
-
+        getReqAddFriendUin();
     }
 
     private void initViewControls() {
@@ -278,27 +268,12 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         //通讯录联系人相关的UI控件
         contactRoot = (RelativeLayout) findViewById(R.id.layout_contact);
         nullLl = (LinearLayout) contactRoot.findViewById(R.id.lcn_ll_null);
-//        dredgeListView = (RecyclerView) contactRoot.findViewById(R.id.lcn_dredge_list);
-//        dredgeNoRl = (RelativeLayout) contactRoot.findViewById(R.id.lcn_rl);
         notOpenListView = (RecyclerView) findViewById(R.id.lcn_not_open_list);
         sideView = (SideView) findViewById(R.id.lcn_side_view);
 
-//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-//        dredgeListView.setNestedScrollingEnabled(false);
-//        dredgeListView.setLayoutManager(linearLayoutManager);
         LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(this);
         notOpenListView.setNestedScrollingEnabled(false);
         notOpenListView.setLayoutManager(linearLayoutManager2);
-
-        /*dredgeNoRl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { //邀请好友开通
-                //跳转到邀请好友界面
-                Intent intent = new Intent(AddFriends.this, ActivityInviteFriend.class);
-                startActivity(intent);
-
-            }
-        });*/
 
         //同校同学相关的UI控件
         schoolRoot = (LinearLayout) findViewById(R.id.layout_school_mate);
@@ -360,9 +335,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     }
 
     private void initListAndAdapter() {
+
         contactDredgeList = new ArrayList<>();
         notOpenList = new ArrayList<>();
         allContactsList = new ArrayList<>();
+        contactAlreadyInviteList = new ArrayList<>();
         allSchoolMateList = new ArrayList<>();
         sameGradeList = new ArrayList<>();
         boyList = new ArrayList<>();
@@ -370,17 +347,16 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         maybeKnowList = new ArrayList<>();
         positionList = new ArrayList();
         
-        initContactsAdapter();
+//        initContactsAdapter();
         initAllSchoolMateAdapter();
         initSameGradeAdapter();
         initBoyAdapter();
         initGirlAdapter();
         initMaybeKnownAdapter();
-
     }
 
     //通讯录
-    private void initContactsAdapter() {
+    private void initContactsAdapter(List<Integer> addFriendUinList) {
 
         //查询通讯录已开通
         String phoneNumber = (String) SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_PHONE_NUMBER, "");
@@ -396,6 +372,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
         //查询通讯录未开通
         notOpenList = queryNotOpenContactsData();
+        contactAlreadyInviteList = contactInviteDao.queryBuilder()
+                .where(ContactInviteDao.Properties.Uin.eq(String.valueOf(mUin)))
+                .list();
 
         if (notOpenList == null || notOpenList.size() == 0) {
             Log.i(TAG, "initNotOpenContactsAdapter: null");
@@ -428,6 +407,11 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                         button.setBackgroundResource(R.drawable.friend_invitation_done);
                         String phone = GsonUtil.GsonString(allContactsList.get(position).getPhone());
                         System.out.println("邀请的电话---" + phone);
+
+                        if (!TextUtils.isEmpty(phone)){
+                            contactInviteDao.insert(new ContactInvite(null,String.valueOf(mUin),allContactsList.get(position).getPhone()));
+                        }
+
                         String phoneStr = "[" + phone + "]";
                         String base64phone = Base64.encodeToString(phoneStr.getBytes(), Base64.DEFAULT);
                         Log.i(TAG, "acceptClick: base64phone---" + base64phone);
@@ -444,7 +428,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 }
 
             }
-        }, allContactsList);
+        }, allContactsList,contactAlreadyInviteList,addFriendUinList);
 
         waitInviteAdapter.setOnGetAlphaIndeserAndSectionListener(this);
         waitInviteAdapter.addRecycleItemListener(new WaitInviteAdapter.OnRecycleItemListener() {
@@ -566,7 +550,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     private void initMaybeKnownAdapter() {
         //可能认识的人；
-        maybeKnownAdapter = new SchoolmateAdapter(YplayApplication.getContext(),
+        maybeKnownAdapter = new SchoolmateAdapter(AddFriends.this,
                 null,
                 new SchoolmateAdapter.acceptCallback() {
                     @Override
@@ -665,39 +649,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         });
     }
 
-    private void initPullRefresh() {
-
-//        pullToRefreshLayout.setCanRefresh(false);
-//        pullToRefreshLayout.setFooterView(loadMoreView);
-//        pullToRefreshLayout.setRefreshListener(new BaseRefreshListener() {
-//            @Override
-//            public void refresh() {
-//                //刷新
-//            }
-//
-//            @Override
-//            public void loadMore() {
-//                //加载更多
-//                mPageNum++;
-//                Log.i(TAG, "loadMore: pageNum---" + mPageNum);
-//
-//                if (mType == 1) {    //通讯录已开通
-//                    getRecommends(1, mPageNum);
-//                } else if (mType == 3) {    //同校所有
-//                    getRecommends(3, mPageNum);
-//                } else if (mType == 4) {    //同校同年级
-//                    getRecommends(4, mPageNum);
-//                } else if (mType == 5) {    //同校男生
-//                    getRecommends(5, mPageNum);
-//                } else if (mType == 6) {    //同校女生
-//                    getRecommends(6, mPageNum);
-//                } else if (mType == 7) {    //可能认识的人
-//                    getRecommends(7, mPageNum);
-//                }
-//            }
-//        });
-
-    }
 
     //发送加好友的请求
     private void addFriend(int toUin, int srcType) {
@@ -799,11 +750,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                                     getRecommendsRespond.getPayload().getFriends();
                             if (friendsBeanList != null && friendsBeanList.size() > 0) {
 
-//                                if (mType == 1) { //通讯录已开通
-//                                    contactDredgeList.addAll(friendsBeanList);
-//                                    handleContactDredge(friendsBeanList);
-//                                } else
-
                                 if (mType == 3) {  //全部
                                     allSchoolMateList.addAll(friendsBeanList);
                                     handleSchoolMate(friendsBeanList);
@@ -874,6 +820,49 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 });
     }
 
+    //获取已经点击加好友的列表
+    private void getReqAddFriendUin(){
+
+        Map<String, Object> tempMap = new HashMap<>();
+        tempMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        tempMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        tempMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+
+        YPlayApiManger.getInstance().getZivApiService()
+                .getReqAddFriendUin(tempMap)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ReqAddFriendUinRespond>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ReqAddFriendUinRespond reqAddFriendUinRespond) {
+                        if (reqAddFriendUinRespond.getCode() == 0){
+                            Log.i(TAG, "onNext: reqAddFriendUinRespond--" + reqAddFriendUinRespond.toString());
+                            List<Integer> tempList = reqAddFriendUinRespond.getPayload().getUins();
+                            if (tempList != null && tempList.size() > 0){
+                                initContactsAdapter(tempList);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         System.out.println("position---" + position);
@@ -883,13 +872,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         }
     }
 
-    //处理通讯录已开通
-    private void handleContactDredge(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-        if (friendsBeanList.size() > 0) {
-            nullLl.setVisibility(View.GONE);
-        }
-        contactsAdapter.notifyDataSetChanged();
-    }
 
     //处理同校同学
     private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
@@ -1115,13 +1097,4 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 .list();
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK && isFromAddFriend) {
-//
-//            startActivity(new Intent(AddFriends.this, MainActivity.class));
-//            return true;//不执行父类点击事件
-//        }
-//        return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
-//    }
 }
