@@ -41,6 +41,8 @@ import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,7 +150,7 @@ public class FragmentAnswer extends BaseFragment {
 
     @OnClick(R.id.frgans_tv_relieve)
     public void relieve(View view) {
-        System.out.println("解除冷冻");
+        LogUtils.getInstance().debug("解除冷冻");
 //        relieve();
     }
 
@@ -179,7 +181,7 @@ public class FragmentAnswer extends BaseFragment {
             total = btn1Cnt + btn2Cnt + btn3Cnt + btn4Cnt + 1;
 
             int width = frgansBtn1.getWidth();
-            System.out.println("宽度---" + width);
+            LogUtils.getInstance().debug("宽度 = {}", width);
 
             frgansBtn1.setButtonColor(selectButtonColor[questionNum % colorCount]);
             frgansBtn2.setButtonColor(selectButtonColor[questionNum % colorCount]);
@@ -191,7 +193,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn3Cnt * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
-            System.out.println("返回异常1");
+            LogUtils.getInstance().debug("返回异常1");
             //frandProgress.setVisibility(View.VISIBLE);
         }
 
@@ -224,7 +226,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask(btn3Cnt * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
-            System.out.println("返回异常2");
+            LogUtils.getInstance().debug("返回异常2");
             //frandProgress.setVisibility(View.VISIBLE);
         }
     }
@@ -256,7 +258,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((1 + btn3Cnt) * 100 / total, 3).execute();
             new ProgressTask(btn4Cnt * 100 / total, 4).execute();
         } else {
-            System.out.println("返回异常3");
+            LogUtils.getInstance().debug("返回异常3");
             //frandProgress.setVisibility(View.VISIBLE);
         }
 
@@ -290,7 +292,7 @@ public class FragmentAnswer extends BaseFragment {
             new ProgressTask((btn3Cnt) * 100 / total, 3).execute();
             new ProgressTask((1 + btn4Cnt) * 100 / total, 4).execute();
         } else {
-            System.out.println("返回异常4");
+            LogUtils.getInstance().debug("返回异常4");
             //frandProgress.setVisibility(View.VISIBLE);
 
         }
@@ -303,11 +305,9 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
 
             frandProgress.setVisibility(View.VISIBLE);
-            Log.i(TAG, "nextPersons: 换一换--" + questionNum);
+            LogUtils.getInstance().debug("nextPersons: 换一换, {}", questionNum);
             getQuestionsCandidate(questionBean.getQid(), questionNum);
 
-        } else {
-            //frandProgress.setVisibility(View.VISIBLE);
         }
 
     }
@@ -356,7 +356,7 @@ public class FragmentAnswer extends BaseFragment {
     @OnClick(R.id.frgans_btn_keep)
     public void btnKeep(View view) {
         //点击继续
-        System.out.println("点击继续");
+        LogUtils.getInstance().debug("点击继续");
 
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.VISIBLE);
@@ -377,7 +377,7 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn4.setEnabled(true);
 
         } else {
-            System.out.println("返回异常");
+            LogUtils.getInstance().debug("返回异常");
             //frandProgress.setVisibility(View.VISIBLE);
         }
 
@@ -390,7 +390,7 @@ public class FragmentAnswer extends BaseFragment {
         if (NetWorkUtil.isNetWorkAvailable(getActivity()) && questionBean != null) {
             frandProgress.setVisibility(View.VISIBLE);
 
-            System.out.println("过questionNum----" + questionNum);
+            LogUtils.getInstance().debug("过questionNum = {}", questionNum);
             changeCount = 0;
 
             frgansBtn1.updateProgress(0);
@@ -404,12 +404,12 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn4.setEnabled(true);
 
             doskipQuestion(questionNum, questionBean.getQid());
-            System.out.println("当前跳过的编号---" + questionNum + ",qid---" +
+            LogUtils.getInstance().debug("当前跳过的编号, {} ; qid = {}", questionNum,
                     questionBean.getQid());
 
 
         } else {
-            System.out.println("返回异常");
+            LogUtils.getInstance().debug("返回异常");
             //frandProgress.setVisibility(View.VISIBLE);
         }
 
@@ -464,7 +464,7 @@ public class FragmentAnswer extends BaseFragment {
         frgUserInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("跳转到我的资料");
+                LogUtils.getInstance().debug("跳转到我的资料");
                 startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
@@ -472,7 +472,7 @@ public class FragmentAnswer extends BaseFragment {
         frgansCountDownView.setOnCountdownEndListener(new CountdownView.OnCountdownEndListener() {
             @Override
             public void onEnd(CountdownView cv) {
-                System.out.println("倒计时结束");
+                LogUtils.getInstance().debug("倒计时结束");
                 relieve();
             }
         });
@@ -490,10 +490,11 @@ public class FragmentAnswer extends BaseFragment {
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
         if (isVisibleToUser) {
-            System.out.println("FragmentAnswer---答题可见");
+            LogUtils.getInstance().debug("FragmentAnswer---答题可见");
             frgEdit.setVisibility(View.VISIBLE);
             MainActivity mainActivity = (MainActivity) getActivity();
-            System.out.println("queationNum%7 == " + (questionNum % colorCount) + ",queationNum---" + questionNum);
+            LogUtils.getInstance().debug("queationNum%7 = {} , queationNum = {}",
+                    (questionNum % colorCount), questionNum);
             mainActivity.setmColor(backgroundColor[questionNum % colorCount]);
             if (!NetWorkUtil.isNetWorkAvailable(getActivity())) {
                 frandProgress.setVisibility(View.VISIBLE);
@@ -513,7 +514,7 @@ public class FragmentAnswer extends BaseFragment {
         fransTvQuestionCount.setText(questionNum + "/15");
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
-            Log.i(TAG, "nextQuestionUpdate: 加载的图片---" + url);
+            LogUtils.getInstance().error("nextQuestionUpdate: 加载的图片, {}", url);
             Picasso.with(getActivity()).load(url).resizeDimen(R.dimen.non_ques_head_img_width,
                     R.dimen.non_ques_head_img_height).memoryPolicy(NO_CACHE, NO_STORE).into(frgansImg);
         }
@@ -618,155 +619,166 @@ public class FragmentAnswer extends BaseFragment {
 
     //拉取问题
     private void getQuestion() {
-
         Map<String, Object> questionsListMap = new HashMap<>();
         questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         questionsListMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getQuestion(questionsListMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<QuestionRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETQUESTIONANDOPTIONS, questionsListMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(@NonNull QuestionRespond questionRespond) {
-//                        System.out.println("问题列表---" + questionListRespond.toString());
-                        Log.i(TAG, "onNext: 拉取问题---" + questionRespond.toString());
-                        if (questionRespond.getCode() == 0) {
+                    public void onStartLoad(int value) {
 
-                            QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
-                            if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
-                                Log.i(TAG, "onNext: 正常状态");
-                                if (isFreeze) {
-                                    isFreeze = false;
-                                    relieve();
-                                }
-
-                                //非冷冻状态
-                                questionBean = questionRespond.getPayload().getQuestion();
-                                List<QuestionRespond.PayloadBean.OptionsBean> optionsList = questionRespond.getPayload().getOptions();
-                                questionNum = questionRespond.getPayload().getIndex();
-
-                                if (voteOptionsBeanList.size() > 0) {
-                                    voteOptionsBeanList.clear();
-                                }
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
-                                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
-
-                                if (questionBean != null) {
-                                    nextQuestionUpdate();
-                                }
-
-                            } else if (payloadBean != null && payloadBean.getFreezeStatus() == 1) {
-                                Log.i(TAG, "onNext: 冷冻状态");
-
-                                //冷冻状态
-                                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
-                                //进入冷冻的时间点
-                                int freezeTs = payloadBean.getFreezeTs();
-                                int nowTs = payloadBean.getNowTs();
-                                int freezeDuration = payloadBean.getFreezeDuration();
-
-                                //应该倒计时的时间
-                                int countTime = freezeDuration - (nowTs - freezeTs);
-                                frgansCountDownView.start(countTime * 1000);
-                                System.out.println("倒计时时间---" + countTime);
-                                questionOut15();
-                            }
-
-                            frandProgress.setVisibility(View.INVISIBLE);
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("问题列表异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetQuestionResponse(result);
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("问题列表异常");
                         frandProgress.setVisibility(View.VISIBLE);
                     }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
                 });
+    }
+
+    private void handleGetQuestionResponse(String result) {
+        QuestionRespond questionRespond = GsonUtil.GsonToBean(result, QuestionRespond.class);
+        LogUtils.getInstance().debug("onNext: 拉取问题, {}", questionRespond.toString());
+        if (questionRespond.getCode() == 0) {
+
+            QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
+            if (payloadBean != null && payloadBean.getFreezeStatus() == 0) {
+                LogUtils.getInstance().debug("onNext: 正常状态");
+                if (isFreeze) {
+                    isFreeze = false;
+                    relieve();
+                }
+
+                //非冷冻状态
+                questionBean = questionRespond.getPayload().getQuestion();
+                List<QuestionRespond.PayloadBean.OptionsBean> optionsList = questionRespond.getPayload().getOptions();
+                questionNum = questionRespond.getPayload().getIndex();
+
+                if (voteOptionsBeanList.size() > 0) {
+                    voteOptionsBeanList.clear();
+                }
+                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
+                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
+                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
+                voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
+
+                if (questionBean != null) {
+                    nextQuestionUpdate();
+                }
+
+            } else if (payloadBean != null && payloadBean.getFreezeStatus() == 1) {
+                LogUtils.getInstance().debug("onNext: 冷冻状态");
+
+                //冷冻状态
+                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+                //进入冷冻的时间点
+                int freezeTs = payloadBean.getFreezeTs();
+                int nowTs = payloadBean.getNowTs();
+                int freezeDuration = payloadBean.getFreezeDuration();
+
+                //应该倒计时的时间
+                int countTime = freezeDuration - (nowTs - freezeTs);
+                frgansCountDownView.start(countTime * 1000);
+                LogUtils.getInstance().debug("倒计时时间, {}", countTime);
+                questionOut15();
+            }
+
+            frandProgress.setVisibility(View.INVISIBLE);
+        }
     }
 
     //某个问题的候选人
     private void getQuestionsCandidate(int qid, int index) {
+        Map<String, Object> questionsListMap = new HashMap<>();
+        questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        questionsListMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        Map<String, Object> questionsCandidateMap = new HashMap<>();
-        questionsCandidateMap.put("qid", qid);
-        questionsCandidateMap.put("index", index);
-        questionsCandidateMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        questionsCandidateMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        questionsCandidateMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETOPTIONS, questionsListMap,
+                new WnsRequestListener() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getQuestionsCandidateNew(questionsCandidateMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<QuestionCandidateRespond>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull QuestionCandidateRespond questionCandidateRespond) {
-                        System.out.println("某个问题的候选者---" + questionCandidateRespond.toString());
-                        if (questionCandidateRespond.getCode() == 0) {
-                            List<QuestionCandidateRespond.PayloadBean.OptionsBean> optionsList = questionCandidateRespond.getPayload().getOptions();
-                            changeCount++;
-                            if (voteOptionsBeanList.size() > 0) {
-                                voteOptionsBeanList.clear();
-                            }
-                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
-                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
-                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
-                            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
+                    public void onStartLoad(int value) {
 
-                            changeName(optionsList.get(0).getNickName(),
-                                    optionsList.get(1).getNickName(),
-                                    optionsList.get(2).getNickName(),
-                                    optionsList.get(3).getNickName());
-
-                            //获取被投票的次数
-                            btn1Cnt = optionsList.get(0).getBeSelCnt();
-                            btn2Cnt = optionsList.get(1).getBeSelCnt();
-                            btn3Cnt = optionsList.get(2).getBeSelCnt();
-                            btn4Cnt = optionsList.get(3).getBeSelCnt();
-
-                            frgansBtn1.setEnabled(true);
-                            frgansBtn2.setEnabled(true);
-                            frgansBtn3.setEnabled(true);
-                            frgansBtn4.setEnabled(true);
-
-                            frandProgress.setVisibility(View.INVISIBLE);
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取某个问题候选者异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetQuestionsCandidateResponse(result);
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("获取某个问题候选者异常");
                         frandProgress.setVisibility(View.VISIBLE);
                     }
-
-                    @Override
-                    public void onComplete() {
-                    }
                 });
+
+    }
+
+    private void handleGetQuestionsCandidateResponse(String result) {
+        QuestionCandidateRespond questionCandidateRespond = GsonUtil.GsonToBean(result, QuestionCandidateRespond.class);
+        LogUtils.getInstance().debug("某个问题的候选者, {}", questionCandidateRespond.toString());
+        if (questionCandidateRespond.getCode() == 0) {
+            List<QuestionCandidateRespond.PayloadBean.OptionsBean> optionsList = questionCandidateRespond.getPayload().getOptions();
+            changeCount++;
+            if (voteOptionsBeanList.size() > 0) {
+                voteOptionsBeanList.clear();
+            }
+            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(0).getUin(), optionsList.get(0).getNickName(), optionsList.get(0).getBeSelCnt()));
+            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(1).getUin(), optionsList.get(1).getNickName(), optionsList.get(1).getBeSelCnt()));
+            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
+            voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
+
+            changeName(optionsList.get(0).getNickName(),
+                    optionsList.get(1).getNickName(),
+                    optionsList.get(2).getNickName(),
+                    optionsList.get(3).getNickName());
+
+            //获取被投票的次数
+            btn1Cnt = optionsList.get(0).getBeSelCnt();
+            btn2Cnt = optionsList.get(1).getBeSelCnt();
+            btn3Cnt = optionsList.get(2).getBeSelCnt();
+            btn4Cnt = optionsList.get(3).getBeSelCnt();
+
+            frgansBtn1.setEnabled(true);
+            frgansBtn2.setEnabled(true);
+            frgansBtn3.setEnabled(true);
+            frgansBtn4.setEnabled(true);
+
+            frandProgress.setVisibility(View.INVISIBLE);
+        }
     }
 
     //投票
     private void vote(int qid, int index, int voteToUin, String options) {
-
         Map<String, Object> voteMap = new HashMap<>();
         voteMap.put("qid", qid);
         voteMap.put("index", index);
@@ -776,39 +788,40 @@ public class FragmentAnswer extends BaseFragment {
         voteMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         voteMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .vote(voteMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<VoteRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_DOVOTE, voteMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull VoteRespond voteRespond) {
-                        System.out.println("投票返回---" + voteRespond);
+                    public void onStartLoad(int value) {
 
+                    }
+
+                    @Override
+                    public void onComplete(String result) {
+                        VoteRespond voteRespond = GsonUtil.GsonToBean(result, VoteRespond.class);
+                        LogUtils.getInstance().debug("投票返回, {}", voteRespond.toString());
                         frandProgress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("投票返回异常");
-                        frandProgress.setVisibility(View.VISIBLE);
+                    public void onTimeOut() {
                     }
 
                     @Override
-                    public void onComplete() {
-
+                    public void onError() {
+                        LogUtils.getInstance().debug("投票返回异常");
+                        frandProgress.setVisibility(View.VISIBLE);
                     }
                 });
     }
 
     //跳过下个问题
     private void doskipQuestion(int index, int qid) {
-
         Map<String, Object> doskipMap = new HashMap<>();
         doskipMap.put("qid", qid);
         doskipMap.put("index", index);
@@ -816,41 +829,47 @@ public class FragmentAnswer extends BaseFragment {
         doskipMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         doskipMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .doskipQuestion(doskipMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_DOSKIP, doskipMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(BaseRespond baseRespond) {
-                        System.out.println("跳过下个问题---" + baseRespond);
-                        if (baseRespond.getCode() == 0) {
-                            questionNum++;
-                            getQuestion();
-
-                            frandProgress.setVisibility(View.INVISIBLE);
-                        }
+                    public void onStartLoad(int value) {
 
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        System.out.println("跳过下个问题异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleDoskipQuestionResponse(result);
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("跳过下个问题异常");
                         frandProgress.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onComplete() {
                     }
                 });
 
     }
 
+    private void handleDoskipQuestionResponse(String result) {
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+        LogUtils.getInstance().debug("跳过下个问题, {}", baseRespond.toString());
+        if (baseRespond.getCode() == 0) {
+            questionNum++;
+            getQuestion();
+
+            frandProgress.setVisibility(View.INVISIBLE);
+        }
+    }
 
     public void setFriendCount() {
 

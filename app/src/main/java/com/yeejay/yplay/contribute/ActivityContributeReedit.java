@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -23,14 +22,16 @@ import android.widget.Toast;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,10 +39,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityContributeReedit extends BaseActivity {
     @BindView(R.id.layout_title2)
@@ -102,14 +99,13 @@ public class ActivityContributeReedit extends BaseActivity {
 
     @OnClick(R.id.con_apply_button)
     public void submit() {
-        System.out.println("提交");
+        LogUtils.getInstance().debug("提交");
         if(NetWorkUtil.isNetWorkAvailable(ActivityContributeReedit.this)){
 
             String questionText = conEdit.getText().toString();
             if (!TextUtils.isEmpty(questionText)){
-                System.out.println("问题不为空" + "v, emojiIndex = " + emojiIndex +
-                        " , mQiconUrl = " + mQiconUrl
-                        + " , getQiconId(mQiconUrl) = " + getQiconId(mQiconUrl));
+                LogUtils.getInstance().error("问题不为空, v, emojiIndex = {}, mQiconUrl = {}, getQiconId(mQiconUrl) = {}",
+                        emojiIndex, mQiconUrl, getQiconId(mQiconUrl));
                 submitQuestion(questionText, emojiIndex != -1 ? emojiIndex : getQiconId(mQiconUrl));
             }
 
@@ -179,7 +175,7 @@ public class ActivityContributeReedit extends BaseActivity {
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
                         && KeyEvent.ACTION_DOWN == event.getAction())){
-                    System.out.println("回车键被点击");
+                    LogUtils.getInstance().debug("回车键被点击");
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm.isActive()) {
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
@@ -202,8 +198,8 @@ public class ActivityContributeReedit extends BaseActivity {
 
                 int currentSelectEmoji = data.getIntExtra("current_select_emoji", 0);
                 emojiIndex = data.getIntExtra("current_emoji_index", 0);
-                System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
-                        + "current_emoji_index" + emojiIndex);
+                LogUtils.getInstance().error("1---currentSelectEmoji = {}, current_emoji_index = {}",
+                        currentSelectEmoji, emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
                 Picasso.with(ActivityContributeReedit.this).load(demojiUrl).into(selectedImg);
 
@@ -224,55 +220,60 @@ public class ActivityContributeReedit extends BaseActivity {
         }
     }
 
-
     private void submitQuestion(String qtext, int qiconId) {
-
         Map<String, Object> conMap = new HashMap<>();
         conMap.put("qtext", qtext);
         conMap.put("qiconId", qiconId);
         conMap.put("uin", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_UIN, 0));
         conMap.put("token", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         conMap.put("ver", SharePreferenceUtil.get(ActivityContributeReedit.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .submiteQuestion(conMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_SUBMITQUESTION, conMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(BaseRespond baseRespond) {
-                        System.out.println("投稿---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0){
-                            //conEdit.setEnabled(false);
+                    public void onStartLoad(int value) {
 
-                            Toast.makeText(ActivityContributeReedit.this,R.string.contribute_success,
-                                    Toast.LENGTH_SHORT).show();
-                            //通知查询投稿页面中的未上线子页面，更新未上线列表信息;
-                            Intent dataIntent = new Intent();
-                            dataIntent.putExtra("position", mPosition);
-                            setResult(6, dataIntent);
-
-                            finish();
-                        }else {
-                            Toast.makeText(ActivityContributeReedit.this,"提交失败",Toast.LENGTH_SHORT).show();
-                        }
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        System.out.println("投稿异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleSubmitQuestionResponse(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("投稿异常");
                     }
                 });
+    }
 
+    private void handleSubmitQuestionResponse(String result) {
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+        LogUtils.getInstance().debug("投稿, {}", baseRespond.toString());
+        if (baseRespond.getCode() == 0){
+            //conEdit.setEnabled(false);
+
+            Toast.makeText(ActivityContributeReedit.this,R.string.contribute_success,
+                    Toast.LENGTH_SHORT).show();
+            //通知查询投稿页面中的未上线子页面，更新未上线列表信息;
+            Intent dataIntent = new Intent();
+            dataIntent.putExtra("position", mPosition);
+            setResult(6, dataIntent);
+
+            finish();
+        }else {
+            Toast.makeText(ActivityContributeReedit.this,"提交失败",Toast.LENGTH_SHORT).show();
+        }
     }
 
     private int getQiconId(String qIconUrl) {

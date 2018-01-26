@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -22,12 +21,10 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendFeedsAdapter;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.CardDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MyLinearLayoutManager;
-import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
 import com.yeejay.yplay.greendao.DaoFriendFeedsDao;
 import com.yeejay.yplay.greendao.FriendInfoDao;
@@ -42,9 +39,12 @@ import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,11 +52,6 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * 好友
@@ -112,7 +107,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
 
-        Log.i(TAG, "initAllMembersView: ");
+        LogUtils.getInstance().debug("initAllMembersView:");
 
         //跳转到我的资料
         jumpToUserInfo();
@@ -151,7 +146,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             @Override
             public void refresh() {
                 long ts = System.currentTimeMillis();
-                System.out.println("顶部刷新--" + ts);
+                LogUtils.getInstance().debug("顶部刷新, ts = {}", ts);
 
                 //拉取新数据
                 getFriendFeeds(ts, 20, false);
@@ -160,7 +155,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
             @Override
             public void loadMore() {
-                System.out.println("底部刷新--");
+                LogUtils.getInstance().debug("底部刷新");
 
                 if (0 == mDataList.size()) {
                     updateUiData();
@@ -186,8 +181,8 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             if (linearLayoutMgr != null) {
                 pos = linearLayoutMgr.findFirstCompletelyVisibleItemPosition();
             }
-            System.out.println("FragmentFriend---可见" + "  refreshOffset-- " + refreshOffset + " feed数组大小--" + mDataList.size()
-                    + " , 在顶部 = " + pos);
+            LogUtils.getInstance().debug("FragmentFriend---可见，refreshOffset = {}, feed数组大小 = {}, 在顶部 = {}",
+                    refreshOffset, mDataList.size(), pos);
 
             //refreshOffset = 0 表示第一次进入动态页面
             //refreshOffset = 1 表示拉取过一次进入动态页面
@@ -198,7 +193,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 if (pos == 0 || refreshOffset == 0) {
                     resetData();
                     long ts = System.currentTimeMillis();
-                    Log.i(TAG, "scrollview 在顶部，需要更新数据: ts---" + ts);
+                    LogUtils.getInstance().debug("scrollview 在顶部，需要更新数据: ts = {}", ts);
                     getFriendFeeds(ts, 10, false);
                 }
             }
@@ -219,8 +214,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     //获取好友动态
     public void getFriendFeeds(long ts, int cnt, final boolean isLoadMore) {
-
-        System.out.println("拉取好友动态----" + ts);
+        LogUtils.getInstance().debug("{}, ts = {}", "拉取好友动态", ts);
         Map<String, Object> friendFeedsMap = new HashMap<>();
         friendFeedsMap.put("ts", ts);
         friendFeedsMap.put("cnt", cnt);
@@ -229,100 +223,112 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         friendFeedsMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         friendFeedsMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getFriendFeeds(friendFeedsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<FriendFeedsRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETFEEDS_URL, friendFeedsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(@NonNull FriendFeedsRespond friendFeedsRespond) {
-                        System.out.println("获取好友动态---" + friendFeedsRespond.toString());
-                        if (friendFeedsRespond.getCode() == 0) {
+                    public void onStartLoad(int value) {
 
-                            List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList = friendFeedsRespond.getPayload().getFeeds();
-                            if (feedsBeanList != null && feedsBeanList.size() > 0) {
-                                Log.d("feed", "拉取好友动态----" + " retCnt--" + feedsBeanList.size());
-                                for (int i = 0; i < feedsBeanList.size(); i++) {
-                                    //插入到数据库
-                                    insertFeedsToDataBase(feedsBeanList.get(i));
-                                }
-
-                                makeSureFeeds(feedsBeanList.get(feedsBeanList.size() - 1).getTs(),
-                                        feedsBeanList.get(0).getTs());
-                            }
-
-                            Log.d("feed", "从数据库查询动态----" + " pagenum--" + refreshOffset);
-
-                            List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset++);
-                            if (refreshList.size() == 0) {
-                                //已经是最后一页了没有数据了，页码不应该一直增加
-                                refreshOffset--;
-                                //todo提示加载完成了没有更多数据了
-                                loadMoreView.noData();
-                                Log.d("feed", "从数据库查询动态返回为空----" + " pagenum--" + refreshOffset);
-                            } else {
-                                //不是最后一页，在拉取数据后，RecycleView自动向上滑动一个item高度；
-                                mDataList.addAll(refreshList);
-                                if (isLoadMore) {
-                                    //是底部刷新时，才需要向上自动滚动2个item高度；
-                                    if (refreshList.size() >= 2) {
-                                        Log.d("feed", "smoothScroll to position---" + (mDataList.size() - refreshList.size() + 1) + "  mDatalist.size()---" + mDataList.size());
-                                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size() - refreshList.size() + 1);
-                                    } else if (refreshList.size() == 1) {
-                                        Log.d("feed", "smoothScroll to position---" + (mDataList.size() - refreshList.size()) + "  mDatalist.size()---" + mDataList.size());
-                                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size() - refreshList.size());
-                                    }
-                                }
-
-                                feedsAdapter.notifyDataSetChanged();
-                            }
-
-                            Log.d("feed", "当前feeds总数目----" + mDataList.size() + "当前页码数--" + (refreshOffset - 1));
-
-                            //判断是否扩列开启
-                            updateUiData();
-
-                            //顶部刷新清理点亮标志
-                            if (!isLoadMore) {
-                                mainActivity.setNewFeeds(false);
-                                mainActivity.setFeedClear();
-                            }
-
-                        } else {
-                            //todo失败的处理
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取好友动态异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetFriendFeedsResponse(result, isLoadMore);
+
+                        LogUtils.getInstance().debug("onComplete() {}", "获取好友动态完成");
                         ffPtfRefreshLayout.finishRefresh();
                         ffPtfRefreshLayout.finishLoadMore();
                     }
 
                     @Override
-                    public void onComplete() {
-                        System.out.println("获取好友动态完成---onComplete");
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError() {}", "获取好友动态异常");
                         ffPtfRefreshLayout.finishRefresh();
                         ffPtfRefreshLayout.finishLoadMore();
                     }
                 });
+
     }
 
+    private void handleGetFriendFeedsResponse(String result, final boolean isLoadMore) {
+        FriendFeedsRespond friendFeedsRespond = GsonUtil.GsonToBean(result, FriendFeedsRespond.class);
+        LogUtils.getInstance().debug("获取好友动态: {}", friendFeedsRespond.toString());
+        if (friendFeedsRespond.getCode() == 0) {
+
+            List<FriendFeedsRespond.PayloadBean.FeedsBean> feedsBeanList = friendFeedsRespond.getPayload().getFeeds();
+            if (feedsBeanList != null && feedsBeanList.size() > 0) {
+                LogUtils.getInstance().debug("拉取好友动态, retCnt = {}", feedsBeanList.size());
+                for (int i = 0; i < feedsBeanList.size(); i++) {
+                    //插入到数据库
+                    insertFeedsToDataBase(feedsBeanList.get(i));
+                }
+
+                makeSureFeeds(feedsBeanList.get(feedsBeanList.size() - 1).getTs(),
+                        feedsBeanList.get(0).getTs());
+            }
+
+            LogUtils.getInstance().debug("从数据库查询动态, pagenum = {}", refreshOffset);
+
+            List<DaoFriendFeeds> refreshList = refreshQuery(refreshOffset++);
+            if (refreshList.size() == 0) {
+                //已经是最后一页了没有数据了，页码不应该一直增加
+                refreshOffset--;
+                //todo提示加载完成了没有更多数据了
+                loadMoreView.noData();
+                LogUtils.getInstance().debug("从数据库查询动态返回为空, pagenum = {}", refreshOffset);
+            } else {
+                //不是最后一页，在拉取数据后，RecycleView自动向上滑动一个item高度；
+                mDataList.addAll(refreshList);
+                if (isLoadMore) {
+                    //是底部刷新时，才需要向上自动滚动2个item高度；
+                    if (refreshList.size() >= 2) {
+                        LogUtils.getInstance().debug("smoothScroll to position = {}, mDatalist.size() = {}",
+                                mDataList.size() - refreshList.size() + 1, mDataList.size());
+                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size() - refreshList.size() + 1);
+                    } else if (refreshList.size() == 1) {
+                        LogUtils.getInstance().debug("smoothScroll to position = {}, mDatalist.size() = {}",
+                                mDataList.size() - refreshList.size(), mDataList.size());
+                        ffSwipeRecyclerView.smoothScrollToPosition(mDataList.size() - refreshList.size());
+                    }
+                }
+
+                feedsAdapter.notifyDataSetChanged();
+            }
+
+            LogUtils.getInstance().debug("当前feeds总数目 = {}, 当前页码数 = {}",
+                    mDataList.size(), refreshOffset - 1);
+
+            //判断是否扩列开启
+            updateUiData();
+
+            //顶部刷新清理点亮标志
+            if (!isLoadMore) {
+                mainActivity.setNewFeeds(false);
+                mainActivity.setFeedClear();
+            }
+
+        }
+    }
 
     //扩列开启界面
     private void updateUiData() {
         if (mDataList.size() == 0) {
-            System.out.println("无动态");
+            LogUtils.getInstance().debug("无动态");
             fransFrfLayout.setVisibility(View.VISIBLE);
             ffPtfRefreshLayout.setVisibility(View.GONE);
             initRecommentFriends();
         } else {
-            System.out.println("有动态");
+            LogUtils.getInstance().debug("有动态");
             fransFrfLayout.setVisibility(View.GONE);
             ffPtfRefreshLayout.setVisibility(View.VISIBLE);
         }
@@ -337,7 +343,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 .offset(refreshOffset * 20)
                 .limit(20)
                 .list();
-        System.out.println("查询到到的个数---" + tempDataBasefeedsList.size());
+        LogUtils.getInstance().debug("查询到到的个数 = {}", tempDataBasefeedsList.size());
         return tempDataBasefeedsList;
     }
 
@@ -350,7 +356,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 .where(DaoFriendFeedsDao.Properties.Ts.eq(feedsBean.getTs()))
                 .build().unique();
         if (daoFriendFeeds == null) {
-            System.out.println("插入数据库");
+            LogUtils.getInstance().debug("插入数据库");
             DaoFriendFeeds insert = new DaoFriendFeeds(null,
                     feedsBean.getTs(),
                     uin,
@@ -376,7 +382,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     //收到好友动态数据确认
     private void makeSureFeeds(long minTs, long maxTs) {
-        System.out.println("收到好友动态确认");
+        LogUtils.getInstance().debug("收到好友动态确认");
         Map<String, Object> makeSureFeedsMap = new HashMap<>();
         makeSureFeedsMap.put("minTs", minTs);
         makeSureFeedsMap.put("maxTs", maxTs);
@@ -384,66 +390,41 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         makeSureFeedsMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         makeSureFeedsMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .makeSureFeeds(makeSureFeedsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<FriendFeedsMakesureRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_ACKFEEDS, makeSureFeedsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(@NonNull FriendFeedsMakesureRespond friendFeedsMakesureRespond) {
-                        if (friendFeedsMakesureRespond.getCode() == 0) {
-                            System.out.println("确认收到数据---" + friendFeedsMakesureRespond.toString());
-                        }
+                    public void onStartLoad(int value) {
+
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("确认收到数据异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleMakeSureFeeds(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
 
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("确认收到数据异常");
                     }
                 });
     }
 
-//    private void getAddFriendMessageCount() {
-//
-//        Map<String, Object> unreadFriendMsgCountMap = new HashMap<>();
-//        unreadFriendMsgCountMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-//        unreadFriendMsgCountMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-//        unreadFriendMsgCountMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-//        YPlayApiManger.getInstance().getZivApiService()
-//                .getUnreadMessageCount(unreadFriendMsgCountMap)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<UnReadMsgCountRespond>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull UnReadMsgCountRespond unReadMsgCountRespond) {
-//                        System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        System.out.println("未读好友消息数异常---" + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//    }
+    private void handleMakeSureFeeds(String result) {
+        FriendFeedsMakesureRespond friendFeedsMakesureRespond = GsonUtil.GsonToBean(result,
+                FriendFeedsMakesureRespond.class);
+        LogUtils.getInstance().debug("确认收到数据: {}", friendFeedsMakesureRespond.toString());
+    }
 
     RecommendFriendForNullAdapter recommendFriendForNullAdapter;
     ListView rfListView;
@@ -461,7 +442,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             addFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    System.out.println("添加好友");
+                    LogUtils.getInstance().debug("添加好友");
                     startActivity(new Intent(getActivity(), AddFriends.class));
                 }
             });
@@ -469,7 +450,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             noMoreShowTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    System.out.println("不再显示");
+                    LogUtils.getInstance().debug("不再显示");
                     rl.setVisibility(View.INVISIBLE);
 
                     SharePreferenceUtil.put(getActivity(), YPlayConstant.YPLAY_NO_MORE_SHOW, true);
@@ -498,7 +479,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             recommendPullView.setRefreshListener(new BaseRefreshListener() {
                 @Override
                 public void refresh() {
-                    System.out.println("刷新");
+                    LogUtils.getInstance().debug("刷新");
                     long ts = System.currentTimeMillis();
                     getFriendFeeds(ts, 20, false);
                     recommendPullView.finishRefresh();
@@ -506,7 +487,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
                 @Override
                 public void loadMore() {
-                    System.out.println("加载更多");
+                    LogUtils.getInstance().debug("加载更多");
                     recommendPullView.finishLoadMore();
 
                 }
@@ -542,7 +523,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                             button.setBackgroundResource(R.drawable.play_invite_yes);
                             //邀请
                             String phone = GsonUtil.GsonString(friendsBean.getPhone());
-                            System.out.println("邀请的电话---" + phone);
+                            LogUtils.getInstance().debug("邀请的电话: {}", phone);
                             String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
                             invitefriendsbysms(base64phone);
                         } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) {
@@ -558,117 +539,134 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     //获取推荐好友信息
     private void recommendFriendsForNull() {
-
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         tempMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         tempMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .recommendFriendsForNull(tempMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendsRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETRANDOMRECOMMENDS, tempMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-                        System.out.println("推荐好友---" + getRecommendsRespond.toString());
-                        if (getRecommendsRespond.getCode() == 0) {
+                    public void onStartLoad(int value) {
 
-                            if (getRecommendsRespond.getPayload().getFriends() != null
-                                    && getRecommendsRespond.getPayload().getFriends().size() > 0) {
-                                initRecommendList(getRecommendsRespond.getPayload().getFriends());
-                            } else {
-                                rl.setVisibility(View.GONE);
-                            }
-
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("推荐好友异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleRecommendFriendsForNullResponse(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("推荐好友异常");
                     }
                 });
     }
 
-    //通过短信邀请好友
-    private void invitefriendsbysms(String friends) {
+    private void handleRecommendFriendsForNullResponse(String result) {
+        GetRecommendsRespond getRecommendsRespond = GsonUtil.GsonToBean(result, GetRecommendsRespond.class);
+        LogUtils.getInstance().debug("推荐好友: {}", getRecommendsRespond.toString());
+        if (getRecommendsRespond.getCode() == 0) {
+            if (getRecommendsRespond.getPayload().getFriends() != null
+                    && getRecommendsRespond.getPayload().getFriends().size() > 0) {
+                initRecommendList(getRecommendsRespond.getPayload().getFriends());
+            } else {
+                rl.setVisibility(View.GONE);
+            }
+        }
+    }
 
+    //通过短信邀请好友（其实是删除好友）
+    private void invitefriendsbysms(String friends) {
         Map<String, Object> removeFreindMap = new HashMap<>();
         removeFreindMap.put("friends", friends);
         removeFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         removeFreindMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         removeFreindMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_REMOVEFRIEND_URL, removeFreindMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("短信邀请好友---" + baseRespond.toString());
+                    public void onStartLoad(int value) {
+
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("短信邀请好友异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleInviteFriendsBySmsResponse(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
                     }
                 });
     }
 
+    private void handleInviteFriendsBySmsResponse(String result) {
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+        LogUtils.getInstance().debug("短信邀请好友: {}", baseRespond.toString());
+    }
+
     //发送加好友的请求
     private void addFriend(int toUin) {
-
         Map<String, Object> addFreindMap = new HashMap<>();
         addFreindMap.put("toUin", toUin);
         addFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .addFriend(addFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<AddFriendRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_ADDFRIEND, addFreindMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull AddFriendRespond addFriendRespond) {
-                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
+                    public void onStartLoad(int value) {
+
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("发送加好友请求异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleAddFriendResponse(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("发送加好友请求异常");
                     }
                 });
+    }
 
+    private void handleAddFriendResponse(String result) {
+        AddFriendRespond addFriendRespond = GsonUtil.GsonToBean(result, AddFriendRespond.class);
+        LogUtils.getInstance().debug("发送加好友请求: {}", addFriendRespond.toString());
     }
 
     //查询我和好友的关系
@@ -678,49 +676,58 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         friendMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
         friendMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         friendMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserInfo(friendMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETUSERPROFILE, friendMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(UserInfoResponde userInfoResponde) {
-                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            int status = userInfoResponde.getPayload().getStatus();
+                    public void onStartLoad(int value) {
 
-                            if (status == 0) {//非好友
-                                showCardDialog(userInfoResponde.getPayload());
-                            } else if (status == 1) {//好友
-                                Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
-                                intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
-                                intent.putExtra("yplay_friend_uin", tempFeeds.getFriendUin());
-                                System.out.println("朋友的uin---" + tempFeeds.getFriendUin());
-                                //将被点击的item设置为已读
-                                DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
-                                        .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
-                                        .build().unique();
-                                daoFriendFeeds.setIsReaded(true);
-                                mDaoFriendFeedsDao.update(daoFriendFeeds);
-                                startActivity(intent);
-                            }
-                        }
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        System.out.println("获取朋友资料异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetFriendInfoResponse(result, tempFeeds);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("获取朋友资料异常");
                     }
                 });
+    }
+
+    private void handleGetFriendInfoResponse(String result, final DaoFriendFeeds tempFeeds) {
+        UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+        LogUtils.getInstance().debug("获取朋友资料: {}", userInfoResponde.toString());
+        if (userInfoResponde.getCode() == 0) {
+            int status = userInfoResponde.getPayload().getStatus();
+
+            if (status == 0) {//非好友
+                showCardDialog(userInfoResponde.getPayload());
+            } else if (status == 1) {//好友
+                Intent intent = new Intent(getActivity(), ActivityFriendsInfo.class);
+                intent.putExtra("yplay_friend_name", tempFeeds.getFriendNickName());
+                intent.putExtra("yplay_friend_uin", tempFeeds.getFriendUin());
+                LogUtils.getInstance().debug("朋友的uin = {}", tempFeeds.getFriendUin());
+                //将被点击的item设置为已读
+                DaoFriendFeeds daoFriendFeeds = mDaoFriendFeedsDao.queryBuilder()
+                        .where(DaoFriendFeedsDao.Properties.Ts.eq(tempFeeds.getTs()))
+                        .build().unique();
+                daoFriendFeeds.setIsReaded(true);
+                mDaoFriendFeedsDao.update(daoFriendFeeds);
+                startActivity(intent);
+            }
+        }
     }
 
 
@@ -767,7 +774,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         cardDialog.setCarDialogRlListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("哈哈哈");
+                LogUtils.getInstance().debug("哈哈哈");
                 cardDialog.dismiss();
             }
         });
@@ -806,7 +813,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
                 int position = (int) o;
                 DaoFriendFeeds tempFeeds = mDataList.get(position);
-                Log.i(TAG, "OnRecycleImageClick: 头像被点击---" + position);
+                LogUtils.getInstance().debug("OnRecycleImageClick: 头像被点击, position = {}", position);
                 //查询关系之后再跳转
                 getFriendInfo(tempFeeds.getFriendUin(), tempFeeds);
                 break;

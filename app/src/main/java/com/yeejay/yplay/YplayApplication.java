@@ -77,6 +77,14 @@ public class YplayApplication extends Application {
                 }
             });
         }
+
+        //创建记录日志的文件夹，路径为/storage/emulated/0/yplay/logs
+        String dirStr = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + File.separator + "yplay" + File.separator + "logs";
+        File file = new File(dirStr);
+        if (!file.exists()) {
+            file.mkdirs();// 创建文件夹
+        }
     }
 
     public static YplayApplication getInstance() {

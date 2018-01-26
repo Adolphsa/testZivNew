@@ -15,7 +15,7 @@ public interface WnsRequestListener {
     /**
      * 开始加载时调用，一般在此处放入加载进度条
      */
-    void onStartLoad();
+    void onStartLoad(int value);
 
     /**
      * 只有加载成功时，才会调用该方法

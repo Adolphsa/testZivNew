@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -25,14 +24,16 @@ import android.widget.Toast;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,10 +41,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityContribute1 extends BaseActivity {
     private static final String TAG = "ActivityContribute1";
@@ -109,7 +106,7 @@ public class ActivityContribute1 extends BaseActivity {
             String questionText = conEdit.getText().toString();
             if (!TextUtils.isEmpty(questionText)){
                 submitQuestion(questionText,emojiIndex);
-                System.out.println("问题不为空");
+                LogUtils.getInstance().debug("问题不为空");
             }
 
         }else {
@@ -124,7 +121,7 @@ public class ActivityContribute1 extends BaseActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             int flag = intent.getIntExtra("contribute_flag", 0);
-            LogUtils.getInstance().debug(TAG + " , mContributeBr, flag = " + String.valueOf(flag));
+            LogUtils.getInstance().debug("mContributeBr, flag = {}" + flag);
             if (1 == flag) { //表示有新的投稿消息;
                 contributeNew.setVisibility(View.VISIBLE);
             }
@@ -168,7 +165,7 @@ public class ActivityContribute1 extends BaseActivity {
         rlEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                Log.d(TAG, "rl_edittext focused!, hasFocus = " + hasFocus);
+                LogUtils.getInstance().debug("rl_edittext focused!, hasFocus = {}", hasFocus);
                 if (hasFocus) {
                     rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
                     conEdit.setCursorVisible(true);
@@ -204,7 +201,7 @@ public class ActivityContribute1 extends BaseActivity {
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
                         && KeyEvent.ACTION_DOWN == event.getAction())){
-                    System.out.println("回车键被点击");
+                    LogUtils.getInstance().debug("回车键被点击");
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm.isActive()) {
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
@@ -228,8 +225,8 @@ public class ActivityContribute1 extends BaseActivity {
 
                 int currentSelectEmoji = data.getIntExtra("current_select_emoji", 0);
                 emojiIndex = data.getIntExtra("current_emoji_index", 0);
-                System.out.println("1---currentSelectEmoji---" + currentSelectEmoji
-                        + "current_emoji_index" + emojiIndex);
+                LogUtils.getInstance().debug("1---currentSelectEmoji = {}, current_emoji_index = {}",
+                        currentSelectEmoji, emojiIndex);
                 String demojiUrl = EMOJI_URL + emojiIndex + ".png";
                 Picasso.with(ActivityContribute1.this).load(demojiUrl).resizeDimen(
                         R.dimen.non_ques_head_img_width, R.dimen.non_ques_head_img_height)
@@ -265,7 +262,7 @@ public class ActivityContribute1 extends BaseActivity {
         }
     }
 
-
+    //提交投稿
     private void submitQuestion(String qtext, int qiconId) {
 
         Map<String, Object> conMap = new HashMap<>();
@@ -274,40 +271,48 @@ public class ActivityContribute1 extends BaseActivity {
         conMap.put("uin", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_UIN, 0));
         conMap.put("token", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         conMap.put("ver", SharePreferenceUtil.get(ActivityContribute1.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .submiteQuestion(conMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_SUBMITQUESTION, conMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(BaseRespond baseRespond) {
-                        System.out.println("投稿---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0){
-                            //conEdit.setEnabled(false);
+                    public void onStartLoad(int value) {
 
-                            //投稿成功，跳转到投稿完成页面;
-                            startActivityForResult(new Intent(ActivityContribute1.this,
-                                    ActivityContributeComplete.class), 3);
-                        }else {
-                            Toast.makeText(ActivityContribute1.this,"提交失败",Toast.LENGTH_SHORT).show();
-                        }
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        System.out.println("投稿异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleSubmitQuestionResponse(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("投稿异常");
                     }
                 });
 
+    }
+
+    private void handleSubmitQuestionResponse(String result) {
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+        LogUtils.getInstance().debug("投稿, {}", baseRespond.toString());
+        if (baseRespond.getCode() == 0){
+            //conEdit.setEnabled(false);
+
+            //投稿成功，跳转到投稿完成页面;
+            startActivityForResult(new Intent(ActivityContribute1.this,
+                    ActivityContributeComplete.class), 3);
+        }else {
+            Toast.makeText(ActivityContribute1.this,"提交失败",Toast.LENGTH_SHORT).show();
+        }
     }
 }

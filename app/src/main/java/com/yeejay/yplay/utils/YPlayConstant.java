@@ -45,4 +45,41 @@ public class YPlayConstant {
 
     public static String IMEI = "";
 
+    public static final String BASE_URL = "http://yplay.vivacampus.com";
+
+    //获取好友动态
+    public static final String API_GETFEEDS_URL = "/api/feed/getfeeds";
+
+    //通过短信邀请好友
+    public static final String API_INVITEFRIENDSBYSMS_URL = "/api/sns/invitefriendsbysms";
+
+    //删除好友
+    public static final String API_REMOVEFRIEND_URL = "/api/sns/removefriend";
+
+    //空页面随机推荐好友
+    public static final String API_GETRANDOMRECOMMENDS = "/api/sns/getrandomrecommends";
+
+    //发送加好友请求
+    public static final String API_ADDFRIEND = "/api/sns/addfriend";
+
+    //获取用户的资料
+    public static final String API_GETUSERPROFILE = "/api/user/getuserprofile";
+
+    //确认feeds收到
+    public static final String API_ACKFEEDS = "/api/feed/ackfeeds";
+
+    //拉取问题
+    public static final String API_GETQUESTIONANDOPTIONS = "/api/vote/getquestionandoptions";
+
+    //某个问题的拉取候选者---新
+    public static final String API_GETOPTIONS = "/api/vote/getoptions";
+
+    //投票
+    public static final String API_DOVOTE = "/api/vote/dovote";
+
+    //跳过下个问题
+    public static final String API_DOSKIP = "/api/vote/doskip";
+
+    //用户投稿
+    public static final String API_SUBMITQUESTION = "/api/vote/submitquestion";
 }

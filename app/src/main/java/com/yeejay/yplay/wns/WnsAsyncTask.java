@@ -68,6 +68,6 @@ public class WnsAsyncTask extends AsyncTask<String, Integer, String>{
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        wnsRequestListener.onStartLoad();
+        wnsRequestListener.onStartLoad(values[0]);
     }
 }
