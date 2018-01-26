@@ -3,31 +3,29 @@ package com.yeejay.yplay.login;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
 public class ChoiceSex extends BaseActivity {
+
+    private static final String TAG = "ChoiceSex";
 
     int gender;
     int isActivitySetting;
@@ -46,9 +44,9 @@ public class ChoiceSex extends BaseActivity {
 
 
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null){
+        if (bundle != null) {
             isActivitySetting = bundle.getInt("activity_setting");
-            System.out.println("isActivitySetting---" + isActivitySetting);
+            Log.i(TAG, "isActivitySetting---" + isActivitySetting);
         }
 
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -58,15 +56,14 @@ public class ChoiceSex extends BaseActivity {
             }
         });
 
-
-         boyBtn = (Button) findViewById(R.id.cs_btn_boy);
-         girlBtn = (Button) findViewById(R.id.cs_btn_girl);
+        boyBtn = (Button) findViewById(R.id.cs_btn_boy);
+        girlBtn = (Button) findViewById(R.id.cs_btn_girl);
 
         boyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 gender = 1;
-                if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)){
+                if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)) {
                     choiceSex(gender);
                     Drawable navBoy = getResources().getDrawable(R.drawable.boy_unselect);
                     navBoy.setBounds(0, 0, navBoy.getMinimumWidth(), navBoy.getMinimumHeight());
@@ -75,8 +72,8 @@ public class ChoiceSex extends BaseActivity {
                     Drawable navGirl = getResources().getDrawable(R.drawable.girl_select);
                     navGirl.setBounds(0, 0, navGirl.getMinimumWidth(), navGirl.getMinimumHeight());
                     girlBtn.setCompoundDrawables(null, navGirl, null, null);
-                }else {
-                    Toast.makeText(ChoiceSex.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ChoiceSex.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -85,7 +82,7 @@ public class ChoiceSex extends BaseActivity {
             @Override
             public void onClick(View v) {
                 gender = 2;
-                if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)){
+                if (NetWorkUtil.isNetWorkAvailable(ChoiceSex.this)) {
                     choiceSex(gender);
 
                     Drawable navBoy = getResources().getDrawable(R.drawable.boy_select);
@@ -95,80 +92,67 @@ public class ChoiceSex extends BaseActivity {
                     Drawable navGirl = getResources().getDrawable(R.drawable.girl_unselect);
                     navGirl.setBounds(0, 0, navGirl.getMinimumWidth(), navGirl.getMinimumHeight());
                     girlBtn.setCompoundDrawables(null, navGirl, null, null);
-                }else {
-                    Toast.makeText(ChoiceSex.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ChoiceSex.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        System.out.println("性别选择");
-    }
-
     //选择性别
     private void choiceSex(final int gender){
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
         Map<String,Object> sexMap = new HashMap<>();
-        System.out.println("性别---" + gender);
+        LogUtils.getInstance().error("gender {}", gender);
         sexMap.put("gender",gender);
         sexMap.put("uin", SharePreferenceUtil.get(ChoiceSex.this, YPlayConstant.YPLAY_UIN,0));
         sexMap.put("token",SharePreferenceUtil.get(ChoiceSex.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
         sexMap.put("ver",SharePreferenceUtil.get(ChoiceSex.this,YPlayConstant.YPLAY_VER,0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .choiceSex(sexMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, sexMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 选择性别---" + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+                if (baseRespond.getCode() == 0){
+
+                    if (isActivitySetting == 1){
+                        Intent intent = new Intent();
+                        String str = gender == 1 ? "男" : "女";
+                        intent.putExtra("activity_setting_gender",str);
+                        ChoiceSex.this.setResult(201,intent);
+                        ChoiceSex.this.finish();
+                    }else {
+                        startActivity(new Intent(ChoiceSex.this,UserInfo.class));
+                        //jumpToWhere();
                     }
 
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0){
-                            System.out.println("选择性别成功---" + baseRespond.toString());
-                            if (isActivitySetting == 1){
-                                Intent intent = new Intent();
-                                String str = gender == 1 ? "男" : "女";
-                                intent.putExtra("activity_setting_gender",str);
-                                ChoiceSex.this.setResult(201,intent);
-                                ChoiceSex.this.finish();
-                            }else {
-                                startActivity(new Intent(ChoiceSex.this,UserInfo.class));
-                                //jumpToWhere();
-                            }
+                }else {
+                    LogUtils.getInstance().error("choice gender fail {}", baseRespond.toString());
+                }
+            }
 
-                        }else {
-                            System.out.println("选择性别失败---" + baseRespond.toString());
-                        }
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("选择性别异常---" + e.getMessage());
+            }
 
-                    }
+            @Override
+            public void onError() {
 
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            }
+        });
     }
 
-    private void jumpToWhere(){
-
-        //判断基本信息
-        String name = (String) SharePreferenceUtil.get(ChoiceSex.this,YPlayConstant.TEMP_NICK_NAME,"yplay");
-        if (TextUtils.isEmpty(name) || name.equals("yplay")){
-            startActivity(new Intent(ChoiceSex.this,UserInfo.class));
-        }
-
-        startActivity(new Intent(ChoiceSex.this, MainActivity.class));
-    }
 }

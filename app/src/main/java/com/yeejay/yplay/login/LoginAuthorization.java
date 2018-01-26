@@ -82,8 +82,8 @@ public class LoginAuthorization extends BaseActivity {
                     } else {
 
                             SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
-                            settingDialog.setTitle("开启通讯录权限");
-                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
+                            settingDialog.setTitle(R.string.open_contact_key);
+                            settingDialog.setMessage(R.string.open_contact_message);
                             settingDialog.show();
 
                     }
@@ -104,16 +104,6 @@ public class LoginAuthorization extends BaseActivity {
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     contactsAuthority();
-//                    if (numberBookAuthoritySuccess) {
-//                        Log.i(TAG, "onSucceed: 通讯录有权限");
-//                    } else {
-//                        Log.i(TAG, "onSucceed: 通讯录无权限");
-//                        SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
-//                        settingDialog.setTitle("开启通讯录权限");
-//                        settingDialog.setMessage("方便您找到正在使用本产品的好友");
-//                        settingDialog.show();
-//
-//                    }
                     break;
             }
             //授权成功跳转
@@ -125,22 +115,13 @@ public class LoginAuthorization extends BaseActivity {
             Log.i(TAG, "onFailed: requestCode---" + requestCode);
             switch (requestCode) {
                 case REQUEST_CODE_PERMISSION_SINGLE_LOCATION:
-                    System.out.println("回调失败的地理位置权限申请失败");
+                    Log.i(TAG, "onFailed: getLonLat");
                     getLonLat();
                     break;
                 case REQUEST_CODE_PERMISSION_SINGLE_CONTACTS:
                     System.out.println("回调失败的通讯录权限申请失败");
+                    Log.i(TAG, "onFailed: contactsAuthority");
                     contactsAuthority();
-//                    if (numberBookAuthoritySuccess) {
-//                        Log.i(TAG, "onFailed: 读到通讯录权限了numberBookAuthoritySuccess---" + numberBookAuthoritySuccess);
-//                    } else {
-//                        if (AndPermission.hasAlwaysDeniedPermission(LoginAuthorization.this, deniedPermissions)) {
-//                            SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 401);
-//                            settingDialog.setTitle("开启通讯录权限");
-//                            settingDialog.setMessage("方便您找到正在使用本产品的好友");
-//                            settingDialog.show();
-//                        }
-//                    }
                     break;
             }
             authorizationSuccess();
@@ -189,13 +170,11 @@ public class LoginAuthorization extends BaseActivity {
             @Override
             public void onClick(View v) {
                 getAddressAuthority();
-                System.out.println("获取地理位置被点击");
             }
         });
         mBtnGetNumberBookAuthority.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("获取通讯录被点击");
                 getNumberBookAuthority();
             }
         });
@@ -262,8 +241,8 @@ public class LoginAuthorization extends BaseActivity {
 
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("请开启位置服务");
-            dialog.setPositiveButton("确定",
+            dialog.setMessage(R.string.laz_open_local);
+            dialog.setPositiveButton(R.string.ok,
                     new android.content.DialogInterface.OnClickListener() {
 
                         @Override
@@ -276,7 +255,7 @@ public class LoginAuthorization extends BaseActivity {
 
                         }
                     });
-            dialog.setNeutralButton("取消", new android.content.DialogInterface.OnClickListener() {
+            dialog.setNeutralButton(R.string.cancel, new android.content.DialogInterface.OnClickListener() {
 
                 @Override
                 public void onClick(DialogInterface arg0, int arg1) {
@@ -316,8 +295,8 @@ public class LoginAuthorization extends BaseActivity {
                     Log.i(TAG, "onReceiveLocation: isFirstShowDialog---" + isFirstShowDialog);
                     isFirstShowDialog = false;
                     SettingDialog settingDialog = AndPermission.defaultSettingDialog(LoginAuthorization.this, 402);
-                    settingDialog.setTitle("开启位置权限");
-                    settingDialog.setMessage("通过您的位置定位离您最近的学校");
+                    settingDialog.setTitle(R.string.laz_open_local_auto);
+                    settingDialog.setMessage(R.string.laz_recently_school);
                     settingDialog.show();
 
                 }
@@ -345,7 +324,6 @@ public class LoginAuthorization extends BaseActivity {
         if (Build.VERSION.SDK_INT >= 23
                 && LoginAuthorization.this.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
                 && LoginAuthorization.this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("无读取联系人权限");
             return;
         }
 
@@ -402,9 +380,14 @@ public class LoginAuthorization extends BaseActivity {
                                 contactsInfoDao.update(queryContactsInfo);
 
                                 Log.i(TAG, "getContacts: update queryContactsInfo---" + queryContactsInfo.getName()
-                                        + "---" +queryContactsInfo.getUin()
-                                        + "---" +queryContactsInfo.getOrgPhone()
-                                        + "---" +queryContactsInfo.getSortKey());
+                                        + "---" + queryContactsInfo.getUin()
+                                        + "---" + queryContactsInfo.getOrgPhone()
+                                        + "---" + queryContactsInfo.getSortKey());
+                                LogUtils.getInstance().error("update queryContactsInfo name %s uin %d OrgPhone %s sortkey %s",
+                                        queryContactsInfo.getName(),
+                                        queryContactsInfo.getUin(),
+                                        queryContactsInfo.getOrgPhone(),
+                                        queryContactsInfo.getSortKey());
                             }
 
                         }
@@ -417,7 +400,6 @@ public class LoginAuthorization extends BaseActivity {
 
             Log.i(TAG, "getContacts: 通讯录长度---" + counter);
             if (counter > 0) {
-//                setContactBackground();
                 numberBookAuthoritySuccess = true;
                 SharePreferenceUtil.put(LoginAuthorization.this, "temp_book", 1);
                 //开启服务上传通讯录
@@ -429,7 +411,7 @@ public class LoginAuthorization extends BaseActivity {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-//            handler.sendEmptyMessage(CONTACTS_BOOLEAN);
+
         }
     }
 
@@ -501,8 +483,6 @@ public class LoginAuthorization extends BaseActivity {
         }
     }
 
-
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -511,8 +491,6 @@ public class LoginAuthorization extends BaseActivity {
             mLocationClient.stop();
         }
     }
-
-
 
     @Override
     protected void onDestroy() {

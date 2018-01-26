@@ -1,12 +1,8 @@
 package com.yeejay.yplay.login;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.os.Handler;
-import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +13,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LazyScrollView;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
+import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,10 +31,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ClassList extends BaseActivity {
 
@@ -48,7 +42,8 @@ public class ClassList extends BaseActivity {
     MesureListView mPrimaryListView;
     @BindView(R.id.cl_scroll_view)
     LazyScrollView clScrollView;
-
+    @BindView(R.id.tips)
+    TextView mTips;
 
     @OnClick(R.id.cl_back)
     public void back(View view) {
@@ -65,21 +60,6 @@ public class ClassList extends BaseActivity {
     int grade;
     int isActivitySetting;
     private int mLeftCnt;
-    private TextView mTips;
-
-
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if(isLoginMode()) {
-                mTips.setText(R.string.look_for_sameclass);
-            } else {
-                mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-                        Integer.toString(mLeftCnt)));
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,17 +75,17 @@ public class ClassList extends BaseActivity {
             System.out.println("activity_setting_school" + isActivitySetting);
             if (isActivitySetting == 10){
                 clBack.setVisibility(View.VISIBLE);
+                queryUserUpdateLeftCount(3);
             }
             mLatitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LATITUDE);
             mLongitude = bundle.getDouble(YPlayConstant.YPLAY_FIRST_LONGITUDE);
             Log.i(TAG, "onCreate: lat---" + mLatitude + ",lon---" + mLongitude);
         }
-        mTips = (TextView) findViewById(R.id.tips);
 
         if(isLoginMode()) {
             mTips.setText(R.string.look_for_sameclass);
         }
-        queryUserUpdateLeftCount(3);
+
 
         mPrimaryListView = (MesureListView) findViewById(R.id.cl_grade_list);
 
@@ -162,24 +142,15 @@ public class ClassList extends BaseActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 getSchoolAndGrade(position);
                 jumpToSchoolList();
-                System.out.println("初中---第" + grade + "schoolType---" + schoolType);
+                Log.i(TAG, "onItemClick: 初中---第" + grade + "schoolType---" + schoolType);
+                LogUtils.getInstance().error("grade {}, schoolType {}",grade,schoolType);
             }
         });
 
-
-//        clScrollView.setOnScrollChangedListener(new OnScrollChangedListener() {
-//            @Override
-//            public void onScrollChanged(int top, int oldTop) {
-//                System.out.println("开始滚动了top---" + top + ",oldTop---" + oldTop);
-////                getWindow().setStatusBarColor(Color.TRANSPARENT);
-////                clTitleLl.getBackground().setAlpha(1);
-//            }
-//        });
     }
 
     boolean isLoginMode() {
-        SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
-        return  pref.getBoolean("isLogin", false);
+        return  (boolean)SharePreferenceUtil.get(ClassList.this,YPlayConstant.YPLAY_LOGIN_MODE,false);
     }
 
     @Override
@@ -194,7 +165,7 @@ public class ClassList extends BaseActivity {
     }
 
     private void jumpToSchoolList() {
-        System.out.println("跳转到学校");
+
         Intent intent = new Intent(ClassList.this, SchoolList.class);
         intent.putExtra(YPlayConstant.YPLAY_FIRST_LATITUDE, mLatitude);
         intent.putExtra(YPlayConstant.YPLAY_FIRST_LONGITUDE, mLongitude);
@@ -278,42 +249,54 @@ public class ClassList extends BaseActivity {
             return true;//不执行父类点击事件
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
+
+
     //查询用户的修改配额
     private void queryUserUpdateLeftCount(int field) {
 
-        Map<String, Object> leftCountMap = new HashMap<>();
-        leftCountMap.put("field", field);
-        leftCountMap.put("uin", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_UIN, 0));
-        leftCountMap.put("token", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        leftCountMap.put("ver", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserUpdateCount(leftCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_QUERY_LEFT_COUNT_URL;
+        Map<String, Object> nameMap = new HashMap<>();
+        nameMap.put("field", field);
+        nameMap.put("uin", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_UIN, 0));
+        nameMap.put("token", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        nameMap.put("ver", SharePreferenceUtil.get(ClassList.this, YPlayConstant.YPLAY_VER, 0));
 
+        WnsAsyncHttp.wnsRequest(url, nameMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 剩余修改次数--- "+ result);
+                UserUpdateLeftCountRespond userUpdateLeftCountRespond = GsonUtil.GsonToBean(result,UserUpdateLeftCountRespond.class);
+                if (userUpdateLeftCountRespond.getCode() == 0) {
+                    mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+                    if(isLoginMode()) {
+                        mTips.setText(R.string.look_for_sameclass);
+                    } else {
+                        mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                                Integer.toString(mLeftCnt)));
                     }
+                }
+            }
 
-                    @Override
-                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
-                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
-                        if (userUpdateLeftCountRespond.getCode() == 0) {
-                            mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
-                            mHandler.sendEmptyMessage(mLeftCnt);
-                        }
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onError(Throwable e) {
+            }
 
-                    }
+            @Override
+            public void onError() {
 
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            }
+        });
     }
+
 }

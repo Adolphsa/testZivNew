@@ -16,15 +16,16 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.GuideContactsAdapter;
 import com.yeejay.yplay.adapter.GuideSchoolmateAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.customview.MesureListView;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
-import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +35,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class AddFriendGuide extends AppCompatActivity {
 
@@ -71,6 +67,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
     @OnClick(R.id.aafg_enter)
     public void aafgEnter() {
+        SharePreferenceUtil.put(AddFriendGuide.this,YPlayConstant.YPLAY_LOGIN_MODE,false);
         startActivity(new Intent(AddFriendGuide.this, MainActivity.class));
     }
 
@@ -101,7 +98,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
         initContactAdapter();
         initSameSchoolAdapter();
-        getRecommends(mType, mPageNum);
+        getRecommends(mPageNum);
     }
 
     //通讯录好友
@@ -142,7 +139,7 @@ public class AddFriendGuide extends AppCompatActivity {
                             bothNull();
 
                         } else {
-                            Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddFriendGuide.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
@@ -173,7 +170,7 @@ public class AddFriendGuide extends AppCompatActivity {
 
                             bothNull();
                         } else {
-                            Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddFriendGuide.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -202,109 +199,103 @@ public class AddFriendGuide extends AppCompatActivity {
         }
     }
 
+    //拉取同校
+    private void getRecommends(int pageNum) {
 
-    //拉取同校/通讯录好友
-    private void getRecommends(int type, int pageNum) {
-
-        System.out.println("type---" + type);
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_SCHOOL_FRIEND_URL;
         Map<String, Object> recommendsMap = new HashMap<>();
-        recommendsMap.put("type", 3);
+        recommendsMap.put("type", mType);
         recommendsMap.put("pageNum", pageNum);
         recommendsMap.put("pageSize", 50);
         recommendsMap.put("uin", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_UIN, 0));
         recommendsMap.put("token", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getSchoolmates(recommendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
 
-                    @Override
-                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-                        if (getRecommendsRespond.getCode() == 0) {
-                            System.out.println("好友列表---" + getRecommendsRespond.toString());
-                            List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
-                                    getRecommendsRespond.getPayload().getFriends();
-                            if (friendsBeanList != null && friendsBeanList.size() > 0) {
+        WnsAsyncHttp.wnsRequest(url, recommendsMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                                allSchoolMateList.addAll(friendsBeanList);
-                                handleSchoolMate(allSchoolMateList);
-                                schoolmateAdapter.notifyDataSetChanged();
+            }
 
-                            } else {
-                                aafgSameSchool.setVisibility(View.GONE);
+            @Override
+            public void onStartLoad(int value) {
 
-                                if (contactsList.size() == 0 && allSchoolMateList.size() == 0) {
-                                    listIsNUll.setVisibility(View.VISIBLE);
-                                } else {
-                                    listIsNUll.setVisibility(View.GONE);
-                                }
+            }
 
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: school friend--- " + result);
+                GetRecommendsRespond getRecommendsRespond = GsonUtil.GsonToBean(result,GetRecommendsRespond.class);
+                if (getRecommendsRespond.getCode() == 0) {
+                    List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
+                            getRecommendsRespond.getPayload().getFriends();
+                    if (friendsBeanList != null && friendsBeanList.size() > 0) {
 
-                            }
+                        allSchoolMateList.addAll(friendsBeanList);
+                        schoolmateAdapter.notifyDataSetChanged();
 
+                    } else {
+                        aafgSameSchool.setVisibility(View.GONE);
+
+                        if (contactsList.size() == 0 && allSchoolMateList.size() == 0) {
+                            listIsNUll.setVisibility(View.VISIBLE);
+                        } else {
+                            listIsNUll.setVisibility(View.GONE);
                         }
-
                     }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("拉取好友异常---" + e.getMessage());
-                        Toast.makeText(AddFriendGuide.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }
+            }
 
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
-    }
+            @Override
+            public void onError() {
 
-    //处理同校同学
-    private void handleSchoolMate(final List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList) {
-        Log.d(TAG, ", handleSchoolMate(), allSchoolMateList.size() = " + allSchoolMateList.size()
-                + allSchoolMateList.toString());
+            }
+        });
     }
 
     //发送加好友的请求
     private void addFriend(int toUin, int srcType) {
-        Map<String, Object> addFreindMap = new HashMap<>();
-        addFreindMap.put("toUin", toUin);
-        addFreindMap.put("srcType", srcType);
-        addFreindMap.put("uin", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_UIN, 0));
-        addFreindMap.put("token", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        addFreindMap.put("ver", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .addFriend(addFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<AddFriendRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
-                    }
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_ADD_FRIEND_URL;
+        Map<String, Object> addFriendMap = new HashMap<>();
+        addFriendMap.put("toUin", toUin);
+        addFriendMap.put("srcType", srcType);
+        addFriendMap.put("uin", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_UIN, 0));
+        addFriendMap.put("token", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        addFriendMap.put("ver", SharePreferenceUtil.get(AddFriendGuide.this, YPlayConstant.YPLAY_VER, 0));
 
-                    @Override
-                    public void onNext(@NonNull AddFriendRespond addFriendRespond) {
-                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
-                    }
+        WnsAsyncHttp.wnsRequest(url, addFriendMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("发送加好友请求异常---" + e.getMessage());
-                    }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onStartLoad(int value) {
 
-                    }
-                });
+            }
 
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: add friend--- " + result);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
 }

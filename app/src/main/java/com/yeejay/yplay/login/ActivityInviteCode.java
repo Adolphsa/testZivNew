@@ -1,7 +1,6 @@
 package com.yeejay.yplay.login;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -17,15 +16,17 @@ import android.widget.Toast;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +34,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityInviteCode extends BaseActivity {
 
@@ -64,7 +60,7 @@ public class ActivityInviteCode extends BaseActivity {
         if (TextUtils.isEmpty(inviteCode)) return;
 
         if (inviteCode.length() <= 0){
-            Toast.makeText(ActivityInviteCode.this,"邀请码为空",Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityInviteCode.this, R.string.aic_incete_code_is_null,Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -119,111 +115,120 @@ public class ActivityInviteCode extends BaseActivity {
         });
     }
 
+    //获取验证码
+    private void checkInviteCode(String phone,String inviteCode) {
 
-    //检验邀请码
-    private void checkInviteCode(String phone,String inviteCode){
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SEND_SMS_URL;
         Map<String, Object> inviteCodeMap = new HashMap<>();
         inviteCodeMap.put("phone", phone);
         inviteCodeMap.put("inviteCode", inviteCode);
+        WnsAsyncHttp.wnsRequest(url, inviteCodeMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .checkInviteCode(inviteCodeMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+            }
 
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onNext(BaseRespond baseRespond) {
-                        Log.i(TAG, "onNext: baseRespond---" + baseRespond);
-                        if (baseRespond.getCode() == 0){
+            }
 
-                            SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_UIN, uin);
-                            SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_TOKEN, token);
-                            SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_VER, ver);
-                            SharePreferenceUtil.put(ActivityInviteCode.this,YPlayConstant.YPLAY_USER_NAME,nickName);
-                            insertUin(uin);
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onNext: baseRespond---" + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+                if (baseRespond.getCode() == 0){
 
-                            getMyInfo();
-                        }else {
-                            aicCodeInvalid.setVisibility(View.VISIBLE);
-                        }
-                    }
+                    SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_UIN, uin);
+                    SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_TOKEN, token);
+                    SharePreferenceUtil.put(ActivityInviteCode.this, YPlayConstant.YPLAY_VER, ver);
+                    SharePreferenceUtil.put(ActivityInviteCode.this,YPlayConstant.YPLAY_USER_NAME,nickName);
+                    insertUin(uin);
 
-                    @Override
-                    public void onError(Throwable e) {
+                    getMyInfo();
+                }else {
+                    aicCodeInvalid.setVisibility(View.VISIBLE);
+                }
+            }
 
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
-
-    //获取自己的资料
     private void getMyInfo() {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_MY_INFO_URL;
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", uin);
         myInfoMap.put("token", token);
         myInfoMap.put("ver", ver);
 
-        Log.i(TAG, "getMyInfo: uin---" + uin + ",token---" + token + ",ver---" + ver);
+        WnsAsyncHttp.wnsRequest(url, myInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(myInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+            }
 
-                    @Override
-                    public void onNext(@NonNull UserInfoResponde userInfoResponde) {
-                        Log.i(TAG, "onNext: userInfoResponde---" + userInfoResponde.toString());
+            @Override
+            public void onStartLoad(int value) {
 
-                        if (userInfoResponde.getCode() == 0) {
-                            UserInfoResponde.PayloadBean.InfoBean infoBean = userInfoResponde.getPayload().getInfo();
+            }
 
-                            if (infoBean.getAge() == 0 ||
-                                    infoBean.getGrade() == 0 ||
-                                    infoBean.getSchoolId() == 0 ||
-                                    infoBean.getGender() == 0 ||
-                                    TextUtils.isEmpty(infoBean.getNickName())) {
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 我的资料---" + result);
+                handleMyInfoRespond(result);
+            }
 
-                                //首次登录注册，记录一个标志到sharedPreference中，表明现在是注册向导状态；
-                                SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
-                                SharedPreferences.Editor editor = pref.edit();
-                                editor.putBoolean("isLogin",true);
-                                editor.commit();
+            @Override
+            public void onTimeOut() {
 
-                                Intent intent = new Intent(ActivityInviteCode.this, LoginAge.class);
-                                intent.putExtra("is_from_invite_code",true);
-                                startActivity(intent);
+            }
 
-                            } else {
-                                startActivity(new Intent(ActivityInviteCode.this, MainActivity.class));
-                            }
+            @Override
+            public void onError() {
 
-                        }
-                    }
+            }
+        });
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.i(TAG, "onNext: userInfoResponde---" + e.toString());
-                    }
-
-                    @Override
-                    public void onComplete() {}
-                });
     }
 
+    //处理我的资料返回
+    private void handleMyInfoRespond(String result) {
+
+        UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+        if (userInfoResponde.getCode() == 0) {
+            UserInfoResponde.PayloadBean.InfoBean infoBean = userInfoResponde.getPayload().getInfo();
+
+            if (infoBean.getAge() == 0 ||
+                    infoBean.getGrade() == 0 ||
+                    infoBean.getSchoolId() == 0 ||
+                    infoBean.getGender() == 0 ||
+                    TextUtils.isEmpty(infoBean.getNickName())) {
+
+                //首次登录注册，记录一个标志到sharedPreference中，表明现在是注册向导状态；
+                SharePreferenceUtil.put(ActivityInviteCode.this,YPlayConstant.YPLAY_LOGIN_MODE,true);
+
+
+                Intent intent = new Intent(ActivityInviteCode.this, LoginAge.class);
+                intent.putExtra("is_from_invite_code",true);
+                startActivity(intent);
+
+            } else {
+                startActivity(new Intent(ActivityInviteCode.this, MainActivity.class));
+            }
+
+        }
+
+    }
 
     //插入uin到数据库
     private void insertUin(int tempUin){

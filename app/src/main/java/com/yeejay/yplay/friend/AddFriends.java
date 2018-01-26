@@ -867,7 +867,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         System.out.println("position---" + position);
         if (position == 4) {
-            System.out.println("啦啦啦");
             startActivity(new Intent(AddFriends.this, ActivityAddFiendsDetail.class));
         }
     }

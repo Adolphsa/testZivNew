@@ -1,6 +1,7 @@
 package com.yeejay.yplay.greendao;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.yeejay.yplay.utils.LogUtils;
@@ -12,7 +13,7 @@ import org.greenrobot.greendao.database.Database;
  * Created by Administrator on 2017/11/23.
  */
 
-public class DataBaseHelper extends DaoMaster.DevOpenHelper{
+public class DataBaseHelper extends DaoMaster.OpenHelper{
 
     private static DaoMaster daoMaster;
     private static DaoSession daoSession;
@@ -22,6 +23,10 @@ public class DataBaseHelper extends DaoMaster.DevOpenHelper{
 
     public DataBaseHelper(Context context, String name) {
         super(context, name);
+    }
+
+    public DataBaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory) {
+        super(context, name, factory);
     }
 
     @Override
@@ -50,7 +55,7 @@ public class DataBaseHelper extends DaoMaster.DevOpenHelper{
      */
     public static DaoMaster getDaoMaster(Context context) {
         if (daoMaster == null) {
-            DaoMaster.OpenHelper helper = new DaoMaster.DevOpenHelper(context,
+            DataBaseHelper helper = new DataBaseHelper(context,
                     DBNAME, null);
             daoMaster = new DaoMaster(helper.getWritableDatabase());
         }

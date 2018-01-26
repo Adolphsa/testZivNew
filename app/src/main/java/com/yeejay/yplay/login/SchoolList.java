@@ -4,12 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -29,10 +27,7 @@ import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
-import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LazyScrollView;
 import com.yeejay.yplay.customview.MesureListView;
@@ -40,9 +35,12 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.NearestSchoolsRespond;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
 import com.yeejay.yplay.userinfo.ActivitySetting;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,13 +50,9 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class SchoolList extends BaseActivity {
+
     private static final String TAG = "SchoolList";
 
     @BindView(R.id.sl_back)
@@ -192,7 +186,7 @@ public class SchoolList extends BaseActivity {
         if (NetWorkUtil.isNetWorkAvailable(SchoolList.this)) {
             getSchoolList(mPageNum, 10);
         } else {
-            Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SchoolList.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
         }
 
         mSchoolListView.setEmptyView(emptyView);
@@ -204,26 +198,10 @@ public class SchoolList extends BaseActivity {
                     System.out.println("shcoolID---" + schoolInfo.getSchoolId() + ",年级---" + grade);
                     choiceSchool(schoolInfo.getSchoolId(), grade, schoolInfo.getSchool());
                 } else {
-                    Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SchoolList.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-//        mSchoolListView.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_UP) {
-//                    System.out.println("拦截");
-//                    slScrollView.requestDisallowInterceptTouchEvent(false);
-//                } else {
-//                    // 请求父类不要拦截这个事件或者直接让ScrollView不拦截这个事件，下面的两行代码一样
-//                    // lv.getParent().getParent().requestDisallowInterceptTouchEvent(true);
-//                    System.out.println("不拦截");
-//                    slScrollView.requestDisallowInterceptTouchEvent(true);
-//                }
-//                return false;
-//            }
-//        });
 
        mptfRefresh.setCanRefresh(false);
         mptfRefresh.setRefreshListener(new BaseRefreshListener() {
@@ -255,7 +233,7 @@ public class SchoolList extends BaseActivity {
                         mDataList.clear();
                         searchSchoolList(mSearchPageNum, 10);
                     } else {
-                        Toast.makeText(SchoolList.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SchoolList.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                     }
 
                     closeInputMethod(mActivity);
@@ -267,8 +245,7 @@ public class SchoolList extends BaseActivity {
     }
 
     boolean isLoginMode() {
-        SharedPreferences pref = YplayApplication.getContext().getSharedPreferences("loginMode",MODE_PRIVATE);
-        return pref.getBoolean("isLogin", false);
+        return  (boolean)SharePreferenceUtil.get(SchoolList.this,YPlayConstant.YPLAY_LOGIN_MODE,false);
     }
 
     private void closeInputMethod(Activity context) {
@@ -345,8 +322,9 @@ public class SchoolList extends BaseActivity {
 
     //获取学校搜索结果列表
     private void searchSchoolList(int pageNum, int pageSize) {
-        Map<String, Object> schoolMap = new HashMap<>();
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SEARCH_SCHOOL_URL;
+        Map<String, Object> schoolMap = new HashMap<>();
         Log.d(TAG, "searchEdit content = " + searchEdit.getText().toString().trim() +
                 " , schoolType = " + schoolType);
         schoolMap.put("schoolType", schoolType);
@@ -357,55 +335,48 @@ public class SchoolList extends BaseActivity {
         schoolMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         schoolMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
 
-        Log.d(TAG,"school---" + schoolType +
-                ",latitude---" + mLatitude +
-                ",latitude---" + mLongitude +
-                ",uin---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0) +
-                ",token---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay") +
-                ",ver---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0)
 
-        );
+        WnsAsyncHttp.wnsRequest(url, schoolMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+                mptfRefresh.finishLoadMore();
+            }
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getSearchScools(schoolMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<NearestSchoolsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+            @Override
+            public void onStartLoad(int value) {
 
-                    }
+            }
 
-                    @Override
-                    public void onNext(@NonNull NearestSchoolsRespond nearestSchoolsRespond) {
-                        Log.d(TAG, "搜索得到的学校列表信息---" + nearestSchoolsRespond.toString());
-                        if (nearestSchoolsRespond.getCode() == 0) {
-                            showSchoolData(nearestSchoolsRespond);
-                        } else {
-                            mSchoolListView.setAdapter(null);
-                            Log.d(TAG,"搜索学校失败");
-                        }
-                        mptfRefresh.finishLoadMore();
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 搜索得到的学校列表信息---" + result);
+                NearestSchoolsRespond nearestSchoolsRespond = GsonUtil.GsonToBean(result,NearestSchoolsRespond.class);
+                if (nearestSchoolsRespond.getCode() == 0) {
+                    showSchoolData(nearestSchoolsRespond);
+                } else {
+                    mSchoolListView.setAdapter(null);
+                    Log.d(TAG,"搜索学校失败");
+                }
+                mptfRefresh.finishLoadMore();
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.d(TAG, "搜索学校异常---" + e.getMessage());
-                        mptfRefresh.finishLoadMore();
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onError() {
+                mptfRefresh.finishLoadMore();
+            }
+        });
     }
 
     //获取学校列表
     private void getSchoolList(int pageNum, int pageSize) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_SCHOOL_URL;
         Map<String, Object> schoolMap = new HashMap<>();
-
         schoolMap.put("schoolType", schoolType);
         schoolMap.put("latitude", mLatitude);
         schoolMap.put("longitude", mLongitude);
@@ -415,7 +386,7 @@ public class SchoolList extends BaseActivity {
         schoolMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         schoolMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
 
-        System.out.println("school---" + schoolType +
+        Log.i(TAG, "getSchoolList: school---" + schoolType +
                 ",latitude---" + mLatitude +
                 ",latitude---" + mLongitude +
                 ",uin---" + SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0) +
@@ -424,38 +395,40 @@ public class SchoolList extends BaseActivity {
 
         );
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getNearestScools(schoolMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<NearestSchoolsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, schoolMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+                mptfRefresh.finishLoadMore();
+            }
 
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onNext(@NonNull NearestSchoolsRespond nearestSchoolsRespond) {
-                        System.out.println("学校列表---" + nearestSchoolsRespond.toString());
-                        if (nearestSchoolsRespond.getCode() == 0) {
-                            showSchoolData(nearestSchoolsRespond);
-                        } else {
-                            System.out.println("获取学校失败");
-                        }
-                        mptfRefresh.finishLoadMore();
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取学校异常---" + e.getMessage());
-                        mptfRefresh.finishLoadMore();
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 学校列表---" + result);
+                NearestSchoolsRespond nearestSchoolsRespond = GsonUtil.GsonToBean(result,NearestSchoolsRespond.class);
+                if (nearestSchoolsRespond.getCode() == 0) {
+                    showSchoolData(nearestSchoolsRespond);
+                } else {
+                    Log.i(TAG, "onComplete: 获取学校失败");
+                    mSchoolListView.setAdapter(null);
+                }
+                mptfRefresh.finishLoadMore();
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onTimeOut() {
 
-                    }
-                });
+            }
+
+            @Override
+            public void onError() {
+                mptfRefresh.finishLoadMore();
+            }
+        });
     }
 
     //显示学校数据
@@ -471,6 +444,7 @@ public class SchoolList extends BaseActivity {
     //选择学校
     private void choiceSchool(int schoolId, final int grade, final String schooolName) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_CHOICE_SCHOOL_URL;
         Map<String, Object> schoolMap = new HashMap<>();
         schoolMap.put("schoolId", schoolId);
         schoolMap.put("grade", grade);
@@ -482,100 +456,95 @@ public class SchoolList extends BaseActivity {
             schoolMap.put("flag",1);
         }
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .choiceSchool(schoolMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {}
+        WnsAsyncHttp.wnsRequest(url, schoolMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("选择学校返回---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0) {
-                            if (isActivitySetting == 10) {
-                                System.out.println("啦啦啦啦啦啦---");
-                                Intent intent = new Intent(SchoolList.this, ActivitySetting.class);
-                                intent.putExtra("as_school_type", schoolType);
-                                intent.putExtra("as_grade", grade);
-                                intent.putExtra("as_school_name", schooolName);
-                                SchoolList.this.setResult(202, intent);
-                                SchoolList.this.startActivity(intent);
-                            } else {
-                                startActivity(new Intent(SchoolList.this, ChoiceSex.class));
-                                //jumpToWhere();
-                            }
+            }
 
-                        }
+            @Override
+            public void onStartLoad(int value) {
 
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("选择学校返回错误---" + e.getMessage());
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 选择学校---" + result);
+                handleChoiceSchoolRespond(result,grade,schooolName);
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onTimeOut() {
 
-                    }
-                });
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
+    //选择学校返回
+    private void handleChoiceSchoolRespond(String result, int grade,String schoolName){
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+        if (baseRespond.getCode() == 0) {
+            if (isActivitySetting == 10) {
+                System.out.println("啦啦啦啦啦啦---");
+                Intent intent = new Intent(SchoolList.this, ActivitySetting.class);
+                intent.putExtra("as_school_type", schoolType);
+                intent.putExtra("as_grade", grade);
+                intent.putExtra("as_school_name", schoolName);
+                SchoolList.this.setResult(202, intent);
+                SchoolList.this.startActivity(intent);
+            } else {
+                startActivity(new Intent(SchoolList.this, ChoiceSex.class));
+                //jumpToWhere();
+            }
 
-    private void jumpToWhere() {
-
-        //判断性别
-        int gender = (int) SharePreferenceUtil.get(SchoolList.this, YPlayConstant.TEMP_GENDER, 0);
-        if (gender == 0) {
-            startActivity(new Intent(SchoolList.this, ChoiceSex.class));
         }
-        //判断基本信息
-        String name = (String) SharePreferenceUtil.get(SchoolList.this, YPlayConstant.TEMP_NICK_NAME, "yplay");
-        if (TextUtils.isEmpty(name) || name.equals("yplay")) {
-            startActivity(new Intent(SchoolList.this, UserInfo.class));
-        }
-
-        startActivity(new Intent(SchoolList.this, MainActivity.class));
     }
 
     //查询用户的修改配额
     private void queryUserUpdateLeftCount(int field) {
 
-        Map<String, Object> leftCountMap = new HashMap<>();
-        leftCountMap.put("field", field);
-        leftCountMap.put("uin", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0));
-        leftCountMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        leftCountMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserUpdateCount(leftCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_QUERY_LEFT_COUNT_URL;
+        Map<String, Object> nameMap = new HashMap<>();
+        nameMap.put("field", field);
+        nameMap.put("uin", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_UIN, 0));
+        nameMap.put("token", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        nameMap.put("ver", SharePreferenceUtil.get(SchoolList.this, YPlayConstant.YPLAY_VER, 0));
 
-                    }
+        WnsAsyncHttp.wnsRequest(url, nameMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
-                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
-                        if (userUpdateLeftCountRespond.getCode() == 0) {
-                            mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
-                            mHandler.sendEmptyMessage(MSG_CODE_LEFT_COUNT);
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
+            @Override
+            public void onStartLoad(int value) {
 
-                    }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 剩余修改次数--- "+ result);
+                UserUpdateLeftCountRespond userUpdateLeftCountRespond = GsonUtil.GsonToBean(result,UserUpdateLeftCountRespond.class);
+                if (userUpdateLeftCountRespond.getCode() == 0) {
+                    mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+                    mHandler.sendEmptyMessage(mLeftCnt);
+                }
+            }
 
-                    }
-                });
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 }

@@ -44,7 +44,6 @@ public class UserPrivacy extends AppCompatActivity {
         layoutTitle2.setTextColor(getResources().getColor(R.color.white));
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.grey));
 
-
         aupWebview.loadUrl(privacyUrl);
     }
 }

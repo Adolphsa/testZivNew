@@ -21,19 +21,20 @@ import com.yeejay.yplay.BuildConfig;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CountDownTimer;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
-import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ContactsInfo;
 import com.yeejay.yplay.model.LoginRespond;
-import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.BaseUtils;
+import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,20 +44,11 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class Login extends BaseActivity {
 
     private static final String TAG = "Login";
 
-    //    @BindView(R.id.login_scroll_view)
-//    ScrollView loginScrollView;
-//    @BindView(R.id.login_root_view)
-//    LinearLayout rootView;
     @BindView(R.id.login_edt_number)
     EditText mEdtPhoneNumber;
     @BindView(R.id.login_edt_auth_code)
@@ -69,15 +61,6 @@ public class Login extends BaseActivity {
     TextView testTv1;
     @BindView(R.id.test_tv2)
     TextView testTv2;
-
-
-    @OnClick(R.id.login_edt_number)
-    public void loginPhone() {
-    }
-
-    @OnClick(R.id.login_edt_auth_code)
-    public void loginAuthCode() {
-    }
 
     //用户协议和隐私政策
     @OnClick(R.id.test_tv2)
@@ -151,10 +134,9 @@ public class Login extends BaseActivity {
             public void afterTextChanged(Editable s) {
 
                 if (s.length() == 11) {
-                    System.out.println("手机号码的长度---" + s.toString());
                     mBtnAuthCode.setEnabled(true);
                     mBtnAuthCode.setTextColor(getResources().getColor(R.color.black));
-                    mBtnAuthCode.setText("发验证码");
+                    mBtnAuthCode.setText(R.string.login_get_auth_code);
                     countDownTimer.cancel();
 
                     //判断验证码的长度
@@ -206,7 +188,7 @@ public class Login extends BaseActivity {
                     mBtnAuthCode.setEnabled(false);
                     sendSms(mEdtPhoneNumber.getText().toString());
                 } else {
-                    Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -225,7 +207,7 @@ public class Login extends BaseActivity {
                     login(mEdtPhoneNumber.getText().toString(), mEdtAuthCode.getText().toString(), uuid,
                             android.os.Build.MODEL, os, appVersion);
                 } else {
-                    Toast.makeText(Login.this, "网络不可用", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -330,31 +312,35 @@ public class Login extends BaseActivity {
     //获取验证码
     private void sendSms(String phoneNumber) {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .sendMessage(phoneNumber)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SEND_SMS_URL;
+        Map<String, Object> msmMap = new HashMap<>();
+        msmMap.put("phone",phoneNumber);
+        WnsAsyncHttp.wnsRequest(url, msmMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("发送短信返回---" + baseRespond.toString());
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("发送短信返回错误---" + e.getMessage());
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 验证码 " + result);
+            }
 
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     //插入uin到数据库
@@ -366,110 +352,97 @@ public class Login extends BaseActivity {
         if (myInfo == null) {
             MyInfo insert = new MyInfo(null, payloadBean.getUin(), 0, 0, 0, 0, 0);
             myInfoDao.insert(insert);
-            System.out.println("插入数据库");
+            LogUtils.getInstance().error("insert myself uin to database {}",payloadBean.getUin());
         }
     }
 
     //登录
     private void login(final String phoneNumber, String code, long uuid, String deviceName, String os, String appVersion) {
-        YPlayApiManger.getInstance().getZivApiService()
-                .login(phoneNumber, code, uuid, deviceName, os, appVersion)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<LoginRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
-                    @Override
-                    public void onNext(@NonNull LoginRespond loginRespond) {
-                        System.out.println("登录返回---" + loginRespond.toString());
-                        if (loginRespond.getCode() == 0) {
-                            int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
-                            uin = loginRespond.getPayload().getUin();
-                            ver = loginRespond.getPayload().getVer();
-                            token = loginRespond.getPayload().getToken();
-                            if (hasCheckInviteCode == 0) { //0表示邀请码验证未通过
-                                Intent intent = new Intent(Login.this, ActivityInviteCode.class);
-                                intent.putExtra("phone_number", phoneNumber);
-                                intent.putExtra("uin", uin);
-                                intent.putExtra("ver", ver);
-                                intent.putExtra("token", token);
-                                intent.putExtra("nick_name", loginRespond.getPayload().getInfo().getUserName());
-                                startActivity(intent);
-                                return;
-                            }
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
-                            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
-                            insertUin(loginRespond.getPayload());
-                            if (loginRespond.getPayload().getIsNewUser() == 1) {
-                                startActivity(new Intent(Login.this, LoginAge.class));
-                            } else {
-                                //逻辑跳转
-                                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
-                                        loginRespond.getPayload().getInfo().getGrade(),
-                                        loginRespond.getPayload().getInfo().getSchoolId(),
-                                        loginRespond.getPayload().getInfo().getGender(),
-                                        loginRespond.getPayload().getInfo().getNickName()
-                                );
-//                                startActivity(new Intent(Login.this, LoginAge.class));
-                            }
-                        } else {
-                            Toast.makeText(Login.this, "验证码错误", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("登录返回错误---" + e.getMessage());
-                    }
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_LOGIN_URL;
+        Map<String, Object> tempMap = new HashMap<>();
+        tempMap.put("phone", phoneNumber);
+        tempMap.put("code", code);
+        tempMap.put("uuid", String.valueOf(uuid));
+        tempMap.put("device",deviceName);
+        tempMap.put("os",os);
+        tempMap.put("appVer",appVersion);
+
+        WnsAsyncHttp.wnsRequest(url, tempMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 登录---" + result);
+                LogUtils.getInstance().error("login complete {} ",result);
+                handleLoginRespond(result,phoneNumber);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
+    //处理登录返回
+    private void handleLoginRespond(String result, String phoneNumber) {
 
-    //获取自己的资料
-    private void getMyInfo(int uin, String token, int ver) {
+        LoginRespond loginRespond = GsonUtil.GsonToBean(result, LoginRespond.class);
+        if (loginRespond.getCode() == 0) {
 
-        Map<String, Object> myInfoMap = new HashMap<>();
-        myInfoMap.put("uin", uin);
-        myInfoMap.put("token", token);
-        myInfoMap.put("ver", ver);
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(myInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
+            int hasCheckInviteCode = loginRespond.getPayload().getHasCheckInviteCode();
+            uin = loginRespond.getPayload().getUin();
+            ver = loginRespond.getPayload().getVer();
+            token = loginRespond.getPayload().getToken();
 
-                    @Override
-                    public void onNext(@NonNull UserInfoResponde userInfoResponde) {
-                        System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            jumpToWhere(userInfoResponde.getPayload().getInfo().getAge(),
-                                    userInfoResponde.getPayload().getInfo().getGrade(),
-                                    userInfoResponde.getPayload().getInfo().getSchoolId(),
-                                    userInfoResponde.getPayload().getInfo().getGender(),
-                                    userInfoResponde.getPayload().getInfo().getNickName()
-                            );
-                        }
-                    }
+            if (hasCheckInviteCode == 0) { //0表示邀请码验证未通过
+                Intent intent = new Intent(Login.this, ActivityInviteCode.class);
+                intent.putExtra("phone_number", phoneNumber);
+                intent.putExtra("uin", uin);
+                intent.putExtra("ver", ver);
+                intent.putExtra("token", token);
+                intent.putExtra("nick_name", loginRespond.getPayload().getInfo().getUserName());
+                startActivity(intent);
+                return;
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取自己的资料异常---" + e.getMessage());
-                    }
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_UIN, uin);
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_TOKEN, token);
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_VER, ver);
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
+            SharePreferenceUtil.put(Login.this, YPlayConstant.YPLAY_USER_NAME, loginRespond.getPayload().getInfo().getUserName());
+            SharePreferenceUtil.put(Login.this,YPlayConstant.YPLAY_LOGIN_MODE,true);
+            insertUin(loginRespond.getPayload());
 
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            if (loginRespond.getPayload().getIsNewUser() == 1) {
+                startActivity(new Intent(Login.this, LoginAge.class));
+            } else {
+                //逻辑跳转
+                jumpToWhere(loginRespond.getPayload().getInfo().getAge(),
+                        loginRespond.getPayload().getInfo().getGrade(),
+                        loginRespond.getPayload().getInfo().getSchoolId(),
+                        loginRespond.getPayload().getInfo().getGender(),
+                        loginRespond.getPayload().getInfo().getNickName()
+                );
+//                startActivity(new Intent(Login.this, LoginAge.class));
+            }
+        } else {
+            Toast.makeText(Login.this, getResources().getString(R.string.base_aotu_error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

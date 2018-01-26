@@ -2,7 +2,6 @@ package com.yeejay.yplay;
 
 import android.app.Application;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 
 import com.bumptech.glide.request.target.ViewTarget;
@@ -31,9 +30,6 @@ public class YplayApplication extends Application {
 
     private static YplayApplication instance;
 
-//    private DaoMaster.DevOpenHelper mHelper;
-    private DataBaseHelper dataBaseHelper;
-    private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
 
@@ -103,18 +99,13 @@ public class YplayApplication extends Application {
     }
 
     private void setDatabase() {
-
-        dataBaseHelper = new DataBaseHelper(this,"yplay-db");
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(this,"yplay-db");
         mDaoMaster = DataBaseHelper.getDaoMaster(this);
         mDaoSession = DataBaseHelper.getDaoSession(this);
     }
 
     public DaoSession getDaoSession() {
         return mDaoSession;
-    }
-
-    public SQLiteDatabase getDb() {
-        return db;
     }
 
 }

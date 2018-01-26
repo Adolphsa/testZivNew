@@ -37,8 +37,11 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.utils.DensityUtil;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -103,7 +106,6 @@ public class UserInfo extends BaseActivity {
             @Override
             public void onClick(View v) {
                 //跳转到答题页面
-                System.out.println("跳转到答题页面");
                 settingName(userName.getText().toString());
             }
         });
@@ -168,8 +170,6 @@ public class UserInfo extends BaseActivity {
     //上传图头像
     private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
 
-        System.out.println("imageName---" + imageName);
-
 //        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -198,7 +198,7 @@ public class UserInfo extends BaseActivity {
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ImageUploadRespond imageUploadRespond) {
-                        System.out.println("图片上传返回---" + imageUploadRespond.toString());
+                        Log.i(TAG, "onNext: 图片上传返回---" + imageUploadRespond.toString());
                         if (imageUploadRespond.getCode() == 0) {
                             //保存图片id
                             SharePreferenceUtil.put(UserInfo.this, YPlayConstant.YPLAY_HEADER_IMG, imageName);
@@ -208,7 +208,7 @@ public class UserInfo extends BaseActivity {
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("图片上传异常---" + e.getMessage());
+                        Log.i(TAG, "onNext: 图片上传异常---" + e.getMessage());
                     }
 
                     @Override
@@ -219,90 +219,97 @@ public class UserInfo extends BaseActivity {
     }
 
     //修改头像
-    private void updateHeaderImg(String headImgId) {
+    private void updateHeaderImg(String headImgId){
 
-        Map<String, Object> imgMap = new HashMap<>();
-        imgMap.put("headImgId", headImgId);
-        imgMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        imgMap.put("token", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        imgMap.put("ver", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_VER, 0));
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
+        Map<String,Object> imgMap = new HashMap<>();
+        imgMap.put("headImgId",headImgId);
+        imgMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN,0));
+        imgMap.put("token",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        imgMap.put("ver",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_VER,0));
 
+        WnsAsyncHttp.wnsRequest(url, imgMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .updateHeaderImg(imgMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+            }
 
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0) {
-                            System.out.println("修改图像成功---" + baseRespond.toString());
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("修改图像异常---" + e.getMessage());
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 修改图像---" + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+                if (baseRespond.getCode() == 0){
+                    Log.i(TAG, "onComplete: set header image success " + baseRespond.toString());
+                }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onTimeOut() {
 
-                    }
-                });
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     //设置姓名
-    private void settingName(String name) {
+    private void settingName(String name){
 
-        if (name.length() <= 0) {
-            Toast.makeText(UserInfo.this, "请设置姓名", Toast.LENGTH_SHORT).show();
+        if (name.length() <= 0){
+            Toast.makeText(UserInfo.this, R.string.uif_set_name, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (name.length() > 20) {
-            Toast.makeText(UserInfo.this, "请输入合理的姓名长度", Toast.LENGTH_SHORT).show();
+        if (name.length() > 20){
+            Toast.makeText(UserInfo.this, R.string.uif_legal_name_length, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Map<String, Object> nameMap = new HashMap<>();
-        nameMap.put("nickname", name);
-        nameMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        nameMap.put("token", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        nameMap.put("ver", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_VER, 0));
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
+        Map<String,Object> nameMap = new HashMap<>();
+        nameMap.put("nickname",name);
+        nameMap.put("uin", SharePreferenceUtil.get(UserInfo.this, YPlayConstant.YPLAY_UIN,0));
+        nameMap.put("token",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_TOKEN,"yplay"));
+        nameMap.put("ver",SharePreferenceUtil.get(UserInfo.this,YPlayConstant.YPLAY_VER,0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .settingName(nameMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, nameMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    }
+            }
 
-                    @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
-                        System.out.println("设置名字---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0) {
-                            startActivity(new Intent(UserInfo.this, AddFriendGuide.class));
-                        }
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("设置名字异常---" + e.getMessage());
-                    }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 设置名字---" + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+                if (baseRespond.getCode() == 0){
+                    startActivity(new Intent(UserInfo.this, AddFriendGuide.class));
+                }
+            }
 
-                    }
-                });
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
     }
 
     //显示底部对话框
@@ -365,7 +372,7 @@ public class UserInfo extends BaseActivity {
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                ToastUtils.showShort(this, "您已经拒绝过一次");
+                ToastUtils.showShort(this, getString(R.string.uif_refuse_one));
             }
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSIONS_REQUEST_CODE);
         } else {//有权限直接调用系统相机拍照
@@ -378,7 +385,7 @@ public class UserInfo extends BaseActivity {
                 PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
                 Log.i(TAG, "autoObtainCameraPermission: CODE_CAMERA_REQUEST---" + CODE_CAMERA_REQUEST);
             } else {
-                ToastUtils.showShort(this, "设备没有SD卡！");
+                ToastUtils.showShort(this, getString(R.string.uif_device_no_sd));
             }
         }
     }
@@ -394,11 +401,11 @@ public class UserInfo extends BaseActivity {
                         imageUri = FileProvider.getUriForFile(UserInfo.this, "com.donkingliang.imageselector", fileUri);//通过FileProvider创建一个content类型的Uri
                     PhotoUtils.takePicture(this, imageUri, CODE_CAMERA_REQUEST);
                 } else {
-                    ToastUtils.showShort(this, "设备没有SD卡！");
+                    ToastUtils.showShort(this, getString(R.string.uif_device_no_sd));
                 }
             } else {
 
-                ToastUtils.showShort(this, "请允许打开相机！！");
+                ToastUtils.showShort(this, getString(R.string.uif_please_open_camera));
             }
         }
     }

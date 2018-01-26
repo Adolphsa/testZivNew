@@ -7,27 +7,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.tencent.imsdk.TIMCallBack;
 import com.xiaomi.mipush.sdk.MiPushClient;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class LoadingActivity extends BaseActivity implements TIMCallBack {
 
@@ -52,7 +49,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
                     if (NetWorkUtil.isNetWorkAvailable(LoadingActivity.this)) {
                         getMyInfo(uin, token, ver);
                     } else {
-                        Toast.makeText(LoadingActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoadingActivity.this, R.string.base_no_internet, Toast.LENGTH_SHORT).show();
                     }
 
                     break;
@@ -77,7 +74,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
         ver = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_VER, (int) 0);
 
-        System.out.println("token---" + token);
+        Log.i(TAG, "init: token---" + token);
 
         if (uin == 0 || TextUtils.isEmpty(token) || ver == 0) {
             handler.sendEmptyMessageDelayed(LOGIN_CODE, 500);
@@ -90,67 +87,78 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
     //获取自己的资料
     private void getMyInfo(int uin, String token, int ver) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_MY_INFO_URL;
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", uin);
         myInfoMap.put("token", token);
         myInfoMap.put("ver", ver);
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(myInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
-                    }
+        WnsAsyncHttp.wnsRequest(url, myInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(@NonNull UserInfoResponde userInfoResponde) {
-                        System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            UserInfoResponde.PayloadBean.InfoBean infoBean = userInfoResponde.getPayload().getInfo();
-                            SharePreferenceUtil.put(LoadingActivity.this,
-                                    YPlayConstant.YPLAY_USER_NAME, userInfoResponde.getPayload().getInfo().getUserName());
-                            SharePreferenceUtil.put(LoadingActivity.this,
-                                    YPlayConstant.YPLAY_NICK_NAME, userInfoResponde.getPayload().getInfo().getNickName());
+            }
 
-                            if (infoBean.getAge() == 0 ||
-                                    infoBean.getGrade() == 0 ||
-                                    infoBean.getSchoolId() == 0 ||
-                                    infoBean.getGender() == 0 ||
-                                    TextUtils.isEmpty(infoBean.getNickName())) {
-                                startActivity(new Intent(LoadingActivity.this, Login.class));
+            @Override
+            public void onStartLoad(int value) {
 
-                            } else {
-                                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
-                            }
+            }
 
-                        } else if (userInfoResponde.getCode() == 11002) {
-                            startActivity(new Intent(LoadingActivity.this, Login.class));
-                        }
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 我的资料---" + result);
+                handleMyInfoRespond(result);
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取自己的资料异常---" + e.getMessage());
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onError() {
+
+            }
+        });
+
+    }
+
+    //处理我的资料返回
+    private void handleMyInfoRespond(String result) {
+
+        UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+        if (userInfoResponde.getCode() == 0) {
+            UserInfoResponde.PayloadBean.InfoBean infoBean = userInfoResponde.getPayload().getInfo();
+            SharePreferenceUtil.put(LoadingActivity.this,
+                    YPlayConstant.YPLAY_USER_NAME, userInfoResponde.getPayload().getInfo().getUserName());
+            SharePreferenceUtil.put(LoadingActivity.this,
+                    YPlayConstant.YPLAY_NICK_NAME, userInfoResponde.getPayload().getInfo().getNickName());
+
+            if (infoBean.getAge() == 0 ||
+                    infoBean.getGrade() == 0 ||
+                    infoBean.getSchoolId() == 0 ||
+                    infoBean.getGender() == 0 ||
+                    TextUtils.isEmpty(infoBean.getNickName())) {
+                startActivity(new Intent(LoadingActivity.this, Login.class));
+
+            } else {
+                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
+            }
+
+        } else if (userInfoResponde.getCode() == 11002) {
+            startActivity(new Intent(LoadingActivity.this, Login.class));
+        }
     }
 
 
     @Override
     public void onError(int i, String s) {
-        System.out.println("im回调错误---" + s);
+        Log.i(TAG, "onError: im回调错误 " + s);
     }
 
     @Override
     public void onSuccess() {
-        System.out.println("im回调成功---");
+        Log.i(TAG, "onError: im回调成功");
     }
 
     /**

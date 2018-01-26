@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.tencent.wns.client.inte.WnsService;
 import com.yeejay.yplay.YplayApplication;
+import com.yeejay.yplay.utils.LogUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -92,12 +93,17 @@ public class WnsAsyncHttp {
                 return content;
             }else{
                 // todo 加日志  url rspcode
+                LogUtils.getInstance().error("request url %s, http rsp code %d", url, rspcode);
+
             }
 
         }catch (SocketTimeoutException timeoutException){
             result = WnsAsyncTask.TIME_OUT;
+            LogUtils.getInstance().error("time out url---" + url);
         } catch (Exception e) {
             Log.i(TAG, "sendHttpUrlConnReq: 异常e---" + e.getMessage());
+            LogUtils.getInstance().error("Exception---" + e.getMessage());
+
         }finally {
             if (in != null){
                 try {
@@ -115,9 +121,6 @@ public class WnsAsyncHttp {
             }
 
         }
-
-        Log.i(TAG, "sendHttpUrlConnReq: end ");
-
         return result;
     }
 

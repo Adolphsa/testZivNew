@@ -3,6 +3,10 @@
 
     <string name="login_only_can_input">qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM1234567890</string>
 
+    <!--base-->
+    <string name="base_no_internet">网络不可用</string>
+    <string name="base_aotu_error">验证码错误</string>
+
     <!--LoadingActivity-->
     <string name="need_permission">您需要开启权限,并重启应用</string>
 
@@ -114,4 +118,17 @@
     <string name="hot">热度</string>
     <string name="zero">0</string>
     <string name="contribute_success">提交成功</string>
+    <string name="set_age_error">设置年龄失败</string>
+    <string name="open_contact_key">开启通讯录权限</string>
+    <string name="open_contact_message">方便您找到正在使用本产品的好友</string>
+    <string name="laz_open_local">请开启位置服务</string>
+    <string name="laz_open_local_auto">开启位置权限</string>
+    <string name="laz_recently_school">通过您的位置定位离您最近的学校</string>
+    <string name="aic_incete_code_is_null">邀请码为空</string>
+    <string name="uif_set_name">请设置姓名</string>
+    <string name="uif_legal_name_length">请输入合理的姓名长度</string>
+    <string name="uif_refuse_one">您已经拒绝过一次</string>
+    <string name="uif_device_no_sd">设备没有SD卡！</string>
+    <string name="uif_please_open_camera">请允许打开相机！！</string>
+
 </resources>

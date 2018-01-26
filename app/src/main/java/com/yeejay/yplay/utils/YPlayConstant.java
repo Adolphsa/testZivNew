@@ -19,6 +19,8 @@ public class YPlayConstant {
     public static final String YPLAY_LATITUDE = "yplay_latitude";
     public static final String YPLAY_LONGITUDE = "yplay_longitude";
 
+    public static final String YPLAY_LOGIN_MODE = "yplay_login_mode";
+
     public static final String YPLAY_SCHOOL_TYPE = "yplay_school_type";
     public static final String YPLAY_SCHOOL_GRADE = "yplay_school_grade";
     public static final String YPLAY_HEADER_IMG = "yplay_header_img";
@@ -44,6 +46,41 @@ public class YPlayConstant {
     public static String MI_PUSH_APP_KEY = "5841763037988";
 
     public static String IMEI = "";
+
+    //yplay api
+    public static final String YPLAY_API_BASE = "http://yplay.vivacampus.com";
+
+    //获取我的资料
+    public static final String API_MY_INFO_URL = "/api/user/getmyprofile";
+
+    //发送验证码
+    public static final String API_SEND_SMS_URL = "/api/account/sendsms";
+
+    //登录
+    public static final String API_LOGIN_URL = "/api/account/login2";
+
+    //设置资料相关
+    public static final String API_SET_AGE_URL = "/api/user/updateuserprofile";
+
+    //查询剩余修改次数
+    public static final String API_QUERY_LEFT_COUNT_URL = "/api/user/getmyprofilemodquota";
+
+    //搜索学校
+    public static final String API_SEARCH_SCHOOL_URL = "/api/account/searchschools";
+
+    //获取学校列表
+    public static final String API_GET_SCHOOL_URL = "/api/account/getnearestschools";
+
+    //选择学校
+    public static final String API_CHOICE_SCHOOL_URL = "/api/user/updateschoolinfo";
+
+    //同校好友
+    public static final String API_GET_SCHOOL_FRIEND_URL = "/api/sns/getrecommends";
+
+    //添加好友
+    public static final String API_ADD_FRIEND_URL = "/api/sns/addfriend";
+
+
 
     public static final String BASE_URL = "http://yplay.vivacampus.com";
 
