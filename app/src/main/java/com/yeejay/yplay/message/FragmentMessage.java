@@ -22,7 +22,6 @@ import com.yeejay.yplay.adapter.MessageAdapter;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MyLinearLayoutManager;
-import com.yeejay.yplay.customview.UpRefreshView;
 import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
@@ -307,7 +306,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         boolean find = false;
 
         for (; idx < mDataList.size(); ++idx) {
-            if (mDataList.get(idx).getSessionId() == sessionId) {
+            if (mDataList.get(idx).getSessionId().equals(sessionId)) {
                 find = true;
                 break;
             }

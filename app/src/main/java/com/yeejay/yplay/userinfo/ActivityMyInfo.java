@@ -184,7 +184,9 @@ public class ActivityMyInfo extends BaseActivity {
             String url = infoBean.getHeadImgUrl();
             if (!TextUtils.isEmpty(url)) {
                 Picasso.with(ActivityMyInfo.this).load(url)
-                        .resizeDimen(R.dimen.lui_header_img_width, R.dimen.lui_header_img_height).into(amiItemHeaderImg);
+                        .resizeDimen(R.dimen.lui_header_img_width, R.dimen.lui_header_img_height)
+                        .centerCrop()
+                        .into(amiItemHeaderImg);
             }
 
             personalSchool.setText(infoBean.getSchoolName());

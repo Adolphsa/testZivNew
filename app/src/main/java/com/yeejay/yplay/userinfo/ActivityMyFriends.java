@@ -135,7 +135,10 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
                     .list();
         mDataList.addAll(tempList);
 
-        mMyFriendsAdapter.notifyDataSetChanged();
+        if (mMyFriendsAdapter != null){
+            mMyFriendsAdapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override

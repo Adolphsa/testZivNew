@@ -80,6 +80,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
             }
 
         } else if (status == 2) {
+            Log.i(TAG, "onBindViewHolder: content---" + imSession.getMsgContent());
             initItem4(holder, imSession.getMsgContent(), imSession);
         }
     }
@@ -222,6 +223,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.messageH
 
     //status = 2
     private void initItem4(messageHolder holder, String msgContent, ImSession imSession) {
+
+        Log.i(TAG, "initItem4: msgContent---" + msgContent);
 
         int msgType = imSession.getMsgType();
         if (msgType == TIMElemType.Custom.ordinal()){
