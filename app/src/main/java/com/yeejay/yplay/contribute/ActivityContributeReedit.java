@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -60,7 +61,7 @@ public class ActivityContributeReedit extends BaseActivity {
     @BindView(R.id.con_apply_ll)
     LinearLayout conApplyLl;
     @BindView(R.id.rl_edittext)
-    RelativeLayout rlEditText;
+    FrameLayout rlEditText;
 
     private static final String TAG = "ContributeReedit";
     private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
