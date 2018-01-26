@@ -2,6 +2,7 @@ package com.yeejay.yplay.friend;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -375,6 +376,9 @@ public class ActivityFriendsInfo extends BaseActivity {
         dbHelper.deleteFriendInfo(friendInfo);
         //删除好友动态
 
+        Intent i = new Intent();
+        i.putExtra("is_remove_friend","yes");
+        setResult(FragmentFriend.FEED_REQUEST_CODE,i);
         finish();
     }
 

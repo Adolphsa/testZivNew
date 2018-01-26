@@ -3,7 +3,9 @@ package com.yeejay.yplay.friend;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -73,6 +75,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     LinearLayout fransFrfLayout;
 
     private static final String TAG = "FragmentFriend";
+    public static final int FEED_REQUEST_CODE = 0x111;
 
     FriendFeedsAdapter feedsAdapter;
     DaoFriendFeedsDao mDaoFriendFeedsDao;
@@ -88,6 +91,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     private LoadMoreView loadMoreView;
 //    private UpRefreshView upRefreshView;
     private RelativeLayout rlRefreshLayout;
+    private String isRemoveFriend;
 
     @Override
     public void onDestroyView() {
@@ -148,7 +152,8 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 long ts = System.currentTimeMillis();
                 LogUtils.getInstance().debug("顶部刷新, ts = {}", ts);
 
-                mDataList.clear();
+//                mDataList.clear();
+                resetData();
                 //拉取新数据
                 getFriendFeeds(ts, 20, false);
 
@@ -175,6 +180,8 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
         super.onVisibilityChangedToUser(isVisibleToUser, isHappenedInSetUserVisibleHintMethod);
+
+        Log.i(TAG, "onVisibilityChangedToUser: ");
         if (isVisibleToUser) {
 
             //判断当前的view是否已经滑动到顶部，如果是则需要自动更新 pos=0表示在顶部
@@ -189,6 +196,9 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             //refreshOffset = 1 表示拉取过一次进入动态页面
             if (refreshOffset <= 1) {
 
+                if (!TextUtils.isEmpty(isRemoveFriend) && isRemoveFriend.equals("yes"))
+                    return;
+
                 //pos = 0 表示拉取过并且处于顶端
                 //refreshOffset = 0 表示从来没有数据，这时需要去刷新看看有没有新数据
                 if (pos == 0 || refreshOffset == 0) {
@@ -202,6 +212,16 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
             setFriendCount();
         }
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG, "onActivityResult: ");
+        if (requestCode == FEED_REQUEST_CODE && data != null){
+            isRemoveFriend = data.getStringExtra("is_remove_friend");
+            Log.i(TAG, "onActivityResult: isRemoveFriend---" + isRemoveFriend);
+        }
     }
 
     private void jumpToUserInfo() {
@@ -589,13 +609,13 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
     //通过短信邀请好友（其实是删除好友）
     private void invitefriendsbysms(String friends) {
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("friends", friends);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        Map<String, Object> inviteFreindMap = new HashMap<>();
+        inviteFreindMap.put("friends", friends);
+        inviteFreindMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        inviteFreindMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        inviteFreindMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_REMOVEFRIEND_URL, removeFreindMap,
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_INVITEFRIENDSBYSMS_URL, inviteFreindMap,
                 new WnsRequestListener() {
 
                     @Override
@@ -726,7 +746,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                         .build().unique();
                 daoFriendFeeds.setIsReaded(true);
                 mDaoFriendFeedsDao.update(daoFriendFeeds);
-                startActivity(intent);
+                startActivityForResult(intent,FEED_REQUEST_CODE);
             }
         }
     }
