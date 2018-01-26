@@ -33,6 +33,7 @@ import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.model.SubmitQueryDetailRespond;
 import com.yeejay.yplay.model.SubmitQueryListRespond;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -215,8 +216,10 @@ public class FragmentConOnline extends BaseFragment implements
                     holder.itemHeadImg.setImageResource(R.drawable.header_deafult);
                 }
 
+                String genderStr = (statsBean.getGender() == 1 ? "男生" : "女生");
                 holder.itemTitle.setText(statsBean.getNickName());
-                holder.itemMsg.setText(statsBean.getSchoolName());
+                holder.itemMsg.setText(FriendFeedsUtil.schoolType(statsBean.getSchoolType(), statsBean.getGrade())
+                        + genderStr);
                 holder.itemDiamondNum.setText(String.valueOf(statsBean.getVotedCnt()));
 
                 return convertView;

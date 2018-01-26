@@ -175,11 +175,16 @@ public class SchoolList extends BaseActivity {
         }
 
         mTips = (TextView) findViewById(R.id.tips);
-        if(isLoginMode()) {
-            mTips.setText(R.string.look_for_classmates);
-        }
+
         searchEdit = (EditText) findViewById(R.id.sl_search_edit);
         queryUserUpdateLeftCount(3);
+
+        if(isLoginMode()) {
+            mTips.setText(R.string.look_for_classmates);
+        } else {
+            mTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
+                    Integer.toString(mLeftCnt)));
+        }
 
         mDataList = new ArrayList<>();
 
@@ -532,7 +537,7 @@ public class SchoolList extends BaseActivity {
                 UserUpdateLeftCountRespond userUpdateLeftCountRespond = GsonUtil.GsonToBean(result,UserUpdateLeftCountRespond.class);
                 if (userUpdateLeftCountRespond.getCode() == 0) {
                     mLeftCnt = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
-                    mHandler.sendEmptyMessage(mLeftCnt);
+                    mHandler.sendEmptyMessage(MSG_CODE_LEFT_COUNT);
                 }
             }
 

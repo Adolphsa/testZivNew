@@ -131,4 +131,5 @@
     <string name="uif_device_no_sd">设备没有SD卡！</string>
     <string name="uif_please_open_camera">请允许打开相机！！</string>
     <string name="same_school_grade_no_submit">暂无同校同年级同学投票</string>
+    <string name="login_tips">看看我有多受欢迎</string>
 </resources>

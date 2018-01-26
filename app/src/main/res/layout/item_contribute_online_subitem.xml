@@ -47,8 +47,8 @@
 
     <ImageView
         android:id="@+id/diamond"
-        android:layout_width="@dimen/friend_add_icon_width"
-        android:layout_height="@dimen/friend_add_icon_height"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:background="@drawable/personal_friends_dimand"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/diamon_num"

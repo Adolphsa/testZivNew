@@ -521,14 +521,14 @@ public class ActivitySetting extends BaseActivity {
                         if (baseRespond.getCode() == 0) {
                             if (tag == 0) {
                                 System.out.println("修改图像成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this, "头像修改成功", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(ActivitySetting.this, "头像修改成功", Toast.LENGTH_SHORT).show();
                             } else if (tag == 1) {
                                 System.out.println("修改姓名成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this, "修改姓名成功", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(ActivitySetting.this, "修改姓名成功", Toast.LENGTH_SHORT).show();
                                 settingNmae.setText(nickName);
                             } else if (tag == 2) {
                                 System.out.println("修改用户名成功---" + baseRespond.toString());
-                                Toast.makeText(ActivitySetting.this, "修改用户名成功", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(ActivitySetting.this, "修改用户名成功", Toast.LENGTH_SHORT).show();
                                 settingUserNmae.setText(userName);
                             }
 

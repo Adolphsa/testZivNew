@@ -30,7 +30,7 @@
         />
     <TextView
         android:id="@+id/diamond_tv_num"
-        android:layout_width="22dp"
+        android:layout_width="wrap_content"
         android:layout_height="22dp"
         android:textSize="14sp"
         android:textColor="@color/text_color_gray2"
@@ -45,6 +45,7 @@
         android:id="@+id/toplist"
         android:layout_width="54dp"
         android:layout_height="28dp"
+        android:layout_marginStart="5dp"
         android:src="@drawable/top"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/diamond_tv_num"
