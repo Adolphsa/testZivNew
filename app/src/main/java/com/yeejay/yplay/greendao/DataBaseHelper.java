@@ -37,7 +37,6 @@ public class DataBaseHelper extends DaoMaster.OpenHelper{
         if (oldVersion < newVersion) {
             Log.i("version", oldVersion + "---先前和更新之后的版本---" + newVersion);
             MigrationHelper.getInstance().migrate(db,
-                    ContactInviteDao.class,
                     ContactsInfoDao.class,
                     DaoFriendFeedsDao.class,
                     FriendInfoDao.class,

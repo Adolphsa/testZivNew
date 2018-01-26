@@ -399,8 +399,10 @@ public class ActivitySetting extends BaseActivity {
             String imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
             Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
             Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
-            settingImgHeader.setImageBitmap(bm1);
-            uploadImage(imagePath, imageName,bm1);
+            if (bm1 != null){
+                settingImgHeader.setImageBitmap(bm1);
+                uploadImage(imagePath, imageName,bm1);
+            }
 
         } else if (requestCode == REQUEST_CODE_CHOICE_GENDER) {
             if (data != null) {

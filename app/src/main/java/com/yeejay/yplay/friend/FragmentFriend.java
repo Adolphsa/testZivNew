@@ -148,6 +148,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
                 long ts = System.currentTimeMillis();
                 LogUtils.getInstance().debug("顶部刷新, ts = {}", ts);
 
+                mDataList.clear();
                 //拉取新数据
                 getFriendFeeds(ts, 20, false);
 

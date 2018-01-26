@@ -2,10 +2,9 @@ package com.yeejay.yplay.friend;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,7 +34,6 @@ import com.yeejay.yplay.utils.YPlayConstant;
 import org.greenrobot.greendao.query.DeleteQuery;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -51,6 +49,8 @@ import tangxiaolv.com.library.EffectiveShapeView;
 import static com.yeejay.yplay.utils.FriendFeedsUtil.schoolType;
 
 public class ActivityFriendsInfo extends BaseActivity {
+
+    private static final String TAG = "ActivityFriendsInfo";
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -368,9 +368,12 @@ public class ActivityFriendsInfo extends BaseActivity {
                 .buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
 
+        Log.i(TAG, "deleteFriendInfo: friend uin---" + friendUin);
+
         //删除好友列表中的好友
         FriendInfo friendInfo =  dbHelper.queryFriendInfo(friendUin);
         dbHelper.deleteFriendInfo(friendInfo);
+        //删除好友动态
 
         finish();
     }

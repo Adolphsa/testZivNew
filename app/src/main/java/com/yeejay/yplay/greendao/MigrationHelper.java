@@ -19,6 +19,8 @@ import java.util.List;
 
 public class MigrationHelper {
 
+    private static final String TAG = "MigrationHelper";
+
     private static final String CONVERSION_CLASS_NOT_FOUND_EXCEPTION = "MIGRATION HELPER - CLASS DOESN'T MATCH WITH THE CURRENT PARAMETERS";
     private static MigrationHelper instance;
 
@@ -75,6 +77,8 @@ public class MigrationHelper {
                 }
             }
             createTableStringBuilder.append(");");
+
+            Log.i(TAG, "generateTempTables: " + createTableStringBuilder.toString());
 
             db.execSQL(createTableStringBuilder.toString());
 

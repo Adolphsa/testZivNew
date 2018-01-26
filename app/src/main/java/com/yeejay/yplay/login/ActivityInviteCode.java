@@ -115,10 +115,10 @@ public class ActivityInviteCode extends BaseActivity {
         });
     }
 
-    //获取验证码
+    //检查邀请码
     private void checkInviteCode(String phone,String inviteCode) {
 
-        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SEND_SMS_URL;
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_CHECK_INVIDE_CODE_URL;
         Map<String, Object> inviteCodeMap = new HashMap<>();
         inviteCodeMap.put("phone", phone);
         inviteCodeMap.put("inviteCode", inviteCode);

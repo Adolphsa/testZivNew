@@ -148,8 +148,11 @@ public class UserInfo extends BaseActivity {
 
             }
             Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
-            userHeadImage.setImageBitmap(bm1);
-            uploadImage(imagePath, imageName,bm1);
+            if (bm1 != null){
+                userHeadImage.setImageBitmap(bm1);
+                uploadImage(imagePath, imageName,bm1);
+            }
+
         }
     }
 

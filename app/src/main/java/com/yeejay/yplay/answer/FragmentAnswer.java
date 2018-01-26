@@ -7,24 +7,18 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.contribute.ActivityContribute1;
 import com.yeejay.yplay.customview.ProgressButton;
@@ -52,11 +46,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.OnClick;
 import cn.iwgang.countdownview.CountdownView;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import pl.droidsonroids.gif.GifImageView;
 
 import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
@@ -147,12 +136,6 @@ public class FragmentAnswer extends BaseFragment {
 
     QuestionRespond.PayloadBean.QuestionBean questionBean;
     List<VoteOptionsBean> voteOptionsBeanList;
-
-    @OnClick(R.id.frgans_tv_relieve)
-    public void relieve(View view) {
-        LogUtils.getInstance().debug("解除冷冻");
-//        relieve();
-    }
 
     //投稿
     @OnClick(R.id.frg_edit)
@@ -707,12 +690,14 @@ public class FragmentAnswer extends BaseFragment {
 
     //某个问题的候选人
     private void getQuestionsCandidate(int qid, int index) {
-        Map<String, Object> questionsListMap = new HashMap<>();
-        questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        questionsListMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        Map<String, Object> questionsCandidateMap  = new HashMap<>();
+        questionsCandidateMap .put("qid", qid);
+        questionsCandidateMap .put("index", index);
+        questionsCandidateMap .put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        questionsCandidateMap .put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionsCandidateMap .put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETOPTIONS, questionsListMap,
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETOPTIONS, questionsCandidateMap ,
                 new WnsRequestListener() {
 
                     @Override
@@ -728,6 +713,7 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onComplete(String result) {
                         handleGetQuestionsCandidateResponse(result);
+                        frandProgress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override

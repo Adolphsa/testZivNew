@@ -80,7 +80,8 @@ public class YPlayConstant {
     //添加好友
     public static final String API_ADD_FRIEND_URL = "/api/sns/addfriend";
 
-
+    //检查邀请码
+    public static final String API_CHECK_INVIDE_CODE_URL = "/api/account/checkinvitecode";
 
     public static final String BASE_URL = "http://yplay.vivacampus.com";
 

@@ -49,8 +49,6 @@ public class WnsAsyncHttp {
 
         try {
 
-            Log.i(TAG, "before sleep");
-
             //1.构造URL，底层网络走wns通道,使用起来和URL是一样的。
             URL u = wnsService.getWnsHttpUrl(url);                   //需要在控制台上配置url对应域名的路由
             HttpURLConnection conn = (HttpURLConnection) u.openConnection();

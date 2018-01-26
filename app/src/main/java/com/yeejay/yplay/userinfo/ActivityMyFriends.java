@@ -175,6 +175,6 @@ public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.
         SharedPreferences.Editor editorsettings = sharedPrefFriends.edit();
         editorsettings.putInt("pos", amfListView.getFirstVisiblePosition());
         editorsettings.putInt("top", top);
-        editorsettings.commit();
+        editorsettings.apply();
     }
 }
