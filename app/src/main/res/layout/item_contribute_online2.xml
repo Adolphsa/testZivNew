@@ -112,13 +112,14 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:textSize="14sp"
             android:textColor="#333333" />
         <ListView
             android:id="@+id/expand_list"
             android:layout_width="match_parent"
             android:layout_height="234dp"
-            android:paddingTop="10dp"
+            android:visibility="gone"
             android:divider="@null">
         </ListView>
     </LinearLayout>

@@ -50,4 +50,12 @@ public class ActivityContributeComplete extends BaseActivity {
             finish();
         }
     }
+
+    @Override
+    public void onBackPressed(){
+        //按导航键返回时，需要实现跟点击返回箭头一样的效果;
+        setResult(3);
+
+        super.onBackPressed();
+    }
 }

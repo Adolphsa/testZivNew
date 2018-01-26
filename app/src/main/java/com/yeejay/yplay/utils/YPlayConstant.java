@@ -120,4 +120,14 @@ public class YPlayConstant {
 
     //用户投稿
     public static final String API_SUBMITQUESTION = "/api/vote/submitquestion";
+
+    //删除选择的未审核通过列表项
+    public static final String API_SUBMIT_DELETE = "/api/submit/delete";
+
+    //查询未上线的投稿列表
+    public static final String API_QUERYLISTNOTONLINE = "/api/submit/querylistnotonline";
+
+    //查询已经上线的题目投票详情
+    public static final String API_QUERYDETAIL = "/api/submit/querydetail";
+
 }

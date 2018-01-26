@@ -131,6 +131,5 @@
     <string name="uif_refuse_one">您已经拒绝过一次</string>
     <string name="uif_device_no_sd">设备没有SD卡！</string>
     <string name="uif_please_open_camera">请允许打开相机！！</string>
-
-
+    <string name="same_school_grade_no_submit">暂无同校同年级同学投票</string>
 </resources>

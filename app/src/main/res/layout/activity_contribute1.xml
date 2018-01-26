@@ -109,42 +109,39 @@
         android:layout_gravity="center_horizontal"
         />
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/rl_edittext"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
         android:layout_marginTop="10dp"
-        android:orientation="vertical"
         android:background="@drawable/shape_con1_edit_background" >
-        <EditText
-            android:id="@+id/con_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:hint="@string/contribute_commit_hint"
-            android:textColorHint="#9A9FA7"
-            android:textSize="16sp"
-            android:maxLength="30"
-            android:cursorVisible="false"
-            android:background="@null"/>
         <TextView
             android:id="@+id/con_text_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:layout_marginEnd="5dp"
-            android:layout_below="@+id/con_edit"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|right"
             android:gravity="bottom|right"
             android:text="@string/contribute_commit_text_count_hint"
             android:textColor="#9A9FA7"
             android:textSize="14sp" />
-    </RelativeLayout>
+        <EditText
+            android:id="@+id/con_edit"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:padding="10dp"
+            android:gravity="top"
+            android:hint="@string/contribute_commit_hint"
+            android:textColorHint="#9A9FA7"
+            android:textSize="16sp"
+            android:maxLength="30"
+            android:lines="2"
+            android:cursorVisible="false"
+            android:background="@null"/>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/con_apply_ll"

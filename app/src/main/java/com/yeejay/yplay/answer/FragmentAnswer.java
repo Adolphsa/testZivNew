@@ -758,8 +758,6 @@ public class FragmentAnswer extends BaseFragment {
             frgansBtn2.setEnabled(true);
             frgansBtn3.setEnabled(true);
             frgansBtn4.setEnabled(true);
-
-            frandProgress.setVisibility(View.INVISIBLE);
         }
     }
 

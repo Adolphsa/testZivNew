@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -64,7 +65,7 @@ public class ActivityContribute1 extends BaseActivity {
     @BindView(R.id.con_apply_ll)
     LinearLayout conApplyLl;
     @BindView(R.id.rl_edittext)
-    RelativeLayout rlEditText;
+    FrameLayout rlEditText;
     @BindView(R.id.contribute_new)
     ImageView contributeNew;
 
@@ -237,6 +238,7 @@ public class ActivityContribute1 extends BaseActivity {
         } else if(requestCode == 3 && resultCode == 3) {
             selectedImg.setVisibility(View.GONE);
             conImg.setVisibility(View.VISIBLE);
+            emojiIndex = -1;
 
             conEdit.setText("");
         }
@@ -245,6 +247,7 @@ public class ActivityContribute1 extends BaseActivity {
         if(resultCode == 4) {
             selectedImg.setVisibility(View.GONE);
             conImg.setVisibility(View.VISIBLE);
+            emojiIndex = -1;
 
             conEdit.setText("");
         }

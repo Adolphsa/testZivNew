@@ -33,9 +33,12 @@ import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.model.SubmitQueryDetailRespond;
 import com.yeejay.yplay.model.SubmitQueryListRespond;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import org.w3c.dom.Text;
 
@@ -71,7 +74,9 @@ public class FragmentConOnline extends BaseFragment implements
 
     private int mPageNum = 1;
     private int mPageSize = 10;
+    //已上线的投稿列表
     private List<SubmitQueryListRespond.PayloadBean.ContributesBean> mReviewedList =  new ArrayList<>();
+    //已上线的投稿列表item中扩展部分展示的详情列表;
     private List<SubmitQueryDetailRespond.PayloadBean.InfosBean> mQueryDetailList =  new ArrayList<>();
     private ContributeOnlineAdapter reviewedAdapter;
     private MyLinearLayoutManager reviewedLtManager;
@@ -86,7 +91,7 @@ public class FragmentConOnline extends BaseFragment implements
 
     @Override
     protected void initAllMembersView(Bundle savedInstanceState) {
-        Log.i(TAG, "initAllMembersView: ");
+        LogUtils.getInstance().debug("initAllMembersView: ");
         mContext = getActivity();
         initControlsAndAdapter();
     }
@@ -221,56 +226,69 @@ public class FragmentConOnline extends BaseFragment implements
 
     //查询已经上线的题目投票详情;
     private void getSubmitQueryDetail(int qid, final LinearLayout ll) {
-        final ListView listView = (ListView) ll.findViewById(R.id.expand_list);
-        final TextView totalView = (TextView) ll.findViewById(R.id.expand_note);
-
         Map<String, Object> contributesMap = new HashMap<>();
         contributesMap.put("qid", qid);
         contributesMap.put("uin", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_UIN, 0));
         contributesMap.put("token", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_TOKEN, "yplay"));
         contributesMap.put("ver", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getSubmitQueryDetail(contributesMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<SubmitQueryDetailRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_QUERYDETAIL, contributesMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(SubmitQueryDetailRespond submitQueryDetailRespond) {
-                        if (submitQueryDetailRespond.getCode() == 0) {
-                            totalView.setText(String.valueOf(submitQueryDetailRespond.getPayload().getTotal()) +
-                                    mContext.getResources().getString(R.string.contribute_answer_num_note_msg1));
+                    public void onStartLoad(int value) {
 
-                            List<SubmitQueryDetailRespond.PayloadBean.InfosBean> contributesBeanList =
-                                    submitQueryDetailRespond.getPayload().getInfos();
-                            if(contributesBeanList != null && contributesBeanList.size() > 0) {
-                                Log.d(TAG, "已经上线的题目投票详情---" + contributesBeanList.toString());
-                                mQueryDetailList.addAll(contributesBeanList);
-                                initQueryDetailList(mQueryDetailList, listView);
-
-                            } else {
-                                //没有拉取到数据
-                            }
-                        } else {
-                            //todo失败的处理
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.d(TAG, "已经上线的题目投票详情---onError，" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetSubmitQueryDetailResponse(result, ll);
+                        LogUtils.getInstance().debug("已经上线的题目投票详情---onComplete, mQueryDetailList.size() = {}",
+                                mQueryDetailList.size());
                     }
 
                     @Override
-                    public void onComplete() {
-                        Log.d(TAG, "已经上线的题目投票详情---onComplete，mQueryDetailList.size() ="
-                                + mQueryDetailList.size());
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("已经上线的题目投票详情查询异常");
                     }
                 });
+    }
+
+    private void handleGetSubmitQueryDetailResponse(String result, final LinearLayout ll) {
+        final ListView listView = (ListView) ll.findViewById(R.id.expand_list);
+        final TextView totalView = (TextView) ll.findViewById(R.id.expand_note);
+
+        SubmitQueryDetailRespond submitQueryDetailRespond = GsonUtil.GsonToBean(result, SubmitQueryDetailRespond.class);
+        if (submitQueryDetailRespond.getCode() == 0) {
+
+            List<SubmitQueryDetailRespond.PayloadBean.InfosBean> contributesBeanList =
+                    submitQueryDetailRespond.getPayload().getInfos();
+            if(contributesBeanList != null && contributesBeanList.size() > 0) {
+                LogUtils.getInstance().debug("已经上线的题目投票详情, {}",
+                        contributesBeanList.toString());
+                totalView.setText(String.valueOf(submitQueryDetailRespond.getPayload().getTotal()) +
+                        mContext.getResources().getString(R.string.contribute_answer_num_note_msg1));
+                listView.setVisibility(View.VISIBLE);
+
+                mQueryDetailList.addAll(contributesBeanList);
+                initQueryDetailList(mQueryDetailList, listView);
+
+            } else {
+                //没有拉取到数据
+                totalView.setText(R.string.same_school_grade_no_submit);
+            }
+        } else {
+            //todo失败的处理
+        }
     }
 
     //查询所有类型的投稿列表
