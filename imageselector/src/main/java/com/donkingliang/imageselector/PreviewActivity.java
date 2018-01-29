@@ -112,6 +112,9 @@ public class PreviewActivity extends AppCompatActivity {
 //        tvIndicator.setText(1 + "/" + mImages.size());
         changeSelect(mImages.get(0));
         vpImage.setCurrentItem(intent.getIntExtra(Constants.POSITION, 0));
+
+        //进入该页面时默认勾选之前点击的图片;
+        clickSelect();
     }
 
     private void initView() {
@@ -121,6 +124,7 @@ public class PreviewActivity extends AppCompatActivity {
         ibConfirm = (ImageButton) findViewById(R.id.ib_confirm);
         btnConfirm = (FrameLayout) findViewById(R.id.btn_confirm);
         tvSelect = (TextView) findViewById(R.id.tv_select);
+
         rlTopBar = (RelativeLayout) findViewById(R.id.rl_top_bar);
         rlBottomBar = (RelativeLayout) findViewById(R.id.rl_bottom_bar);
 

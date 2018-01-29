@@ -67,10 +67,10 @@ public class ImagePagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
         final PhotoView currentView = viewList.remove(0);
-        currentView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         final Image image = mImgList.get(position);
         container.addView(currentView);
-        Log.i(TAG, "instantiateItem: ");
+        Log.i(TAG, "instantiateItem: image.getPath() = " + image.getPath());
 
         Glide.with(mContext).load(new File(image.getPath())).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).into(currentView);
 //        Glide.with(mContext).load(new File(image.getPath()))
