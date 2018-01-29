@@ -81,7 +81,8 @@ public class FriendFeedsAdapter extends RecyclerView.Adapter<FriendFeedsAdapter.
         holder.ffItemHeaderImg.setTag(url);
 
         if (!TextUtils.isEmpty(url)){
-            Picasso.with(mContext).load(url).resize(50,50).into(holder.ffItemHeaderImg);
+            Picasso.with(mContext).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                    R.dimen.item_add_friends_height).into(holder.ffItemHeaderImg);
         }else {
             holder.ffItemHeaderImg.setImageResource(R.drawable.header_deafult);
         }
