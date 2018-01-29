@@ -40,7 +40,6 @@ import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.answer.FragmentAnswer;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.data.db.DbHelper;
 import com.yeejay.yplay.data.db.ImpDbHelper;
@@ -64,6 +63,8 @@ import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.PushUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -340,10 +341,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
 
-
     //获取im签名
     private void getImSignature() {
-
         final Map<String, Object> imMap = new HashMap<>();
         final int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         imMap.put("uin", uin);
@@ -351,42 +350,45 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         imMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
         imMap.put("identifier", uin);
 
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GENEUSERSIG, imMap,
+                new WnsRequestListener() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getImSignature(imMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ImSignatureRespond>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(ImSignatureRespond imSignatureRespond) {
-                        if (imSignatureRespond.getCode() == 0) {
-                            String imSig = imSignatureRespond.getPayload().getSig();
-                            System.out.println("im签名---" + imSig);
-                            if (!TextUtils.isEmpty(imSig)) {
-                                imLogin(String.valueOf(uin), imSig);
-                            }
-
-                        }
+                    public void onStartLoad(int value) {
 
                     }
 
                     @Override
-                    public void onError(Throwable e) {
+                    public void onComplete(String result) {
+                        handleGetImSignature(result, uin);
+                    }
+
+                    @Override
+                    public void onTimeOut() {
 
                     }
 
                     @Override
-                    public void onComplete() {
-
+                    public void onError() {
                     }
                 });
+    }
 
+    private void handleGetImSignature(String result, final int uin) {
+        ImSignatureRespond imSignatureRespond = GsonUtil.GsonToBean(result, ImSignatureRespond.class);
+        if (imSignatureRespond.getCode() == 0) {
+            String imSig = imSignatureRespond.getPayload().getSig();
+            LogUtils.getInstance().debug("im签名, {}", imSig);
+            if (!TextUtils.isEmpty(imSig)) {
+                imLogin(String.valueOf(uin), imSig);
+            }
 
+        }
     }
 
     /**
@@ -458,128 +460,146 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
     //获取请求加好友的人数
     public void getAddFreindCount() {
-
         Map<String, Object> tempMap = new HashMap<>();
         final int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
         tempMap.put("uin", uin);
         tempMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         tempMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getNewNotify(tempMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<PushNotifyRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETNEWNOTIFYSTAT, tempMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(PushNotifyRespond pushNotifyRespond) {
-                        Log.i(TAG, "onNext: pushNotifyRespond---" + pushNotifyRespond.toString());
-                        if (0 == pushNotifyRespond.getCode()) {
-                            int newCount = pushNotifyRespond.getPayload().getNewAddFriendMsgCnt();
-                            MyInfo myInfo = myInfoDao.queryBuilder()
-                                    .where(MyInfoDao.Properties.Uin.eq(uin))
-                                    .build().unique();
-                            if (myInfo != null) {
+                    public void onStartLoad(int value) {
 
-                                int addFriendNum = myInfo.getAddFriendNum();
-                                Log.i(TAG, "onNext: addFriendNum---" + addFriendNum);
-                                if (addFriendNum != newCount)
-                                    addFriendNum = newCount;
-
-                                myInfo.setAddFriendNum(addFriendNum);
-                                myInfoDao.update(myInfo);
-                                setFriendCount();
-                            }
-                        }
                     }
 
                     @Override
-                    public void onError(Throwable e) {}
+                    public void onComplete(String result) {
+                        handleGetAddFriendCount(result, uin);
+                    }
 
                     @Override
-                    public void onComplete() {}
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
                 });
+    }
+
+    private void handleGetAddFriendCount(String result, final int uin) {
+        PushNotifyRespond pushNotifyRespond = GsonUtil.GsonToBean(result, PushNotifyRespond.class);
+        LogUtils.getInstance().debug("onNext: pushNotifyRespond, {}", pushNotifyRespond.toString());
+        if (0 == pushNotifyRespond.getCode()) {
+            int newCount = pushNotifyRespond.getPayload().getNewAddFriendMsgCnt();
+            MyInfo myInfo = myInfoDao.queryBuilder()
+                    .where(MyInfoDao.Properties.Uin.eq(uin))
+                    .build().unique();
+            if (myInfo != null) {
+
+                int addFriendNum = myInfo.getAddFriendNum();
+                LogUtils.getInstance().debug("onNext: addFriendNum = {}", addFriendNum);
+                if (addFriendNum != newCount)
+                    addFriendNum = newCount;
+
+                myInfo.setAddFriendNum(addFriendNum);
+                myInfoDao.update(myInfo);
+                setFriendCount();
+            }
+        }
     }
 
     //插入我的好友列表到数据库
     private void getMyFriendsList() {
-
-        Log.i(TAG, "getMyFriendsList---mPageNum=" + mPageNum);
+        LogUtils.getInstance().debug("getMyFriendsList---mPageNum = {}", mPageNum);
         if (mPageNum == 1) {
             dbHelper.deleteFriendInfoAll();
         }
-        Log.i(TAG, "getMyFriendsList: 493");
-        Map<String, Object> myFriendsMap = new HashMap<>();
+        LogUtils.getInstance().debug("getMyFriendsList: 493");
 
+        Map<String, Object> myFriendsMap = new HashMap<>();
         myFriendsMap.put("pageNum", mPageNum);
         myFriendsMap.put("pageSize", mPageSize);
         myFriendsMap.put("uin", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, 0));
         myFriendsMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myFriendsMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
-        Log.i(TAG, "getMyFriendsList: 501");
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyFriendsList(myFriendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<FriendsListRespond>() {
+        LogUtils.getInstance().debug("getMyFriendsList: 501");
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETMYFRIENDS, myFriendsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull FriendsListRespond friendsListRespond) {
-                        Log.i(TAG, "onNext: friendsListRespond---" + friendsListRespond.toString());
-                        if (friendsListRespond.getCode() != 0) {
-                            return;
-                        }
-                        int total = friendsListRespond.getPayload().getTotal();
-                        List<FriendsListRespond.PayloadBean.FriendsBean> tempList
-                                = friendsListRespond.getPayload().getFriends();
-                        if (tempList == null || tempList.size() == 0) {
-                            return;
-                        }
-
-                        FriendInfo dataBaseFriendInfo;
-//                        insertFriendInfoNum += tempList.size();
-                        for (FriendsListRespond.PayloadBean.FriendsBean friendInfo : tempList) {
-                            dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin());
-                            if (dataBaseFriendInfo == null) {
-//                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
-                                dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));
-                                LogUtils.getInstance().error("insert friendInfo---" + friendInfo.toString());
-                            } else {
-                                Log.i(TAG, "onNext: updateFriendInfo---" + dataBaseFriendInfo);
-
-                                dbHelper.updateFriendInfo(dataBaseFriendInfo, friendInfo);
-                                LogUtils.getInstance().error("update friendInfo---" + friendInfo.toString());
-                            }
-                        }
-                        if ((mPageNum * mPageSize) >= total) {
-                            return;
-                        } else {
-                            mPageNum++;
-                            getMyFriendsList();
-                        }
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.i(TAG, "onError: " + e.getMessage());
+                    public void onStartLoad(int value) {
 
                     }
 
                     @Override
-                    public void onComplete() {
-                        Log.i(TAG, "onComplete: 554");
+                    public void onComplete(String result) {
+                        handleGetMyFriendsList(result);
+                        LogUtils.getInstance().debug("onComplete: 554");
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError()");
                     }
                 });
     }
 
+    private void handleGetMyFriendsList(String result) {
+        FriendsListRespond friendsListRespond = GsonUtil.GsonToBean(result, FriendsListRespond.class);
+        LogUtils.getInstance().debug("onNext: friendsListRespond, {}", friendsListRespond.toString());
+        if (friendsListRespond.getCode() != 0) {
+            return;
+        }
+        int total = friendsListRespond.getPayload().getTotal();
+        List<FriendsListRespond.PayloadBean.FriendsBean> tempList
+                = friendsListRespond.getPayload().getFriends();
+        if (tempList == null || tempList.size() == 0) {
+            return;
+        }
+
+        FriendInfo dataBaseFriendInfo;
+//                        insertFriendInfoNum += tempList.size();
+        for (FriendsListRespond.PayloadBean.FriendsBean friendInfo : tempList) {
+            dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin());
+            if (dataBaseFriendInfo == null) {
+//                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
+                dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));
+                LogUtils.getInstance().error("insert friendInfo, {}", friendInfo.toString());
+            } else {
+                LogUtils.getInstance().error("onNext: updateFriendInfo, {}", dataBaseFriendInfo);
+
+                dbHelper.updateFriendInfo(dataBaseFriendInfo, friendInfo);
+                LogUtils.getInstance().error("onNext: update friendInfo, {}", friendInfo.toString());
+            }
+        }
+        if ((mPageNum * mPageSize) >= total) {
+            return;
+        } else {
+            mPageNum++;
+            getMyFriendsList();
+        }
+    }
 
     @Override
     public void onConnected() {
@@ -973,10 +993,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         }
     }
 
-
     //更新通讯录
     private void updateContacts(List<com.yeejay.yplay.model.ContactsInfo> contactsInfoList) {
-
         Map<String, Object> contactsMap = new HashMap<>();
         String contactString = GsonUtil.GsonString(contactsInfoList);
         String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
@@ -985,93 +1003,104 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         contactsMap.put("token", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         contactsMap.put("ver", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .updateContacts(contactsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UpdateContactsRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_CONTACTS_UPDATE, contactsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull UpdateContactsRespond baseRespond) {
+                    public void onStartLoad(int value) {
 
-                        if (baseRespond.getCode() == 0) {
-                            Log.i(TAG, "onNext: baseRespond---" + baseRespond.toString());
-                            List<UpdateContactsRespond.PayloadBean.InfosBean> infoList = baseRespond.getPayload().getInfos();
-                            updateSuccessHandle(infoList);
-
-                        } else {
-                            Log.i(TAG, "onNext: 更新通讯录失败---" + baseRespond.toString());
-                        }
                     }
 
                     @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        Log.i(TAG, "onError:更新通讯录失败---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleUpdateContacts(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
 
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError:更新通讯录失败");
                     }
                 });
     }
 
+    private void handleUpdateContacts(String result) {
+        UpdateContactsRespond baseRespond = GsonUtil.GsonToBean(result, UpdateContactsRespond.class);
+        if (baseRespond.getCode() == 0) {
+            LogUtils.getInstance().debug("onNext: baseRespond, {}", baseRespond.toString());
+            List<UpdateContactsRespond.PayloadBean.InfosBean> infoList = baseRespond.getPayload().getInfos();
+            updateSuccessHandle(infoList);
+
+        } else {
+            LogUtils.getInstance().debug("onNext: 更新通讯录失败, {}", baseRespond.toString());
+        }
+    }
+
     //不变的记录需要查询更新
     private void queryByPhone(List<String> unchangedList){
-
         Map<String, Object> queryContactsMap = new HashMap<>();
         String queryContactStr = GsonUtil.GsonString(unchangedList);
-        Log.i(TAG, "queryByPhone: queryContactStr---" + queryContactStr);
+        LogUtils.getInstance().debug("queryByPhone: queryContactStr = {}", queryContactStr);
         String encodedString = Base64.encodeToString(queryContactStr.getBytes(), Base64.DEFAULT);
         queryContactsMap.put("data", encodedString);
         queryContactsMap.put("uin", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, 0));
         queryContactsMap.put("token", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         queryContactsMap.put("ver", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .queryUserRegisterState(queryContactsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ContactsRegisterStateRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_QUERYBYPHONE, queryContactsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(ContactsRegisterStateRespond friendsListRespond) {
-                        Log.i(TAG, "onNext: friendsListRespond---" + friendsListRespond.toString());
-                        if (friendsListRespond.getCode() == 0){
-                            Log.i(TAG, "onNext: 查询通讯录是否已注册---" + friendsListRespond.toString());
-                            List<ContactsRegisterStateRespond.PayloadBean.InfosBean> friendsBeanList = friendsListRespond.getPayload().getInfos();
-                            if (friendsBeanList != null && friendsBeanList.size() > 0){
-                                //更新返回的数据在数据库中
-                                updateContactRegister(friendsBeanList);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
+                    public void onStartLoad(int value) {
 
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onComplete(String result) {
+                        handleQueryByPhone(result);
+                    }
 
+                    @Override
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError:更新通讯录失败");
                     }
                 });
     }
 
-
+    private void handleQueryByPhone(String result) {
+        ContactsRegisterStateRespond friendsListRespond = GsonUtil.GsonToBean(result, ContactsRegisterStateRespond.class);
+        LogUtils.getInstance().debug("onNext: friendsListRespond, {}", friendsListRespond.toString());
+        if (friendsListRespond.getCode() == 0){
+            LogUtils.getInstance().debug("onNext: 查询通讯录是否已注册, {}", friendsListRespond.toString());
+            List<ContactsRegisterStateRespond.PayloadBean.InfosBean> friendsBeanList = friendsListRespond.getPayload().getInfos();
+            if (friendsBeanList != null && friendsBeanList.size() > 0){
+                //更新返回的数据在数据库中
+                updateContactRegister(friendsBeanList);
+            }
+        }
+    }
 
     //删除通讯录记录
     private void deleteContacts(List<com.yeejay.yplay.model.ContactsInfo> contactsInfoList) {
-
         Map<String, Object> contactsMap = new HashMap<>();
         String contactString = GsonUtil.GsonString(contactsInfoList);
         String encodedString = Base64.encodeToString(contactString.getBytes(), Base64.DEFAULT);
@@ -1080,38 +1109,44 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         contactsMap.put("token", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         contactsMap.put("ver", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeContacts(contactsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UpdateContactsRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_CONTACTS_REMOVE, contactsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull UpdateContactsRespond baseRespond) {
+                    public void onStartLoad(int value) {
 
-                        if (baseRespond.getCode() == 0) {
-                            int cnt = baseRespond.getPayload().getCnt();
-                            Log.i(TAG, "onNext: 删除记录的条数---" + cnt);
-
-                        } else {
-                            Log.i(TAG, "onNext: 删除通讯录失败---" + baseRespond.toString());
-                        }
                     }
 
                     @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        Log.i(TAG, "onError:删除通讯录失败---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleDeleteContacts(result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
 
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError:删除通讯录失败");
                     }
                 });
+    }
+
+    private void handleDeleteContacts(String result) {
+        UpdateContactsRespond baseRespond = GsonUtil.GsonToBean(result, UpdateContactsRespond.class);
+        if (baseRespond.getCode() == 0) {
+            int cnt = baseRespond.getPayload().getCnt();
+            LogUtils.getInstance().debug("onNext: 删除记录的条数 = {}", cnt);
+        } else {
+            LogUtils.getInstance().debug("onNext: 删除通讯录失败, ", baseRespond.toString());
+        }
     }
 
     //上传通讯录成功后更新数据库数据

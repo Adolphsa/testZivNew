@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -22,16 +21,18 @@ import android.widget.Toast;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.customview.ProgressButton;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.MsgContent1;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,10 +44,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityNnonymityReply extends AppCompatActivity {
 
@@ -89,7 +86,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
 
     @OnClick(R.id.non_send)
     public void replayVote() {
-        System.out.println("投票回复");
+        LogUtils.getInstance().debug("投票回复");
 
         if (NetWorkUtil.isNetWorkAvailable(ActivityNnonymityReply.this)) {
             nonSend.setEnabled(false);
@@ -121,9 +118,8 @@ public class ActivityNnonymityReply extends AppCompatActivity {
             int status = bundle.getInt("yplay_session_status");
             String sender = bundle.getString("yplay_sender");
             String msgContent = bundle.getString("yplay_msg_content");
-            System.out.println("匿名---sessionId---" + sessionId
-                    + "status---" + status
-                    + "sender---" + sender);
+            LogUtils.getInstance().debug("匿名---sessionId = {}, status = {}, sender = {}",
+                    sessionId, status, sender);
 
             if (status == 0) {
                 initView1(msgContent);
@@ -153,7 +149,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.i(TAG, "onTextChanged: " + s);
+                LogUtils.getInstance().debug("onTextChanged, s = {}", s);
                 if (s.length() > 0) {
                     nonSend.setEnabled(true);
                     nonSend.setImageResource(R.drawable.feather_yes);
@@ -288,7 +284,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
                             String nickName1, String nickName2, String nickName3, String nickName4) {
 
         int total = bsc1 + bsc2 + bsc3 + bsc4 + 1;
-        System.out.println("non---total---" + total);
+        LogUtils.getInstance().debug("non---total = {}", total);
 
         nonButton1.setText(nickName1);
         nonButton2.setText(nickName2);
@@ -297,68 +293,18 @@ public class ActivityNnonymityReply extends AppCompatActivity {
 
         if (selectIndex == 1) {
             nonButton1.setBackground(getDrawable(R.drawable.nonymity_reply_select));
-//            nonButton1.setButtonColor(R.color.message_button__selcet70);
-//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
-//
-//            nonButton1.updateProgress((bsc1 + 1) * 100 / total);
-//            nonButton2.updateProgress(bsc2 * 100 / total);
-//            nonButton3.updateProgress(bsc3 * 100 / total);
-//            nonButton4.updateProgress(bsc4 * 100 / total);
-
-//            System.out.println("被选中的是1");
-
         } else if (selectIndex == 2) {
             nonButton2.setBackground(getDrawable(R.drawable.nonymity_reply_select));
-
-//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton2.setButtonColor(R.color.message_button__selcet70);
-//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
-//
-//            nonButton1.updateProgress(bsc1 * 100 / total);
-//            nonButton2.updateProgress((bsc2 + 1) * 100 / total);
-//            nonButton3.updateProgress(bsc3 * 100 / total);
-//            nonButton4.updateProgress(bsc4 * 100 / total);
-
-//            System.out.println("被选中的是2");
-
         } else if (selectIndex == 3) {
             nonButton3.setBackground(getDrawable(R.drawable.nonymity_reply_select));
-//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton3.setButtonColor(R.color.message_button__selcet70);
-//            nonButton4.setButtonColor(R.color.message_button_no_selcet20);
-//
-//            nonButton1.updateProgress(bsc1 * 100 / total);
-//            nonButton2.updateProgress(bsc2 * 100 / total);
-//            nonButton3.updateProgress((bsc3 + 1) * 100 / total);
-//            nonButton4.updateProgress(bsc4 * 100 / total);
-
-//            System.out.println("被选中的是3");
         } else if (selectIndex == 4) {
             nonButton4.setBackground(getDrawable(R.drawable.nonymity_reply_select));
-
-//            nonButton1.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton2.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton3.setButtonColor(R.color.message_button_no_selcet20);
-//            nonButton4.setButtonColor(R.color.message_button__selcet70);
-//
-//            nonButton1.updateProgress(bsc1 * 100 / total);
-//            nonButton2.updateProgress(bsc2 * 100 / total);
-//            nonButton3.updateProgress(bsc3 * 100 / total);
-//            nonButton4.updateProgress((bsc4 + 1) * 100 / total);
-//
-//            System.out.println("被选中的是41");
         }
 
     }
 
-
     //回复消息
     private void replayImVote(String sessionId, String content) {
-
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("uin", SharePreferenceUtil.get(ActivityNnonymityReply.this, YPlayConstant.YPLAY_UIN, 0));
         tempMap.put("token", SharePreferenceUtil.get(ActivityNnonymityReply.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
@@ -366,38 +312,44 @@ public class ActivityNnonymityReply extends AppCompatActivity {
         tempMap.put("sessionId", sessionId);
         tempMap.put("content", content);
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .replayImVote(tempMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_SENDVOTEREPLYMSG, tempMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(BaseRespond baseRespond) {
-                        System.out.println("投票回复---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0) {
-                            hideKeyword();
-                            nonInputLl.setVisibility(View.GONE);
-                            nonWaitReplay.setVisibility(View.VISIBLE);
-                        } else {
-                            Toast.makeText(ActivityNnonymityReply.this, "发送失败", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
+                    public void onStartLoad(int value) {
 
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onComplete(String result) {
+                        handleReplayImVoteResponse(result);
+                    }
 
+                    @Override
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
                     }
                 });
+    }
+
+    private void handleReplayImVoteResponse(String result) {
+        BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+        LogUtils.getInstance().debug("投票回复, {}", baseRespond.toString());
+        if (baseRespond.getCode() == 0) {
+            hideKeyword();
+            nonInputLl.setVisibility(View.GONE);
+            nonWaitReplay.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(ActivityNnonymityReply.this, "发送失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     //收起键盘

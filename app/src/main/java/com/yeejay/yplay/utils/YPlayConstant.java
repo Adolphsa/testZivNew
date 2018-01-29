@@ -130,4 +130,27 @@ public class YPlayConstant {
     //查询已经上线的题目投票详情
     public static final String API_QUERYDETAIL = "/api/submit/querydetail";
 
+    //查询所有类型的投稿列表
+    public static final String API_QUERYLIST = "/api/submit/querylist";
+
+    //获取im签名
+    public static final String API_GENEUSERSIG = "/api/im/geneusersig";
+
+    //获取用户新通知
+    public static final String API_GETNEWNOTIFYSTAT = "/api/notify/getnewnotifystat";
+
+    //获取我的好友列表
+    public static final String API_GETMYFRIENDS = "/api/user/getmyfriends";
+
+    //通讯录上传或更新
+    public static final String API_CONTACTS_UPDATE = "/api/addr/update";
+
+    //查询用户的注册状态
+    public static final String API_QUERYBYPHONE = "/api/addr/querybyphone";
+
+    //通讯录remove
+    public static final String API_CONTACTS_REMOVE = "/api/addr/remove";
+
+    //投票消息回复
+    public static final String API_SENDVOTEREPLYMSG = "/api/im/sendvotereplymsg";
 }

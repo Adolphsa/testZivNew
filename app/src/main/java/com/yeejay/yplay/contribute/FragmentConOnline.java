@@ -1,13 +1,9 @@
 package com.yeejay.yplay.contribute;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
@@ -24,15 +19,11 @@ import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.ContributeOnlineAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseFragment;
-import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.HeadRefreshView;
-import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.model.SubmitQueryDetailRespond;
 import com.yeejay.yplay.model.SubmitQueryListRespond;
-import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
@@ -41,19 +32,12 @@ import com.yeejay.yplay.utils.YPlayConstant;
 import com.yeejay.yplay.wns.WnsAsyncHttp;
 import com.yeejay.yplay.wns.WnsRequestListener;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * 已上线的投稿情况
@@ -296,8 +280,8 @@ public class FragmentConOnline extends BaseFragment implements
 
     //查询所有类型的投稿列表
     public void getContributeList(int type, int pageNum, int pageSize) {
-        Log.d(TAG, "getContributeList(), type = " + type + " ,pageNum = " + pageNum +
-                ", pageSize = " + pageSize);
+        LogUtils.getInstance().debug("getContributeList(), type = {}, pageNum = {}, pageSize = {}",
+                type, pageNum, pageSize);
         Map<String, Object> contributesMap = new HashMap<>();
         contributesMap.put("type", type);
         contributesMap.put("pageNum", pageNum);
@@ -306,65 +290,73 @@ public class FragmentConOnline extends BaseFragment implements
         contributesMap.put("token", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_TOKEN, "yplay"));
         contributesMap.put("ver", SharePreferenceUtil.get(mContext, YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getContributeList(contributesMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<SubmitQueryListRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_QUERYLIST, contributesMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
+
                     }
 
                     @Override
-                    public void onNext(@NonNull SubmitQueryListRespond contributesListRespond) {
-                        Log.d(TAG,"查询投稿列表---" + contributesListRespond.toString());
-                        if (contributesListRespond.getCode() == 0) {
+                    public void onStartLoad(int value) {
 
-                            List<SubmitQueryListRespond.PayloadBean.ContributesBean> contributesBeanList =
-                                    contributesListRespond.getPayload().getContributesInfo();
-                            if (contributesBeanList != null && contributesBeanList.size() > 0) {
-                                //顶部刷新，因此是将数据添加到list的头部
-                                mReviewedList.addAll(0, contributesBeanList);
-                                Log.d(TAG,"查询投稿列表---contributesBeanList.size() = " +
-                                        contributesBeanList.size() + " , mReviewedList.size() = " +
-                                        mReviewedList.size());
-
-                                //拉取审核通过的投稿存入list后更新UI;
-                                if (nullView.getVisibility() == View.VISIBLE) {
-                                    nullView.setVisibility(View.GONE);
-                                }
-                                //refreshLayout.setVisibility(View.VISIBLE);
-
-                                reviewedAdapter.notifyDataSetChanged();
-                            } else {
-                                //拉取不到数据了
-                                headRefreshView.noData();
-
-                                Log.d(TAG,"查询投稿列表---contributesBeanList.size() = 0");
-                                if (mReviewedList.size() <= 0) {
-                                    //refreshLayout.setVisibility(View.GONE);
-                                    nullView.setVisibility(View.VISIBLE);
-                                }
-                            }
-
-                            refreshLayout.finishRefresh();
-                        }else{
-                            //todo失败的处理
-                        }
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("查询投稿列表---" + e.getMessage());
+                    public void onComplete(String result) {
+                        handleGetContributeListResponse(result);
+                        LogUtils.getInstance().debug("查询投稿列表---onComplete, mReviewedList.size() = {}",
+                                mReviewedList.size());
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("查询投稿列表异常");
                         refreshLayout.finishRefresh();
                     }
-
-                    @Override
-                    public void onComplete() {
-                        System.out.println("查询投稿列表---onComplete, mReviewedList.size() = "
-                                + mReviewedList.size());
-                    }
                 });
+    }
+
+    private void handleGetContributeListResponse(String result) {
+        SubmitQueryListRespond contributesListRespond = GsonUtil.GsonToBean(result, SubmitQueryListRespond.class);
+        LogUtils.getInstance().debug("查询投稿列表, {}", contributesListRespond.toString());
+        if (contributesListRespond.getCode() == 0) {
+
+            List<SubmitQueryListRespond.PayloadBean.ContributesBean> contributesBeanList =
+                    contributesListRespond.getPayload().getContributesInfo();
+            if (contributesBeanList != null && contributesBeanList.size() > 0) {
+                //顶部刷新，因此是将数据添加到list的头部
+                mReviewedList.addAll(0, contributesBeanList);
+                LogUtils.getInstance().debug("查询投稿列表, contributesBeanList.size() = {}, mReviewedList.size() = {}"
+                        , contributesBeanList.size(), mReviewedList.size());
+
+                //拉取审核通过的投稿存入list后更新UI;
+                if (nullView.getVisibility() == View.VISIBLE) {
+                    nullView.setVisibility(View.GONE);
+                }
+                //refreshLayout.setVisibility(View.VISIBLE);
+
+                reviewedAdapter.notifyDataSetChanged();
+            } else {
+                //拉取不到数据了
+                headRefreshView.noData();
+
+                LogUtils.getInstance().debug("查询投稿列表---contributesBeanList.size() = 0");
+                if (mReviewedList.size() <= 0) {
+                    //refreshLayout.setVisibility(View.GONE);
+                    nullView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            refreshLayout.finishRefresh();
+        }else{
+            //todo失败的处理
+        }
     }
 
     private static class ViewHolder {
