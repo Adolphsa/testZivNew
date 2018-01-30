@@ -545,7 +545,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             public void loadMore() {
             }
         });
-
     }
 
     private void initTitle() {
@@ -570,6 +569,15 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         layoutSetting.setVisibility(View.VISIBLE);
         layoutSetting.setImageResource(R.drawable.message_more);
 
+        acwEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //软键盘弹出时，recyclerView要滑动到最低端;
+                if (chatAdapter.getItemCount() > 0) {
+                    acwRecycleView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
+                }
+            }
+        });
         acwEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
