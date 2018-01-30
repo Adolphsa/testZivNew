@@ -142,7 +142,7 @@
         <activity
             android:name=".message.ActivityChatWindow"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:windowSoftInputMode="stateUnspecified|adjustPan" />
         <activity
             android:name=".userinfo.ActivityMyInfo"
             android:screenOrientation="portrait" />
