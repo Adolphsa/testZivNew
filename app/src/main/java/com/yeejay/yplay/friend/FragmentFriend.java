@@ -610,7 +610,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         }
     }
 
-    //通过短信邀请好友（其实是删除好友）
+    //通过短信邀请好友
     private void invitefriendsbysms(String friends) {
         Map<String, Object> inviteFreindMap = new HashMap<>();
         inviteFreindMap.put("friends", friends);

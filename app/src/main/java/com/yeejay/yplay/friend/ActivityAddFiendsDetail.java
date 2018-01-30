@@ -17,7 +17,6 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendsDetailAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardRequestFredDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
@@ -44,11 +43,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityAddFiendsDetail extends BaseActivity {
 
@@ -413,38 +407,38 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     }
 
     //删除好友
-    private void removeFriend(int toUin) {
-
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("toUin", toUin);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("删除好友---" + baseRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("删除好友异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
+//    private void removeFriend(int toUin) {
+//
+//        Map<String, Object> removeFreindMap = new HashMap<>();
+//        removeFreindMap.put("toUin", toUin);
+//        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
+//        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+//        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .removeFriend(removeFreindMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<BaseRespond>() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(@NonNull BaseRespond baseRespond) {
+//                        System.out.println("删除好友---" + baseRespond.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        System.out.println("删除好友异常---" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 
 }

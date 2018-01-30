@@ -96,6 +96,13 @@ public class YPlayConstant {
     //接受好友请求
     public static final String API_ACCEPT_FRIEND_URL = "/api/sns/acceptaddfriend";
 
+    //获取已经点击加好友的列表
+    public static final String API_ALREADY_CLICK_ADD_URL = "/api/sns/getreqaddfrienduins";
+
+    //退出登录
+    public static final String API_LOGIN_OUT_URL = "/api/account/logout";
+
+
 
     //---------------------------------------------------------------------
     public static final String BASE_URL = "http://yplay.vivacampus.com";

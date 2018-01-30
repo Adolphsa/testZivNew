@@ -25,7 +25,6 @@ import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.SchoolmateAdapter;
 import com.yeejay.yplay.adapter.WaitInviteAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
@@ -37,8 +36,6 @@ import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.FriendInfo;
 import com.yeejay.yplay.greendao.FriendInfoDao;
-import com.yeejay.yplay.model.AddFriendRespond;
-import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ReqAddFriendUinRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
@@ -48,6 +45,8 @@ import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,11 +57,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class AddFriends extends BaseActivity implements AdapterView.OnItemClickListener,
         WaitInviteAdapter.OnGetAlphaIndexerAndSectionsListener {
@@ -351,8 +345,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         girlList = new ArrayList<>();
         maybeKnowList = new ArrayList<>();
         positionList = new ArrayList();
-        
-//        initContactsAdapter();
+
         initAllSchoolMateAdapter();
         initSameGradeAdapter();
         initBoyAdapter();
@@ -742,74 +735,81 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         addFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         addFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         addFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .addFriend(addFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<AddFriendRespond>() {
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_ADDFRIEND, addFreindMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull AddFriendRespond addFriendRespond) {
-                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
+                    public void onStartLoad(int value) {
+
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("发送加好友请求异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        Log.i(TAG, "onComplete: 发送加好友请求" + result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
+                        LogUtils.getInstance().debug("发送加好友请求异常");
                     }
                 });
-
     }
+
 
     //通过短信邀请好友
     private void invitefriendsbysms(String friends) {
 
         Log.i(TAG, "invitefriendsbysms: friends---" + friends);
-        Map<String, Object> invitefriendsMap = new HashMap<>();
-        invitefriendsMap.put("friends", friends);
-        invitefriendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
-        invitefriendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        invitefriendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .smsInviteFriends(invitefriendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
+        Map<String, Object> inviteFreindMap = new HashMap<>();
+        inviteFreindMap.put("friends", friends);
+        inviteFreindMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
+        inviteFreindMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        inviteFreindMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_INVITEFRIENDSBYSMS_URL, inviteFreindMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("短信邀请好友---" + baseRespond.toString());
+                    public void onStartLoad(int value) {
+
                     }
 
                     @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("短信邀请好友异常---" + e.getMessage());
+                    public void onComplete(String result) {
+                        Log.i(TAG, "onComplete: 短信邀请好友---" + result);
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onTimeOut() {
+                    }
 
+                    @Override
+                    public void onError() {
                     }
                 });
     }
 
+
     //拉取同校/通讯录好友
     private void getRecommends(int type, int pageNum) {
 
-        System.out.println("type---" + type);
+        Log.i(TAG, "getRecommends: type---" + type);
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_SCHOOL_FRIEND_URL;
         Map<String, Object> recommendsMap = new HashMap<>();
         recommendsMap.put("type", type);
         recommendsMap.put("pageNum", pageNum);
@@ -817,133 +817,142 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         recommendsMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         recommendsMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         recommendsMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getSchoolmates(recommendsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+
+        WnsAsyncHttp.wnsRequest(url, recommendsMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: school friend--- " + result);
+                handleGetRecommendsResponse(result);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+    }
+
+    private void handleGetRecommendsResponse(String result){
+        GetRecommendsRespond getRecommendsRespond = GsonUtil.GsonToBean(result,GetRecommendsRespond.class);
+        if (getRecommendsRespond.getCode() == 0){
+            Log.i(TAG, "handleGetRecommendsResponse: 好友列表---" + getRecommendsRespond.toString());
+            List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
+                    getRecommendsRespond.getPayload().getFriends();
+            if (friendsBeanList != null && friendsBeanList.size() > 0) {
+
+                if (mType == 3) {  //全部
+                    allSchoolMateList.addAll(friendsBeanList);
+                    handleSchoolMate(friendsBeanList);
+                } else if (mType == 4) {  //同年级
+                    sameGradeList.addAll(friendsBeanList);
+                    handleSameGradeMate(friendsBeanList);
+                } else if (mType == 5) {      //男
+                    boyList.addAll(friendsBeanList);
+                    handleBoyMate(friendsBeanList);
+                } else if (mType == 6) {      //女
+                    girlList.addAll(friendsBeanList);
+                    handleGirlMate(friendsBeanList);
+                } else if (mType == 7) {      //可能认识的人
+                    maybeKnowList.addAll(friendsBeanList);
+                    handleMaybeKnowFriend(friendsBeanList);
+                }
+
+            } else {
+                //针对同校同学的处理（拉第一把数据就没有时，要如此处理是因为四个同学类型公用一个ListView）
+                if (mType == 3) {//全部同学
+                    if (allSchoolMateList.size() == 0) {
+                        allSchoolmateListView.setAdapter(null);
+                        schoolmateAdapter.notifyDataSetChanged();
+
+                        llNullView.setVisibility(View.VISIBLE);
                     }
+                } else if (mType == 4) {//同年级
+                    if (sameGradeList.size() == 0) {
+                        allSchoolmateListView.setAdapter(null);
+                        sameGradeAdapter.notifyDataSetChanged();
 
-                    @Override
-                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-                        if (getRecommendsRespond.getCode() == 0) {
-                            System.out.println("好友列表---" + getRecommendsRespond.toString());
-                            List<GetRecommendsRespond.PayloadBean.FriendsBean> friendsBeanList =
-                                    getRecommendsRespond.getPayload().getFriends();
-                            if (friendsBeanList != null && friendsBeanList.size() > 0) {
-
-                                if (mType == 3) {  //全部
-                                    allSchoolMateList.addAll(friendsBeanList);
-                                    handleSchoolMate(friendsBeanList);
-                                } else if (mType == 4) {  //同年级
-                                    sameGradeList.addAll(friendsBeanList);
-                                    handleSameGradeMate(friendsBeanList);
-                                } else if (mType == 5) {      //男
-                                    boyList.addAll(friendsBeanList);
-                                    handleBoyMate(friendsBeanList);
-                                } else if (mType == 6) {      //女
-                                    girlList.addAll(friendsBeanList);
-                                    handleGirlMate(friendsBeanList);
-                                } else if (mType == 7) {      //可能认识的人
-                                    maybeKnowList.addAll(friendsBeanList);
-                                    handleMaybeKnowFriend(friendsBeanList);
-                                }
-
-                            } else {
-                                //针对同校同学的处理（拉第一把数据就没有时，要如此处理是因为四个同学类型公用一个ListView）
-                                if (mType == 3) {//全部同学
-                                    if (allSchoolMateList.size() == 0) {
-                                        allSchoolmateListView.setAdapter(null);
-                                        schoolmateAdapter.notifyDataSetChanged();
-
-                                        llNullView.setVisibility(View.VISIBLE);
-                                    }
-                                } else if (mType == 4) {//同年级
-                                    if (sameGradeList.size() == 0) {
-                                        allSchoolmateListView.setAdapter(null);
-                                        sameGradeAdapter.notifyDataSetChanged();
-
-                                        llNullView.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                                if (mType == 5) {//男生
-                                    if (boyList.size() == 0) {
-                                        allSchoolmateListView.setAdapter(null);
-                                        boyAdapter.notifyDataSetChanged();
-
-                                        llNullView.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                                if (mType == 6) {//女生
-                                    if (girlList.size() == 0) {
-                                        allSchoolmateListView.setAdapter(null);
-                                        girlAdapter.notifyDataSetChanged();
-
-                                        llNullView.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                                //网络获取不到数据了；
-                                loadMoreView.noData();
-                            }
-
-                        }
+                        llNullView.setVisibility(View.VISIBLE);
                     }
+                }
+                if (mType == 5) {//男生
+                    if (boyList.size() == 0) {
+                        allSchoolmateListView.setAdapter(null);
+                        boyAdapter.notifyDataSetChanged();
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("拉取好友异常---" + e.getMessage());
-                        Toast.makeText(AddFriends.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        llNullView.setVisibility(View.VISIBLE);
                     }
+                }
+                if (mType == 6) {//女生
+                    if (girlList.size() == 0) {
+                        allSchoolmateListView.setAdapter(null);
+                        girlAdapter.notifyDataSetChanged();
 
-                    @Override
-                    public void onComplete() {
-
+                        llNullView.setVisibility(View.VISIBLE);
                     }
-                });
+                }
+                //网络获取不到数据了；
+                loadMoreView.noData();
+            }
+        }
     }
 
     //获取已经点击加好友的列表
     private void getReqAddFriendUin(){
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_ALREADY_CLICK_ADD_URL;
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         tempMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         tempMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .getReqAddFriendUin(tempMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ReqAddFriendUinRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, tempMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    }
+            }
 
-                    @Override
-                    public void onNext(ReqAddFriendUinRespond reqAddFriendUinRespond) {
-                        if (reqAddFriendUinRespond.getCode() == 0){
-                            Log.i(TAG, "onNext: reqAddFriendUinRespond--" + reqAddFriendUinRespond.toString());
-                            List<Integer> tempList = reqAddFriendUinRespond.getPayload().getUins();
-                            initContactsAdapter(tempList);
-                        }
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onError(Throwable e) {
+            }
 
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: already click add friend--- " + result);
+                ReqAddFriendUinRespond reqAddFriendUinRespond = GsonUtil.GsonToBean(result,ReqAddFriendUinRespond.class);
+                if (reqAddFriendUinRespond.getCode() == 0){
+                    Log.i(TAG, "onNext: reqAddFriendUinRespond--" + reqAddFriendUinRespond.toString());
+                    List<Integer> tempList = reqAddFriendUinRespond.getPayload().getUins();
+                    initContactsAdapter(tempList);
+                }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onTimeOut() {
 
-                    }
-                });
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
-
-
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -1070,52 +1079,64 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
 
     //查询朋友的信息
     private void getFriendInfo(int friendUin, View view) {
+
         final View friendItemView = view;
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GETUSERPROFILE;
         Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("userUin", friendUin);
         friendMap.put("uin", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, 0));
         friendMap.put("token", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         friendMap.put("ver", SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserInfo(friendMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
 
-                    @Override
-                    public void onNext(UserInfoResponde userInfoResponde) {
-                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            UserInfoResponde.PayloadBean.InfoBean infoBean =
-                                    userInfoResponde.getPayload().getInfo();
-                            int status = userInfoResponde.getPayload().getStatus();
-                            if (status == 1) {
-                                Intent intent = new Intent(AddFriends.this, ActivityFriendsInfo.class);
-                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
-                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
-                                System.out.println("朋友的uin---" + infoBean.getUin());
-                                startActivity(intent);
-                            } else {
-                                showCardDialog(userInfoResponde.getPayload(), friendItemView);
-                            }
+        WnsAsyncHttp.wnsRequest(url, friendMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        System.out.println("获取朋友资料异常---" + e.getMessage());
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 获取朋友的资料---" + result);
+                handleGetFriendInfoResponde(result,friendItemView);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
+
+    private void handleGetFriendInfoResponde(String result, View friendItemView){
+        UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+        if (userInfoResponde.getCode() == 0) {
+            UserInfoResponde.PayloadBean.InfoBean infoBean =
+                    userInfoResponde.getPayload().getInfo();
+            int status = userInfoResponde.getPayload().getStatus();
+            if (status == 1) {
+                Intent intent = new Intent(AddFriends.this, ActivityFriendsInfo.class);
+                intent.putExtra("yplay_friend_name", infoBean.getNickName());
+                intent.putExtra("yplay_friend_uin", infoBean.getUin());
+                System.out.println("朋友的uin---" + infoBean.getUin());
+                startActivity(intent);
+            } else {
+                showCardDialog(userInfoResponde.getPayload(), friendItemView);
+            }
+
+        }
+    }
+
 
     //显示名片
     private void showCardDialog(UserInfoResponde.PayloadBean payloadBean, View view) {
@@ -1163,7 +1184,6 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         public void onTouchingLetterChanged(String s) {
             if (alphaIndexer.get(s) != null) {//判断当前选中的字母是否存在集合中
                 int position = alphaIndexer.get(s);//如果存在集合中则取出集合中该字母对应所在的位置,再利用对应的setSelection，就可以实现点击选中相应字母，然后联系人就会定位到相应的位置
-//                notOpenListView.scrollToPosition(position);
                 LinearLayoutManager llm = (LinearLayoutManager) notOpenListView.getLayoutManager();
                 llm.scrollToPositionWithOffset(position, 0);
             }

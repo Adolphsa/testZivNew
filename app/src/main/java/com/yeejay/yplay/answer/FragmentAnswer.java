@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -60,6 +61,10 @@ public class FragmentAnswer extends BaseFragment {
 
     private static final String TAG = "FragmentAnswer";
 
+    @BindView(R.id.frans_play_root)
+    RelativeLayout fransPlayroot;
+    @BindView(R.id.frans_cooling_root)
+    RelativeLayout fransCoolingRoot;
     @BindView(R.id.frans_question_number)
     TextView fransTvQuestionCount;
     @BindView(R.id.frgans_img)
@@ -84,10 +89,9 @@ public class FragmentAnswer extends BaseFragment {
     Button frgansBtnNextQuestion;
     @BindView(R.id.frgans_tv_or)
     TextView frgansTvOr;
-    @BindView(R.id.frgans_tv_relieve)
-    TextView frgansTvRelieve;
+
     @BindView(R.id.frgans_btn_invite)
-    ImageButton frgansBtnInvite;
+    Button frgansBtnInvite;
     @BindView(R.id.frg_user_info)
     ImageButton frgUserInfo;
     @BindView(R.id.frgans_count_down_view)
@@ -106,33 +110,41 @@ public class FragmentAnswer extends BaseFragment {
     int questionNum = 1;
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
-    int colorCount = 7;
+    int colorCount = 4;
     int changeCount = 0;    //换一换的次数
     boolean isFreeze;
 
-    int backgroundColor[] = {R.color.play_color7,
-            R.color.play_color2,
-            R.color.play_color3,
-            R.color.play_color4,
-            R.color.play_color5,
-            R.color.play_color6,
-            R.color.play_color1,};
+    int backgroundColor[] = {R.drawable.shape_answer_play1,
+            R.drawable.shape_answer_play2,
+            R.drawable.shape_answer_play3,
+            R.drawable.shape_answer_play4
+            };
 
-//    int buttonColor[] = {R.color.button_color207,
-//            R.color.button_color202,
-//            R.color.button_color203,
-//            R.color.button_color204,
-//            R.color.button_color205,
-//            R.color.button_color206,
-//            R.color.button_color201};
+    int backgroundStartColor[] = {
+            R.color.play_gradient_1_start,
+            R.color.play_gradient_2_start,
+            R.color.play_gradient_3_start,
+            R.color.play_gradient_4_start
+    };
 
-    int selectButtonColor[] = {R.color.button_color707,
-            R.color.button_color702,
-            R.color.button_color703,
-            R.color.button_color704,
-            R.color.button_color705,
-            R.color.button_color706,
-            R.color.button_color701};
+    int backgroundEndColor[] = {
+            R.color.play_gradient_1_end,
+            R.color.play_gradient_2_end,
+            R.color.play_gradient_3_end,
+            R.color.play_gradient_4_end
+    };
+
+    int buttonColor[] = {R.drawable.shape_play_button_background1,
+            R.drawable.shape_play_button_background2,
+            R.drawable.shape_play_button_background3,
+            R.drawable.shape_play_button_background4
+            };
+
+    int selectButtonColor[] = {R.color.button_selector_color_1,
+            R.color.button_selector_color_2,
+            R.color.button_selector_color_3,
+            R.color.button_selector_color_4
+            };
 
     QuestionRespond.PayloadBean.QuestionBean questionBean;
     List<VoteOptionsBean> voteOptionsBeanList;
@@ -434,13 +446,11 @@ public class FragmentAnswer extends BaseFragment {
     protected void initAllMembersView(Bundle savedInstanceState) {
         registerBr();
 
-        getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color4));
-        frgansLinlearLayout.setBackgroundColor(getResources().getColor(R.color.play_color4));
-        baseTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color4));
-        //Glide.with(getActivity()).load(R.drawable.loading).asGif().
-        //        diskCacheStrategy(DiskCacheStrategy.NONE).into(frandProgressContent);
+        getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
+        fransPlayroot.setBackgroundResource(backgroundColor[questionNum % colorCount]);
+        baseTitleRl.setBackgroundColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
 
-        voteOptionsBeanList = new ArrayList<VoteOptionsBean>();
+        voteOptionsBeanList = new ArrayList<>();
 
         frgTitle.setVisibility(View.INVISIBLE);
 
@@ -461,13 +471,6 @@ public class FragmentAnswer extends BaseFragment {
         });
     }
 
-    //修改颜色
-    private void changeColor(int color) {
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.setBottomColor(color);
-        frgansLinlearLayout.setBackgroundColor(getResources().getColor(color));
-        baseTitleRl.setBackgroundColor(getResources().getColor(color));
-    }
 
     @Override
     public void onVisibilityChangedToUser(boolean isVisibleToUser, boolean isHappenedInSetUserVisibleHintMethod) {
@@ -476,9 +479,9 @@ public class FragmentAnswer extends BaseFragment {
             LogUtils.getInstance().debug("FragmentAnswer---答题可见");
             frgEdit.setVisibility(View.VISIBLE);
             MainActivity mainActivity = (MainActivity) getActivity();
-            LogUtils.getInstance().debug("queationNum%7 = {} , queationNum = {}",
+            LogUtils.getInstance().debug("queationNum%4 = {} , queationNum = {}",
                     (questionNum % colorCount), questionNum);
-            mainActivity.setmColor(backgroundColor[questionNum % colorCount]);
+            mainActivity.setmColor(backgroundStartColor[questionNum % colorCount]);
             if (!NetWorkUtil.isNetWorkAvailable(getActivity())) {
                 frandProgress.setVisibility(View.VISIBLE);
             } else {
@@ -488,13 +491,15 @@ public class FragmentAnswer extends BaseFragment {
 
             if (isFreeze) {  //如果是冷却状态就去拉一把问题
                 getQuestion();
+            }else {
+                //getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
             }
         }
     }
 
     private void nextQuestionUpdate() {
 
-        fransTvQuestionCount.setText(questionNum + "/15");
+        fransTvQuestionCount.setText("- " + questionNum + "/15" + " -");
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
             LogUtils.getInstance().error("nextQuestionUpdate: 加载的图片, {}", url);
@@ -514,8 +519,15 @@ public class FragmentAnswer extends BaseFragment {
         btn3Cnt = voteOptionsBeanList.get(2).getBeSelCnt();
         btn4Cnt = voteOptionsBeanList.get(3).getBeSelCnt();
 
-        changeColor(backgroundColor[questionNum % colorCount]);
+        //更新界面颜色
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.setBottomColor(backgroundEndColor[questionNum % colorCount]);
+        fransPlayroot.setBackgroundResource(backgroundColor[questionNum % colorCount]);
+        baseTitleRl.setBackgroundColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
+        getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
 
+        Log.i(TAG, "nextQuestionUpdate: questionNum---" + questionNum + ",colorCount---" + colorCount);
+        Log.i(TAG, "nextQuestionUpdate: 颜色数组序号---" + questionNum % colorCount);
 
     }
 
@@ -544,25 +556,10 @@ public class FragmentAnswer extends BaseFragment {
 
         isFreeze = true;
 
-        //修改背景颜色
-        changeColor(R.color.play_color2);
+        baseTitleRl.setBackgroundColor(getResources().getColor(R.color.cooling_gradient_end));
 
-        frgansImg.setImageDrawable(getResources().getDrawable(R.drawable.play_socket));
-        frgansQuestion.setText("技能冷却");
-        frgansCountDownView.setVisibility(View.VISIBLE);
-        fransTvQuestionCount.setVisibility(View.INVISIBLE);
-
-        frgansBtn1.setVisibility(View.INVISIBLE);
-        frgansBtn2.setVisibility(View.INVISIBLE);
-        frgansBtn3.setVisibility(View.INVISIBLE);
-        frgansBtn4.setVisibility(View.INVISIBLE);
-
-        frgansTvOr.setVisibility(View.VISIBLE);
-        frgansTvRelieve.setVisibility(View.VISIBLE);
-
-        frgansTnNextPerson.setVisibility(View.INVISIBLE);
-        frgansBtnNextQuestion.setVisibility(View.INVISIBLE);
-        frgansBtnInvite.setVisibility(View.VISIBLE);
+        fransPlayroot.setVisibility(View.GONE);
+        fransCoolingRoot.setVisibility(View.VISIBLE);
     }
 
     //解除冷冻
@@ -573,31 +570,13 @@ public class FragmentAnswer extends BaseFragment {
         questionNum = 1;
         getQuestion();
 
-        fransTvQuestionCount.setVisibility(View.VISIBLE);
-        fransTvQuestionCount.setText(questionNum + "");
-
-        frgansTvOr.setVisibility(View.INVISIBLE);
-        frgansTvRelieve.setVisibility(View.INVISIBLE);
-        frgansCountDownView.setVisibility(View.GONE);
-
-        frgansTnNextPerson.setVisibility(View.VISIBLE);
-        frgansBtnNextQuestion.setVisibility(View.VISIBLE);
-        frgansBtnInvite.setVisibility(View.INVISIBLE);
-
-        frgansBtn1.setVisibility(View.VISIBLE);
-        frgansBtn2.setVisibility(View.VISIBLE);
-        frgansBtn3.setVisibility(View.VISIBLE);
-        frgansBtn4.setVisibility(View.VISIBLE);
+        fransPlayroot.setVisibility(View.VISIBLE);
+        fransCoolingRoot.setVisibility(View.GONE);
 
         frgansBtn1.updateProgress(0);
         frgansBtn2.updateProgress(0);
         frgansBtn3.updateProgress(0);
         frgansBtn4.updateProgress(0);
-
-        frgansBtn1.setEnabled(true);
-        frgansBtn2.setEnabled(true);
-        frgansBtn3.setEnabled(true);
-        frgansBtn4.setEnabled(true);
     }
 
     //拉取问题
@@ -623,6 +602,7 @@ public class FragmentAnswer extends BaseFragment {
                     @Override
                     public void onComplete(String result) {
                         handleGetQuestionResponse(result);
+                        frandProgress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
@@ -663,6 +643,13 @@ public class FragmentAnswer extends BaseFragment {
                 voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(2).getUin(), optionsList.get(2).getNickName(), optionsList.get(2).getBeSelCnt()));
                 voteOptionsBeanList.add(new VoteOptionsBean(optionsList.get(3).getUin(), optionsList.get(3).getNickName(), optionsList.get(3).getBeSelCnt()));
 
+                frgansBtn1.setBackgroundResource(buttonColor[questionNum % colorCount]);
+                frgansBtn2.setBackgroundResource(buttonColor[questionNum % colorCount]);
+                frgansBtn3.setBackgroundResource(buttonColor[questionNum % colorCount]);
+                frgansBtn4.setBackgroundResource(buttonColor[questionNum % colorCount]);
+
+                Log.i(TAG, "handleGetQuestionResponse: base button color ---" + questionNum % colorCount);
+
                 if (questionBean != null) {
                     nextQuestionUpdate();
                 }
@@ -671,7 +658,7 @@ public class FragmentAnswer extends BaseFragment {
                 LogUtils.getInstance().debug("onNext: 冷冻状态");
 
                 //冷冻状态
-                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+                getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.cooling_gradient_end));
                 //进入冷冻的时间点
                 int freezeTs = payloadBean.getFreezeTs();
                 int nowTs = payloadBean.getNowTs();
@@ -684,7 +671,6 @@ public class FragmentAnswer extends BaseFragment {
                 questionOut15();
             }
 
-            frandProgress.setVisibility(View.INVISIBLE);
         }
     }
 

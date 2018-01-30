@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.greendao.FriendInfo;
-import com.yeejay.yplay.model.FriendsListRespond;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,6 +104,12 @@ public class MyFriendsAdapter extends BaseAdapter{
         }
         String name = friendInfo.getFriendName();
         holder.itemMyFriendName.setText(name);
+
+        if (position == 0){
+            String currentAlpha = friendsInfoList.get(0).getSortKey();
+            holder.itemMyFriendFirstName.setText(currentAlpha);
+            holder.itemMyFriendFirstName.setVisibility(View.VISIBLE);
+        }
 
         if (position >= 1){
             String currentAlpha = friendsInfoList.get(position).getSortKey();

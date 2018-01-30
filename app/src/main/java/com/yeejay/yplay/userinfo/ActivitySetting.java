@@ -36,7 +36,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,7 +56,6 @@ import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.BuildConfig;
-import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
@@ -164,7 +162,6 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("头像");
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 0;
-//            ImageSelectorUtils.openPhotoAndClip(ActivitySetting.this,REQUEST_CODE);
             showImageBottomDialog();
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
@@ -193,7 +190,6 @@ public class ActivitySetting extends BaseActivity {
         if (NetWorkUtil.isNetWorkAvailable(ActivitySetting.this)) {
             tag = 2;
             queryUserUpdateLeftCount(2);
-//            showInputDialog("修改用户名", "");
         } else {
             Toast.makeText(ActivitySetting.this, "网络异常", Toast.LENGTH_SHORT).show();
         }
@@ -206,9 +202,6 @@ public class ActivitySetting extends BaseActivity {
         System.out.println("性别");
         tag = 4;
         queryUserUpdateLeftCount(4);
-//        Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-//        intent.putExtra("activity_setting", 1);
-//        startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
     }
 
     //修改学校信息
@@ -369,7 +362,6 @@ public class ActivitySetting extends BaseActivity {
         versionText.setText(ver);
     }
 
-
     //初始化资料
     private void initView(UserInfoResponde.PayloadBean.InfoBean infoBean) {
         String url = infoBean.getHeadImgUrl();
@@ -429,15 +421,6 @@ public class ActivitySetting extends BaseActivity {
             getLonLat();
         }
     }
-
-    /**
-     * 选择图片文件
-     */
-//    private void selectImage() {
-//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//        intent.setType("image/*");
-//        startActivityForResult(intent, REQ_CODE_SEL_IMG);
-//    }
 
     //获取上传头像签名
     private void getUploadImgSig(final String imagePath, final String imageName, final Bitmap bitmap) {
@@ -561,6 +544,8 @@ public class ActivitySetting extends BaseActivity {
     //修改头像
     private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
+
         Map<String, Object> imgMap = new HashMap<>();
         if (!TextUtils.isEmpty(nickName)) {
             imgMap.put("nickName", nickName);
@@ -580,190 +565,191 @@ public class ActivitySetting extends BaseActivity {
         imgMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         imgMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
 
+        WnsAsyncHttp.wnsRequest(url, imgMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .updateHeaderImg(imgMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: " + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result,BaseRespond.class);
+                if (baseRespond.getCode() == 0) {
+                    if (tag == 0) {
+                        System.out.println("修改图像成功---" + baseRespond.toString());
+                        //Toast.makeText(ActivitySetting.this, "头像修改成功", Toast.LENGTH_SHORT).show();
+                    } else if (tag == 1) {
+                        System.out.println("修改姓名成功---" + baseRespond.toString());
+                        //Toast.makeText(ActivitySetting.this, "修改姓名成功", Toast.LENGTH_SHORT).show();
+                        settingNmae.setText(nickName);
+                    } else if (tag == 2) {
+                        System.out.println("修改用户名成功---" + baseRespond.toString());
+                        //Toast.makeText(ActivitySetting.this, "修改用户名成功", Toast.LENGTH_SHORT).show();
+                        settingUserNmae.setText(userName);
                     }
 
-                    @Override
-                    public void onNext(@io.reactivex.annotations.NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0) {
-                            if (tag == 0) {
-                                System.out.println("修改图像成功---" + baseRespond.toString());
-                                //Toast.makeText(ActivitySetting.this, "头像修改成功", Toast.LENGTH_SHORT).show();
-                            } else if (tag == 1) {
-                                System.out.println("修改姓名成功---" + baseRespond.toString());
-                                //Toast.makeText(ActivitySetting.this, "修改姓名成功", Toast.LENGTH_SHORT).show();
-                                settingNmae.setText(nickName);
-                            } else if (tag == 2) {
-                                System.out.println("修改用户名成功---" + baseRespond.toString());
-                                //Toast.makeText(ActivitySetting.this, "修改用户名成功", Toast.LENGTH_SHORT).show();
-                                settingUserNmae.setText(userName);
-                            }
+                } else if (baseRespond.getCode() == 11011) {
+                    Toast.makeText(ActivitySetting.this, R.string.username_already_exist, Toast.LENGTH_SHORT).show();
+                }
+            }
 
-                        } else if (baseRespond.getCode() == 11011) {
-                            Toast.makeText(ActivitySetting.this, R.string.username_already_exist, Toast.LENGTH_SHORT).show();
-                        }
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("修改图像异常---" + e.getMessage());
-                    }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onError() {
 
-                    }
-                });
+            }
+        });
     }
 
     //获取自己的资料
     private void getMyInfo() {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_MY_INFO_URL;
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         myInfoMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myInfoMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(myInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
-                    }
+        WnsAsyncHttp.wnsRequest(url, myInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(@NonNull UserInfoResponde userInfoResponde) {
-                        System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            initView(userInfoResponde.getPayload().getInfo());
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取自己的资料异常---" + e.getMessage());
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 我的资料---" + result);
+                UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+                if (userInfoResponde.getCode() == 0) {
+                    initView(userInfoResponde.getPayload().getInfo());
+                }
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     //查询用户的修改配额
     private void queryUserUpdateLeftCount(int field) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_QUERY_LEFT_COUNT_URL;
         Map<String, Object> leftCountMap = new HashMap<>();
         leftCountMap.put("field", field);
         leftCountMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         leftCountMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         leftCountMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserUpdateCount(leftCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserUpdateLeftCountRespond>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
 
-                    }
+        WnsAsyncHttp.wnsRequest(url, leftCountMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(UserUpdateLeftCountRespond userUpdateLeftCountRespond) {
-                        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
-                        if (userUpdateLeftCountRespond.getCode() == 0) {
-                            int letCount = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
-                            int tempField = userUpdateLeftCountRespond.getPayload().getInfo().getField();
-                            System.out.println(tempField + "---编号");
-                            if (tag == 1) {
+            }
 
-                                if (letCount > 0 && letCount != INVALID_NUM) {
-                                    //showInputDialog("输入真实姓名", "只有" + letCount + "次修改机会,请珍惜喵~");
-                                    showDialogTips(tag, letCount);
-                                } else if (letCount == INVALID_NUM) {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
-                                } else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 修剩余修改次数---" + result);
+                handleqQueryUserUpdateLeftCountResponse(result);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
+    }
+
+
+    private void handleqQueryUserUpdateLeftCountResponse(String result){
+
+        UserUpdateLeftCountRespond userUpdateLeftCountRespond = GsonUtil.GsonToBean(result,UserUpdateLeftCountRespond.class);
+        System.out.println("剩余修改次数---" + userUpdateLeftCountRespond.toString());
+        if (userUpdateLeftCountRespond.getCode() == 0) {
+            int letCount = userUpdateLeftCountRespond.getPayload().getInfo().getLeftCnt();
+            int tempField = userUpdateLeftCountRespond.getPayload().getInfo().getField();
+            System.out.println(tempField + "---编号");
+            if (tag == 1) {
+
+                if (letCount > 0 && letCount != INVALID_NUM) {
+                    showDialogTips(tag, letCount);
+                } else if (letCount == INVALID_NUM) {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
+                } else {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "姓名修改次数已用完咯");
+                }
+
+            } else if (tag == 2) {
+                if (letCount > 0 && letCount != INVALID_NUM) {
+                    showDialogTips(tag, letCount);
+                } else if (letCount == INVALID_NUM) {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                } else {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
+                }
+            } else if (tag == 3) {
+                if (letCount > 0 && letCount != INVALID_NUM) {
+                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
+                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
+                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    isGetLonLat = true;
+                                    isFirstShowDialog = true;
+                                    getAddressAuthority();
+
                                 }
+                            })
+                            .show();
+                } else if (letCount == INVALID_NUM) {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
+                } else {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
+                }
+            } else if (tag == 4) {//gender modifer;
+                if (letCount > 0 && letCount != INVALID_NUM) {
+                    showDialogTips(tag, letCount);
+                } else if (letCount == INVALID_NUM) {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
+                } else {
+                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
+                }
+            }
 
-                            } else if (tag == 2) {
-                                if (letCount > 0 && letCount != INVALID_NUM) {
-                                    //showInputDialog("修改用户名", "只有" + letCount + "次修改机会,请珍惜喵~");
-                                    showDialogTips(tag, letCount);
-                                } else if (letCount == INVALID_NUM) {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
-                                } else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "用户名修改次数已用完咯");
-                                }
-                            } else if (tag == 3) {
-                                if (letCount > 0 && letCount != INVALID_NUM) {
-                                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
-                                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
-                                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-
-                                                    //查看地理位置权限
-//                                                    getLonLat();
-//                                                    if (!addressAuthoritySuccess) { //无权限
-//
-//                                                    }
-                                                    isGetLonLat = true;
-                                                    isFirstShowDialog = true;
-                                                    getAddressAuthority();
-
-                                                }
-                                            })
-                                            .show();
-                                } else if (letCount == INVALID_NUM) {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
-                                } else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "年级学校修改次数已用完咯");
-                                }
-                            } else if (tag == 4) {//gender modifer;
-                                if (letCount > 0 && letCount != INVALID_NUM) {
-//                                    AlertDialog dialog = new AlertDialog.Builder(ActivitySetting.this)
-//                                            .setMessage("只有" + letCount + "次修改机会,请珍惜喵~")
-//                                            .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-//                                                @Override
-//                                                public void onClick(DialogInterface dialog, int which) {
-//                                                    Intent intent = new Intent(ActivitySetting.this, ChoiceSex.class);
-//                                                    intent.putExtra("activity_setting", 1);
-//                                                    startActivityForResult(intent, REQUEST_CODE_CHOICE_GENDER);
-//                                                }
-//                                            })
-//                                            .show();
-                                    showDialogTips(tag, letCount);
-                                } else if (letCount == INVALID_NUM) {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
-                                } else {
-                                    DialogUtils.showInviteDialogInfo(ActivitySetting.this, "性别修改次数已用完咯");
-                                }
-                            }
-
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+        }
 
     }
 
@@ -925,16 +911,7 @@ public class ActivitySetting extends BaseActivity {
 
                 break;
             case TYPE_GENDER://gender
-//                View GenderLayout = inflater.inflate(R.layout.dialog_content_gender_layout, null);
-//                TextView genderTips = (TextView) GenderLayout.findViewById(R.id.tips1);
-//                genderTips.setText(String.format(getResources().getString(R.string.tips1_name_mofify_num),
-//                        Integer.toString(letCount)));
-//
-//
-//
-//                CustomDialog.Builder genderBuilder = new CustomDialog.Builder(this);
-//                genderBuilder.setContentView(GenderLayout);
-//                genderBuilder.create().show();
+
                 CustomGenderDialog.Builder genderBuilder = new CustomGenderDialog.Builder(this);
                 final CustomGenderDialog genderDialog = genderBuilder.create();
                 final View genderContentView = genderBuilder.getContentView();
@@ -995,192 +972,234 @@ public class ActivitySetting extends BaseActivity {
     //选择性别
     private void choiceSex(final int gender) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
         Map<String, Object> sexMap = new HashMap<>();
-        System.out.println("gender---" + gender);
+        Log.i(TAG, "choiceSex: gender---" + gender);
         sexMap.put("gender", gender);
         sexMap.put("flag", 1);
         sexMap.put("uin", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_UIN, 0));
         sexMap.put("token", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         sexMap.put("ver", SharePreferenceUtil.get(this, YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .choiceSex(sexMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, sexMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    }
+            }
 
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        if (baseRespond.getCode() == 0) {
-                            System.out.println("gender set successfully---" + baseRespond.toString());
-//                            if (isActivitySetting == 1){
-//                                Intent intent = new Intent();
-//                                String str = gender == 1 ? "男" : "女";
-//                                intent.putExtra("activity_setting_gender",str);
-//                               // ChoiceSex.this.setResult(201,intent);
-//                                //ChoiceSex.this.finish();
-//                            }else {
-//                                startActivity(new Intent(this,UserInfo.class));
-//                                //jumpToWhere();
-//                            }
+            @Override
+            public void onStartLoad(int value) {
 
-                        } else {
-                            System.out.println("gender set error---" + baseRespond.toString());
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("gender set exception---" + e.getMessage());
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 选择性别---" + result);
+            }
 
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onError() {
+
+            }
+        });
+
     }
 
     //退出登录
     private void logout() {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_LOGIN_OUT_URL;
         Map<String, Object> logoutMap = new HashMap<>();
         logoutMap.put("uin", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_UIN, 0));
         logoutMap.put("token", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         logoutMap.put("ver", SharePreferenceUtil.get(ActivitySetting.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(logoutMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
 
-                    @Override
-                    public void onNext(UserInfoResponde userInfoResponde) {
-                        System.out.println("退出登录---" + userInfoResponde.toString());
+        WnsAsyncHttp.wnsRequest(url, logoutMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                        //登出
-                        TIMManager.getInstance().logout(new TIMCallBack() {
-                            @Override
-                            public void onError(int code, String desc) {
+            }
 
-                                //错误码code和错误描述desc，可用于定位请求失败原因
-                                //错误码code列表请参见错误码表
-                                Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
-                            }
+            @Override
+            public void onStartLoad(int value) {
 
-                            @Override
-                            public void onSuccess() {
-                                //登出成功
-                                System.out.println("im退出成功");
-                            }
-                        });
+            }
 
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
-                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
-                        AppManager.getAppManager().AppExit(ActivitySetting.this);
-                        startActivity(new Intent(ActivitySetting.this, Login.class));
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: logout--- " + result);
+                BaseRespond baseResponde = GsonUtil.GsonToBean(result, BaseRespond.class);
+                if (baseResponde.getCode() == 0){
+                    //登出
+                    TIMManager.getInstance().logout(new TIMCallBack() {
+                        @Override
+                        public void onError(int code, String desc) {
 
-                    @Override
-                    public void onError(Throwable e) {
-                        System.out.println("退出登录---异常" + e.getMessage());
-                    }
+                            //错误码code和错误描述desc，可用于定位请求失败原因
+                            //错误码code列表请参见错误码表
+                            Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
+                        }
 
-                    @Override
-                    public void onComplete() {
+                        @Override
+                        public void onSuccess() {
+                            //登出成功
+                            Log.i(TAG, "onSuccess: im退出成功");
+                        }
+                    });
 
-                    }
-                });
+                    SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
+                    SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
+                    SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
+                    AppManager.getAppManager().AppExit(ActivitySetting.this);
+                    startActivity(new Intent(ActivitySetting.this, Login.class));
+                }
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
+
+//        YPlayApiManger.getInstance().getZivApiService()
+//                .getMyInfo(logoutMap)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<UserInfoResponde>() {
+//                    @Override
+//                    public void onSubscribe(Disposable d) {
+//                    }
+//
+//                    @Override
+//                    public void onNext(UserInfoResponde userInfoResponde) {
+//                        System.out.println("退出登录---" + userInfoResponde.toString());
+//
+//                        //登出
+//                        TIMManager.getInstance().logout(new TIMCallBack() {
+//                            @Override
+//                            public void onError(int code, String desc) {
+//
+//                                //错误码code和错误描述desc，可用于定位请求失败原因
+//                                //错误码code列表请参见错误码表
+//                                Log.d("ActivitySetting", "logout failed. code: " + code + " errmsg: " + desc);
+//                            }
+//
+//                            @Override
+//                            public void onSuccess() {
+//                                //登出成功
+//                                System.out.println("im退出成功");
+//                            }
+//                        });
+//
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_UIN);
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_TOKEN);
+//                        SharePreferenceUtil.remove(ActivitySetting.this, YPlayConstant.YPLAY_VER);
+//                        AppManager.getAppManager().AppExit(ActivitySetting.this);
+//                        startActivity(new Intent(ActivitySetting.this, Login.class));
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        System.out.println("退出登录---异常" + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
 
     }
 
     EditText editText;
 
     //展示对话框
-    private void showInputDialog(String title, String message) {
-
-        editText = new EditText(ActivitySetting.this);
-        LinearLayout.LayoutParams etParam = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        etParam.setMargins(20, 0, 20, 0);
-        editText.setLayoutParams(etParam);
-
-        if (tag == 1) {
-            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
-            editText.setSingleLine();
-            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_SEND
-                            || actionId == EditorInfo.IME_ACTION_DONE
-                            || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
-                            && KeyEvent.ACTION_DOWN == event.getAction())) {
-                        System.out.println("回车键被点击");
-                        return true;
-                    }
-                    return false;
-                }
-            });
-        } else if (tag == 2) {
-            editText.setKeyListener(new DigitsKeyListener() {
-                @Override
-                public int getInputType() {
-                    return InputType.TYPE_TEXT_VARIATION_PASSWORD;
-                }
-
-                @Override
-                protected char[] getAcceptedChars() {
-                    char[] data = getResources().getString(R.string.login_only_can_input).toCharArray();
-                    return data;
-                }
-            });
-            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
-        }
-
-        AlertDialog.Builder inputDialog =
-                new AlertDialog.Builder(ActivitySetting.this);
-        inputDialog.setTitle(title).setView(editText);
-
-        if (!TextUtils.isEmpty(message)) {
-            inputDialog.setMessage(message);
-        }
-        inputDialog.setPositiveButton("确定",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String name = editText.getText().toString().trim();
-                        if (name.length() > 0) {
-                            if (tag == 1) {
-                                System.out.println("修改姓名---" + name);
-                                updateHeaderImg(null, name, 0, null);
-                            } else if (tag == 2) {
-                                System.out.println("修改用户名---" + name);
-                                updateHeaderImg(null, null, 0, name);
-                            }
-                        } else {
-                            Toast.makeText(ActivitySetting.this, "昵称不能为空哦", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-        inputDialog.setNegativeButton("取消",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        System.out.println("取消按钮");
-                    }
-                });
-        inputDialog.show();
-    }
+//    private void showInputDialog(String title, String message) {
+//
+//        editText = new EditText(ActivitySetting.this);
+//        LinearLayout.LayoutParams etParam = new LinearLayout.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        etParam.setMargins(20, 0, 20, 0);
+//        editText.setLayoutParams(etParam);
+//
+//        if (tag == 1) {
+//            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
+//            editText.setSingleLine();
+//            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//                @Override
+//                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                    if (actionId == EditorInfo.IME_ACTION_SEND
+//                            || actionId == EditorInfo.IME_ACTION_DONE
+//                            || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode()
+//                            && KeyEvent.ACTION_DOWN == event.getAction())) {
+//                        System.out.println("回车键被点击");
+//                        return true;
+//                    }
+//                    return false;
+//                }
+//            });
+//        } else if (tag == 2) {
+//            editText.setKeyListener(new DigitsKeyListener() {
+//                @Override
+//                public int getInputType() {
+//                    return InputType.TYPE_TEXT_VARIATION_PASSWORD;
+//                }
+//
+//                @Override
+//                protected char[] getAcceptedChars() {
+//                    char[] data = getResources().getString(R.string.login_only_can_input).toCharArray();
+//                    return data;
+//                }
+//            });
+//            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+//        }
+//
+//        AlertDialog.Builder inputDialog =
+//                new AlertDialog.Builder(ActivitySetting.this);
+//        inputDialog.setTitle(title).setView(editText);
+//
+//        if (!TextUtils.isEmpty(message)) {
+//            inputDialog.setMessage(message);
+//        }
+//        inputDialog.setPositiveButton("确定",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String name = editText.getText().toString().trim();
+//                        if (name.length() > 0) {
+//                            if (tag == 1) {
+//                                System.out.println("修改姓名---" + name);
+//                                updateHeaderImg(null, name, 0, null);
+//                            } else if (tag == 2) {
+//                                System.out.println("修改用户名---" + name);
+//                                updateHeaderImg(null, null, 0, name);
+//                            }
+//                        } else {
+//                            Toast.makeText(ActivitySetting.this, "昵称不能为空哦", Toast.LENGTH_SHORT).show();
+//                        }
+//
+//                    }
+//                });
+//        inputDialog.setNegativeButton("取消",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        System.out.println("取消按钮");
+//                    }
+//                });
+//        inputDialog.show();
+//    }
 
     //获取地址位置权限
     private void getAddressAuthority() {

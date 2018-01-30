@@ -173,7 +173,6 @@ public class UserInfo extends BaseActivity {
     //上传图头像
     private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
 
-//        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] datas = baos.toByteArray();

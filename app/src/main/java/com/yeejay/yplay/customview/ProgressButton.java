@@ -15,7 +15,7 @@ import com.yeejay.yplay.R;
  * Created by Administrator on 2017/10/30.
  */
 
-public class ProgressButton extends android.support.v7.widget.AppCompatButton {
+public class ProgressButton extends android.support.v7.widget.AppCompatTextView {
 
     //public static final int TYPE_FILL = 0;
     //public static final int TYPE_STROKE = 1;

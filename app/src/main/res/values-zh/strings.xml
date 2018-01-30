@@ -134,4 +134,7 @@
     <string name="same_school_grade_no_submit">暂无同校同年级同学投票</string>
     <string name="login_tips">看看我有多受欢迎</string>
     <string name="head_img_upload_error">头像上传失败</string>
+    <string name="frgans_cooling_keep">后 继续答题</string>
+    <string name="frgans_cooling_or">— 或者 —</string>
+    <string name="frgans_cooling_invite_friend">邀请好友 马上答题</string>
 </resources>

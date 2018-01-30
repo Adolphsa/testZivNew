@@ -44,8 +44,36 @@
     <color name="play_round_background">#ECECEC</color>
     <color name="class_color">#FFB300</color>
     <color name="loading_color">#A8D8F3</color>
+    <color name="cooling_gradient_start">#F36B48</color>
+    <color name="cooling_gradient_end">#E9A511</color>
+    <color name="cooling_button">#EA642D</color>
+
+    <color name="play_gradient_1_start">#C6B4F2</color>
+    <color name="play_gradient_1_end">#847BE0</color>
+
+    <color name="play_gradient_2_start">#7BEFD9</color>
+    <color name="play_gradient_2_end">#34ACE0</color>
+
+    <color name="play_gradient_3_start">#FF7944</color>
+    <color name="play_gradient_3_end">#F2558C</color>
+
+    <color name="play_gradient_4_start">#97B4F4</color>
+    <color name="play_gradient_4_end">#6171E4</color>
 
     <color name="class_item_select_color">#1AFFB300</color>
+
+    <!--base button color-->
+    <color name="button_color_1">#B1A5ED</color>
+    <color name="button_color_2">#66CBE9</color>
+    <color name="button_color_3">#F098B1</color>
+    <color name="button_color_4">#93A7F2</color>
+
+    <!--selector button color-->
+    <color name="button_selector_color_1">#8075DA</color>
+    <color name="button_selector_color_2">#3E9FD0</color>
+    <color name="button_selector_color_3">#E75185</color>
+    <color name="button_selector_color_4">#5263CB</color>
+
 
     <!--button color 20-->
     <color name="button_color201">#33A2C5DA</color>

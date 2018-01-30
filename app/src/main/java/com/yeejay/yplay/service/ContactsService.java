@@ -8,7 +8,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.model.UpdateContactsRespond;
@@ -16,16 +15,13 @@ import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ContactsService extends Service {
 
@@ -75,21 +71,24 @@ public class ContactsService extends Service {
         contactsMap.put("token", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         contactsMap.put("ver", SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_VER, 0));
 
-        YPlayApiManger.getInstance().getZivApiService()
-                .updateContacts(contactsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UpdateContactsRespond>() {
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_CONTACTS_UPDATE, contactsMap,
+                new WnsRequestListener() {
+
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+                    public void onNoInternet() {
 
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull UpdateContactsRespond baseRespond) {
+                    public void onStartLoad(int value) {
 
+                    }
+
+                    @Override
+                    public void onComplete(String result) {
+                        UpdateContactsRespond baseRespond = GsonUtil.GsonToBean(result, UpdateContactsRespond.class);
                         if (baseRespond.getCode() == 0) {
-                            System.out.println("上传通讯录成功---" + baseRespond.toString());
+                            Log.i(TAG, "onComplete: 上传通讯录成功---" + baseRespond.toString());
                             offset++;
                             Log.i(TAG, "onNext: offset---" + offset);
 
@@ -104,13 +103,13 @@ public class ContactsService extends Service {
                     }
 
                     @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        Log.i(TAG, "onError: 上传通讯录失败---" + e.getMessage());
+                    public void onTimeOut() {
+
                     }
 
                     @Override
-                    public void onComplete() {
-
+                    public void onError() {
+                        LogUtils.getInstance().debug("onError:更新通讯录失败");
                     }
                 });
     }
