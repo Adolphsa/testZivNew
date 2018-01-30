@@ -153,4 +153,7 @@ public class YPlayConstant {
 
     //投票消息回复
     public static final String API_SENDVOTEREPLYMSG = "/api/im/sendvotereplymsg";
+
+    //获取上传头像的签名
+    public static final String API_GETHEADIMGUPLOADSIG= "/api/user/getheadimguploadsig";
 }

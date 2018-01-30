@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -245,6 +246,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         //获取签名
         getImSignature();
+        //获取上传头像签名
+        getUploadImgSig();
+
         //获取加好友的人数
         getAddFreindCount();
         setMessageIcon();
@@ -348,7 +352,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         imMap.put("uin", uin);
         imMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         imMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
-        imMap.put("identifier", uin);
+        imMap.put("identifier", String.valueOf(uin));
 
         WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GENEUSERSIG, imMap,
                 new WnsRequestListener() {
@@ -383,12 +387,77 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         ImSignatureRespond imSignatureRespond = GsonUtil.GsonToBean(result, ImSignatureRespond.class);
         if (imSignatureRespond.getCode() == 0) {
             String imSig = imSignatureRespond.getPayload().getSig();
-            LogUtils.getInstance().debug("im签名, {}", imSig);
+            int expireTime = imSignatureRespond.getPayload().getExpireAt();
+
+            LogUtils.getInstance().debug("im签名 = {}, expireTime = {}", imSig, expireTime);
             if (!TextUtils.isEmpty(imSig)) {
                 imLogin(String.valueOf(uin), imSig);
             }
 
         }
+    }
+
+    //获取上传头像签名
+    private void getUploadImgSig() {
+        final Map<String, Object> imMap = new HashMap<>();
+        final int uin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
+        imMap.put("uin", uin);
+        imMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        imMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
+        imMap.put("identifier", String.valueOf(uin));
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETHEADIMGUPLOADSIG, imMap,
+                new WnsRequestListener() {
+
+                    @Override
+                    public void onNoInternet() {
+
+                    }
+
+                    @Override
+                    public void onStartLoad(int value) {
+
+                    }
+
+                    @Override
+                    public void onComplete(String result) {
+                        handleGetUploadImgSigResponse(result);
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                    }
+                });
+    }
+
+    private void handleGetUploadImgSigResponse(String result) {
+        ImSignatureRespond imSignatureRespond = GsonUtil.GsonToBean(result, ImSignatureRespond.class);
+        if (imSignatureRespond.getCode() == 0) {
+            String imSig = imSignatureRespond.getPayload().getSig();
+            int expireTime = imSignatureRespond.getPayload().getExpireAt();
+            //将签名和签名过期时间保存到sharedPreference中
+            storeImSigAndExpireTime(imSig, expireTime);
+        }
+    }
+
+    /*
+     * 保存上传头像签名和过期时间。
+     */
+    private void storeImSigAndExpireTime(String imSig, long expireTime) {
+        LogUtils.getInstance().debug("expireTime = {}, current time = {}",
+                expireTime, BaseUtils.getCurrentDayTimeMillis());
+        SharedPreferences sharedPrefFriends = YplayApplication.getContext().
+                getSharedPreferences(YPlayConstant.SP_KEY_IM_SIG,
+                        Context.MODE_PRIVATE);
+        SharedPreferences.Editor editorsettings = sharedPrefFriends.edit();
+        editorsettings.putString("im_Sig", imSig);
+        editorsettings.putLong("expireTime", expireTime);
+        editorsettings.apply();
     }
 
     /**

@@ -251,7 +251,7 @@ public interface YPlayApi {
     @POST("/api/vote/submitquestion")
     Observable<BaseRespond> submiteQuestion(@FieldMap Map<String,Object> filemap);
 
-    //用户投稿
+    //获取IM签名
     @FormUrlEncoded
     @POST("/api/im/geneusersig")
     Observable<ImSignatureRespond> getImSignature(@FieldMap Map<String,Object> filemap);
@@ -293,4 +293,9 @@ public interface YPlayApi {
     @FormUrlEncoded
     @POST("/api/submit/querydetail")
     Observable<SubmitQueryDetailRespond> getSubmitQueryDetail(@FieldMap Map<String,Object> filemap);
+
+    //获取上传头像的签名
+    @FormUrlEncoded
+    @POST("/api/user/getheadimguploadsig")
+    Observable<ImSignatureRespond> getUploadImgSignature(@FieldMap Map<String,Object> filemap);
 }

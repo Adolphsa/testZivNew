@@ -3,8 +3,10 @@ package com.yeejay.yplay.userinfo;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.LocationManager;
@@ -55,7 +57,9 @@ import com.yanzhenjie.permission.Permission;
 import com.yanzhenjie.permission.PermissionListener;
 import com.yanzhenjie.permission.SettingDialog;
 import com.yeejay.yplay.BuildConfig;
+import com.yeejay.yplay.MainActivity;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.AppManager;
 import com.yeejay.yplay.base.BaseActivity;
@@ -64,17 +68,23 @@ import com.yeejay.yplay.customview.CustomGenderDialog;
 import com.yeejay.yplay.login.ClassList;
 import com.yeejay.yplay.login.Login;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UserUpdateLeftCountRespond;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.DialogUtils;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
+import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -281,7 +291,7 @@ public class ActivitySetting extends BaseActivity {
     private Uri imageUri;
 
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
-    private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
+    private static final String IMAGE_AUTHORIZATION = "eJxlj11PgzAYhe-5FQ23M66Ur83Ei60Sh6JIxrKwG1KhYCGD2nZkavbfnaixie-t85yc834YAAAzjdaXpCj6Q6dy9capCa6ACc2LP8g5K3OicluU-yA9ciZoTipFxQgt13URhLrDStopVrFfA0LbtzQuyzYfS76xc047nusjXWH1CB*CDQ4THCSvCyGmaVxEbC7EMLlvstU*hH2lgm1K4hnmeChq*dguwnobbnYow97yVq7WTf-c7IKlf5e9JE-2zTA-xOhdTnwSTQlqr7VKxfb05yPLR8jxkL55oEKyvhsFBM8KsuHXmcbJ*AR1ZVvx";
     private final int INVALID_NUM = 100000;
     private static int GENDER_VALUE = 0;//2 represents female; 1 represents male;
     private final static int GENDER_MALE = 1;
@@ -291,7 +301,7 @@ public class ActivitySetting extends BaseActivity {
     private final static int TYPE_CLASSSCHOOL = 3;
     private final static int TYPE_GENDER = 4;
 
-    String dirStr;
+    private String mImSig;
     boolean addressAuthoritySuccess = false;
     boolean locationServiceSuccess = false;
     LocationManager mLocationManager;
@@ -429,8 +439,70 @@ public class ActivitySetting extends BaseActivity {
 //        startActivityForResult(intent, REQ_CODE_SEL_IMG);
 //    }
 
+    //获取上传头像签名
+    private void getUploadImgSig(final String imagePath, final String imageName, final Bitmap bitmap) {
+        final Map<String, Object> imMap = new HashMap<>();
+        final int uin = (int) SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, (int) 0);
+        imMap.put("uin", uin);
+        imMap.put("token", SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        imMap.put("ver", SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_VER, 0));
+        imMap.put("identifier", String.valueOf(uin));
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETHEADIMGUPLOADSIG, imMap,
+                new WnsRequestListener() {
+
+                    @Override
+                    public void onNoInternet() {
+
+                    }
+
+                    @Override
+                    public void onStartLoad(int value) {
+
+                    }
+
+                    @Override
+                    public void onComplete(String result) {
+                        ImSignatureRespond imSignatureRespond = GsonUtil.GsonToBean(result, ImSignatureRespond.class);
+                        if (imSignatureRespond.getCode() == 0) {
+                            mImSig = imSignatureRespond.getPayload().getSig();
+
+                            uploadImageImpl(imagePath, imageName, bitmap);
+                        }
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                    }
+                });
+    }
+
+    //上传图头像前先获取im签名;
+    private void uploadImage(String imagePath, final String imageName, final Bitmap bitmap) {
+        SharedPreferences sp = YplayApplication.getContext().getSharedPreferences(
+                YPlayConstant.SP_KEY_IM_SIG,
+                Context.MODE_PRIVATE);
+        mImSig = sp.getString("im_Sig", IMAGE_AUTHORIZATION);
+        long expireTime = sp.getLong("expireTime", 0);
+        long currentTime = BaseUtils.getCurrentDayTimeMillis();
+        LogUtils.getInstance().debug("im_Sig = {}, expireTime = {}, currentTime = {}",
+                mImSig, expireTime, currentTime);
+        if(TextUtils.isEmpty(mImSig) || expireTime >= currentTime) {
+            //说明需要从服务器重新获取最新的上传头像签名;
+            getUploadImgSig(imagePath, imageName, bitmap);
+        } else {
+            //说明当前上传头像签名依然有效,则去真正的上传头像：
+            uploadImageImpl(imagePath, imageName, bitmap);
+        }
+    }
+
     //上传图头像
-    private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
+    private void uploadImageImpl(String imagePath, final String imageName, final Bitmap bitmap) {
 
         System.out.println("imageName---" + imageName);
 
@@ -452,7 +524,7 @@ public class ActivitySetting extends BaseActivity {
         body.setFilecontent(datas);
 
         YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName, upload, aa)
+                .uploadHeaderImg(mImSig, imageName, upload, aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
@@ -474,6 +546,8 @@ public class ActivitySetting extends BaseActivity {
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
                         System.out.println("图片上传异常---" + e.getMessage());
+                        Toast.makeText(ActivitySetting.this, R.string.head_img_upload_error,
+                                Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
