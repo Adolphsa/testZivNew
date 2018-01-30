@@ -28,10 +28,13 @@ import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.BaseUtils;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +147,6 @@ public class ActivityAddFiendsDetail extends BaseActivity {
             }
         }, mDataList);
 
-//        aafdListView.setEmptyView(emptyView);
         aafdListView.setAdapter(friendsDetailAdapter);
 
         friendsDetailAdapter.addRecycleItemListener(new FriendsDetailAdapter.OnRecycleItemListener() {
@@ -162,13 +164,6 @@ public class ActivityAddFiendsDetail extends BaseActivity {
             }
         });
 
-//        aafdListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//
-//
-//            }
-//        });
     }
 
     private void initFriendsDetailListView(final List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList) {
@@ -208,49 +203,57 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     //查询发好友请求之人的信息
     private void getFriendInfo(int friendUin, View view) {
         final View friendItemView = view;
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GETUSERPROFILE;
         Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("userUin", friendUin);
         friendMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
         friendMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         friendMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUserInfo(friendMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {}
 
-                    @Override
-                    public void onNext(UserInfoResponde userInfoResponde) {
-                        System.out.println("获取朋友资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            UserInfoResponde.PayloadBean.InfoBean infoBean =
-                                    userInfoResponde.getPayload().getInfo();
-                            int status = userInfoResponde.getPayload().getStatus();
-                            if (status == 1) {
-                                Intent intent = new Intent(ActivityAddFiendsDetail.this, ActivityFriendsInfo.class);
-                                intent.putExtra("yplay_friend_name", infoBean.getNickName());
-                                intent.putExtra("yplay_friend_uin", infoBean.getUin());
-                                System.out.println("朋友的uin---" + infoBean.getUin());
-                                startActivity(intent);
-                            } else {
-                                showCardDialog(userInfoResponde.getPayload(), friendItemView);
-                            }
+        WnsAsyncHttp.wnsRequest(url, friendMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                        }
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 获取朋友的资料---" + result);
+                UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+                if (userInfoResponde.getCode() == 0) {
+                    UserInfoResponde.PayloadBean.InfoBean infoBean =
+                            userInfoResponde.getPayload().getInfo();
+                    int status = userInfoResponde.getPayload().getStatus();
+                    if (status == 1) {
+                        Intent intent = new Intent(ActivityAddFiendsDetail.this, ActivityFriendsInfo.class);
+                        intent.putExtra("yplay_friend_name", infoBean.getNickName());
+                        intent.putExtra("yplay_friend_uin", infoBean.getUin());
+                        Log.i(TAG, "onComplete: 朋友的uin---" + infoBean.getUin());
+                        startActivity(intent);
+                    } else {
+                        showCardDialog(userInfoResponde.getPayload(), friendItemView);
                     }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        System.out.println("获取朋友资料异常---" + e.getMessage());
-                    }
+                }
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     //显示名片
@@ -292,111 +295,121 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     //拉取添加好友消息
     private void getAddFriendmsgs(int pageNum) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_FRIEND_COUNT_URL;
         Map<String, Object> getAddFriendmsgsMap = new HashMap<>();
         getAddFriendmsgsMap.put("updateLastReadMsgId", 0);
         getAddFriendmsgsMap.put("pageNum",pageNum);
         getAddFriendmsgsMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
         getAddFriendmsgsMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         getAddFriendmsgsMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getAddFriendMsg(getAddFriendmsgsMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetAddFriendMsgs>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+
+        WnsAsyncHttp.wnsRequest(url, getAddFriendmsgsMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 拉取添加好友消息---" + result);
+                GetAddFriendMsgs getAddFriendMsgs = GsonUtil.GsonToBean(result, GetAddFriendMsgs.class);
+                if (getAddFriendMsgs.getCode() == 0) {
+                    List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
+                            = getAddFriendMsgs.getPayload().getMsgs();
+                    if (tempList != null && tempList.size() > 0) {
+                        mDataList.addAll(tempList);
+                        initFriendsDetailListView(tempList);
+                    } else {
+                        //不能拉到数据了
+                        loadMoreView.noData();
                     }
 
-                    @Override
-                    public void onNext(@NonNull GetAddFriendMsgs getAddFriendMsgs) {
-                        System.out.println("拉取添加好友消息---" + getAddFriendMsgs.toString());
-                        if (getAddFriendMsgs.getCode() == 0) {
-                            List<GetAddFriendMsgs.PayloadBean.MsgsBean> tempList
-                                    = getAddFriendMsgs.getPayload().getMsgs();
-                            if (tempList != null && tempList.size() > 0) {
-                                mDataList.addAll(tempList);
-                                initFriendsDetailListView(tempList);
-                            } else {
-                                //不能拉到数据了
-                                loadMoreView.noData();
-                            }
+                } else {
+                    //如果服务器返回失败
+                    aafdListView.setAdapter(null);
+                }
+                aafdPtfRefresh.finishLoadMore();
 
-                        } else {
-                            //如果服务器返回失败
-                            aafdListView.setAdapter(null);
-                        }
-                        aafdPtfRefresh.finishLoadMore();
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("拉取添加好友消息异常---" + e.getMessage());
-                        aafdPtfRefresh.finishLoadMore();
-                    }
+            @Override
+            public void onTimeOut() {
+                aafdPtfRefresh.finishLoadMore();
+            }
 
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            @Override
+            public void onError() {
+                aafdPtfRefresh.finishLoadMore();
+            }
+        });
     }
 
     //接受好友请求
     private void accepeAddFreind(int msgId, int act, final GetAddFriendMsgs.PayloadBean.MsgsBean msgsBean) {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_ACCEPT_FRIEND_URL;
         Map<String, Object> accepeAddFreindMap = new HashMap<>();
         accepeAddFreindMap.put("msgId", msgId);
         accepeAddFreindMap.put("act",act);
         accepeAddFreindMap.put("uin", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, 0));
         accepeAddFreindMap.put("token", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         accepeAddFreindMap.put("ver", SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .acceptAddFriend(accepeAddFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
+        WnsAsyncHttp.wnsRequest(url, accepeAddFreindMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 接受好友请求---" + result);
+                BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
+                if (baseRespond.getCode() == 0){
+                    Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
+                    DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
+                    if (dbHelper.queryFriendInfo(msgsBean.getFromUin()) == null){
+                        dbHelper.insertFriendInfo(new FriendInfo(null,
+                                msgsBean.getFromUin(),
+                                msgsBean.getFromNickName(),
+                                msgsBean.getFromHeadImgUrl(),
+                                msgsBean.getFromGender(),
+                                msgsBean.getFromGrade(),
+                                msgsBean.getSchoolId(),
+                                msgsBean.getSchoolType(),
+                                msgsBean.getSchoolName(),
+                                msgsBean.getTs(),
+                                BaseUtils.getSortKey(msgsBean.getFromNickName()),
+                                String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
+                        Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
+                    }else {
+                        Log.i(TAG, "onNext: 已添加---" + msgsBean.getFromUin());
                     }
 
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("接受好友请求---" + baseRespond.toString());
-                        if (baseRespond.getCode() == 0){
-                            Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
-                            DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
-                            if (dbHelper.queryFriendInfo(msgsBean.getFromUin()) == null){
-                                dbHelper.insertFriendInfo(new FriendInfo(null,
-                                        msgsBean.getFromUin(),
-                                        msgsBean.getFromNickName(),
-                                        msgsBean.getFromHeadImgUrl(),
-                                        msgsBean.getFromGender(),
-                                        msgsBean.getFromGrade(),
-                                        msgsBean.getSchoolId(),
-                                        msgsBean.getSchoolType(),
-                                        msgsBean.getSchoolName(),
-                                        msgsBean.getTs(),
-                                        BaseUtils.getSortKey(msgsBean.getFromNickName()),
-                                        String.valueOf(SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, 0))));
-                                Log.i(TAG, "onNext: friendUin---" + msgsBean.getFromUin());
-                            }else {
-                                Log.i(TAG, "onNext: 已添加---" + msgsBean.getFromUin());
-                            }
+                }
 
-                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("接受好友请求异常---" + e.getMessage());
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onComplete() {
+            }
 
-                    }
-                });
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     //删除好友

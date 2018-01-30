@@ -35,12 +35,15 @@ import com.yeejay.yplay.greendao.ContactInvite;
 import com.yeejay.yplay.greendao.ContactInviteDao;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
+import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.FriendInfoDao;
 import com.yeejay.yplay.model.AddFriendRespond;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.ReqAddFriendUinRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
@@ -208,6 +211,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     private List<String> sections;// 存放存在的汉语拼音首字母
     private ContactsInfoDao contactsInfoDao;
     private ContactInviteDao contactInviteDao;
+    private FriendInfoDao friendInfoDao;
     int mUin;
 
     private LinearLayout schoolRoot;    //同校同学
@@ -251,6 +255,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         layoutTitle.setText("添加好友");
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
         contactInviteDao = YplayApplication.getInstance().getDaoSession().getContactInviteDao();
+        friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
 
         mUin = (int) SharePreferenceUtil.get(AddFriends.this, YPlayConstant.YPLAY_UIN, (int) 0);
 
@@ -364,10 +369,89 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                 .where(ContactsInfoDao.Properties.Uin.gt(1000))
                 .where(ContactsInfoDao.Properties.Phone.notEq(phoneNumber))
                 .list();
-        if (contactDredgeList != null && contactDredgeList.size() > 0){
+
+        for(ContactsInfo ci : contactDredgeList){
+            if(ci != null) {
+                LogUtils.getInstance().debug("通讯录已经注册的列表, phone={},uin={},name={}", ci.getOrgPhone(), ci.getUin(), ci.getName());
+            }
+        }
+
+        //查询我的好友列表
+        List<FriendInfo> friendList = friendInfoDao.loadAll();
+        List<ContactsInfo> contactDredgeList2 = new ArrayList<>();
+        List<ContactsInfo> contactDredgeList3 = new ArrayList<>();
+
+        //过滤掉我的好友
+        if(friendList != null && friendList.size() > 0){
+
+            for(ContactsInfo ci : contactDredgeList){
+                if(ci == null){
+                    continue;
+                }
+
+                boolean find = false;
+
+                //查看是否存在我的好友列表中
+               for(FriendInfo fi : friendList){
+                   int fUin =  fi.getFriendUin();
+                   if(fUin == ci.getUin()){
+                       find = true;
+                       break;
+                   }
+               }
+               //如果不在我的好友列表 则显示出来
+               if(!find){
+                   contactDredgeList2.add(ci);
+               }
+
+            }
+        }else{
+            //好友列表为空或者数据库表不存在
+            contactDredgeList2 = contactDredgeList;
+        }
+
+        for(ContactsInfo ci : contactDredgeList2){
+            if(ci != null) {
+                LogUtils.getInstance().debug("通讯录已经注册的列表(已经过滤我的好友), phone={},uin={},name={}", ci.getOrgPhone(), ci.getUin(), ci.getName());
+            }
+        }
+
+        //过滤掉已经点击加好友的
+        if (addFriendUinList != null && addFriendUinList.size() > 0){
+
+            for (ContactsInfo ci : contactDredgeList2) {
+
+                if(ci == null){
+                    continue;
+                }
+
+                boolean find = false;
+
+                for (Integer i: addFriendUinList) {
+                    if (i == ci.getUin()){
+                        find = true;
+                        break;
+                    }
+                }
+
+                if (!find){
+                    contactDredgeList3.add(ci);
+                }
+            }
+        }else{
+            contactDredgeList3 = contactDredgeList2;
+        }
+
+        for(ContactsInfo ci : contactDredgeList3){
+            if(ci != null) {
+                LogUtils.getInstance().debug("通讯录已经注册的列表(已经过滤我已经申请加好友的列表), phone={},uin={},name={}", ci.getOrgPhone(), ci.getUin(), ci.getName());
+            }
+        }
+
+        if (contactDredgeList3.size() > 0){
             nullLl.setVisibility(View.GONE);
             allContactsList.add(new ContactsInfo(null,"已开通好友",null,null,2,null,null,null));
-            allContactsList.addAll(contactDredgeList);
+            allContactsList.addAll(contactDredgeList3);
         }
 
         //查询通讯录未开通
@@ -380,7 +464,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
             Log.i(TAG, "initNotOpenContactsAdapter: null");
             sideView.setVisibility(View.GONE);
         } else {
-            Log.i(TAG, "initNotOpenContactsAdapter: not null");
+            Log.i(TAG, "initNotOpenContactsAdapter: not null---" + notOpenList.get(0).getSortKey());
 
             allContactsList.add(new ContactsInfo(null,"未开通好友",null,null,3,null,null,null));
             allContactsList.addAll(notOpenList);
@@ -843,9 +927,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                         if (reqAddFriendUinRespond.getCode() == 0){
                             Log.i(TAG, "onNext: reqAddFriendUinRespond--" + reqAddFriendUinRespond.toString());
                             List<Integer> tempList = reqAddFriendUinRespond.getPayload().getUins();
-                            if (tempList != null && tempList.size() > 0){
-                                initContactsAdapter(tempList);
-                            }
+                            initContactsAdapter(tempList);
                         }
                     }
 

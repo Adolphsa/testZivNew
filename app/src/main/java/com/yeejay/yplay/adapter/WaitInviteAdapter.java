@@ -132,8 +132,11 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         Log.i(TAG, "getView: " + position);
 
         int uin = contentList.get(position).getUin();
+
         if (uin == 0) {  //未开通
+
             if (position >= 1) {
+
                 String currentAlpha = contentList.get(position).getSortKey();
                 String previewAlpha = contentList.get(position - 1).getSortKey();
                 if (!TextUtils.isEmpty(previewAlpha) && !previewAlpha.equals(currentAlpha)) { //不相等表示有新的字母项产生且为该类字母堆中的第一个字母索引项
@@ -141,6 +144,13 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     ((ViewHolder) holder).afiFirstAlpha.setVisibility(View.VISIBLE);
                 } else {
                     ((ViewHolder) holder).afiFirstAlpha.setVisibility(View.GONE);
+                }
+
+                //未开通好友第一个字母
+                if (getItemViewType(position-1) == TYPE_TEXT){
+                    String currentAlpha2 = contentList.get(position).getSortKey();
+                    ((ViewHolder) holder).afiFirstAlpha.setText(currentAlpha2);
+                    ((ViewHolder) holder).afiFirstAlpha.setVisibility(View.VISIBLE);
                 }
 
             } else {
@@ -189,7 +199,6 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             String url = contactsInfo.getHeadImgUrl();
             String nickName = contactsInfo.getNickName().trim();
-
 
             ((ViewHolder) holder).afItemName.setText(nickName);
             ((ViewHolder) holder).afItemTvSharesFriends.setText("通讯录好友");

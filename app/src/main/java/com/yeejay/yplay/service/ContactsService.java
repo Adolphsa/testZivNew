@@ -11,7 +11,6 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
-import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
@@ -55,7 +54,7 @@ public class ContactsService extends Service {
     private void upLoadingContacts() {
 
         List<ContactsInfo> contactsInfoList = queryContacts();
-        List<com.yeejay.yplay.model.ContactsInfo> waitUploadingContactsList = new ArrayList<>();
+        final List<com.yeejay.yplay.model.ContactsInfo> waitUploadingContactsList = new ArrayList<>();
 
         if (contactsInfoList == null || contactsInfoList.size() <= 0){
             Log.i(TAG, "upLoadingContacts: 没有查询到数据");
@@ -66,7 +65,6 @@ public class ContactsService extends Service {
                 Log.i(TAG, "upLoadingContacts: name---" + contactsInfo.getName() + "orgPhone---" + contactsInfo.getOrgPhone());
                 waitUploadingContactsList.add(new com.yeejay.yplay.model.ContactsInfo(contactsInfo.getName(), contactsInfo.getOrgPhone()));
             }
-
         }
 
         Map<String, Object> contactsMap = new HashMap<>();
@@ -96,7 +94,7 @@ public class ContactsService extends Service {
                             Log.i(TAG, "onNext: offset---" + offset);
 
                             List<UpdateContactsRespond.PayloadBean.InfosBean> infoList = baseRespond.getPayload().getInfos();
-                            updateSuccessHandle(infoList);
+                            updateSuccessHandle(waitUploadingContactsList,infoList);
 
                             upLoadingContacts();
 
@@ -118,8 +116,10 @@ public class ContactsService extends Service {
     }
 
     //上传成功后更新数据库数据
-    private void updateSuccessHandle(List<UpdateContactsRespond.PayloadBean.InfosBean> infoList) {
+    private void updateSuccessHandle(List<com.yeejay.yplay.model.ContactsInfo> uploadList, List<UpdateContactsRespond.PayloadBean.InfosBean> infoList) {
+
         for (UpdateContactsRespond.PayloadBean.InfosBean infosBean : infoList) {
+
             ContactsInfo contactsInfo = contactsInfoDao.queryBuilder()
                     .where(ContactsInfoDao.Properties.OrgPhone.eq(infosBean.getOrgPhone()))
                     .build().unique();
@@ -139,6 +139,39 @@ public class ContactsService extends Service {
                 Log.i(TAG, "updateSuccessHandle: 查询到的orgPhone为空---" + infosBean.getOrgPhone());
             }
         }
+
+        //对于服务器返回的校验每个号码是否返回 如果没有返回，说明号码格式非手机号 不用再次上传
+        for(com.yeejay.yplay.model.ContactsInfo info : uploadList){
+
+            boolean find = false;
+            String curOrgPhone = info.getPhone();
+
+            if(TextUtils.isEmpty(curOrgPhone)){
+                continue;
+            }
+
+            for (UpdateContactsRespond.PayloadBean.InfosBean infosBean : infoList) {
+                if(curOrgPhone.equals(infosBean.getOrgPhone())){
+                    find = true;
+                    break;
+                }
+            }
+
+            //如果没有找到 这说明非手机号
+            if(!find){
+
+                ContactsInfo contactsInfo = contactsInfoDao.queryBuilder()
+                        .where(ContactsInfoDao.Properties.OrgPhone.eq(curOrgPhone))
+                        .build().unique();
+
+                if (contactsInfo != null){
+                    contactsInfo.setUin(2); //0 已经上传 1 还未删除 2 非手机号
+                    contactsInfoDao.update(contactsInfo);
+                    LogUtils.getInstance().error("更新通讯录,非手机号码---" + curOrgPhone);
+                }
+
+            }
+        }
     }
 
 
@@ -146,6 +179,7 @@ public class ContactsService extends Service {
     private List<ContactsInfo> queryContacts(){
 
          return contactsInfoDao.queryBuilder()
+                 .where(ContactsInfoDao.Properties.Uin.eq(1))
                 .orderAsc(ContactsInfoDao.Properties.SortKey)
                 .offset(offset*50)
                 .limit(50)

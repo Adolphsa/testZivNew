@@ -58,6 +58,7 @@ import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
+import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
@@ -76,11 +77,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity implements HuaweiApiClient.ConnectionCallbacks,
         HuaweiApiClient.OnConnectionFailedListener {
@@ -203,6 +200,12 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+
+        //查询本地数据库是否有未上传的记录
+        List<ContactsInfo> cis = contactsInfoDao.queryBuilder().where(ContactsInfoDao.Properties.Uin.eq(1)).list();
+        if (cis != null && cis.size() >0){
+            startService(new Intent(MainActivity.this, ContactsService.class));
+        }
 
         insertUin();
         contactThread = new Thread(new ContactsUpdateRunnable());
@@ -927,6 +930,11 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         Log.i(TAG, "compareContacts: 比较通讯录的变更");
         List<com.yeejay.yplay.greendao.ContactsInfo> localContactsList = contactsInfoDao.loadAll();
+
+        for (com.yeejay.yplay.greendao.ContactsInfo contactsInfo : localContactsList) {
+            LogUtils.getInstance().debug("读取应用自己的通讯录数据库, phone={},name={},uin={}", contactsInfo.getOrgPhone(), contactsInfo.getName(), contactsInfo.getUin());
+        }
+
         int localSize = localContactsList.size();   //旧通讯录的size
         int currentSize = currentContactsList.size();   //新通讯库的size
 
@@ -1257,8 +1265,6 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             }
         }
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

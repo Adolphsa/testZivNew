@@ -33,6 +33,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class ActivityMyFriends extends BaseActivity implements MyFriendsAdapter.OnGetAlphaIndexerAndSectionsListener{
+
     private static final String TAG = "ActivityMyFriends";
 
     @BindView(R.id.layout_title_back2)

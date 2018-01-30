@@ -1,13 +1,10 @@
 package com.yeejay.yplay.userinfo;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Base64;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -16,24 +13,20 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
-import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.friend.ActivityAddFiendsDetail;
 import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
-import com.yeejay.yplay.model.AddFriendRespond;
-import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.FriendsListRespond;
-import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
-import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,14 +36,11 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import tangxiaolv.com.library.EffectiveShapeView;
 
 public class ActivityMyInfo extends BaseActivity {
+
+    private static final String TAG = "ActivityMyInfo";
 
     @BindView(R.id.layout_title_back2)
     ImageButton myTvBack;
@@ -135,12 +125,9 @@ public class ActivityMyInfo extends BaseActivity {
     }
 
     List<FriendsListRespond.PayloadBean.FriendsBean> mDataList;
-    int mPageNum = 1;
 
     TextView friendRequestNum;
     TextView friendNumTv;
-
-    RecommendFriendForNullAdapter recommendFriendForNullAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,28 +139,21 @@ public class ActivityMyInfo extends BaseActivity {
         initTitle();
         initFriendsList();
 
-        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
-        getUserDiamondInfo(uin, 1);
         mDataList = new ArrayList<>();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        //更新我的资料
         getMyInfo();
         getAddFriendMessageCount();
-        System.out.println("我的资料resume");
-//        recommendFriends();
     }
 
     //初始化标题
     private void initTitle() {
         layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
         layoutSetting.setVisibility(View.VISIBLE);
-//        myTvBack.setImageResource(R.drawable.back_white);
-//        myTvTitle.setText("我的");
-//        myTvTitle.setTextColor(getResources().getColor(R.color.white));
         myTvTitle.setVisibility(View.GONE);
     }
 
@@ -220,320 +200,99 @@ public class ActivityMyInfo extends BaseActivity {
         friendNumTv = (TextView) myFriendsRl.findViewById(R.id.friend_tv_num);
 
         //好友请求
-        //ImageView friendRequestImg = (ImageView) friendRequestRl.findViewById(R.id.friend_iv1);
-        //TextView friendRequestTv = (TextView) friendRequestRl.findViewById(R.id.friend_tv1);
         friendRequestNum = (TextView) friendRequestRl.findViewById(R.id.friend_tv_num);
-
-        //friendRequestImg.setImageDrawable(getDrawable(R.drawable.my_info_friend_request));
-        //friendRequestTv.setText("好友请求");
-
-        //添加好友
-        //ImageView addFriendImg = (ImageView) addFriendsRl.findViewById(R.id.friend_iv1);
-        //TextView addFriendTv = (TextView) addFriendsRl.findViewById(R.id.friend_tv1);
-        //TextView addFriendNum = (TextView) addFriendsRl.findViewById(R.id.friend_tv_num);
-
-        //addFriendImg.setImageDrawable(getDrawable(R.drawable.my_info_add_friend));
-        //addFriendTv.setText("添加好友");
-        //addFriendNum.setVisibility(View.GONE);
-    }
-
-    //扩列开启相关
-    private void initRecommendList(final List<GetRecommendsRespond.PayloadBean.FriendsBean> tempList) {
-
-        //从数据库读取值来设定开启扩列的显示与否
-        MyInfoDao myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
-        int uin = (int) SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
-        MyInfo myInfo = myInfoDao.queryBuilder().where(MyInfoDao.Properties.Uin.eq(uin))
-                .build().unique();
-//        if (myInfo != null && myInfo.getIsNoMoreShow2() == 1) {
-//            diamondExpansionRl.setVisibility(View.GONE);
-//        }
-
-        recommendFriendForNullAdapter = new RecommendFriendForNullAdapter(ActivityMyInfo.this,
-                new RecommendFriendForNullAdapter.hideCallback() {
-                    @Override
-                    public void hideClick(View v) {
-
-                    }
-                },
-                new RecommendFriendForNullAdapter.acceptCallback() {
-                    @Override
-                    public void acceptClick(View v) {
-                        Button button = (Button) v;
-                        GetRecommendsRespond.PayloadBean.FriendsBean friendsBean = tempList.get((int) v.getTag());
-                        int recommendType = friendsBean.getRecommendType();
-                        if (recommendType == 2) {
-                            button.setBackgroundResource(R.drawable.play_invite_yes);
-                            //邀请
-                            String phone = GsonUtil.GsonString(friendsBean.getPhone());
-                            System.out.println("邀请的电话---" + phone);
-                            String base64phone = Base64.encodeToString(phone.getBytes(), Base64.DEFAULT);
-                            invitefriendsbysms(base64phone);
-                        } else if (recommendType == 1 || recommendType == 3 || recommendType == 4) {
-                            button.setBackgroundResource(R.drawable.already_apply);
-                            int uin = friendsBean.getUin();
-                            addFriend(uin);
-                        }
-                    }
-                },
-                tempList, 2);
-//        diamondExpansionListView.setAdapter(recommendFriendForNullAdapter);
-    }
-
-
-    //显示对话框
-    private void showNormalDialog() {
-        final AlertDialog.Builder normalDialog =
-                new AlertDialog.Builder(ActivityMyInfo.this);
-        normalDialog.setMessage("解除好友关系后，你也会在对方的好友列表中消失");
-        normalDialog.setPositiveButton("解除关系",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-        normalDialog.setNegativeButton("取消",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-        normalDialog.show();
     }
 
     //获取自己的资料
     private void getMyInfo() {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_MY_INFO_URL;
         Map<String, Object> myInfoMap = new HashMap<>();
         myInfoMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
         myInfoMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         myInfoMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getMyInfo(myInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UserInfoResponde>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
 
-                    @Override
-                    public void onNext(@NonNull UserInfoResponde userInfoResponde) {
-                        System.out.println("获取自己的资料---" + userInfoResponde.toString());
-                        if (userInfoResponde.getCode() == 0) {
-                            initMyInfo(userInfoResponde.getPayload().getInfo());
-                            String phoneNumber = userInfoResponde.getPayload().getInfo().getPhone();
-                            SharePreferenceUtil.put(ActivityMyInfo.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
-                        }
-                    }
+        WnsAsyncHttp.wnsRequest(url, myInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取自己的资料异常---" + e.getMessage());
-                    }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onStartLoad(int value) {
 
-                    }
-                });
-    }
+            }
 
-    //获取钻石信息
-    private void getUserDiamondInfo(int userUin, int pageNum) {
+            @Override
+            public void onComplete(String result) {
+                UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+                if (userInfoResponde.getCode() == 0){
+                    initMyInfo(userInfoResponde.getPayload().getInfo());
+                    String phoneNumber = userInfoResponde.getPayload().getInfo().getPhone();
+                    SharePreferenceUtil.put(ActivityMyInfo.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
+                }
+            }
 
-        Map<String, Object> diamondInfoMap = new HashMap<>();
-        diamondInfoMap.put("userUin", userUin);
-        diamondInfoMap.put("pageNum", pageNum);
-        diamondInfoMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        diamondInfoMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        diamondInfoMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUsersDamonInfo(diamondInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UsersDiamondInfoRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
+            @Override
+            public void onTimeOut() {
 
-                    @Override
-                    public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
-                        System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
-                        if (usersDiamondInfoRespond.getCode() == 0) {
+            }
 
-                        }
-                    }
+            @Override
+            public void onError() {
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取用户钻石信息异常---" + e.getMessage());
-                    }
+            }
+        });
 
-                    @Override
-                    public void onComplete() {
-                    }
-                });
     }
 
     //获取未读的消息数
     private void getAddFriendMessageCount() {
 
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_UNREAD_MESSAGE_COUNT_URL;
         Map<String, Object> unreadFriendMsgCountMap = new HashMap<>();
         unreadFriendMsgCountMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
         unreadFriendMsgCountMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         unreadFriendMsgCountMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUnreadMessageCount(unreadFriendMsgCountMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UnReadMsgCountRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
+        WnsAsyncHttp.wnsRequest(url, unreadFriendMsgCountMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 未读好友消息---" + result);
+                UnReadMsgCountRespond unReadMsgCountRespond = GsonUtil.GsonToBean(result, UnReadMsgCountRespond.class);
+                if (unReadMsgCountRespond.getCode() == 0) {
+                    int count = unReadMsgCountRespond.getPayload().getCnt();
+                    if (count == 0) {
+                        friendRequestNum.setVisibility(View.GONE);
+                    } else {
+                        friendRequestNum.setVisibility(View.VISIBLE);
+                        friendRequestNum.setText(String.valueOf(count));
+                        friendRequestNum.setBackground(getDrawable(R.drawable.shape_friend_request_background));
+                        friendRequestNum.setTextColor(getResources().getColor(R.color.white));
                     }
 
-                    @Override
-                    public void onNext(@NonNull UnReadMsgCountRespond unReadMsgCountRespond) {
-                        System.out.println("未读好友消息---" + unReadMsgCountRespond.toString());
-                        if (unReadMsgCountRespond.getCode() == 0) {
-                            int count = unReadMsgCountRespond.getPayload().getCnt();
-                            if (count == 0) {
-                                friendRequestNum.setVisibility(View.GONE);
-                            } else {
-                                friendRequestNum.setVisibility(View.VISIBLE);
-                                friendRequestNum.setText(String.valueOf(count));
-                                friendRequestNum.setBackground(getDrawable(R.drawable.shape_friend_request_background));
-                                friendRequestNum.setTextColor(getResources().getColor(R.color.white));
-                            }
+                }
+            }
 
-                        }
+            @Override
+            public void onTimeOut() {
 
-                    }
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("未读好友消息数异常---" + e.getMessage());
-                    }
+            @Override
+            public void onError() {
 
-                    @Override
-                    public void onComplete() {
-                    }
-                });
-    }
-
-
-    //获取推荐好友信息
-    private void recommendFriends() {
-
-        Map<String, Object> tempMap = new HashMap<>();
-        tempMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        tempMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        tempMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .recommendFriendsForNull(tempMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<GetRecommendsRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                    }
-
-                    @Override
-                    public void onNext(@NonNull GetRecommendsRespond getRecommendsRespond) {
-                        System.out.println("推荐好友---" + getRecommendsRespond.toString());
-                        if (getRecommendsRespond.getCode() == 0) {
-
-                            if (getRecommendsRespond.getPayload().getFriends() != null
-                                    && getRecommendsRespond.getPayload().getFriends().size() > 0) {
-                                initRecommendList(getRecommendsRespond.getPayload().getFriends());
-                            } else {
-//                                diamondExpansionRl.setVisibility(View.GONE);
-//                                amiView2.setVisibility(View.GONE);
-                            }
-
-                        }
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("推荐好友异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
-
-    //通过短信邀请好友
-    private void invitefriendsbysms(String friends) {
-        Map<String, Object> removeFreindMap = new HashMap<>();
-        removeFreindMap.put("friends", friends);
-        removeFreindMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        removeFreindMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        removeFreindMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .removeFriend(removeFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<BaseRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull BaseRespond baseRespond) {
-                        System.out.println("短信邀请好友---" + baseRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("短信邀请好友异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-    }
-
-    //发送加好友的请求
-    private void addFriend(int toUin) {
-
-        Map<String, Object> addFreindMap = new HashMap<>();
-        addFreindMap.put("toUin", toUin);
-        addFreindMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
-        addFreindMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
-        addFreindMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .addFriend(addFreindMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<AddFriendRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull AddFriendRespond addFriendRespond) {
-                        System.out.println("发送加好友请求---" + addFriendRespond.toString());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("发送加好友请求异常---" + e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-
+            }
+        });
     }
 }

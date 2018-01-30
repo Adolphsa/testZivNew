@@ -1,9 +1,9 @@
 package com.yeejay.yplay.userinfo;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -12,13 +12,15 @@ import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.AllDiamondsAdapter;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.StatuBarUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +30,10 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ActivityAllDiamond extends BaseActivity {
+
+    private static final String TAG = "ActivityAllDiamond";
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
@@ -120,7 +119,9 @@ public class ActivityAllDiamond extends BaseActivity {
     }
 
     //获取钻石信息
-    private void getUserDiamondInfo(int userUin,int pageNum, int pageSize){
+    private void getUserDiamondInfo(int userUin,int pageNum, int pageSize) {
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_DIAMOND_URL;
         Map<String, Object> diamondInfoMap = new HashMap<>();
         diamondInfoMap.put("userUin",userUin);
         diamondInfoMap.put("pageNum",pageNum);
@@ -128,48 +129,49 @@ public class ActivityAllDiamond extends BaseActivity {
         diamondInfoMap.put("uin", SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_UIN, 0));
         diamondInfoMap.put("token", SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
         diamondInfoMap.put("ver", SharePreferenceUtil.get(ActivityAllDiamond.this, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUsersDamonInfo(diamondInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UsersDiamondInfoRespond>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+        WnsAsyncHttp.wnsRequest(url, diamondInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 用户钻石信息---" + result);
+                UsersDiamondInfoRespond usersDiamondInfoRespond = GsonUtil.GsonToBean(result, UsersDiamondInfoRespond.class);
+                if (usersDiamondInfoRespond.getCode() == 0){
+                    List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
+                    System.out.println("List<>---" + tempList.size());
+                    if (tempList.size() > 0){
+                        mPageNum++;
+                        mDataList.addAll(tempList);
+                        initDiamondList(tempList);
+                    }else {
+                        System.out.println("数据加载完毕");
+                        loadMoreView.noData();
                     }
 
-                    @Override
-                    public void onNext(@NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
-                        System.out.println("获取用户钻石信息---" + usersDiamondInfoRespond.toString());
-                        if (usersDiamondInfoRespond.getCode() == 0){
-                            List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
-                            System.out.println("List<>---" + tempList.size());
-                            if (tempList.size() > 0){
-                                mPageNum++;
-                                mDataList.addAll(tempList);
-                                initDiamondList(tempList);
-                            }else {
-                                System.out.println("数据加载完毕");
-                                loadMoreView.noData();
-                            }
+                } else {
+                    //服务器获取信息失败
+                    aadListView.setAdapter(null);
+                }
+                aadPtfRefresh.finishLoadMore();
+            }
 
-                        } else {
-                            //服务器获取信息失败
-                            aadListView.setAdapter(null);
-                        }
-                        aadPtfRefresh.finishLoadMore();
-                    }
+            @Override
+            public void onTimeOut() {
+                aadPtfRefresh.finishLoadMore();
+            }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        System.out.println("获取用户钻石信息异常---" + e.getMessage());
-                        aadPtfRefresh.finishLoadMore();
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            @Override
+            public void onError() {
+                aadPtfRefresh.finishLoadMore();
+            }
+        });
     }
 }

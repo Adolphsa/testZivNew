@@ -800,7 +800,14 @@ public class ActivitySetting extends BaseActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         //设置你的操作事项
+                        String username = userNameView.getText().toString().trim();
                         System.out.println("modify username" + userNameView.getText().toString().trim());
+
+                        if (username.contains("pu") || username.contains("pupu") || username.contains("噗") || username.contains("噗噗")){
+                            Toast.makeText(ActivitySetting.this, "包含敏感词汇", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         updateHeaderImg(null, userNameView.getText().toString().trim(),
                                 0, null);
                     }

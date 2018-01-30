@@ -34,6 +34,7 @@ public class YPlayConstant {
     public static final String YPLAY_NO_MORE_SHOW = "no_more_show";
 
     public static final String YPLAY_IM_SIGNATURE = "im_signature";
+    public static final String SP_KEY_IM_SIG = "img_signature";
 
     public static final int YPLAY_FEEDS_TYPE = 1;
     public static final int YPLAY_MY_INFO_TYPE = 2;
@@ -83,6 +84,20 @@ public class YPlayConstant {
     //检查邀请码
     public static final String API_CHECK_INVIDE_CODE_URL = "/api/account/checkinvitecode";
 
+    //获取钻石信息
+    public static final String API_GET_DIAMOND_URL = "/api/user/getusergemstatinfo";
+
+    //获取未读好友的消息数
+    public static final String API_GET_UNREAD_MESSAGE_COUNT_URL = "/api/sns/getaddfriendnewmsgcnt";
+
+    //拉取添加好友消息数组
+    public static final String API_GET_FRIEND_COUNT_URL = "/api/sns/getaddfriendmsgs";
+
+    //接受好友请求
+    public static final String API_ACCEPT_FRIEND_URL = "/api/sns/acceptaddfriend";
+
+
+    //---------------------------------------------------------------------
     public static final String BASE_URL = "http://yplay.vivacampus.com";
 
     //获取好友动态

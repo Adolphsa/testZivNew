@@ -78,7 +78,7 @@
     </logger>
 
     <!-- Write INFO (and higher-level) messages to the log file -->
-    <root level="ERROR">
+    <root level="DEBUG">
         <appender-ref ref="LOGCAT"/>
     </root>
 
