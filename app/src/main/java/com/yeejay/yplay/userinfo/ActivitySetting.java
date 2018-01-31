@@ -784,7 +784,6 @@ public class ActivitySetting extends BaseActivity {
                 userBuilder.setContentView(userNameLayout);
                 userBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
                         //设置你的操作事项
                         String username = userNameView.getText().toString().trim();
                         System.out.println("modify username" + userNameView.getText().toString().trim());
@@ -793,6 +792,7 @@ public class ActivitySetting extends BaseActivity {
                             Toast.makeText(ActivitySetting.this, "包含敏感词汇", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        dialog.dismiss();
 
                         updateHeaderImg(null, userNameView.getText().toString().trim(),
                                 0, null);
