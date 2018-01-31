@@ -223,7 +223,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 return;
             }
 
-            LogUtils.getInstance().debug("send: 编辑框的内容 = {}", str);
+            LogUtils.getInstance().debug("send: 编辑框的内容 = {}，imagePath = {}", str, imagePath);
             if (!TextUtils.isEmpty(str) || !TextUtils.isEmpty(imagePath)) {
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
@@ -273,56 +273,64 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         sessionId, mSender, uin);
 
                 if (!TextUtils.isEmpty(imagePath)) {
+                    File imageFile = new File(imagePath);
+                    //实际使用过程中出现过发消息时拍照图片bitmap null pointer导致的异常，
+                    // 故此处先判断下图片文件确实存在;
+                    if (imageFile.exists()) {
+                        //发送图片时MessageUpdateUtil中对自己发送图片的消息做了过滤，导致ActivityChatWindow中
+                        //的onMessageUpdate()回调不会被触发，因此需要再这里另外加入时间戳信息;
+                        insertTimestampMsg();
 
-                    msgId = System.currentTimeMillis();
+                        msgId = System.currentTimeMillis();
 
-                    ImageInfo imageInfo = new ImageInfo();
-                    Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                    int imageFormat = getImageFormat(imagePath);
-                    imageInfo.setImageFormat(imageFormat);
+                        ImageInfo imageInfo = new ImageInfo();
+                        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+                        int imageFormat = getImageFormat(imagePath);
+                        imageInfo.setImageFormat(imageFormat);
 
 
-                    ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
-                    originalImage.setImageType(TIMImageType.Original);
-                    originalImage.setImageWidth(bitmap.getWidth());
-                    originalImage.setImageHeight(bitmap.getHeight());
-                    originalImage.setImageUrl(imagePath);
-                    imageInfo.setOriginalImage(originalImage);
+                        ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
+                        originalImage.setImageType(TIMImageType.Original);
+                        originalImage.setImageWidth(bitmap.getWidth());
+                        originalImage.setImageHeight(bitmap.getHeight());
+                        originalImage.setImageUrl(imagePath);
+                        imageInfo.setOriginalImage(originalImage);
 
-                    ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
-                    thumbImage.setImageType(TIMImageType.Thumb);
-                    thumbImage.setImageWidth(bitmap.getWidth());
-                    thumbImage.setImageHeight(bitmap.getHeight());
-                    thumbImage.setImageUrl(imagePath);
-                    imageInfo.setThumbImage(thumbImage);
+                        ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
+                        thumbImage.setImageType(TIMImageType.Thumb);
+                        thumbImage.setImageWidth(bitmap.getWidth());
+                        thumbImage.setImageHeight(bitmap.getHeight());
+                        thumbImage.setImageUrl(imagePath);
+                        imageInfo.setThumbImage(thumbImage);
 
-                    ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
-                    largeImage.setImageType(TIMImageType.Large);
-                    largeImage.setImageWidth(bitmap.getWidth());
-                    largeImage.setImageHeight(bitmap.getHeight());
-                    largeImage.setImageUrl(imagePath);
-                    imageInfo.setLargeImage(largeImage);
+                        ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
+                        largeImage.setImageType(TIMImageType.Large);
+                        largeImage.setImageWidth(bitmap.getWidth());
+                        largeImage.setImageHeight(bitmap.getHeight());
+                        largeImage.setImageUrl(imagePath);
+                        imageInfo.setLargeImage(largeImage);
 
-                    String imageInfoStr = GsonUtil.GsonString(imageInfo);
-                    imageMsgTs = System.currentTimeMillis() / 1000;
-                    selfImageMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Image.ordinal(), imageInfoStr, imageMsgTs, -1);
-                    imMsgDao.insert(selfImageMsg);
+                        String imageInfoStr = GsonUtil.GsonString(imageInfo);
+                        imageMsgTs = System.currentTimeMillis() / 1000;
+                        selfImageMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Image.ordinal(), imageInfoStr, imageMsgTs, -1);
+                        imMsgDao.insert(selfImageMsg);
 
-                    //更新会话的最近一条消息
-                    imSessionImage = imSessionDao.queryBuilder()
-                            .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                            .build().unique();
-                    if (imSessionImage != null) {
-                        imSessionImage.setLastMsgId(msgId);
-                        imSessionImage.setLastSender(String.valueOf(uin));
-                        imSessionImage.setMsgType(TIMElemType.Image.ordinal());
-                        imSessionImage.setMsgTs(imageMsgTs);
-                        imSessionDao.update(imSessionImage);
+                        //更新会话的最近一条消息
+                        imSessionImage = imSessionDao.queryBuilder()
+                                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                                .build().unique();
+                        if (imSessionImage != null) {
+                            imSessionImage.setLastMsgId(msgId);
+                            imSessionImage.setLastSender(String.valueOf(uin));
+                            imSessionImage.setMsgType(TIMElemType.Image.ordinal());
+                            imSessionImage.setMsgTs(imageMsgTs);
+                            imSessionDao.update(imSessionImage);
+                        }
+
+                        mDataList.add(0, selfImageMsg);
+                        chatAdapter.notifyItemInserted(mDataList.size() - 1);
+                        acwRecycleView.scrollToPosition(mDataList.size() - 1);
                     }
-
-                    mDataList.add(0, selfImageMsg);
-                    chatAdapter.notifyItemInserted(mDataList.size() - 1);
-                    acwRecycleView.scrollToPosition(mDataList.size() - 1);
                 }
 
                 //发送消息
@@ -764,7 +772,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             mDataList.add(0, imMsg);
         }
-
     }
 
     private String getCurrentTime(long imMsgTs) {

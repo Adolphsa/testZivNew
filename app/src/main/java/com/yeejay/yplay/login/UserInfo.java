@@ -225,7 +225,7 @@ public class UserInfo extends BaseActivity {
                 });
     }
 
-    //上传图头像前先获取im签名;
+    //上传头像前先获取im签名;
     private void uploadImage(String imagePath, final String imageName, final Bitmap bitmap) {
         SharedPreferences sp = YplayApplication.getContext().getSharedPreferences(
                 YPlayConstant.SP_KEY_IM_SIG,
