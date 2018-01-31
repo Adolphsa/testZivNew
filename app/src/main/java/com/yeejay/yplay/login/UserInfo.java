@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,13 +33,17 @@ import com.donkingliang.imageselector.utils.ImageUtil;
 import com.donkingliang.imageselector.utils.PhotoUtils;
 import com.donkingliang.imageselector.utils.ToastUtils;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.base.BaseActivity;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.ImageUploadBody;
 import com.yeejay.yplay.model.ImageUploadRespond;
+import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 import com.yeejay.yplay.wns.WnsAsyncHttp;
@@ -70,10 +76,10 @@ public class UserInfo extends BaseActivity {
     private File fileUri;
     private Uri imageUri;
     private static final String BASE_URL_USER = "http://sh.file.myqcloud.com";
-    private static final String IMAGE_AUTHORIZATION = "ZijsNfCd4w8zOyOIAnbyIykTgBdhPTEyNTMyMjkzNTUmYj15cGxheSZrPUFLSURyWjFFRzQwejcyaTdMS3NVZmFGZm9pTW15d2ZmbzRQViZlPTE1MTcxMjM1ODcmdD0xNTA5MzQ3NTg3JnI9MTAwJnU9MCZmPQ==";
 
     EffectiveShapeView userHeadImage;
     EditText userName;
+    private String mImSig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,27 +138,33 @@ public class UserInfo extends BaseActivity {
 
         String imagePath = "";
         String imageName = "";
-        if (data != null){
-            if (requestCode == REQUEST_CODE) {
+
+        if (requestCode == REQUEST_CODE) {
+            if (data != null) {
                 ArrayList<String> images = data.getStringArrayListExtra(ImageSelectorUtils.SELECT_RESULT);
 
                 imagePath = images.get(0);
                 imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
                 Log.i(TAG, "onActivityResult: 相册imagePath---" + imagePath + ",imageName---" + imageName);
 
-            } else if (requestCode == CODE_CAMERA_REQUEST) {
-
-                imagePath = fileUri.getAbsolutePath();
-                imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
-                Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
-
+                Bitmap bm1 = ImageUtil.decodeImage(imagePath, 200, 200);
+                if (bm1 != null) {
+                    userHeadImage.setImageBitmap(bm1);
+                    uploadImage(imagePath, imageName, bm1);
+                }
             }
+
+        } else if (requestCode == CODE_CAMERA_REQUEST) {
+
+            imagePath = fileUri.getAbsolutePath();
+            imageName = imagePath.substring(imagePath.length() - 17, imagePath.length());
+            Log.i(TAG, "onActivityResult: 拍照imagePath---" + imagePath + ",imageName---" + imageName);
+
             Bitmap bm1 = ImageUtil.decodeImage(imagePath,200,200);
             if (bm1 != null){
                 userHeadImage.setImageBitmap(bm1);
                 uploadImage(imagePath, imageName,bm1);
             }
-
         }
     }
 
@@ -170,8 +182,70 @@ public class UserInfo extends BaseActivity {
         return super.onTouchEvent(event);
     }
 
+    //获取上传头像签名
+    private void getUploadImgSig(final String imagePath, final String imageName, final Bitmap bitmap) {
+        final Map<String, Object> imMap = new HashMap<>();
+        final int uin = (int) SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_UIN, (int) 0);
+        imMap.put("uin", uin);
+        imMap.put("token", SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        imMap.put("ver", SharePreferenceUtil.get(YplayApplication.getContext(), YPlayConstant.YPLAY_VER, 0));
+        imMap.put("identifier", String.valueOf(uin));
+
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETHEADIMGUPLOADSIG, imMap,
+                new WnsRequestListener() {
+
+                    @Override
+                    public void onNoInternet() {
+
+                    }
+
+                    @Override
+                    public void onStartLoad(int value) {
+
+                    }
+
+                    @Override
+                    public void onComplete(String result) {
+                        ImSignatureRespond imSignatureRespond = GsonUtil.GsonToBean(result, ImSignatureRespond.class);
+                        if (imSignatureRespond.getCode() == 0) {
+                            mImSig = imSignatureRespond.getPayload().getSig();
+
+                            uploadImageImpl(imagePath, imageName, bitmap);
+                        }
+                    }
+
+                    @Override
+                    public void onTimeOut() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                    }
+                });
+    }
+
+    //上传图头像前先获取im签名;
+    private void uploadImage(String imagePath, final String imageName, final Bitmap bitmap) {
+        SharedPreferences sp = YplayApplication.getContext().getSharedPreferences(
+                YPlayConstant.SP_KEY_IM_SIG,
+                Context.MODE_PRIVATE);
+        mImSig = sp.getString("im_Sig", "");
+        long expireTime = sp.getLong("expireTime", 0);
+        long currentTime = BaseUtils.getCurrentDayTimeMillis();
+        LogUtils.getInstance().debug("im_Sig = {}, expireTime = {}, currentTime = {}",
+                mImSig, expireTime, currentTime);
+        if(TextUtils.isEmpty(mImSig) || expireTime >= currentTime) {
+            //说明需要从服务器重新获取最新的上传头像签名;
+            getUploadImgSig(imagePath, imageName, bitmap);
+        } else {
+            //说明当前上传头像签名依然有效,则去真正的上传头像：
+            uploadImageImpl(imagePath, imageName, bitmap);
+        }
+    }
+
     //上传图头像
-    private void uploadImage(String imagePath, final String imageName,Bitmap bitmap) {
+    private void uploadImageImpl(String imagePath, final String imageName, final Bitmap bitmap) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -189,7 +263,7 @@ public class UserInfo extends BaseActivity {
         body.setFilecontent(datas);
 
         YPlayApiManger.getInstance().getZivApiServiceParameters(BASE_URL_USER)
-                .uploadHeaderImg(IMAGE_AUTHORIZATION, imageName, upload, aa)
+                .uploadHeaderImg(mImSig, imageName, upload, aa)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ImageUploadRespond>() {
@@ -211,6 +285,8 @@ public class UserInfo extends BaseActivity {
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
                         Log.i(TAG, "onNext: 图片上传异常---" + e.getMessage());
+                        Toast.makeText(UserInfo.this, R.string.head_img_upload_error,
+                                Toast.LENGTH_SHORT).show();
                     }
 
                     @Override

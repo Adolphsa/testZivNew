@@ -366,7 +366,8 @@ public class ActivitySetting extends BaseActivity {
     private void initView(UserInfoResponde.PayloadBean.InfoBean infoBean) {
         String url = infoBean.getHeadImgUrl();
         if (!TextUtils.isEmpty(url)) {
-            Picasso.with(ActivitySetting.this).load(url).into(settingImgHeader);
+                Picasso.with(ActivitySetting.this).load(url).resizeDimen(R.dimen.item_add_friends_width,
+                        R.dimen.item_add_friends_height).into(settingImgHeader);
         }
 
         settingNmae.setText(infoBean.getNickName());
@@ -470,7 +471,7 @@ public class ActivitySetting extends BaseActivity {
         SharedPreferences sp = YplayApplication.getContext().getSharedPreferences(
                 YPlayConstant.SP_KEY_IM_SIG,
                 Context.MODE_PRIVATE);
-        mImSig = sp.getString("im_Sig", IMAGE_AUTHORIZATION);
+        mImSig = sp.getString("im_Sig", "");
         long expireTime = sp.getLong("expireTime", 0);
         long currentTime = BaseUtils.getCurrentDayTimeMillis();
         LogUtils.getInstance().debug("im_Sig = {}, expireTime = {}, currentTime = {}",
@@ -484,12 +485,12 @@ public class ActivitySetting extends BaseActivity {
         }
     }
 
+
     //上传图头像
     private void uploadImageImpl(String imagePath, final String imageName, final Bitmap bitmap) {
 
         System.out.println("imageName---" + imageName);
 
-//        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] datas = baos.toByteArray();
@@ -540,8 +541,7 @@ public class ActivitySetting extends BaseActivity {
                 });
     }
 
-
-    //修改头像
+    //修改头像/昵称/姓名/性别
     private void updateHeaderImg(String headImgId, final String nickName, int gender, final String userName) {
 
         String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_SET_AGE_URL;
