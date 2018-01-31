@@ -91,6 +91,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +178,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                     .where(ImSessionDao.Properties.SessionId.eq(sessionId))
                     .build().unique();
             String chater = imSession.getChater();
-            LogUtils.getInstance().debug("send: chater = {}" + chater);
+            LogUtils.getInstance().debug("send: chater = {}", chater);
 
             //判断是否是好友关系
             FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
@@ -222,7 +223,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 return;
             }
 
-            LogUtils.getInstance().debug("send: 编辑框的内容 = {}" + str);
+            LogUtils.getInstance().debug("send: 编辑框的内容 = {}", str);
             if (!TextUtils.isEmpty(str) || !TextUtils.isEmpty(imagePath)) {
                 //构造一条消息
                 final TIMMessage msg = new TIMMessage();
@@ -682,7 +683,6 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         if (!TextUtils.isEmpty(sessionId)) {
             //查询消息表
             mDataList = queryDatabaseForImsession(sessionId);
-            System.out.println("消息列表的长度---" + mDataList.size());
             LogUtils.getInstance().debug("消息列表的长度 = {}",mDataList.size());
         }
     }
@@ -736,14 +736,54 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         });
     }
 
+    /*
+    * 判断离上一条消息的时间间隔是否超过3分钟，超过 则在UI中显示上一条信息的时间信息：
+    */
+    private void insertTimestampMsg () {
+        //获取最近一条消息的时间戳;
+        List<ImMsg> imMsgList = imMsgDao.queryBuilder()
+                .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                .orderDesc(ImMsgDao.Properties.MsgTs)
+                .offset(dataOffset * 10)
+                .limit(1)
+                .list();
+        long lastImMsgTs = imMsgList.get(0).getMsgTs();
+        long currentTs = System.currentTimeMillis() / 1000;
+
+        LogUtils.getInstance().debug("lastImMsgTs = {}, currentTs = {}", lastImMsgTs, currentTs);
+        if ((currentTs - lastImMsgTs) >= (long)180) {
+            //如果当前时间戳跟最近一条消息时间戳相隔超过3分钟，则插入到数据列表中;
+            ImMsg imMsg = new ImMsg(null,
+                    sessionId,
+                    System.currentTimeMillis(),
+                    String.valueOf(uin),
+                    100,
+                    getCurrentTime(lastImMsgTs),
+                    (System.currentTimeMillis() / 1000),
+                    1);
+
+            mDataList.add(0, imMsg);
+        }
+
+    }
+
+    private String getCurrentTime(long imMsgTs) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return df.format(imMsgTs * 1000).toString();
+    }
+
     @Override
     public void onMessageUpdate(ImMsg imMsg) {
 
         String content = imMsg.getMsgContent();
-        LogUtils.getInstance().debug("聊天窗口收到了 content = {}", content);
         String tempSessionId = imMsg.getSessionId();
+        LogUtils.getInstance().debug("聊天窗口收到了 content = {}, SessionId = {}",
+                content, tempSessionId);
 
         if (!TextUtils.isEmpty(tempSessionId) && sessionId.equals(tempSessionId)) {
+            //判断离上一条消息的时间间隔是否超过3分钟，超过 则在UI中显示时间信息：
+            insertTimestampMsg();
+
             mDataList.add(0, imMsg);
             chatAdapter.notifyItemInserted(mDataList.size() - 1);
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
