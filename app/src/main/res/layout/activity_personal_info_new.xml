@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_myinfo_bg"
+    >
+    <include layout="@layout/layout_title_bar_my_page" />
+    <include layout="@layout/layout_personal_info_header"
+        />
+    <include layout="@layout/layout_personal_info_diamonds"
+        android:id="@+id/ami_include_my_diammonds"
+        />
+    <include
+        android:id="@+id/ami_include_my_friends"
+        layout="@layout/layout_user_info_friends"
+
+        />
+    <include layout="@layout/layout_myinfo_req_add"
+        />
+
+</LinearLayout>

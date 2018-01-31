@@ -793,7 +793,7 @@ public class ActivitySetting extends BaseActivity {
                             return;
                         }
                         dialog.dismiss();
-
+                        dialog.dismiss();
                         updateHeaderImg(null, userNameView.getText().toString().trim(),
                                 0, null);
                     }
@@ -869,7 +869,7 @@ public class ActivitySetting extends BaseActivity {
                             return;
                         }
 
-                        dialog.dismiss();
+
                         //设置你的操作事项
                         System.out.println("modify nickname" + nickNameView.getText().toString().trim());
                         updateHeaderImg(null, null, 0, nickNameView.getText().toString().trim());

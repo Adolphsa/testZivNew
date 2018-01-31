@@ -2,10 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="220dp"
-    android:paddingBottom="20dp"
-    android:gravity="center"
-    android:background="@drawable/shape_user_info_background">
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="54dp"
+    >
 
     <tangxiaolv.com.library.EffectiveShapeView
         android:id="@+id/lui_header_img"
@@ -14,7 +13,119 @@
         android:scaleType="fitXY"
         app:shape="circle"
         android:src="@drawable/header_deafult"
-        android:layout_alignParentRight="true"
         android:background="@drawable/shape_cycyle"
+        />
+    <TextView
+        android:id="@+id/personal_nick_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name"
+        android:textColor="@color/white"
+        android:layout_toRightOf="@+id/lui_header_img"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="16dp"
+        android:textSize="18sp"
+        android:maxEms="5"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <ImageView
+        android:id="@+id/personal_gender"
+        android:layout_width="21dp"
+        android:layout_height="21dp"
+        android:src="@drawable/myinfo_sex_boy"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="16dp"
+        android:layout_toRightOf="@+id/personal_nick_name" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="25dp"
+        android:layout_toRightOf="@+id/lui_header_img"
+        android:layout_below="@+id/personal_nick_name"
+        android:layout_marginTop="10dp"
+        >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/myinfo_diamond"
+
+            />
+        <TextView
+            android:id="@+id/lui_diamond_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginLeft="9dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="|"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginLeft="10dp"
+            />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/myinfo_friend"
+            android:layout_marginLeft="15dp"
+            />
+        <TextView
+            android:id="@+id/lui_friend_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginLeft="8dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lpi_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/lui_header_img"
+        android:layout_marginTop="20dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="@string/username_colon_only"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/personal_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/personal_school"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="深圳大学 · 大一"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:layout_below="@+id/lpi_ll"
         />
 </RelativeLayout>

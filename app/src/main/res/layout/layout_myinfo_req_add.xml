@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="54dp"
+    android:layout_gravity="center"
+    android:layout_marginTop="10dp">
+
+    <!-- friends request-->
+    <RelativeLayout
+        android:id="@+id/ami_include_friend_request"
+        android:layout_width="145dp"
+        android:layout_height="54dp"
+        android:layout_gravity="center"
+        android:background="@drawable/selector_my_info_main_item_background">
+
+        <ImageView
+            android:id="@+id/friend_iv1"
+            android:layout_width="@dimen/personal_icon_width"
+            android:layout_height="@dimen/personal_icon_height"
+            android:src="@drawable/personal_friend_request_icon"
+            android:scaleType="fitXY"
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:id="@+id/friend_tv1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/my_item_font_color"
+            android:text="@string/friend_request"
+            android:layout_toRightOf="@id/friend_iv1"
+            android:layout_marginLeft="6dp"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/friend_tv_num"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:textSize="14sp"
+            android:textColor="@color/text_color_gray2"
+            android:text="0"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            />
+    </RelativeLayout>
+
+    <!-- friends add-->
+    <RelativeLayout
+        android:id="@+id/ami_include_add_friend"
+        android:layout_width="145dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="center"
+        android:background="@drawable/selector_my_info_main_item_background">
+
+        <ImageView
+            android:id="@+id/friend_add_icon"
+            android:layout_width="@dimen/personal_icon_width"
+            android:layout_height="@dimen/personal_icon_height"
+            android:src="@drawable/personal_friends_add_icon"
+            android:scaleType="fitXY"
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true" />
+        <TextView
+            android:id="@+id/friend_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/my_item_font_color"
+            android:text="@string/friend_add"
+            android:layout_toRightOf="@id/friend_add_icon"
+            android:layout_marginLeft="6dp"
+            android:layout_centerVertical="true"
+            android:gravity="center" />
+    </RelativeLayout>
+</RelativeLayout>

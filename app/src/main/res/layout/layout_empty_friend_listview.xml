@@ -2,7 +2,7 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:src="@drawable/friend_null"
+    android:src="@drawable/friend_req_add_null"
     android:layout_gravity="center"
     android:gravity="center" >
 

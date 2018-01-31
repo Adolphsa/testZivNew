@@ -256,7 +256,7 @@ public class MessageUpdateUtil {
                         int ts = jsonObject.getInt("ts");
                         Log.i(TAG, "PushNotify: jsonObject friendUin---" + friendUin + ",ts---" + ts);
                         DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
-                        FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
+                        FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin,uin);
                         dbHelper.deleteFriendInfo(friendInfo);
                     } catch (JSONException e) {
                         e.printStackTrace();

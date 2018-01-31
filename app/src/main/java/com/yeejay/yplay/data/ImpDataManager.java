@@ -44,8 +44,8 @@ public class ImpDataManager implements DataManager{
     }
 
     @Override
-    public FriendInfo queryFriendInfo(int friendUin) {
-        return mDbHelper.queryFriendInfo(friendUin);
+    public FriendInfo queryFriendInfo(int friendUin, int myselfUin) {
+        return mDbHelper.queryFriendInfo(friendUin,myselfUin);
     }
 
     @Override

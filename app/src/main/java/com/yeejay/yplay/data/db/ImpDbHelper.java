@@ -51,8 +51,9 @@ public class ImpDbHelper implements DbHelper{
     }
 
     @Override
-    public FriendInfo queryFriendInfo(int friendUin) {
+    public FriendInfo queryFriendInfo(int friendUin, int myselfUin) {
         return mDaoSession.getFriendInfoDao().queryBuilder()
+                .where(FriendInfoDao.Properties.MyselfUin.eq(myselfUin))
                 .where(FriendInfoDao.Properties.FriendUin.eq(friendUin))
                 .build().unique();
     }

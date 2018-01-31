@@ -155,6 +155,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
     ContactsInfoDao contactsInfoDao;
     Thread contactThread;
     boolean threadIsExist = false;
+    int myselfUin;
 
     public int getmColor() {
         return mColor;
@@ -200,6 +201,8 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
         imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
         myInfoDao = YplayApplication.getInstance().getDaoSession().getMyInfoDao();
+
+        myselfUin = (int) SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, (int) 0);
 
         //查询本地数据库是否有未上传的记录
         List<ContactsInfo> cis = contactsInfoDao.queryBuilder().where(ContactsInfoDao.Properties.Uin.eq(1)).list();
@@ -653,7 +656,7 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         FriendInfo dataBaseFriendInfo;
 //                        insertFriendInfoNum += tempList.size();
         for (FriendsListRespond.PayloadBean.FriendsBean friendInfo : tempList) {
-            dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin());
+            dataBaseFriendInfo = dbHelper.queryFriendInfo(friendInfo.getUin(),myselfUin);
             if (dataBaseFriendInfo == null) {
 //                                Log.i(TAG, "onNext: insertFriendInfo--" + dataBaseFriendInfo);
                 dbHelper.insertFriendInfo(dbHelper.NetworkFriendInfo2DbFriendInfo(friendInfo));

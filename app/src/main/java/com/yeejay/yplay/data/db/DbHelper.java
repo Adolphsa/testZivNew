@@ -15,7 +15,7 @@ public interface DbHelper {
     //friendInfo
     long insertFriendInfo(FriendInfo friendInfo);
     FriendInfo NetworkFriendInfo2DbFriendInfo(FriendsListRespond.PayloadBean.FriendsBean friendInfo);
-    FriendInfo queryFriendInfo(int friendUin);
+    FriendInfo queryFriendInfo(int friendUin, int myselfUin);
     void updateFriendInfo(FriendInfo friendInfo);
     void updateFriendInfo(FriendInfo dataBaseFriendInfo, FriendsListRespond.PayloadBean.FriendsBean friendInfo);
     void deleteFriendInfo(FriendInfo friendInfo);

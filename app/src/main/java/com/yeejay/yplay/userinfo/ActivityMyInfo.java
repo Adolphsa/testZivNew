@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -14,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.RecyclerImageView;
 import com.yeejay.yplay.friend.ActivityAddFiendsDetail;
 import com.yeejay.yplay.friend.AddFriends;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -21,6 +25,7 @@ import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.UnReadMsgCountRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
+import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
@@ -62,14 +67,15 @@ public class ActivityMyInfo extends BaseActivity {
     TextView personalUserName;
     @BindView(R.id.personal_school)
     TextView personalSchool;
-    @BindView(R.id.personal_grade)
-    TextView personalGrade;
+//    @BindView(R.id.personal_grade)
+//    TextView personalGrade;
 
     @BindView(R.id.diamond_tv_num)
     TextView amiTvDiamondNumber;
     @BindView(R.id.ami_include_my_diammonds)
     RelativeLayout amiDiamonds;
-
+    @BindView(R.id.lpid_diamond_list)
+    ListView lpidDiamondListView;
 
     //好友相关
     @BindView(R.id.ami_include_my_friends)
@@ -78,6 +84,10 @@ public class ActivityMyInfo extends BaseActivity {
     RelativeLayout friendRequestRl;
     @BindView(R.id.ami_include_add_friend)
     RelativeLayout addFriendsRl;
+    @BindView(R.id.lui_diamond_count)
+    TextView luiDiamondCount;
+    @BindView(R.id.lui_friend_count)
+    TextView luiFriendCount;
 
     //返回
     @OnClick(R.id.layout_title_back2)
@@ -128,14 +138,16 @@ public class ActivityMyInfo extends BaseActivity {
 
     TextView friendRequestNum;
     TextView friendNumTv;
+    int myselfUin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_personal_info);
+        setContentView(R.layout.activity_personal_info_new);
         ButterKnife.bind(this);
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.play_color2));
+        myselfUin = (int)SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0);
+        getWindow().setStatusBarColor(getResources().getColor(R.color.myinfo_end_color));
         initTitle();
         initFriendsList();
 
@@ -148,11 +160,13 @@ public class ActivityMyInfo extends BaseActivity {
         //更新我的资料
         getMyInfo();
         getAddFriendMessageCount();
+
+        getUserDiamondInfo(myselfUin,1,3);
     }
 
     //初始化标题
     private void initTitle() {
-        layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.play_color2));
+        layoutTitleRl.setBackgroundColor(getResources().getColor(R.color.myinfo_end_color));
         layoutSetting.setVisibility(View.VISIBLE);
         myTvTitle.setVisibility(View.GONE);
     }
@@ -169,31 +183,33 @@ public class ActivityMyInfo extends BaseActivity {
                         .into(amiItemHeaderImg);
             }
 
-            personalSchool.setText(infoBean.getSchoolName());
+            personalSchool.setText(infoBean.getSchoolName() + " • " + FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             personalNickName.setText(infoBean.getNickName());
             personalUserName.setText(infoBean.getUserName());
-            personalGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
+//            personalGrade.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
             if (infoBean.getGender() == 1) {
                 personalGender.setVisibility(View.VISIBLE);
-                personalGender.setImageDrawable(getDrawable(R.drawable.feeds_boy));
+                personalGender.setImageDrawable(getDrawable(R.drawable.myinfo_sex_boy));
             } else {
                 personalGender.setVisibility(View.VISIBLE);
-                personalGender.setImageDrawable(getDrawable(R.drawable.feeds_girl));
+                personalGender.setImageDrawable(getDrawable(R.drawable.myinfo_sex_girl));
             }
 
             //钻石数量
             int diamondNum = infoBean.getGemCnt();
             amiTvDiamondNumber.setText(String.valueOf(diamondNum));
+            luiDiamondCount.setText(String.valueOf(diamondNum));
 
             //好友数量
             int friendsNum = infoBean.getFriendCnt();
             friendNumTv.setText(String.valueOf(friendsNum));
+            luiFriendCount.setText(String.valueOf(friendsNum));
         }
 
     }
 
 
-    //初始化我的好友列表
+    //初始化
     private void initFriendsList() {
 
         //我的好友
@@ -226,7 +242,7 @@ public class ActivityMyInfo extends BaseActivity {
             @Override
             public void onComplete(String result) {
                 UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
-                if (userInfoResponde.getCode() == 0){
+                if (userInfoResponde.getCode() == 0) {
                     initMyInfo(userInfoResponde.getPayload().getInfo());
                     String phoneNumber = userInfoResponde.getPayload().getInfo().getPhone();
                     SharePreferenceUtil.put(ActivityMyInfo.this, YPlayConstant.YPLAY_PHONE_NUMBER, phoneNumber);
@@ -294,5 +310,125 @@ public class ActivityMyInfo extends BaseActivity {
 
             }
         });
+    }
+
+    //获取钻石信息
+    private void getUserDiamondInfo(int userUin,int pageNum, int pageSize) {
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_DIAMOND_URL;
+        Map<String, Object> diamondInfoMap = new HashMap<>();
+        diamondInfoMap.put("userUin",userUin);
+        diamondInfoMap.put("pageNum",pageNum);
+        diamondInfoMap.put("pageSize",pageSize);
+        diamondInfoMap.put("uin", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_UIN, 0));
+        diamondInfoMap.put("token", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        diamondInfoMap.put("ver", SharePreferenceUtil.get(ActivityMyInfo.this, YPlayConstant.YPLAY_VER, 0));
+        WnsAsyncHttp.wnsRequest(url, diamondInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 用户钻石信息---" + result);
+                handleDiamondRespond(result);
+            }
+
+            @Override
+            public void onTimeOut() {}
+
+            @Override
+            public void onError() {
+
+            }
+        });
+    }
+
+    //处理钻石列表数据返回
+    private void handleDiamondRespond(String result){
+
+        UsersDiamondInfoRespond usersDiamondInfoRespond = GsonUtil.GsonToBean(result, UsersDiamondInfoRespond.class);
+        if (usersDiamondInfoRespond.getCode() == 0){
+            List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
+            Log.i(TAG, "handleDiamondRespond: list---" + tempList.size());
+            if (tempList != null && tempList.size() > 0){
+                initDiamondAdapter(tempList);
+            }
+
+        }
+
+    }
+
+    //初始化钻石适配器
+    private void initDiamondAdapter(final List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList){
+
+        BaseAdapter diamondAdapter = new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return tempList.size() > 3 ? 3 : tempList.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return tempList.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                ViewHolder holder;
+                if (convertView == null) {
+                    convertView = View.inflate(ActivityMyInfo.this, R.layout.item_diamond_new, null);
+                    holder = new ViewHolder();
+                    holder.itemAmiIndex = (ImageView) convertView.findViewById(R.id.afi_item_index);
+                    holder.itemAmiImg = (RecyclerImageView) convertView.findViewById(R.id.afi_item_img);
+                    holder.itemAmiText = (TextView) convertView.findViewById(R.id.afi_item_text);
+
+                    convertView.setTag(holder);
+                } else {
+                    holder = (ViewHolder) convertView.getTag();
+                }
+
+                UsersDiamondInfoRespond.PayloadBean.StatsBean statsBean = tempList.get(position);
+
+                if (position == 0){
+                    holder.itemAmiIndex.setImageResource(R.drawable.diamond_top1);
+                }else if (position == 1){
+                    holder.itemAmiIndex.setImageResource(R.drawable.diamond_top2);
+                }else if (position == 2){
+                    holder.itemAmiIndex.setImageResource(R.drawable.diamond_top3);
+                }
+
+                String url = statsBean.getQiconUrl();
+                if (!TextUtils.isEmpty(url)){
+                    Picasso.with(ActivityMyInfo.this).load(url).resizeDimen(R.dimen.item_diamonds_list_img_width,
+                            R.dimen.item_diamonds_list_img_height).into(holder.itemAmiImg);
+                }else {
+                    holder.itemAmiImg.setImageResource(R.drawable.diamond_null);
+                }
+                holder.itemAmiText.setText(statsBean.getQtext());
+                return convertView;
+            }
+        };
+
+        lpidDiamondListView.setAdapter(diamondAdapter);
+
+    }
+
+    private static class ViewHolder {
+        ImageView itemAmiIndex;
+        TextView itemAmiText;
+        RecyclerImageView itemAmiImg;
     }
 }

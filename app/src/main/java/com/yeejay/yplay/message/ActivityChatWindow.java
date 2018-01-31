@@ -181,7 +181,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             LogUtils.getInstance().debug("send: chater = {}", chater);
 
             //判断是否是好友关系
-            FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater));
+            FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater),uin);
             if (friendInfo == null) {
 
                 ImMsg imMsg0 = new ImMsg(null,

@@ -108,6 +108,7 @@ public class FragmentAnswer extends BaseFragment {
     GifImageView frandProgress;
 
     int questionNum = 1;
+    int questionTotal;
     int btn1Cnt, btn2Cnt, btn3Cnt, btn4Cnt;
     int total;
     int colorCount = 4;
@@ -499,7 +500,7 @@ public class FragmentAnswer extends BaseFragment {
 
     private void nextQuestionUpdate() {
 
-        fransTvQuestionCount.setText("- " + questionNum + "/15" + " -");
+        fransTvQuestionCount.setText("- " + questionNum + "/" + questionTotal + " -");
         String url = questionBean.getQiconUrl();
         if (!TextUtils.isEmpty(url)) {
             LogUtils.getInstance().error("nextQuestionUpdate: 加载的图片, {}", url);
@@ -634,6 +635,7 @@ public class FragmentAnswer extends BaseFragment {
                 questionBean = questionRespond.getPayload().getQuestion();
                 List<QuestionRespond.PayloadBean.OptionsBean> optionsList = questionRespond.getPayload().getOptions();
                 questionNum = questionRespond.getPayload().getIndex();
+                questionTotal = questionRespond.getPayload().getTotal();
 
                 if (voteOptionsBeanList.size() > 0) {
                     voteOptionsBeanList.clear();

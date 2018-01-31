@@ -67,6 +67,7 @@ public class ActivityAddFiendsDetail extends BaseActivity {
     private LoadMoreView loadMoreView;
     FriendsDetailAdapter friendsDetailAdapter;
     int mPageNum = 1;
+    int myselfUin;
     List<GetAddFriendMsgs.PayloadBean.MsgsBean> mDataList;
 
     @Override
@@ -77,6 +78,8 @@ public class ActivityAddFiendsDetail extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityAddFiendsDetail.this, true);
+
+        myselfUin = (int) SharePreferenceUtil.get(ActivityAddFiendsDetail.this, YPlayConstant.YPLAY_UIN, (int) 0);
 
         mDataList = new ArrayList<>();
         layoutTitle.setText("好友请求");
@@ -370,9 +373,9 @@ public class ActivityAddFiendsDetail extends BaseActivity {
                 Log.i(TAG, "onComplete: 接受好友请求---" + result);
                 BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
                 if (baseRespond.getCode() == 0){
-                    Toast.makeText(ActivityAddFiendsDetail.this,"接受成功",Toast.LENGTH_SHORT).show();
+
                     DbHelper dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
-                    if (dbHelper.queryFriendInfo(msgsBean.getFromUin()) == null){
+                    if (dbHelper.queryFriendInfo(msgsBean.getFromUin(),myselfUin) == null){
                         dbHelper.insertFriendInfo(new FriendInfo(null,
                                 msgsBean.getFromUin(),
                                 msgsBean.getFromNickName(),

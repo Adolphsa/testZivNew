@@ -161,7 +161,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".friend.ActivitySearchFriends"

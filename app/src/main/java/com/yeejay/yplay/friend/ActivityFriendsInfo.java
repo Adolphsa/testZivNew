@@ -93,6 +93,7 @@ public class ActivityFriendsInfo extends BaseActivity {
     ImageView arrowsImg;
 
     int friendUin;
+    int myselfUin;
     private DbHelper dbHelper;
 
     @OnClick(R.id.layout_title_back2)
@@ -128,6 +129,7 @@ public class ActivityFriendsInfo extends BaseActivity {
         layoutSetting.setVisibility(View.GONE);
         arrowsImg.setVisibility(View.GONE);
 
+        myselfUin = (int) SharePreferenceUtil.get(ActivityFriendsInfo.this, YPlayConstant.YPLAY_UIN, (int) 0);
         dbHelper = new ImpDbHelper(YplayApplication.getInstance().getDaoSession());
 
         RelativeLayout rl = (RelativeLayout) findViewById(R.id.layout_my_friend);
@@ -175,7 +177,7 @@ public class ActivityFriendsInfo extends BaseActivity {
             diamondTvNum.setText(infoBean.getGemCnt() + "");
 
             //更新朋友数据
-            FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin);
+            FriendInfo friendInfo = dbHelper.queryFriendInfo(friendUin,myselfUin);
             if (friendInfo == null){
                 dbHelper.insertFriendInfo(new FriendInfo(null,infoBean.getUin(),
                         infoBean.getNickName(),
@@ -360,11 +362,14 @@ public class ActivityFriendsInfo extends BaseActivity {
     //删除好友资料
     private void deleteFriendInfo() {
 
+
+
         DaoFriendFeedsDao friendFeedsDao = YplayApplication.getInstance()
                 .getDaoSession()
                 .getDaoFriendFeedsDao();
 
         DeleteQuery deleteQuery = friendFeedsDao.queryBuilder()
+                .where(DaoFriendFeedsDao.Properties.Uin.eq(myselfUin))
                 .where(DaoFriendFeedsDao.Properties.FriendUin.eq(friendUin))
                 .buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
@@ -372,7 +377,7 @@ public class ActivityFriendsInfo extends BaseActivity {
         Log.i(TAG, "deleteFriendInfo: friend uin---" + friendUin);
 
         //删除好友列表中的好友
-        FriendInfo friendInfo =  dbHelper.queryFriendInfo(friendUin);
+        FriendInfo friendInfo =  dbHelper.queryFriendInfo(friendUin,myselfUin);
         dbHelper.deleteFriendInfo(friendInfo);
         //删除好友动态
 

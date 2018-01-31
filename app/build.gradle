@@ -159,4 +159,5 @@ dependencies {
         exclude group: 'com.google.android', module: 'android'
     }
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.1'
+    implementation files('libs/cloudwns-sdk-android-v2.6.0_102_2394-original.jar')
 }
