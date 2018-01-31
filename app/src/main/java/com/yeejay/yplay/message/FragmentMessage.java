@@ -28,6 +28,7 @@ import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.MessageUpdateUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
@@ -46,6 +47,8 @@ import butterknife.OnClick;
 public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.SessionUpdateListener {
 
     private static final String TAG = "FragmentMessage";
+    private static final int REQ_CODE_NONMITY_REPLY = 1;
+    private static final int RESULT_CODE_NONMITY_REPLY = 1;
 
     @BindView(R.id.message_title)
     RelativeLayout messageTitle;
@@ -203,7 +206,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 }
 
                 System.out.println("message----sessionId---" + sessionId);
-                startActivity(intent);
+                startActivityForResult(intent, REQ_CODE_NONMITY_REPLY);
             }
         });
 
@@ -233,6 +236,27 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                 //messageRefreshView.finishLoadMore();
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_NONMITY_REPLY && resultCode == RESULT_CODE_NONMITY_REPLY) {
+            //如果是匿名非好友发出的消息（将该消息插入数据库，但不会发给服务器），
+            //则从数据库中找到这个session，然后调用onSessionUpdate(ImSession imSession)
+            if (data != null) {
+                String sessionID = data.getStringExtra("inserted_sessionID");
+                LogUtils.getInstance().debug("sessionID = {}", sessionID);
+
+                if (!TextUtils.isEmpty(sessionID)) {
+                    ImSession imSession = imSessionDao.queryBuilder()
+                            .where(ImSessionDao.Properties.SessionId.eq(sessionID))
+                            .build().unique();
+
+                    onSessionUpdate(imSession);
+                }
+            }
+        }
     }
 
     @Override

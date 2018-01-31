@@ -1,7 +1,9 @@
 package com.yeejay.yplay.message;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -20,9 +22,14 @@ import android.widget.Toast;
 
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
+import com.tencent.imsdk.TIMElemType;
 import com.yeejay.yplay.R;
+import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.customview.ProgressButton;
+import com.yeejay.yplay.greendao.ImMsg;
+import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
+import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.model.MsgContent1;
 import com.yeejay.yplay.model.MsgContent2;
@@ -48,6 +55,7 @@ import butterknife.OnClick;
 public class ActivityNnonymityReply extends AppCompatActivity {
 
     private static final String TAG = "ActivityNnonymityReply";
+    private static final int RESULT_CODE_NONMITY_REPLY = 1;
 
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack2;
@@ -81,6 +89,12 @@ public class ActivityNnonymityReply extends AppCompatActivity {
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
+        if (insertedDbManually) {
+            Intent intent = new Intent();
+            intent.putExtra("inserted_sessionID", insertedSessionId);
+            setResult(RESULT_CODE_NONMITY_REPLY, intent);
+        }
+
         finish();
     }
 
@@ -98,8 +112,8 @@ public class ActivityNnonymityReply extends AppCompatActivity {
     }
 
     String sessionId;
-    ImSession imSession;
-    boolean isFirst = true;
+    private boolean insertedDbManually = false;
+    private String insertedSessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -304,7 +318,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
     }
 
     //回复消息
-    private void replayImVote(String sessionId, String content) {
+    private void replayImVote(final String sessionId, final String content) {
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("uin", SharePreferenceUtil.get(ActivityNnonymityReply.this, YPlayConstant.YPLAY_UIN, 0));
         tempMap.put("token", SharePreferenceUtil.get(ActivityNnonymityReply.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
@@ -327,7 +341,7 @@ public class ActivityNnonymityReply extends AppCompatActivity {
 
                     @Override
                     public void onComplete(String result) {
-                        handleReplayImVoteResponse(result);
+                        handleReplayImVoteResponse(result, sessionId, content);
                     }
 
                     @Override
@@ -340,16 +354,162 @@ public class ActivityNnonymityReply extends AppCompatActivity {
                 });
     }
 
-    private void handleReplayImVoteResponse(String result) {
+    private void handleReplayImVoteResponse(String result, final String sessionId, final String content) {
         BaseRespond baseRespond = GsonUtil.GsonToBean(result, BaseRespond.class);
         LogUtils.getInstance().debug("投票回复, {}", baseRespond.toString());
         if (baseRespond.getCode() == 0) {
             hideKeyword();
             nonInputLl.setVisibility(View.GONE);
             nonWaitReplay.setVisibility(View.VISIBLE);
-        } else {
+        } else if (baseRespond.getCode() == 15005) {
+            //如果为特殊错误码15005, 则UI上要保持跟返回码为0一样的状态，同时构造一条消息插入本地数据库
+            hideKeyword();
+            nonInputLl.setVisibility(View.GONE);
+            nonWaitReplay.setVisibility(View.VISIBLE);
+
+            //插入本地数据库及更新session处理
+            handleInsertNotFriendMsgIntoDb(sessionId, content);
+        }
+        else {
             Toast.makeText(ActivityNnonymityReply.this, "发送失败", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    /*
+     * 收到非好友发过来的匿名消息时进行特殊处理：构造一条消息插入数据库，并更新session,触发外部回调接口;
+     */
+    private void handleInsertNotFriendMsgIntoDb(final String sessionId, final String content){
+        LogUtils.getInstance().debug("sessionId = {}, content = {}", sessionId, content);
+
+        ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
+        ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
+
+        ImSession imSession = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                .build().unique();
+
+        if (imSession == null) {
+            //会话必须是存在的，因为是本地在回复消息，如果不存在，则会话窗口就不会存在
+            LogUtils.getInstance().error("非好友匿名投票消息不存在");
+            return;
+        }
+
+        String lastMsgContent = imSession.getMsgContent();
+
+        int dataType = -1;
+        String data = null;
+        try {
+            JSONObject jsonObject = new JSONObject(lastMsgContent);
+            dataType = jsonObject.getInt("DataType");
+            data = jsonObject.getString("Data");
+        } catch (JSONException e) {
+            LogUtils.getInstance().error("exception = {}", e.toString());
+        }
+
+        if(dataType != 1){
+            LogUtils.getInstance().error("type = {}, which is wrong", dataType);
+            return;
+        }
+
+        MsgContent2 msgContent2 = GsonUtil.GsonToBean(data,MsgContent2.class);
+        MsgContent2.ReceiverInfoBean receiverInfoBean = msgContent2.getReceiverInfo();
+        MsgContent2.SenderInfoBean senderInfoBean = msgContent2.getSenderInfo();
+
+        MsgContent2.SenderInfoBean newSenderInfo = new MsgContent2.SenderInfoBean();
+        MsgContent2.ReceiverInfoBean newReceiverInfo = new MsgContent2.ReceiverInfoBean();;
+
+        newSenderInfo.setUin(receiverInfoBean.getUin());
+        newSenderInfo.setUserName(receiverInfoBean.getUserName());
+        newSenderInfo.setPhone(receiverInfoBean.getPhone());
+        newSenderInfo.setNickName(receiverInfoBean.getNickName());
+        newSenderInfo.setHeadImgUrl(receiverInfoBean.getHeadImgUrl());
+        newSenderInfo.setGender(receiverInfoBean.getGender());
+        newSenderInfo.setAge(receiverInfoBean.getAge());
+        newSenderInfo.setGrade(receiverInfoBean.getGrade());
+        newSenderInfo.setSchoolId(receiverInfoBean.getSchoolId());
+        newSenderInfo.setSchoolName(receiverInfoBean.getSchoolName());
+        newSenderInfo.setSchoolType(receiverInfoBean.getSchoolType());
+        newSenderInfo.setCountry(receiverInfoBean.getCountry());
+        newSenderInfo.setProvince(receiverInfoBean.getProvince());
+        newSenderInfo.setCity(receiverInfoBean.getCity());
+        newSenderInfo.setTs(receiverInfoBean.getTs());
+
+        newReceiverInfo.setUin(senderInfoBean.getUin());
+        newReceiverInfo.setUserName(senderInfoBean.getUserName());
+        newReceiverInfo.setPhone(senderInfoBean.getPhone());
+        newReceiverInfo.setNickName(senderInfoBean.getNickName());
+        newReceiverInfo.setHeadImgUrl(senderInfoBean.getHeadImgUrl());
+        newReceiverInfo.setGender(senderInfoBean.getGender());
+        newReceiverInfo.setAge(senderInfoBean.getAge());
+        newReceiverInfo.setGrade(senderInfoBean.getGrade());
+        newReceiverInfo.setSchoolId(senderInfoBean.getSchoolId());
+        newReceiverInfo.setSchoolName(senderInfoBean.getSchoolName());
+        newReceiverInfo.setSchoolType(senderInfoBean.getSchoolType());
+        newReceiverInfo.setCountry(senderInfoBean.getCountry());
+        newReceiverInfo.setProvince(senderInfoBean.getProvince());
+        newReceiverInfo.setCity(senderInfoBean.getCity());
+        newReceiverInfo.setTs(senderInfoBean.getTs());
+
+        msgContent2.setReceiverInfo(newReceiverInfo);
+        msgContent2.setSenderInfo(newSenderInfo);
+
+        msgContent2.setContent(content);
+
+        String newData = GsonUtil.GsonString(msgContent2);
+        int newDataType = 2;
+
+        JSONObject newJsonObject = new JSONObject();
+        try {
+            newJsonObject.put("DataType", newDataType);
+            newJsonObject.put("Data", newData);
+        } catch (JSONException e) {
+            LogUtils.getInstance().error("exception = {}", e.toString());
+        }
+        String tmsgContent = newJsonObject.toString();
+
+        long msgId = (System.currentTimeMillis() / 1000);
+        int uin = (int)SharePreferenceUtil.get(YplayApplication.getInstance(), YPlayConstant.YPLAY_UIN, (int) 0);
+        String sender = String.valueOf(uin);
+        int msgType = TIMElemType.Custom.ordinal();
+        long msgTs = msgId;
+        int msgSuccess = 1;
+        int status = 1;//1表示投稿恢复状态;
+
+        ImMsg imMsg = new ImMsg(null, sessionId, msgId, sender, msgType, tmsgContent, msgTs, msgSuccess);
+
+        try {
+            imMsgDao.insert(imMsg);
+        } catch (Exception e) {
+            LogUtils.getInstance().error("插入构造的非好友匿名投票回复消息 异常");
+        }
+
+        imSession.setLastMsgId(msgId);
+        imSession.setLastSender(sender);
+        imSession.setMsgContent(tmsgContent);
+        imSession.setMsgType(msgType);
+        imSession.setMsgTs(msgTs);
+        imSession.setStatus(status);
+        imSession.setUnreadMsgNum(0);//会话未读数目为0
+
+        imSessionDao.update(imSession);
+        updateUi();
+
+        //这个insertedSessionId将要传给FragmentMessage;
+        insertedSessionId = sessionId;
+        //设置标记位，当退出该页面时通知FragmentMessage更新UI;
+        insertedDbManually = true;
+    }
+
+    private void updateUi() {
+        layoutSetting.setVisibility(View.INVISIBLE);
+        nonEdit.setHint("等待回复");
+        Drawable nav_up = getResources().getDrawable(R.drawable.wait_repeat);
+        nav_up.setBounds(0, 0, nav_up.getMinimumWidth(), nav_up.getMinimumHeight());
+        nonEdit.setCompoundDrawables(nav_up, null, null, null);
+        nonEdit.setCompoundDrawablePadding(25);
+        nonEdit.setEnabled(false);
+        nonSend.setEnabled(false);
     }
 
     //收起键盘
@@ -372,11 +532,9 @@ public class ActivityNnonymityReply extends AppCompatActivity {
                 getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
                 if (bottom != 0 && oldBottom != 0 && bottom - rect.bottom <= 0) {
                     nonEdit.setCursorVisible(false);
-//                    Toast.makeText(ActivityNnonymityReply.this, "隐藏", Toast.LENGTH_SHORT).show();
 
                 } else {
                     nonEdit.setCursorVisible(true);
-//                    Toast.makeText(ActivityNnonymityReply.this, "弹出", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -403,5 +561,15 @@ public class ActivityNnonymityReply extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed(){
+        if (insertedDbManually) {
+            Intent intent = new Intent();
+            setResult(RESULT_CODE_NONMITY_REPLY, intent);
+        }
+
+        super.onBackPressed();
     }
 }
