@@ -863,6 +863,12 @@ public class ActivitySetting extends BaseActivity {
                 nickBuilder.setContentView(nickNameLayout);
                 nickBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        String nickname = nickNameView.getText().toString().trim();
+                        if (nickname.contains("pu") || nickname.contains("pupu") || nickname.contains("噗") || nickname.contains("噗噗")){
+                            Toast.makeText(ActivitySetting.this, "包含敏感词汇", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         dialog.dismiss();
                         //设置你的操作事项
                         System.out.println("modify nickname" + nickNameView.getText().toString().trim());
