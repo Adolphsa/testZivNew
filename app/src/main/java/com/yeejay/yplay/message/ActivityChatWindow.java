@@ -183,7 +183,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             //判断是否是好友关系
             FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater),uin);
             if (friendInfo == null) {
-
+                //非好友时文本消息发不出去，但还是会插入到数据库中;
                 ImMsg imMsg0 = new ImMsg(null,
                         sessionId,
                         System.currentTimeMillis(),
@@ -220,6 +220,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 chatAdapter.notifyDataSetChanged();
                 acwEdit.setText("");
                 acwRecycleView.scrollToPosition(mDataList.size() - 1);
+
                 return;
             }
 
@@ -755,27 +756,25 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 .offset(dataOffset * 10)
                 .limit(1)
                 .list();
-        if (imMsgList == null) {
-            //如果没有消息则不插入时间戳;
-            return;
-        }
 
-        long lastImMsgTs = imMsgList.get(0).getMsgTs();
-        long currentTs = System.currentTimeMillis() / 1000;
+        if (imMsgList != null && imMsgList.size() > 0) {
+            long lastImMsgTs = imMsgList.get(0).getMsgTs();
+            long currentTs = System.currentTimeMillis() / 1000;
 
-        LogUtils.getInstance().debug("lastImMsgTs = {}, currentTs = {}", lastImMsgTs, currentTs);
-        if ((currentTs - lastImMsgTs) >= (long)180) {
-            //如果当前时间戳跟最近一条消息时间戳相隔超过3分钟，则插入到数据列表中;
-            ImMsg imMsg = new ImMsg(null,
-                    sessionId,
-                    System.currentTimeMillis(),
-                    String.valueOf(uin),
-                    100,
-                    getCurrentTime(lastImMsgTs),
-                    (System.currentTimeMillis() / 1000),
-                    1);
+            LogUtils.getInstance().debug("lastImMsgTs = {}, currentTs = {}", lastImMsgTs, currentTs);
+            if ((currentTs - lastImMsgTs) >= (long) 180) {
+                //如果当前时间戳跟最近一条消息时间戳相隔超过3分钟，则插入到数据列表中;
+                ImMsg imMsg = new ImMsg(null,
+                        sessionId,
+                        System.currentTimeMillis(),
+                        String.valueOf(uin),
+                        100,
+                        getCurrentTime(lastImMsgTs),
+                        (System.currentTimeMillis() / 1000),
+                        1);
 
-            mDataList.add(0, imMsg);
+                mDataList.add(0, imMsg);
+            }
         }
     }
 
