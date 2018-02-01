@@ -755,6 +755,11 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 .offset(dataOffset * 10)
                 .limit(1)
                 .list();
+        if (imMsgList == null) {
+            //如果没有消息则不插入时间戳;
+            return;
+        }
+
         long lastImMsgTs = imMsgList.get(0).getMsgTs();
         long currentTs = System.currentTimeMillis() / 1000;
 
