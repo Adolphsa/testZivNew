@@ -3,16 +3,22 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="20dp"
-    >
+    android:layout_marginTop="20dp" >
     <ImageView
         android:id="@+id/msg_item_right_not_friend"
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:src="@drawable/msg_not_friend"
         android:layout_toLeftOf="@+id/msg_item_right"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="3dp"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        />
+    <ImageView
+        android:id="@+id/msg_item_progressbar"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_toLeftOf="@+id/msg_item_right"
+        android:layout_centerVertical="true"
         android:visibility="gone"
         />
     <TextView
@@ -23,8 +29,9 @@
         android:textSize="16sp"
         android:textColor="@color/white"
         android:layout_marginRight="21dp"
-        android:layout_marginLeft="50dp"
+        android:layout_marginLeft="10dp"
         android:background="@drawable/right_chat"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         />
 

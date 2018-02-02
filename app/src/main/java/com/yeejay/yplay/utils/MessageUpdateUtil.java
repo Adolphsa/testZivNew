@@ -214,7 +214,6 @@ public class MessageUpdateUtil {
         String sessionId = timMessage.getMsg().session().sid();
         int sessionType = timMessage.getMsg().session().type().ordinal();
 
-
         if (sessionType == SessionType.kC2C.ordinal()) {
 
             String msgContent = new String(((TIMCustomElem) timMessage.getElement(0)).getData());
@@ -373,6 +372,9 @@ public class MessageUpdateUtil {
 
         //收到文本消息
         if (msgType == TIMElemType.Text.ordinal()) {
+            if (String.valueOf(uin).equals(sender)){ //是文本消息并且是自己发送的
+                return;
+            }
 
             String text = ((TIMTextElem) timMessage.getElement(0)).getText();
             System.out.println("收到的文本消息---" + text);

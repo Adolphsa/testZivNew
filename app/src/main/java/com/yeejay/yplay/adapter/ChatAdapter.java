@@ -26,6 +26,7 @@ import com.yeejay.yplay.model.ImageInfo;
 import com.yeejay.yplay.model.MsgContent2;
 import com.yeejay.yplay.utils.DensityUtil;
 import com.yeejay.yplay.utils.GsonUtil;
+import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 
@@ -46,6 +47,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     private static final String TAG = "ChatAdapter";
 
+    //消息的三种状态;
+    private static final int MSG_STATUS_SENDING = 0;
+    private static final int MSG_STATUS_SUCCESS = 1;
+    private static final int MSG_STATUS_ERROR = 2;
+
     public enum ITEM_TYPE {
         ITEM_TYPE_LEFT,
         ITEM_TYPE_RIGHT,
@@ -61,13 +67,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     String content;
 
     public interface OnItemClickListener{
-        void onItemClick(int position);
+        void onItemClick(View v);
     }
 
     @Override
     public void onClick(View v) {
-        if (mItemClickListener != null){
-            mItemClickListener.onItemClick((Integer) v.getTag());
+        if (mItemClickListener != null) {
+            mItemClickListener.onItemClick(v);
         }
     }
 
@@ -88,7 +94,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal()) {
 //            System.out.println("右边");
-            return new RightMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_right, parent, false));
+            RightMsgViewHolder holder = new RightMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.layout_message_chat_text_right, parent, false));
+            holder.msgNotFriend.setOnClickListener(this);
+
+            return holder;
 
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_VOTE_CARD.ordinal()) {
 //            System.out.println("投票卡片");
@@ -106,6 +116,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_image_right, parent, false);
             RightImageViewHolder holder = new RightImageViewHolder(view);
             holder.msgImageRight.setOnClickListener(this);
+            holder.msgImageNotFriend.setOnClickListener(this);
+
             return holder;
         }
         return null;
@@ -118,12 +130,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         int immsgType = imMsg.getMsgType();
         String msgContent = imMsg.getMsgContent();
         String sender = imMsg.getSender();
-        if (immsgType == 101){
+        int status = imMsg.getMsgSucess();
+
+        if (immsgType == 101){//非好友状态下，发送失败的消息类型（消息左边会显示感叹号，另外此条消息依然会插入数据库）
             if (!TextUtils.isEmpty(msgContent)){
                 ((RightMsgViewHolder) holder).msgRight.setText(msgContent);
                 ((RightMsgViewHolder) holder).msgNotFriend.setVisibility(View.VISIBLE);
+                ((RightMsgViewHolder) holder).msgNotFriend.setTag(position);
             }
-        }else if (immsgType == 6) {
+        }else if (immsgType == 6) {//自定义消息（投票卡片）
             try {
                 JSONObject jsonObject = new JSONObject(msgContent);
                 int dataType = jsonObject.getInt("DataType");
@@ -144,7 +159,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
 //                    System.out.println("chatAdapter右边---" + content);
                     ((RightMsgViewHolder) holder).msgRight.setText(content);
-
 
                 } else if (holder instanceof VoteCardViewHolder) {        //投票卡片
                     int uin = (int) SharePreferenceUtil.get(context, YPlayConstant.YPLAY_UIN, (int) 0);
@@ -169,7 +183,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }else if (immsgType == TIMElemType.Text.ordinal()){
+        }else if (immsgType == TIMElemType.Text.ordinal()){//文本消息
             if (holder instanceof LeftMsgViewHolder) {      //左边的聊天框
                 if (!TextUtils.isEmpty(msgContent)) {
                     ((LeftMsgViewHolder) holder).msgLeft.setText(msgContent);
@@ -178,11 +192,32 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             } else if (holder instanceof RightMsgViewHolder) {    //右边的聊天框
                 if (!TextUtils.isEmpty(msgContent)){
                     ((RightMsgViewHolder) holder).msgRight.setText(msgContent);
+                    ((RightMsgViewHolder) holder).msgNotFriend.setTag(position);
+
+                    //根据消息数据表中的MSG_SUCESS字段判断当前消息的发送状态;
+                    switch (status) {
+                        case MSG_STATUS_SENDING :
+                            ((RightMsgViewHolder) holder).msgNotFriend.setVisibility(View.GONE);
+                            ((RightMsgViewHolder) holder).msgRightBar.setVisibility(View.VISIBLE);
+                            Glide.with(context).load(R.drawable.pic_rotate)
+                                    .asGif()
+                                    .into(((RightMsgViewHolder) holder).msgRightBar);
+                            break;
+                        case MSG_STATUS_SUCCESS :
+                            ((RightMsgViewHolder) holder).msgNotFriend.setVisibility(View.GONE);
+                            ((RightMsgViewHolder) holder).msgRightBar.setVisibility(View.GONE);
+                            break;
+                        case MSG_STATUS_ERROR :
+                            ((RightMsgViewHolder) holder).msgNotFriend.setVisibility(View.VISIBLE);
+                            ((RightMsgViewHolder) holder).msgRightBar.setVisibility(View.GONE);
+                            break;
+                        default:
+                    }
                 }
             }
         }else if (immsgType == 100){    //中间的提示
             ((CenterMsgViewHolder)holder).msgCenter.setText(msgContent);
-        }else if (immsgType == TIMElemType.Image.ordinal()){
+        }else if (immsgType == TIMElemType.Image.ordinal()){//图片消息
             if (holder instanceof LeftImageViewHolder){     //左边的图片
                 ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
@@ -239,6 +274,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 }
 
             }else if (holder instanceof RightImageViewHolder){      //右边的图片
+                //根据消息数据表中的MSG_SUCESS字段判断当前消息的发送状态;
+                switch (status) {
+                    case MSG_STATUS_SENDING :
+                        ((RightImageViewHolder) holder).msgImageNotFriend.setVisibility(View.GONE);
+                        ((RightImageViewHolder) holder).msgRightBar.setVisibility(View.VISIBLE);
+                        Glide.with(context).load(R.drawable.pic_rotate)
+                                .asGif()
+                                .into(((RightImageViewHolder) holder).msgRightBar);
+                        break;
+                    case MSG_STATUS_SUCCESS :
+                        ((RightImageViewHolder) holder).msgImageNotFriend.setVisibility(View.GONE);
+                        ((RightImageViewHolder) holder).msgRightBar.setVisibility(View.GONE);
+                        break;
+                    case MSG_STATUS_ERROR :
+                        ((RightImageViewHolder) holder).msgImageNotFriend.setVisibility(View.VISIBLE);
+                        ((RightImageViewHolder) holder).msgRightBar.setVisibility(View.GONE);
+                        break;
+                    default:
+                }
+
+                ((RightImageViewHolder)holder).msgImageNotFriend.setTag(position);
                 ((RightImageViewHolder)holder).msgImageRight.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
                 if (imageInfo == null || imageInfo.getThumbImage() == null) return;
@@ -439,6 +495,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         TextView msgRight;
         @BindView(R.id.msg_item_right_not_friend)
         ImageView msgNotFriend;
+        @BindView(R.id.msg_item_progressbar)
+        ImageView msgRightBar;
 
         public RightMsgViewHolder(View itemView) {
             super(itemView);
@@ -497,6 +555,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     public static class RightImageViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.msg_item_progressbar)
+        ImageView msgRightBar;
         @BindView(R.id.msg_item_image_right_up)
         ImageView msgImageRightUp;
         @BindView(R.id.msg_item_image_right)

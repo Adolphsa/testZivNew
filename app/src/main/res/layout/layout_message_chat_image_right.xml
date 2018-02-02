@@ -4,8 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="20dp"
     android:orientation="vertical"
-    android:id="@+id/msg_item_image_right_root"
-    >
+    android:id="@+id/msg_item_image_right_root" >
 
     <ImageView
         android:id="@+id/msg_item_image_right_not_friend"
@@ -15,6 +14,15 @@
         android:layout_marginTop="3dp"
         android:layout_toLeftOf="@+id/msg_item_image_right"
         android:src="@drawable/msg_not_friend"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/msg_item_progressbar"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="3dp"
+        android:layout_toLeftOf="@+id/msg_item_image_right"
         android:visibility="gone" />
 
     <ImageView

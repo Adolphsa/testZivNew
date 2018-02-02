@@ -49,6 +49,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     private static final String TAG = "FragmentMessage";
     private static final int REQ_CODE_NONMITY_REPLY = 1;
     private static final int RESULT_CODE_NONMITY_REPLY = 1;
+    private static final int RESULT_CODE_FRIEND_CHAT_REPLY = 2;
 
     @BindView(R.id.message_title)
     RelativeLayout messageTitle;
@@ -241,6 +242,7 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        LogUtils.getInstance().debug("requestCode = {}, resultCode = {}", requestCode, resultCode);
         if (requestCode == REQ_CODE_NONMITY_REPLY && resultCode == RESULT_CODE_NONMITY_REPLY) {
             //如果是匿名非好友发出的消息（将该消息插入数据库，但不会发给服务器），
             //则从数据库中找到这个session，然后调用onSessionUpdate(ImSession imSession)
@@ -252,6 +254,22 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                     ImSession imSession = imSessionDao.queryBuilder()
                             .where(ImSessionDao.Properties.SessionId.eq(sessionID))
                             .build().unique();
+
+                    onSessionUpdate(imSession);
+                }
+            }
+        } else if (requestCode == REQ_CODE_NONMITY_REPLY && resultCode == RESULT_CODE_FRIEND_CHAT_REPLY) {
+            if (data != null) {
+                String sessionID = data.getStringExtra("update_sessionID");
+                LogUtils.getInstance().debug("sessionID = {}", sessionID);
+
+                if (!TextUtils.isEmpty(sessionID)) {
+                    ImSession imSession = imSessionDao.queryBuilder()
+                            .where(ImSessionDao.Properties.SessionId.eq(sessionID))
+                            .build().unique();
+
+                    imSession.setUnreadMsgNum(0);
+                    imSessionDao.update(imSession);
 
                     onSessionUpdate(imSession);
                 }

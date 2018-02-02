@@ -109,6 +109,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     private static final int REQUEST_CODE = 0x00000011;
     private static final int CODE_CAMERA_REQUEST = 0xa01;
     private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0xa03;
+
+    private static final int RESULT_CODE_FRIEND_CHAT_REPLY = 2;
+
     private File fileUri;
     private Uri imageUri;
 
@@ -137,12 +140,9 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
-        ImSessionDao imSessionDao = YplayApplication.getInstance().getDaoSession().getImSessionDao();
-        ImSession imSession = imSessionDao.queryBuilder()
-                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                .build().unique();
-        imSession.setUnreadMsgNum(0);
-        imSessionDao.update(imSession);
+        Intent intent = new Intent();
+        intent.putExtra("update_sessionID", sessionId);
+        setResult(RESULT_CODE_FRIEND_CHAT_REPLY, intent);
         finish();
     }
 
@@ -160,235 +160,527 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @OnClick(R.id.acw_send)
     public void send() {
-        sendMessage("");
+        sendTextMessage();
     }
 
-    //发送消息
-    private void sendMessage(String imagePath) {
+    private void sendTextMessage() {
 
         //点击之后立马变为不可点状态
         acwSend.setClickable(false);
         acwSend.setImageResource(R.drawable.feather_no);
 
-        LogUtils.getInstance().debug("发送消息");
-        if (NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
-            String str = acwEdit.getText().toString().trim();
-
-            ImSession imSession = imSessionDao.queryBuilder()
-                    .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                    .build().unique();
-            String chater = imSession.getChater();
-            LogUtils.getInstance().debug("send: chater = {}", chater);
-
-            //判断是否是好友关系
-            FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater),uin);
-            if (friendInfo == null) {
-                //非好友时文本消息发不出去，但还是会插入到数据库中;
-                ImMsg imMsg0 = new ImMsg(null,
-                        sessionId,
-                        System.currentTimeMillis(),
-                        String.valueOf(uin),
-                        101,
-                        str,
-                        (System.currentTimeMillis() / 1000),
-                        1);
-                imMsgDao.insert(imMsg0);
-
-                ImMsg imMsg1 = new ImMsg(null,
-                        sessionId,
-                        System.currentTimeMillis(),
-                        String.valueOf(uin),
-                        100,
-                        "对方已不是你的好友",
-                        (System.currentTimeMillis() / 1000),
-                        1);
-                imMsgDao.insert(imMsg1);
-
-                ImMsg imMsg2 = new ImMsg(null,
-                        sessionId,
-                        System.currentTimeMillis(),
-                        String.valueOf(uin),
-                        100,
-                        "先和对方成为好友，才能聊天哦~",
-                        (System.currentTimeMillis() / 1000),
-                        1);
-                imMsgDao.insert(imMsg2);
-
-                mDataList.add(0, imMsg0);
-                mDataList.add(0, imMsg1);
-                mDataList.add(0, imMsg2);
-                chatAdapter.notifyDataSetChanged();
-                acwEdit.setText("");
-                acwRecycleView.scrollToPosition(mDataList.size() - 1);
-
-                return;
-            }
-
-            LogUtils.getInstance().debug("send: 编辑框的内容 = {}，imagePath = {}", str, imagePath);
-            if (!TextUtils.isEmpty(str) || !TextUtils.isEmpty(imagePath)) {
-                //构造一条消息
-                final TIMMessage msg = new TIMMessage();
-
-                if (TextUtils.isEmpty(imagePath)) {
-                    //添加文本内容
-                    TIMTextElem elem = new TIMTextElem();
-                    elem.setText(str);
-
-                    //将elem添加到消息
-                    if (msg.addElement(elem) != 0) {
-                        LogUtils.getInstance().debug("addElement text failed");
-                        return;
-                    }
-                } else {
-                    //添加图片
-                    TIMImageElem elem = new TIMImageElem();
-                    elem.setPath(imagePath);
-
-                    //将elem添加到消息
-                    if (msg.addElement(elem) != 0) {
-                        LogUtils.getInstance().debug("addElement image failed");
-                        return;
-                    }
-                }
-
-                TIMMessageOfflinePushSettings offlineSettings = new TIMMessageOfflinePushSettings();
-                offlineSettings.setDescr(str);
-                offlineSettings.setEnabled(true);
-
-                TIMMessageOfflinePushSettings.AndroidSettings andSetting = new TIMMessageOfflinePushSettings.AndroidSettings();
-                andSetting.setTitle(myselfNickName);
-                andSetting.setNotifyMode(TIMMessageOfflinePushSettings.NotifyMode.Custom);
-
-                TIMMessageOfflinePushSettings.IOSSettings iosSettings = new TIMMessageOfflinePushSettings.IOSSettings();
-                iosSettings.setBadgeEnabled(true);
-
-                offlineSettings.setAndroidSettings(andSetting);
-                offlineSettings.setIosSettings(iosSettings);
-                msg.setOfflinePushSettings(offlineSettings);
-
-                conversation = TIMManager.getInstance().getConversation(
-                        TIMConversationType.Group,      //会话类型：群组
-                        sessionId);                       //群组Id
-
-                LogUtils.getInstance().debug("send: sessionId = {}, msender = {}, uin = {}",
-                        sessionId, mSender, uin);
-
-                if (!TextUtils.isEmpty(imagePath)) {
-                    File imageFile = new File(imagePath);
-                    //实际使用过程中出现过发消息时拍照图片bitmap null pointer导致的异常，
-                    // 故此处先判断下图片文件确实存在;
-                    if (imageFile.exists()) {
-                        //发送图片时MessageUpdateUtil中对自己发送图片的消息做了过滤，导致ActivityChatWindow中
-                        //的onMessageUpdate()回调不会被触发，因此需要再这里另外加入时间戳信息;
-                        insertTimestampMsg();
-
-                        msgId = System.currentTimeMillis();
-
-                        ImageInfo imageInfo = new ImageInfo();
-                        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                        int imageFormat = getImageFormat(imagePath);
-                        imageInfo.setImageFormat(imageFormat);
-
-
-                        ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
-                        originalImage.setImageType(TIMImageType.Original);
-                        originalImage.setImageWidth(bitmap.getWidth());
-                        originalImage.setImageHeight(bitmap.getHeight());
-                        originalImage.setImageUrl(imagePath);
-                        imageInfo.setOriginalImage(originalImage);
-
-                        ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
-                        thumbImage.setImageType(TIMImageType.Thumb);
-                        thumbImage.setImageWidth(bitmap.getWidth());
-                        thumbImage.setImageHeight(bitmap.getHeight());
-                        thumbImage.setImageUrl(imagePath);
-                        imageInfo.setThumbImage(thumbImage);
-
-                        ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
-                        largeImage.setImageType(TIMImageType.Large);
-                        largeImage.setImageWidth(bitmap.getWidth());
-                        largeImage.setImageHeight(bitmap.getHeight());
-                        largeImage.setImageUrl(imagePath);
-                        imageInfo.setLargeImage(largeImage);
-
-                        String imageInfoStr = GsonUtil.GsonString(imageInfo);
-                        imageMsgTs = System.currentTimeMillis() / 1000;
-                        selfImageMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Image.ordinal(), imageInfoStr, imageMsgTs, -1);
-                        imMsgDao.insert(selfImageMsg);
-
-                        //更新会话的最近一条消息
-                        imSessionImage = imSessionDao.queryBuilder()
-                                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                                .build().unique();
-                        if (imSessionImage != null) {
-                            imSessionImage.setLastMsgId(msgId);
-                            imSessionImage.setLastSender(String.valueOf(uin));
-                            imSessionImage.setMsgType(TIMElemType.Image.ordinal());
-                            imSessionImage.setMsgTs(imageMsgTs);
-                            imSessionDao.update(imSessionImage);
-                        }
-
-                        mDataList.add(0, selfImageMsg);
-                        chatAdapter.notifyItemInserted(mDataList.size() - 1);
-                        acwRecycleView.scrollToPosition(mDataList.size() - 1);
-                    }
-                }
-
-                //发送消息
-                conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
-
-                    @Override
-                    public void onError(int code, String desc) {//发送消息失败
-                        //错误码code和错误描述desc，可用于定位请求失败原因
-                        //错误码code含义请参见错误码表
-                        LogUtils.getInstance().debug("发送消息失败, code = {}, errmsg = {}", code, desc);
-                        ImMsg imMsg = insertMsg(msg, 0); //发送失败为0
-                        mDataList.add(0, imMsg);
-
-                        //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 0, false);
-                    }
-
-                    @Override
-                    public void onSuccess(TIMMessage msg) {//发送消息成功
-                        LogUtils.getInstance().debug("发送成功");
-
-                        long tmsgId = msg.getMsgUniqueId();
-                        long tmsgTs = msg.getMsg().time();
-
-                        ImMsg imMsg = imMsgDao.queryBuilder()
-                                .where(ImMsgDao.Properties.SessionId.eq(sessionId))
-                                .where(ImMsgDao.Properties.MsgId.eq(imageMsgTs))
-                                .build().unique();
-                        if (imMsg != null) {
-                            imMsg.setMsgId(tmsgId);
-                            imMsg.setMsgTs(tmsgTs);
-                            imMsgDao.update(imMsg);
-                        }
-
-                        ImSession imSession1 = imSessionDao.queryBuilder()
-                                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
-                                .build().unique();
-                        if (imSession1 != null) {
-                            imSession1.setLastMsgId(tmsgId);
-                            imSession1.setMsgTs(tmsgTs);
-                            imSessionDao.update(imSession1);
-                        }
-
-                        //更新会话列表
-                        MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 1, false);
-                        acwEdit.setText("");
-                    }
-                });
-            } else {
-                Toast.makeText(ActivityChatWindow.this, "发送内容不能为空", Toast.LENGTH_SHORT).show();
-            }
-
-        } else {
+        //如果网络异常，提示用户后返回
+        if (!NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
             Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
+            LogUtils.getInstance().error("uin {}, 发送消息，网络异常", uin);
+            return;
         }
+
+        //获取要发送的文本
+        final String str = acwEdit.getText().toString().trim();
+        LogUtils.getInstance().debug("uin {}, 发送文本消息 {}", uin, str);
+
+        //如果是空，则直接返回
+        if (TextUtils.isEmpty(str)) {
+            LogUtils.getInstance().debug("uin {}, 发送文本消息，文本内容为空!", uin);
+            Toast.makeText(ActivityChatWindow.this, "发送内容不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ImSession imSession = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                .build().unique();
+
+        if (imSession == null) {
+            LogUtils.getInstance().error("uin {}, 发送文本消息{}，在数据库未找到sessionId {}", uin, str, sessionId);
+            return;
+        }
+
+        //插入时间戳;
+        insertTimestampMsg();
+
+        final String chater = imSession.getChater();
+        LogUtils.getInstance().debug("uin {}, 发送文本消息{}，chater {}", uin, str, chater);
+
+        //如果不是好友 则提示用户非好友信息后 返回
+        FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater), uin);
+        if (friendInfo == null) {
+
+            LogUtils.getInstance().error("uin {}, 发送文本消息{}，chater {}, 已经非好友！", uin, str, chater);
+
+            ImMsg imMsg0 = new ImMsg(null,
+                    sessionId,
+                    System.currentTimeMillis(),
+                    String.valueOf(uin),
+                    101,
+                    str,
+                    (System.currentTimeMillis() / 1000),
+                    1);
+            imMsgDao.insert(imMsg0);
+
+            ImMsg imMsg1 = new ImMsg(null,
+                    sessionId,
+                    System.currentTimeMillis(),
+                    String.valueOf(uin),
+                    100,
+                    "对方已不是你的好友",
+                    (System.currentTimeMillis() / 1000),
+                    1);
+            imMsgDao.insert(imMsg1);
+
+            ImMsg imMsg2 = new ImMsg(null,
+                    sessionId,
+                    System.currentTimeMillis(),
+                    String.valueOf(uin),
+                    100,
+                    "先和对方成为好友，才能聊天哦~",
+                    (System.currentTimeMillis() / 1000),
+                    1);
+            imMsgDao.insert(imMsg2);
+
+            mDataList.add(0, imMsg0);
+            mDataList.add(0, imMsg1);
+            mDataList.add(0, imMsg2);
+            chatAdapter.notifyDataSetChanged();
+            acwEdit.setText("");
+            acwRecycleView.scrollToPosition(mDataList.size() - 1);
+            return;
+        }
+
+        //构造一条消息
+        final TIMMessage msg = new TIMMessage();
+        //添加文本内容
+        TIMTextElem elem = new TIMTextElem();
+        elem.setText(str);
+
+        //将elem添加到消息
+        if (msg.addElement(elem) != 0) {
+            LogUtils.getInstance().error("uin {}, 发送文本消息{}，chater {}, addElement error", uin, str, chater);
+            return;
+        }
+
+        //取毫秒数作为临时的一个消息ID
+        msgId = System.currentTimeMillis();
+
+        //msgSuccess -> 0 表示发送中 1->表示发送成功 2表示发送失败
+        //先插入到消息和会话表中，在成功或者失败之后，更新其对应的消息状态msgSuccess->1或者msgSuccess->2
+        ImMsg imMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Text.ordinal(), str, msgId / 1000, 0);
+        try {
+            imMsgDao.insert(imMsg);
+        } catch (Exception e) {
+            LogUtils.getInstance().error("uin {}, 发送文本消息{}，chater {}, insert to msgtable error {}", uin, str, chater, e.getMessage());
+            return;
+        }
+
+        //更新adpater里面的数据
+        mDataList.add(0, imMsg);
+        chatAdapter.notifyDataSetChanged();
+        acwRecycleView.scrollToPosition(mDataList.size() - 1);
+
+        //更新会话表中的信息
+        imSession.setLastMsgId(msgId);
+        imSession.setLastSender(String.valueOf(uin));
+        imSession.setMsgType(TIMElemType.Text.ordinal());
+        imSession.setMsgTs(msgId / 1000);
+        imSession.setMsgContent(str);
+        imSession.setUnreadMsgNum(0);
+
+        imSessionDao.update(imSession);
+
+        TIMMessageOfflinePushSettings offlineSettings = new TIMMessageOfflinePushSettings();
+        offlineSettings.setDescr(str);
+        offlineSettings.setEnabled(true);
+
+        TIMMessageOfflinePushSettings.AndroidSettings andSetting = new TIMMessageOfflinePushSettings.AndroidSettings();
+        andSetting.setTitle(myselfNickName);
+        andSetting.setNotifyMode(TIMMessageOfflinePushSettings.NotifyMode.Custom);
+
+        TIMMessageOfflinePushSettings.IOSSettings iosSettings = new TIMMessageOfflinePushSettings.IOSSettings();
+        iosSettings.setBadgeEnabled(true);
+
+        offlineSettings.setAndroidSettings(andSetting);
+        offlineSettings.setIosSettings(iosSettings);
+        msg.setOfflinePushSettings(offlineSettings);
+
+        conversation = TIMManager.getInstance().getConversation(
+                TIMConversationType.Group,      //会话类型：群组
+                sessionId);                     //群组Id
+
+        LogUtils.getInstance().debug("uin {}, 发送文本消息 {}，chater {}, 发送中...", uin, str, chater);
+
+        //发送消息
+        conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
+
+            @Override
+            public void onError(int code, String desc) {//发送消息失败
+                //错误码code和错误描述desc，可用于定位请求失败原因
+                //错误码code含义请参见错误码表
+
+                LogUtils.getInstance().error("uin {}, 发送文本消息{}，chater {}, 发送失败 code {}, desc {}", uin, str, chater, code, desc);
+
+                ImMsg timMsg = imMsgDao.queryBuilder()
+                        .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                        .where(ImMsgDao.Properties.MsgId.eq(msgId))
+                        .build().unique();
+
+                if (timMsg != null) {
+                    //更新数据库
+                    timMsg.setMsgSucess(2);//设置为消息发送失败
+                    imMsgDao.update(timMsg);
+
+                    //更新adpater里面的数据
+                    ImMsg t;
+                    for(int i = 0; i < mDataList.size(); ++i){
+                        t = mDataList.get(i);
+                        if(t!=null){
+                            if (t.getMsgId() == msgId){
+                                mDataList.get(i).setMsgSucess(2);
+                                chatAdapter.notifyItemChanged(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                ImSession timSession = imSessionDao.queryBuilder()
+                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                        .build().unique();
+                if (timSession != null) {
+                    //设置msg发送失败
+                    //imSessionDao.update(timSession);
+                }
+
+                //更新会话列表
+                //MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 0, false);
+            }
+
+            @Override
+            public void onSuccess(TIMMessage msg) {//发送消息成功
+                long tmsgId = msg.getMsgUniqueId();
+                long tmsgTs = msg.getMsg().time();
+
+                LogUtils.getInstance().debug("uin {}, 发送文本消息 {}，chater {}, 发送成功 msgId {}", uin, str, chater, tmsgId);
+
+                ImMsg timMsg = imMsgDao.queryBuilder()
+                        .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                        .where(ImMsgDao.Properties.MsgId.eq(msgId))
+                        .build().unique();
+
+                if (timMsg != null) {
+
+                    //更新数据库
+                    timMsg.setMsgId(tmsgId);
+                    timMsg.setMsgTs(tmsgTs);
+                    timMsg.setMsgSucess(1);//设置为消息发送成功
+                    imMsgDao.update(timMsg);
+
+                    //更新adpater里面的数据
+                    ImMsg t;
+                    for(int i = 0; i < mDataList.size(); ++i){
+                        t = mDataList.get(i);
+                        if (t != null){
+                            if (t.getMsgId() == tmsgId){
+                                mDataList.get(i).setMsgSucess(1);
+                                chatAdapter.notifyDataSetChanged();
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                ImSession timSession = imSessionDao.queryBuilder()
+                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                        .build().unique();
+                if (timSession != null) {
+                    timSession.setLastMsgId(tmsgId);
+                    timSession.setMsgTs(tmsgTs);
+                    //todo 更新状态
+
+                    imSessionDao.update(timSession);
+                }
+
+                //更新会话列表
+                //MessageUpdateUtil.getMsgUpdateInstance().updateSessionAndMessage(msg, 1, false);
+
+            }
+        });
+
+        acwEdit.setText("");
     }
 
+    //发送图片消息
+    private void sendImageMessage(String imagePath){
+
+        //点击之后立马变为不可点状态
+        acwSend.setClickable(false);
+        acwSend.setImageResource(R.drawable.feather_no);
+
+        //如果网络异常，提示用户后返回
+        if (!NetWorkUtil.isNetWorkAvailable(ActivityChatWindow.this)) {
+            Toast.makeText(ActivityChatWindow.this, "网络异常", Toast.LENGTH_SHORT).show();
+            LogUtils.getInstance().error("uin {}, 发送消息，网络异常", uin);
+            return;
+        }
+
+        //如果是空，则直接返回
+        if (TextUtils.isEmpty(imagePath)) {
+            LogUtils.getInstance().debug("uin {}, 发送图片消息，图片路径为空!", uin);
+            Toast.makeText(ActivityChatWindow.this, "发送图片不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ImSession imSession = imSessionDao.queryBuilder()
+                .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                .build().unique();
+
+        if (imSession == null) {
+            LogUtils.getInstance().error("uin {}, 发送图片消息{}，在数据库未找到sessionId {}", uin, imagePath, sessionId);
+            return;
+        }
+
+        //构造消息表中的content字段 是一个json结构的字符串
+        File imageFile = new File(imagePath);
+        //实际使用过程中出现过发消息时拍照图片bitmap null pointer导致的异常，
+        // 故此处先判断下图片文件确实存在;
+        if (!imageFile.exists()) {
+            LogUtils.getInstance().error("uin {}, 发送图片消息{}, 图片不存在", uin, imagePath);
+            return;
+        }
+
+        //插入时间戳;
+        insertTimestampMsg();
+
+        ImageInfo imageInfo = new ImageInfo();
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        int imageFormat = getImageFormat(imagePath);
+        imageInfo.setImageFormat(imageFormat);
+
+        ImageInfo.OriginalImage originalImage = new ImageInfo.OriginalImage();
+        originalImage.setImageType(TIMImageType.Original);
+        originalImage.setImageWidth(bitmap.getWidth());
+        originalImage.setImageHeight(bitmap.getHeight());
+        originalImage.setImageUrl(imagePath);
+        imageInfo.setOriginalImage(originalImage);
+
+        ImageInfo.ThumbImage thumbImage = new ImageInfo.ThumbImage();
+        thumbImage.setImageType(TIMImageType.Thumb);
+        thumbImage.setImageWidth(bitmap.getWidth());
+        thumbImage.setImageHeight(bitmap.getHeight());
+        thumbImage.setImageUrl(imagePath);
+        imageInfo.setThumbImage(thumbImage);
+
+        ImageInfo.LargeImage largeImage = new ImageInfo.LargeImage();
+        largeImage.setImageType(TIMImageType.Large);
+        largeImage.setImageWidth(bitmap.getWidth());
+        largeImage.setImageHeight(bitmap.getHeight());
+        largeImage.setImageUrl(imagePath);
+        imageInfo.setLargeImage(largeImage);
+
+        //消息表中的字符串
+        final String imageInfoStr = GsonUtil.GsonString(imageInfo);
+
+        final String chater = imSession.getChater();
+        LogUtils.getInstance().debug("uin {}, 发送图片消息{}，chater {}", uin, imagePath, chater);
+
+        //取毫秒数作为临时的一个消息ID
+        msgId = System.currentTimeMillis();
+
+        //如果不是好友 则提示用户非好友信息后 返回
+        FriendInfo friendInfo = mDbHelper.queryFriendInfo(Integer.valueOf(chater), uin);
+        if (friendInfo == null) {
+
+            LogUtils.getInstance().error("uin {}, 发送图片消息{}，chater {}, 已经非好友！", uin, imagePath, chater);
+
+            ImMsg imMsg0 = new ImMsg(null,
+                    sessionId,
+                    msgId,
+                    String.valueOf(uin),
+                    TIMElemType.Image.ordinal(),
+                    imageInfoStr,
+                    (msgId / 1000),
+                    2); //发送失败
+            imMsgDao.insert(imMsg0);
+
+            ImMsg imMsg1 = new ImMsg(null,
+                    sessionId,
+                    msgId+1,
+                    String.valueOf(uin),
+                    100,
+                    "对方已不是你的好友",
+                    ((msgId+1) / 1000),
+                    1);
+            imMsgDao.insert(imMsg1);
+
+            ImMsg imMsg2 = new ImMsg(null,
+                    sessionId,
+                    msgId+2,
+                    String.valueOf(uin),
+                    100,
+                    "先和对方成为好友，才能聊天哦~",
+                    ((msgId+2) / 1000),
+                    1);
+            imMsgDao.insert(imMsg2);
+
+            mDataList.add(0, imMsg0);
+            mDataList.add(0, imMsg1);
+            mDataList.add(0, imMsg2);
+            chatAdapter.notifyDataSetChanged();
+            acwEdit.setText("");
+            acwRecycleView.scrollToPosition(mDataList.size() - 1);
+            return;
+        }
+
+        //msgSuccess -> 0 表示发送中 1->表示发送成功 2表示发送失败
+        //先插入到消息和会话表中，在成功或者失败之后，更新其对应的消息状态msgSuccess->1或者msgSuccess->2
+        ImMsg imMsg = new ImMsg(null, sessionId, msgId, String.valueOf(uin), TIMElemType.Image.ordinal(), imageInfoStr, msgId / 1000, 0);
+        try {
+            imMsgDao.insert(imMsg);
+        } catch (Exception e) {
+            LogUtils.getInstance().error("uin {}, 发送图片消息{}，chater {}, insert to msgtable error {}", uin, imageInfoStr, chater, e.getMessage());
+            return;
+        }
+
+        //更新adpater里面的数据
+        mDataList.add(0, imMsg);
+        chatAdapter.notifyDataSetChanged();
+        acwRecycleView.scrollToPosition(mDataList.size() - 1);
+
+        //更新会话表中的信息
+        imSession.setLastMsgId(msgId);
+        imSession.setLastSender(String.valueOf(uin));
+        imSession.setMsgType(TIMElemType.Image.ordinal());
+        imSession.setMsgTs(msgId / 1000);
+        imSession.setUnreadMsgNum(0);
+
+        imSessionDao.update(imSession);
+
+        //构造一条消息
+        final TIMMessage msg = new TIMMessage();
+
+        //添加图片
+        TIMImageElem elem = new TIMImageElem();
+        elem.setPath(imagePath);
+
+        //将elem添加到消息
+        if (msg.addElement(elem) != 0) {
+            LogUtils.getInstance().error("uin {}, 发送图片消息{}，chater {}, addElement error", uin, imageInfoStr, chater);
+            return;
+        }
+
+        TIMMessageOfflinePushSettings offlineSettings = new TIMMessageOfflinePushSettings();
+        offlineSettings.setDescr("[图片]");
+        offlineSettings.setEnabled(true);
+
+        TIMMessageOfflinePushSettings.AndroidSettings andSetting = new TIMMessageOfflinePushSettings.AndroidSettings();
+        andSetting.setTitle(myselfNickName);
+        andSetting.setNotifyMode(TIMMessageOfflinePushSettings.NotifyMode.Custom);
+
+        TIMMessageOfflinePushSettings.IOSSettings iosSettings = new TIMMessageOfflinePushSettings.IOSSettings();
+        iosSettings.setBadgeEnabled(true);
+
+        offlineSettings.setAndroidSettings(andSetting);
+        offlineSettings.setIosSettings(iosSettings);
+        msg.setOfflinePushSettings(offlineSettings);
+
+        conversation = TIMManager.getInstance().getConversation(
+                TIMConversationType.Group,      //会话类型：群组
+                sessionId);                     //群组Id
+
+        LogUtils.getInstance().debug("uin {}, 发送图片消息 {}，chater {}, 发送中...", uin, imageInfoStr, chater);
+
+        //发送消息
+        conversation.sendMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
+
+            @Override
+            public void onError(int code, String desc) {//发送消息失败
+                //错误码code和错误描述desc，可用于定位请求失败原因
+                //错误码code含义请参见错误码表
+
+                LogUtils.getInstance().error("uin {}, 发送图片消息{}，chater {}, 发送失败 code {}, desc {}", uin, imageInfoStr, chater, code, desc);
+
+                ImMsg timMsg = imMsgDao.queryBuilder()
+                        .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                        .where(ImMsgDao.Properties.MsgId.eq(msgId))
+                        .build().unique();
+
+                if (timMsg != null) {
+                    //更新数据库
+                    timMsg.setMsgSucess(2);//设置为消息发送失败
+                    imMsgDao.update(timMsg);
+
+                    //更新adpater里面的数据
+                    ImMsg t;
+                    for(int i = 0; i < mDataList.size(); ++i){
+                        t = mDataList.get(i);
+                        if(t!=null){
+                            if (t.getMsgId() == msgId){
+                                mDataList.get(i).setMsgSucess(2);
+                                chatAdapter.notifyItemChanged(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                ImSession timSession = imSessionDao.queryBuilder()
+                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                        .build().unique();
+                if (timSession != null) {
+                    //todo 更新状态
+                    //设置msg发送失败
+                    //imSessionDao.update(timSession);
+                }
+            }
+
+            @Override
+            public void onSuccess(TIMMessage msg) {//发送消息成功
+                long tmsgId = msg.getMsgUniqueId();
+                long tmsgTs = msg.getMsg().time();
+
+                LogUtils.getInstance().debug("uin {}, 发送图片消息 {}，chater {}, 发送成功 msgId {}", uin, imageInfoStr, chater, tmsgId);
+
+                ImMsg timMsg = imMsgDao.queryBuilder()
+                        .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                        .where(ImMsgDao.Properties.MsgId.eq(msgId))
+                        .build().unique();
+
+                if (timMsg != null) {
+
+                    //更新数据库
+                    timMsg.setMsgId(tmsgId);
+                    timMsg.setMsgTs(tmsgTs);
+                    timMsg.setMsgSucess(1);//设置为消息发送成功
+                    imMsgDao.update(timMsg);
+
+                    //更新adpater里面的数据
+                    ImMsg t;
+                    for(int i = 0; i < mDataList.size(); ++i){
+                        t = mDataList.get(i);
+                        if (t != null){
+                            if (t.getMsgId() == tmsgId){
+                                mDataList.get(i).setMsgSucess(1);
+                                chatAdapter.notifyDataSetChanged();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                ImSession timSession = imSessionDao.queryBuilder()
+                        .where(ImSessionDao.Properties.SessionId.eq(sessionId))
+                        .build().unique();
+                if (timSession != null) {
+                    timSession.setLastMsgId(tmsgId);
+                    timSession.setMsgTs(tmsgTs);
+                    //todo 更新状态
+                    imSessionDao.update(timSession);
+                }
+            }
+        });
+
+        acwEdit.setText("");
+    }
 
     String sessionId;
     long msgId;
@@ -479,25 +771,28 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         chatAdapter.setItemClickListener(new ChatAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
-                int realPosition = mDataList.size() - (position + 1);
-                LogUtils.getInstance().debug("onItemClick: 图片被点击了---{}, position = {}, realPosition = {}",
-                        mDataList.get(realPosition).getMsgContent(), position, realPosition);
-                String imageInfoStr = mDataList.get(realPosition).getMsgContent();
-                String currentSender = mDataList.get(realPosition).getSender();
-                ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
-                String url = imageInfo.getLargeImage().getImageUrl();
-                int imageFormat = imageInfo.getImageFormat();
-                int largeWidth = imageInfo.getLargeImage().getImageWidth();
-                int largeHeight = imageInfo.getLargeImage().getImageHeight();
-                if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF) {
-                    showImageDialog(url, largeWidth, largeHeight, currentSender);
-                }
+            public void onItemClick(View view) {
+                if (view.getId() == R.id.msg_item_image_left || view.getId() == R.id.msg_item_image_right) {
+                    //处理消息中的图片点击事件；
+                    int position = (Integer) view.getTag();
+                    int realPosition = mDataList.size() - (position + 1);
+                    LogUtils.getInstance().debug("onItemClick: 图片被点击了---{}, position = {}, realPosition = {}",
+                            mDataList.get(realPosition).getMsgContent(), position, realPosition);
+                    String imageInfoStr = mDataList.get(realPosition).getMsgContent();
+                    String currentSender = mDataList.get(realPosition).getSender();
+                    ImageInfo imageInfo = GsonUtil.GsonToBean(imageInfoStr, ImageInfo.class);
+                    String url = imageInfo.getLargeImage().getImageUrl();
+                    int imageFormat = imageInfo.getImageFormat();
+                    int largeWidth = imageInfo.getLargeImage().getImageWidth();
+                    int largeHeight = imageInfo.getLargeImage().getImageHeight();
+                    if (!TextUtils.isEmpty(url) && imageFormat != TIMImageElem.TIM_IMAGE_FORMAT_GIF) {
+                        showImageDialog(url, largeWidth, largeHeight, currentSender);
+                    }
 
-                View llView = linearLayoutManager.findViewByPosition(position);
+                    View llView = linearLayoutManager.findViewByPosition(position);
 
-                if (llView == null) return;
-                if (uin == Integer.valueOf(currentSender)) {    //发送者是自己
+                    if (llView == null) return;
+                    if (uin == Integer.valueOf(currentSender)) {    //发送者是自己
 //                    RelativeLayout rightRl = (RelativeLayout) llView;
 //                    ImageView rightImgView = (ImageView) rightRl.findViewById(R.id.msg_item_image_right);
 //
@@ -509,19 +804,26 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 //                            .centerCrop()
 //                            .into(rightImgView);
 
-                    LogUtils.getInstance().debug("onItemClick: 右设置大图");
-                } else {                 //非自己
-                    RelativeLayout leftRl = (RelativeLayout) llView;
-                    ImageView leftImgView = (ImageView) leftRl.findViewById(R.id.msg_item_image_left);
+                        LogUtils.getInstance().debug("onItemClick: 右设置大图");
+                    } else {                 //非自己
+                        RelativeLayout leftRl = (RelativeLayout) llView;
+                        ImageView leftImgView = (ImageView) leftRl.findViewById(R.id.msg_item_image_left);
 
-                    ViewGroup.LayoutParams lp = leftImgView.getLayoutParams();
-                    if (lp == null) return;
-                    Picasso.with(ActivityChatWindow.this).load(url)
-                            .resize(lp.width, lp.height)
-                            .config(Bitmap.Config.RGB_565)
-                            .centerCrop()
-                            .into(leftImgView);
-                    LogUtils.getInstance().debug("onItemClick: 左设置大图");
+                        ViewGroup.LayoutParams lp = leftImgView.getLayoutParams();
+                        if (lp == null) return;
+                        Picasso.with(ActivityChatWindow.this).load(url)
+                                .resize(lp.width, lp.height)
+                                .config(Bitmap.Config.RGB_565)
+                                .centerCrop()
+                                .into(leftImgView);
+                        LogUtils.getInstance().debug("onItemClick: 左设置大图");
+                    }
+                } else if (view.getId() == R.id.msg_item_right_not_friend) {
+                    //处理文本消息发送失败时，感叹号的点击事件;
+                    handleTextClickExclamation((Integer)view.getTag());
+                } else if (view.getId() == R.id.msg_item_image_right_not_friend) {
+                    //处理图片发送失败时，感叹号的点击事件：
+                    handleImgClickExclamation((Integer)view.getTag());
                 }
             }
         });
@@ -555,6 +857,22 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             public void loadMore() {
             }
         });
+    }
+
+    /*
+    * 文本发送失败时,点击左侧感叹号重发：
+    */
+    private void handleTextClickExclamation(int position) {
+        LogUtils.getInstance().debug("位置 {} 的文本左侧感叹号被点击!", position);
+        //sendMessageAfterError(position);
+    }
+
+    /*
+    * 图片发送失败时,点击左侧感叹号重发：
+    */
+    private void handleImgClickExclamation(int position) {
+        LogUtils.getInstance().debug("位置 {} 的图片左侧感叹号被点击!", position);
+        //sendMessageAfterError(position);
     }
 
     private void initTitle() {
@@ -795,6 +1113,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             //判断离上一条消息的时间间隔是否超过3分钟，超过 则在UI中显示时间信息：
             insertTimestampMsg();
 
+            //更新UI显示;
             mDataList.add(0, imMsg);
             chatAdapter.notifyItemInserted(mDataList.size() - 1);
             acwRecycleView.scrollToPosition(mDataList.size() - 1);
@@ -1051,25 +1370,32 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
             LogUtils.getInstance().debug("onActivityResult: images_url = {}", images.get(0));
 
             String imagePath = images.get(0);
-            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-            String dirStr = root + File.separator + "yplay" + File.separator + "image";
-            String localImagePath = "";
-            if (bitmap != null) {
-                localImagePath = ImageUtil.saveImage(bitmap, dirStr);
-                bitmap.recycle();
-                bitmap = null;
-            }
-            LogUtils.getInstance().debug("onActivityResult: local imagePATH = {}", localImagePath);
+            int imgType = getImageFormat(imagePath);
+            LogUtils.getInstance().debug("imgType = {}", imgType);
 
-            sendMessage(localImagePath);
+            if (imgType == TIMImageElem.TIM_IMAGE_FORMAT_GIF){
+                sendImageMessage(imagePath);
+            }else {
+                Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+                String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+                String dirStr = root + File.separator + "yplay" + File.separator + "image";
+                String localImagePath = "";
+                if (bitmap != null) {
+                    localImagePath = ImageUtil.saveImage(bitmap, dirStr);
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+                LogUtils.getInstance().debug("onActivityResult: local imagePATH = {}", localImagePath);
+
+                sendImageMessage(localImagePath);
+            }
 
         } else if (requestCode == CODE_CAMERA_REQUEST) {
             String imagePath = fileUri.getAbsolutePath();
             LogUtils.getInstance().debug("onActivityResult: 拍照的url = {}, imagePath = {}",
                     imageUri, imagePath);
 
-            sendMessage(imagePath);
+            sendImageMessage(imagePath);
         }
     }
 
@@ -1243,5 +1569,14 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
         return 255;
 
+    }
+
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent();
+        intent.putExtra("update_sessionID", sessionId);
+        setResult(RESULT_CODE_FRIEND_CHAT_REPLY, intent);
+
+        super.onBackPressed();
     }
 }
