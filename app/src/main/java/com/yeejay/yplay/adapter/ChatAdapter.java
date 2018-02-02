@@ -58,7 +58,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         ITEM_TYPE_VOTE_CARD,
         ITEM_TYPE_CENTER,
         ITEM_TYPE_IMAGE_LEFT,
-        ITEM_TYPE_IMAGE_RIGHT
+        ITEM_TYPE_IMAGE_RIGHT,
+        ITEM_TYPE_TIME
     }
 
     private Context context;
@@ -103,9 +104,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (viewType == ITEM_TYPE.ITEM_TYPE_VOTE_CARD.ordinal()) {
 //            System.out.println("投票卡片");
             return new VoteCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_card, parent, false));
-        }else if (viewType == ITEM_TYPE.ITEM_TYPE_CENTER.ordinal()){    //中间
+        } else if (viewType == ITEM_TYPE.ITEM_TYPE_CENTER.ordinal()){    //中间
             return new CenterMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_text_center, parent, false));
-        }else if (viewType == ITEM_TYPE.ITEM_TYPE_IMAGE_LEFT.ordinal()){    //左边的图片
+        } else if (viewType == ITEM_TYPE.ITEM_TYPE_TIME.ordinal()){    //时间消息类型
+            return new TimeMsgViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_center_time, parent, false));
+        } else if (viewType == ITEM_TYPE.ITEM_TYPE_IMAGE_LEFT.ordinal()){    //左边的图片
 
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_chat_imge_left, parent, false);
             LeftImageViewHolder holder = new LeftImageViewHolder(view);
@@ -217,7 +220,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
         }else if (immsgType == 100){    //中间的提示
             ((CenterMsgViewHolder)holder).msgCenter.setText(msgContent);
-        }else if (immsgType == TIMElemType.Image.ordinal()){//图片消息
+        } else if (immsgType == 200){    //时间提示
+            LogUtils.getInstance().debug("onBindViewHolder ITEM_TYPE_TIME");
+            ((TimeMsgViewHolder)holder).msgTime.setText(msgContent);
+        } else if (immsgType == TIMElemType.Image.ordinal()){//图片消息
             if (holder instanceof LeftImageViewHolder){     //左边的图片
                 ((LeftImageViewHolder)holder).msgImageLeft.setTag(position);
                 ImageInfo imageInfo = GsonUtil.GsonToBean(msgContent, ImageInfo.class);
@@ -397,16 +403,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             } else if (sender.equals(String.valueOf(uin))) {  //发送者是自己
                 return ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal();
             }
-        }else if (immsgType == 100){    //中间的提示
-            return ITEM_TYPE.ITEM_TYPE_CENTER.ordinal();
         }else if (immsgType == 101){
             return ITEM_TYPE.ITEM_TYPE_RIGHT.ordinal();
-        }else if (immsgType == 2){      //图片消息
+        }else if (immsgType == 100){
+            return ITEM_TYPE.ITEM_TYPE_CENTER.ordinal();
+        } else if (immsgType == 2){      //图片消息
             if (!sender.equals(String.valueOf(uin))) { //发送者不是自己
                 return ITEM_TYPE.ITEM_TYPE_IMAGE_LEFT.ordinal();
             } else if (sender.equals(String.valueOf(uin))) {  //发送者是自己
                 return ITEM_TYPE.ITEM_TYPE_IMAGE_RIGHT.ordinal();
             }
+        } else if (immsgType == 200){//时间消息类型
+            return ITEM_TYPE.ITEM_TYPE_TIME.ordinal();
         }
 
         return -1;
@@ -535,6 +543,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         TextView msgCenter;
 
         public CenterMsgViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public static class TimeMsgViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.msg_item_center_time)
+        TextView msgTime;
+
+        public TimeMsgViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

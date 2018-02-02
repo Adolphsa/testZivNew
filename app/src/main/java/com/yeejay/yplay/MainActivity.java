@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,6 +49,8 @@ import com.yeejay.yplay.friend.FragmentFriend;
 import com.yeejay.yplay.greendao.ContactsInfo;
 import com.yeejay.yplay.greendao.ContactsInfoDao;
 import com.yeejay.yplay.greendao.FriendInfo;
+import com.yeejay.yplay.greendao.ImMsg;
+import com.yeejay.yplay.greendao.ImMsgDao;
 import com.yeejay.yplay.greendao.ImSession;
 import com.yeejay.yplay.greendao.ImSessionDao;
 import com.yeejay.yplay.greendao.MyInfo;
@@ -258,6 +261,10 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         //获取加好友的人数
         getAddFreindCount();
         setMessageIcon();
+
+        //统一将发送中的改成发送失败
+        new DbAsyncTask().execute();
+
 //        setFeedIcon();
 
         getMyFriendsList();
@@ -1303,6 +1310,22 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
         @Override
         public void run() {
             getContacts();
+        }
+    }
+
+    private static class DbAsyncTask extends AsyncTask<String, Integer, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            //程序启动把所有发送中的消息状态改成发送失败
+            ImMsgDao imMsgDao = YplayApplication.getInstance().getDaoSession().getImMsgDao();
+            List<ImMsg> imMsgs = imMsgDao.queryBuilder().where(ImMsgDao.Properties.MsgSucess.le(0)).list();
+
+            for(ImMsg msg : imMsgs){
+                msg.setMsgSucess(2);
+                imMsgDao.update(msg);
+            }
+
+            return null;
         }
     }
 

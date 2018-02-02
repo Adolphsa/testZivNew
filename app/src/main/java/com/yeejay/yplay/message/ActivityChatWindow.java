@@ -335,7 +335,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         if(t!=null){
                             if (t.getMsgId() == msgId){
                                 mDataList.get(i).setMsgSucess(2);
-                                chatAdapter.notifyItemChanged(i);
+                                chatAdapter.notifyDataSetChanged();
                                 break;
                             }
                         }
@@ -359,7 +359,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 long tmsgId = msg.getMsgUniqueId();
                 long tmsgTs = msg.getMsg().time();
 
-                LogUtils.getInstance().debug("uin {}, 发送文本消息 {}，chater {}, 发送成功 msgId {}", uin, str, chater, tmsgId);
+                LogUtils.getInstance().debug("uin {}, 发送文本消息 {}，chater {}, 发送成功 msgId {}, msgTs {}", uin, str, chater, tmsgId, tmsgTs);
 
                 ImMsg timMsg = imMsgDao.queryBuilder()
                         .where(ImMsgDao.Properties.SessionId.eq(sessionId))
@@ -370,7 +370,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
                     //更新数据库
                     timMsg.setMsgId(tmsgId);
-                    timMsg.setMsgTs(tmsgTs);
+                    //timMsg.setMsgTs(tmsgTs);
                     timMsg.setMsgSucess(1);//设置为消息发送成功
                     imMsgDao.update(timMsg);
 
@@ -616,7 +616,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         if(t!=null){
                             if (t.getMsgId() == msgId){
                                 mDataList.get(i).setMsgSucess(2);
-                                chatAdapter.notifyItemChanged(i);
+                                chatAdapter.notifyDataSetChanged();
                                 break;
                             }
                         }
@@ -638,7 +638,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                 long tmsgId = msg.getMsgUniqueId();
                 long tmsgTs = msg.getMsg().time();
 
-                LogUtils.getInstance().debug("uin {}, 发送图片消息 {}，chater {}, 发送成功 msgId {}", uin, imageInfoStr, chater, tmsgId);
+                LogUtils.getInstance().debug("uin {}, 发送图片消息 {}，chater {}, 发送成功 msgId {}, msgTs {}", uin, imageInfoStr, chater, tmsgId, tmsgTs);
 
                 ImMsg timMsg = imMsgDao.queryBuilder()
                         .where(ImMsgDao.Properties.SessionId.eq(sessionId))
@@ -649,7 +649,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
                     //更新数据库
                     timMsg.setMsgId(tmsgId);
-                    timMsg.setMsgTs(tmsgTs);
+                    //timMsg.setMsgTs(tmsgTs);
                     timMsg.setMsgSucess(1);//设置为消息发送成功
                     imMsgDao.update(timMsg);
 
@@ -1070,14 +1070,15 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         //获取最近一条消息的时间戳;
         List<ImMsg> imMsgList = imMsgDao.queryBuilder()
                 .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                .where(ImMsgDao.Properties.MsgType.eq(200))
                 .orderDesc(ImMsgDao.Properties.MsgTs)
-                .offset(dataOffset * 10)
                 .limit(1)
                 .list();
 
+        long currentTs = System.currentTimeMillis() / 1000 - 1;
+
         if (imMsgList != null && imMsgList.size() > 0) {
             long lastImMsgTs = imMsgList.get(0).getMsgTs();
-            long currentTs = System.currentTimeMillis() / 1000;
 
             LogUtils.getInstance().debug("lastImMsgTs = {}, currentTs = {}", lastImMsgTs, currentTs);
             if ((currentTs - lastImMsgTs) >= (long) 180) {
@@ -1086,11 +1087,38 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
                         sessionId,
                         System.currentTimeMillis(),
                         String.valueOf(uin),
-                        100,
-                        getCurrentTime(lastImMsgTs),
-                        (System.currentTimeMillis() / 1000),
+                        200,
+                        getCurrentTime(currentTs),
+                        currentTs,
                         1);
 
+                //插入时间戳消息到数据库，并插入到数据列表中;
+                imMsgDao.insert(imMsg);
+                mDataList.add(0, imMsg);
+            }
+        }else{
+
+            //如果实名之后 从来没有插入时间消息，则直接插入一条时间消息
+            List<ImMsg> timMsgList = imMsgDao.queryBuilder()
+                    .where(ImMsgDao.Properties.SessionId.eq(sessionId))
+                    .where(ImMsgDao.Properties.MsgType.eq(1))
+                    .orderDesc(ImMsgDao.Properties.MsgTs)
+                    .limit(1)
+                    .list();
+
+            if (timMsgList != null && timMsgList.size() > 0){
+                //如果当前时间戳跟最近一条消息时间戳相隔超过3分钟，则插入到数据列表中;
+                ImMsg imMsg = new ImMsg(null,
+                        sessionId,
+                        System.currentTimeMillis(),
+                        String.valueOf(uin),
+                        200,
+                        getCurrentTime(currentTs),
+                        currentTs,
+                        1);
+
+                //插入时间戳消息到数据库，并插入到数据列表中;
+                imMsgDao.insert(imMsg);
                 mDataList.add(0, imMsg);
             }
         }
