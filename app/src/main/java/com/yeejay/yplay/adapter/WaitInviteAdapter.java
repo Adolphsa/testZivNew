@@ -168,7 +168,7 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((ViewHolder) holder).afItemName.setText(nickName);
             ((ViewHolder) holder).afItemTvSharesFriends.setText(phone);
 
-            ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.friend_invitation);
+            ((ViewHolder) holder).afBtnAccept.setBackgroundResource(R.drawable.friend_invitation_new);
             ((ViewHolder) holder).afBtnAccept.setEnabled(true);
             ((ViewHolder) holder).afBtnAccept.setOnClickListener(acceptListener);
 
@@ -186,9 +186,11 @@ public class WaitInviteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         } else if (uin == 2) {   //已开通文字
             String contactTitle = contentList.get(position).getName();
             ((TextViewHolder) holder).contactsTitle.setText(contactTitle);
+            ((TextViewHolder) holder).contactsTitle.setTextColor(context.getResources().getColor(R.color.first_name));
         } else if (uin == 3) {    //未开通文字
             String contactTitle = contentList.get(position).getName();
             ((TextViewHolder) holder).contactsTitle.setText(contactTitle);
+            ((TextViewHolder) holder).contactsTitle.setTextColor(context.getResources().getColor(R.color.first_name));
         } else if (uin > 1000) {  //通讯录已开通好友
 
             ((ViewHolder) holder).afItemHeaderImg.setVisibility(View.VISIBLE);

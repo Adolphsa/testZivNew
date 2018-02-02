@@ -18,7 +18,7 @@
 
     <RelativeLayout
         android:layout_width="312dp"
-        android:layout_height="402dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/shape_white_round25"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="96dp"
@@ -27,7 +27,7 @@
         <TextView
             android:id="@+id/frgans_question"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_marginTop="82dp"
             android:layout_centerHorizontal="true"
             android:textStyle="bold"
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/frgans_question"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="40dp"
             android:orientation="horizontal">
 
             <com.yeejay.yplay.customview.ProgressButton
@@ -124,7 +124,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_below="@+id/frgans_ll2"
-            android:layout_marginTop="36dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
             >
 
             <Button

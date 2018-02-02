@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -265,9 +264,11 @@ public class ActivityAddFiendsDetail extends BaseActivity {
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageView button = (ImageView) v;
+                TextView button = (TextView) v;
                 if (NetWorkUtil.isNetWorkAvailable(ActivityAddFiendsDetail.this)) {
-                    button.setImageResource(R.drawable.peer_be_as_friends);
+                    button.setBackgroundResource(R.drawable.shape_friend_card_add_selected_bg);
+                    button.setTextColor(getResources().getColor(R.color.text_color_gray2));
+                    button.setEnabled(false);
                     //除了更新朋友选项卡信息中的按钮状态外，还要更新外部对应的好友请求列表item的按钮状态；
                     if (friendItemView != null) {
 

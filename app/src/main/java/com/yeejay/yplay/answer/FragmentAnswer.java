@@ -483,11 +483,11 @@ public class FragmentAnswer extends BaseFragment {
             LogUtils.getInstance().debug("queationNum%4 = {} , queationNum = {}",
                     (questionNum % colorCount), questionNum);
             mainActivity.setmColor(backgroundStartColor[questionNum % colorCount]);
-            if (!NetWorkUtil.isNetWorkAvailable(getActivity())) {
-                frandProgress.setVisibility(View.VISIBLE);
-            } else {
-                frandProgress.setVisibility(View.INVISIBLE);
-            }
+//            if (!NetWorkUtil.isNetWorkAvailable(getActivity())) {
+//                frandProgress.setVisibility(View.VISIBLE);
+//            } else {
+//                frandProgress.setVisibility(View.INVISIBLE);
+//            }
             setFriendCount();
 
             if (isFreeze) {  //如果是冷却状态就去拉一把问题
@@ -821,6 +821,7 @@ public class FragmentAnswer extends BaseFragment {
 
                     @Override
                     public void onTimeOut() {
+                        frandProgress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override

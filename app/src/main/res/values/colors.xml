@@ -19,7 +19,7 @@
 
     <color name="progress_bg">#fff2c0</color>
     <color name="divider_color2">#FFF9F9F9</color>
-    <color name="first_name">#A1DDDE </color>
+    <color name="first_name">#513EBD</color>
 
 
     <color name="blue_pressed">#7cb342</color>
@@ -149,5 +149,8 @@
     <color name="brozne_diamond_color">#FFF5900A</color>
 
     <color name="devider_line_color">#ff000000</color>
+
+    <color name="diamond_item_index_color">#7C62D1</color>
+    <color name="adf_fri_status_color">#3023AE </color>
 
 </resources>

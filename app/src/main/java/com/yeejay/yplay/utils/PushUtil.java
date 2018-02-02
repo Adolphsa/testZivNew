@@ -116,11 +116,14 @@ public class PushUtil implements Observer {
             String msgContent = imSession.getMsgContent();
             String nickName = imSession.getNickName();
 
-            notificationIntent.putExtra("yplay_sessionId",sessionId);
-            notificationIntent.putExtra("yplay_session_status",status);
-            notificationIntent.putExtra("yplay_sender",sender);
-            notificationIntent.putExtra("yplay_msg_content",msgContent);
-            notificationIntent.putExtra("yplay_nick_name",nickName);
+            if (notificationIntent != null){
+                notificationIntent.putExtra("yplay_sessionId",sessionId);
+                notificationIntent.putExtra("yplay_session_status",status);
+                notificationIntent.putExtra("yplay_sender",sender);
+                notificationIntent.putExtra("yplay_msg_content",msgContent);
+                notificationIntent.putExtra("yplay_nick_name",nickName);
+            }
+
 
             Log.i(TAG, "PushNotify: sessionID---" + sessionId + ",nickname----"
              +nickName + ",msgContent---" + msgContent);

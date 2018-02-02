@@ -130,6 +130,9 @@ public class BaseUtils {
         if (!TextUtils.isEmpty(nickName)){
             char firstName = nickName.charAt(0);
             defaultSortkey = String.valueOf(Pinyin.toPinyin(firstName).charAt(0)).toUpperCase() ;
+            if (!defaultSortkey.matches("[A-Z]")){
+                defaultSortkey = "#";
+            }
         }
         return defaultSortkey;
 

@@ -23,7 +23,8 @@
             android:layout_centerVertical="true"
             style="@style/add_friends_subtitle_style"
             android:text="@string/classmate_in_same_school"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            />
 
         <TextView
             android:id="@+id/filter_text"

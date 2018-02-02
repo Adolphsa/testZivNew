@@ -24,7 +24,7 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.adapter.FriendFeedsAdapter;
 import com.yeejay.yplay.adapter.RecommendFriendForNullAdapter;
 import com.yeejay.yplay.base.BaseFragment;
-import com.yeejay.yplay.customview.CardDialog;
+import com.yeejay.yplay.customview.CardBigDialog;
 import com.yeejay.yplay.customview.LoadMoreView;
 import com.yeejay.yplay.customview.MyLinearLayoutManager;
 import com.yeejay.yplay.greendao.DaoFriendFeeds;
@@ -39,7 +39,6 @@ import com.yeejay.yplay.model.FriendFeedsRespond;
 import com.yeejay.yplay.model.GetRecommendsRespond;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.userinfo.ActivityMyInfo;
-import com.yeejay.yplay.utils.FriendFeedsUtil;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.NetWorkUtil;
@@ -754,56 +753,32 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
         }
     }
 
-
     //显示名片
     private void showCardDialog(UserInfoResponde.PayloadBean payloadBean) {
 
         final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
-        int status = payloadBean.getStatus();
 
-        final CardDialog cardDialog = new CardDialog(getActivity(), R.style.CustomDialog);
-        cardDialog.setCardImgStr(infoBean.getHeadImgUrl());
-        cardDialog.setCardDiamondCountStr("钻石 " + String.valueOf(infoBean.getGemCnt()));
-        cardDialog.setCardNameStr(infoBean.getNickName());
-        cardDialog.setCardSchoolNameStr(infoBean.getSchoolName());
-        cardDialog.setCardGradeStr(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
-
-        if (status == 0) {
-            cardDialog.setButtonImg(R.drawable.green_add_friend);
-        } else if (status == 2) {
-            cardDialog.setButtonImg(R.drawable.already_apply);
-        }
+        final CardBigDialog cardDialog = new CardBigDialog(getActivity(), R.style.CustomDialog,
+                payloadBean);
 
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton) v;
+                TextView button = (TextView) v;
                 if (NetWorkUtil.isNetWorkAvailable(getActivity())) {
-                    button.setImageResource(R.drawable.already_apply);
+                    button.setBackgroundResource(R.drawable.shape_friend_card_add_selected_bg);
+                    button.setTextColor(getResources().getColor(R.color.text_color_gray2));
+                    button.setEnabled(false);
+
                     addFriend(infoBean.getUin());
                 } else {
                     Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
                 }
-
-
-            }
-        });
-        cardDialog.setAddFriendListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ImageButton button = (ImageButton) v;
-                button.setImageResource(R.drawable.already_apply);
-            }
-        });
-        cardDialog.setCarDialogRlListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LogUtils.getInstance().debug("哈哈哈");
-                cardDialog.dismiss();
             }
         });
         cardDialog.show();
     }
+
 
     //设置添加好友的数量
     public void setFriendCount() {
@@ -821,7 +796,7 @@ public class FragmentFriend extends BaseFragment implements FriendFeedsAdapter.O
 
             } else {
                 if (addFriendTextView != null) {
-                    addFriendTextView.setText(addFriendNum + "");
+                    addFriendTextView.setText(String.valueOf(addFriendNum));
                 }
 
             }

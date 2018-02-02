@@ -2,15 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:wheel="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:id="@+id/frgans_linear_layout">
 
     <include layout="@layout/layout_frag_title_bar" />
 
-    <include layout="@layout/fragment_answer_play"
-        />
+    <include layout="@layout/fragment_answer_play" />
     <include layout="@layout/fragment_answer_cooling"
         android:visibility="gone"
         />

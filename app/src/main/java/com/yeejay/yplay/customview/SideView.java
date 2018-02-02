@@ -7,11 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import com.yeejay.yplay.R;
 
 /**
  * 字母侧边栏
@@ -69,7 +66,7 @@ public class SideView extends View{
 
             if (i==choose){
 
-                paint.setColor(Color.parseColor("#A1DDDE"));
+                paint.setColor(Color.parseColor("#513EBD"));
                 canvas.drawCircle(width/2,yPos-(singleHeight/4),width/2,paint);
 
                 paint.setColor(Color.parseColor("#ffffff"));

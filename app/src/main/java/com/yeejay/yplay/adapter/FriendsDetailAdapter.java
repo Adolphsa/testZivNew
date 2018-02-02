@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.model.GetAddFriendMsgs;
-import com.yeejay.yplay.utils.NetWorkUtil;
 
 import java.util.List;
 
@@ -111,7 +109,7 @@ public class FriendsDetailAdapter extends RecyclerView.Adapter<FriendsDetailAdap
             holder.afBtnAccept.setBackgroundResource(R.drawable.be_as_friends);
             holder.afBtnAccept.setEnabled(false);
         }else {
-            holder.afBtnAccept.setBackgroundResource(R.drawable.friends_accept);
+            holder.afBtnAccept.setBackgroundResource(R.drawable.friend_ask);
             holder.afBtnAccept.setEnabled(true);
             holder.afBtnAccept.setOnClickListener(acceptListener);
         }

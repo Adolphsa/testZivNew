@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -78,19 +77,16 @@ public class AllDiamondsAdapter extends BaseAdapter{
 
         if(position == 0) {
             holder.itemAmiIndex.setBackgroundResource(R.drawable.gold_medal);
-            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.gold_diamond_color));
+
         } else if(position == 1) {
             holder.itemAmiIndex.setBackgroundResource(R.drawable.silver_medal);
-            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.silver_diamond_color));
+
         } else if(position == 2) {
             holder.itemAmiIndex.setBackgroundResource(R.drawable.bronze_medal);
-            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.brozne_diamond_color));
-        } else if(position > 2 && position < 99){
-            holder.itemAmiIndex.setBackgroundResource(R.drawable.normal_medal);
-            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.play_color2));
-        } else {
-            holder.itemAmiIndex.setBackgroundResource(R.drawable.shape_diamond_normal_background);
-            holder.itemAmiCount.setTextColor(context.getResources().getColor(R.color.play_color2));
+
+        }else {
+            holder.itemAmiIndex.setBackgroundResource(R.drawable.shape_transparent);
+
         }
 
         return convertView;

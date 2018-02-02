@@ -1,72 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    >
+    android:background="@drawable/shape_myinfo_bg">
 
-    <LinearLayout
+
+    <include
+        android:id="@+id/apf_title"
+        layout="@layout/layout_title_bar2" />
+
+    <include
+        android:id="@+id/apf_header_info"
+        layout="@layout/layout_personal_info_header"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@drawable/shape_user_info_background"
-        android:orientation="vertical"
-        android:layout_weight="0.37">
-        <include layout="@layout/layout_title_bar2"/>
-        <include layout="@layout/layout_personal_info_header" />
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/apf_title"
+        android:layout_marginLeft="54dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_weight="0.63">
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <include layout="@layout/layout_personal_info" />
+    <TextView
+        android:id="@+id/remove_friend"
+        android:layout_width="96dp"
+        android:layout_height="30dp"
+        android:layout_below="@+id/apf_header_info"
+        android:layout_marginLeft="54dp"
+        android:text="@string/as_friends"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:background="@drawable/shape_stroke1"
+        />
 
-                <RelativeLayout
-                    android:id="@+id/remove_friend"
-                    android:layout_width="129dp"
-                    android:layout_height="48dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@drawable/shape_btn_unbind">
-                    <ImageView
-                        android:id="@+id/remove_friend_img"
-                        android:layout_width="@dimen/personal_icon_width"
-                        android:layout_height="@dimen/personal_icon_height"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/remove_friends_icon"/>
+    <include
+        layout="@layout/layout_personal_info_diamonds"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/remove_friend"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
 
-                    <TextView
-                        android:id="@+id/remove_friend_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/as_friends"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:layout_marginStart="10dp"
-                        android:layout_toEndOf="@+id/remove_friend_img"
-                        android:layout_centerVertical="true" />
 
-                </RelativeLayout>
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/remove_friend"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:background="@drawable/shape_is_fri_new"-->
+        <!--android:padding="10dp">-->
 
-                <include layout="@layout/layout_peer_friend_diamond_info"/>
+        <!--<ImageView-->
+            <!--android:id="@+id/remove_friend_img"-->
+            <!--android:layout_width="@dimen/personal_icon_width"-->
+            <!--android:layout_height="@dimen/personal_icon_height"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:src="@drawable/friend_both_black" />-->
 
-                <include
-                    android:id="@+id/layout_my_friend"
-                    layout="@layout/layout_peer_friend_friend_info"/>
+        <!--<TextView-->
+            <!--android:id="@+id/remove_friend_text"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/remove_friend_img"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_marginStart="10dp"-->
+            <!--android:text="@string/as_friends"-->
+            <!--android:textColor="@color/my_item_font_color"-->
+            <!--android:textSize="14sp" />-->
 
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
-</LinearLayout>
+    <!--</RelativeLayout>-->
+
+
+</RelativeLayout>

@@ -10,30 +10,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
-import com.yeejay.yplay.api.YPlayApiManger;
 import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.model.UsersDiamondInfoRespond;
 import com.yeejay.yplay.utils.FriendFeedsUtil;
+import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
+import com.yeejay.yplay.wns.WnsAsyncHttp;
+import com.yeejay.yplay.wns.WnsRequestListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.OnClick;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * 名片dialog
@@ -46,19 +40,16 @@ public class CardRequestFredDialog extends Dialog {
     private static final int GENDER_MALE = 1;
     private static final int GENDER_FEMALE = 2;
     private static final int STATUS_FRIEND = 1;
-    private static final int STATUS_REQUEST_FRIEND = 2;
 
     ImageView backView;
     TextView nameView;
     ImageView genderView;
     TextView diamondNumView;
-    ImageView addFriendView;
+    TextView addFriendView;
     TextView schoolView;
-    TextView gradeView;
+//    TextView gradeView;
     ListView aadListView;
     PullToRefreshLayout aadPtfRefresh;
-
-    List<UsersDiamondInfoRespond.PayloadBean.StatsBean> mDataList;
 
     private int mPageNum = 1;
     private int mPageSize = 3;
@@ -87,7 +78,6 @@ public class CardRequestFredDialog extends Dialog {
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         initCardDialog();
-        mDataList = new ArrayList<>();
         getUserDiamondInfo(mPayloadBean.getInfo().getUin(), mPageNum, mPageSize);
     }
 
@@ -102,9 +92,9 @@ public class CardRequestFredDialog extends Dialog {
         nameView = (TextView) findViewById(R.id.lui_name);
         genderView = (ImageView) findViewById(R.id.lui_gender);
         diamondNumView = (TextView) findViewById(R.id.diamond_num);
-        addFriendView = (ImageView) findViewById(R.id.add_friend);
+        addFriendView = (TextView) findViewById(R.id.add_friend);
         schoolView = (TextView)findViewById(R.id.school);
-        gradeView = (TextView) findViewById(R.id.grade);
+//        gradeView = (TextView) findViewById(R.id.grade);
         aadListView = (ListView) findViewById(R.id.aad_list_view);
         aadPtfRefresh = (PullToRefreshLayout) findViewById(R.id.aad_ptf_refresh);
 
@@ -112,10 +102,8 @@ public class CardRequestFredDialog extends Dialog {
         //状态
         int status = mPayloadBean.getStatus();//1表示已经加为好友, 否则为接受请求状态；
         if (status == STATUS_FRIEND) {
-            addFriendView.setImageResource(R.drawable.peer_be_as_friends);
             addFriendView.setEnabled(false);
         } else {
-            addFriendView.setImageResource(R.drawable.peer_friend_accept);
             addFriendView.setEnabled(true);
         }
 
@@ -127,8 +115,7 @@ public class CardRequestFredDialog extends Dialog {
             genderView.setImageResource(R.drawable.feeds_girl);
         }
         diamondNumView.setText(String.valueOf(infoBean.getGemCnt()));
-        schoolView.setText(infoBean.getSchoolName());
-        gradeView.setText(FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
+        schoolView.setText(infoBean.getSchoolName() + "·" + FriendFeedsUtil.schoolType(infoBean.getSchoolType(), infoBean.getGrade()));
 
         addFriendView.setOnClickListener(addFriendListener);
     }
@@ -201,6 +188,8 @@ public class CardRequestFredDialog extends Dialog {
 
     //获取钻石信息
     private void getUserDiamondInfo(int userUin,int pageNum, int pageSize){
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_GET_DIAMOND_URL;
         Map<String, Object> diamondInfoMap = new HashMap<>();
         diamondInfoMap.put("userUin",userUin);
         diamondInfoMap.put("pageNum",pageNum);
@@ -208,44 +197,36 @@ public class CardRequestFredDialog extends Dialog {
         diamondInfoMap.put("uin", SharePreferenceUtil.get(context, YPlayConstant.YPLAY_UIN, 0));
         diamondInfoMap.put("token", SharePreferenceUtil.get(context, YPlayConstant.YPLAY_TOKEN, "yplay"));
         diamondInfoMap.put("ver", SharePreferenceUtil.get(context, YPlayConstant.YPLAY_VER, 0));
-        YPlayApiManger.getInstance().getZivApiService()
-                .getUsersDamonInfo(diamondInfoMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<UsersDiamondInfoRespond>() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
 
-                    }
+        WnsAsyncHttp.wnsRequest(url, diamondInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
 
-                    @Override
-                    public void onNext(@io.reactivex.annotations.NonNull UsersDiamondInfoRespond usersDiamondInfoRespond) {
-                        System.out.println("get diamonds' info---" + usersDiamondInfoRespond.toString());
-                        if (usersDiamondInfoRespond.getCode() == 0){
-                            List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
-                            System.out.println("List<>---" + tempList.size());
-                            if (tempList.size() > 0 && tempList.size() < 4){
-                                mDataList.addAll(tempList);
-                                int total = usersDiamondInfoRespond.getPayload().getTotal();
-                                initDiamondList(mDataList);
-                            }else {
-                                System.out.println("data load completely!");
-                            }
+            }
 
-                        }
-                    }
+            @Override
+            public void onStartLoad(int value) {
 
-                    @Override
-                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        System.out.println("error while getting diamonds' info ---" + e.getMessage());
+            }
 
-                    }
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 用户钻石信息---" + result);
+                UsersDiamondInfoRespond usersDiamondInfoRespond = GsonUtil.GsonToBean(result, UsersDiamondInfoRespond.class);
+                if (usersDiamondInfoRespond.getCode() == 0){
+                    List<UsersDiamondInfoRespond.PayloadBean.StatsBean> tempList = usersDiamondInfoRespond.getPayload().getStats();
+                    initDiamondList(tempList);
+                }
+            }
 
-                    @Override
-                    public void onComplete() {
+            @Override
+            public void onTimeOut() {}
 
-                    }
-                });
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     private static class ViewHolder {

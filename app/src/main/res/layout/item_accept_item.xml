@@ -72,8 +72,8 @@
         />
     <Button
         android:id="@+id/af_btn_hide"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:background="@drawable/friends_request_ignore"
         android:layout_toLeftOf="@+id/af_btn_accept2"
         android:layout_centerVertical="true"

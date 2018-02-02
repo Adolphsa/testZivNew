@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@color/feeds_search_color"
-            android:dividerHeight="0.3dp" />
+            android:dividerHeight="0.5dp" />
         <include
             android:id="@+id/emptyview"
             layout="@layout/layout_empty_diamond_listview"/>

@@ -1,154 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_dialog_rl"
-    android:orientation="vertical"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_width="320dp"
-    android:layout_height="468dp"
-    android:background="@drawable/shape_dialog_userinfo_backgroud" >
+    android:background="@drawable/shape_dialog_userinfo_backgroud"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/back"
         android:layout_width="34dp"
         android:layout_height="34dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
         android:layout_gravity="right"
-        android:src ="@drawable/gender_cancel"
-        android:contentDescription="@null" />
+        android:layout_marginEnd="15dp"
+        android:layout_marginTop="15dp"
+        android:contentDescription="@null"
+        android:src="@drawable/gender_cancel" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="42dp"
-        android:layout_marginBottom="10dp" >
+        android:layout_marginLeft="20dp"
+        >
 
-        <TextView
-            android:id="@+id/lui_name"
+        <tangxiaolv.com.library.EffectiveShapeView
+            android:id="@+id/lui_header_img"
+            android:layout_width="@dimen/lui_header_img_width"
+            android:layout_height="@dimen/lui_header_img_height"
+            android:background="@drawable/shape_cycyle"
+            android:scaleType="fitXY"
+            android:src="@drawable/header_deafult"
+            app:shape="circle" />
+
+        <LinearLayout
+            android:id="@+id/dlpf_ll1"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@+id/lui_header_img">
+
+            <TextView
+                android:id="@+id/lui_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:maxEms="5"
+                android:maxLines="1"
+                android:text="姓名"
+                android:textColor="@color/devider_line_color"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/lui_gender"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/card_sex_boy" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxEms="5"
-            android:maxLines="1"
-            android:text="姓名"
-            android:textColor="@color/add_friend_subtitle_color"
-            android:textSize="28sp" />
-        <ImageView
-            android:id="@+id/lui_gender"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/feeds_girl"
-            android:layout_toRightOf="@+id/lui_name"
-            android:layout_alignBottom="@+id/lui_name"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp" />
-    </RelativeLayout>
+            android:layout_below="@+id/dlpf_ll1"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@+id/lui_header_img">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="42dp" >
+            <ImageView
+                android:id="@+id/diamond"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/mine_diamond" />
 
-        <ImageView
-            android:id="@+id/diamond"
-            android:layout_width="20dp"
-            android:layout_height="15dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/mine_diamond" />
-        <TextView
-            android:id="@+id/diamond_num"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="111"
-            android:layout_marginStart="24dp"
-            android:textColor="@color/add_friend_subtitle_color"
-            android:textSize="14sp" />
-        <ImageView
-            android:id="@+id/add_friend"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/peer_add_friends" />
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/diamond_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="4dp"
+                android:text="111"
+                android:textColor="@color/devider_line_color"
+                android:textSize="16sp" />
+        </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="42dp"
->
-
-        <ImageView
-            android:id="@+id/school_icon"
-            android:layout_width="20dp"
-            android:layout_height="15dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/mine_school" />
         <TextView
             android:id="@+id/school"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/lui_header_img"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
             android:text="222"
-            android:layout_marginStart="4dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/school_icon"
-            android:textColor="@color/add_friend_subtitle_color"
-            android:textSize="14sp" />
+            android:textColor="@color/my_item_font_color"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            />
 
-        <View
-            android:id="@+id/devider"
-            android:layout_width="1dp"
-            android:layout_height="12dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/school"
-            android:background="@color/devider_line_color" />
-
-        <TextView
-            android:id="@+id/grade"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="333"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/devider"
-            android:textColor="@color/add_friend_subtitle_color"
-            android:textSize="14sp" />
     </RelativeLayout>
-
-    <!--
-    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
-        android:id="@+id/aad_ptf_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#F9F9F9"
-        android:focusable="false"
-        android:layout_marginTop="10dp">
-        -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="244dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:orientation="vertical"
-        android:background="@drawable/shape_dialog_friends_info_down_background">
+        android:background="@drawable/shape_dialog_friends_info_down_background"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="14sp"
+            android:textColor="@color/my_item_font_color"
+            android:text="TOP榜单"
+            android:textStyle="bold"
+            android:drawableLeft="@drawable/card_friend_info_left"
+            android:drawableRight="@drawable/card_friend_info_right"
+            android:drawablePadding="8dp"
+            android:layout_gravity="center"
+            />
         <ListView
             android:id="@+id/aad_list_view"
             android:layout_width="match_parent"
-            android:layout_height="234dp"
-            android:paddingTop="10dp"
+            android:layout_height="wrap_content"
             android:divider="@color/feeds_search_color"
-            android:dividerHeight="0.3dp" />
+            android:dividerHeight="0.3dp"
+            android:paddingTop="10dp" />
     </LinearLayout>
-    <!--
-    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
-    -->
 
+    <TextView
+        android:id="@+id/add_friend"
+        android:layout_width="260dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/shape_friend_card_add_bg"
+        android:gravity="center"
+        android:text="加好友"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="22dp"
+        />
 </LinearLayout>

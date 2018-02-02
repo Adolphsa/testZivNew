@@ -51,7 +51,7 @@
     <string name="which_class">几年级啦</string>
     <string name="which_school">在哪里上学呀</string>
     <string name="search">搜索</string>
-    <string name="hint_search_gate">输入用户名</string>
+    <string name="hint_search_gate">搜索用户门牌号</string>
     <string name="people_maybe_known">可能认识的人</string>
     <string name="classmate_in_same_school">同校同学</string>
     <string name="filter">筛选</string>

@@ -76,10 +76,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
     ImageButton btnAddWaitInvite;
     @BindView(R.id.layout_title_back2)
     ImageButton layoutTitleBack;
-    @BindView(R.id.layout_title2)
-    TextView layoutTitle;
+
     @BindView(R.id.searchView)
-    TextView searchView;
+    ImageView searchView;
     @BindView(R.id.filter_text)
     TextView filterText;
 
@@ -244,9 +243,9 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         setContentView(R.layout.activity_add_friends);
         ButterKnife.bind(this);
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.myinfo_end_color));
         StatuBarUtil.setMiuiStatusBarDarkMode(AddFriends.this, true);
-        layoutTitle.setText("添加好友");
+
         contactsInfoDao = YplayApplication.getInstance().getDaoSession().getContactsInfoDao();
         contactInviteDao = YplayApplication.getInstance().getDaoSession().getContactInviteDao();
         friendInfoDao = YplayApplication.getInstance().getDaoSession().getFriendInfoDao();
@@ -1144,18 +1143,17 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
         final View friendItemView = view;
         final UserInfoResponde.PayloadBean.InfoBean infoBean = payloadBean.getInfo();
 
-        //状态
-        int status = payloadBean.getStatus();
-
         final CardBigDialog cardDialog = new CardBigDialog(AddFriends.this, R.style.CustomDialog,
                 payloadBean);
 
         cardDialog.setAddFriendListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageView button = (ImageView) v;
+                TextView button = (TextView) v;
                 if (NetWorkUtil.isNetWorkAvailable(AddFriends.this)) {
-                    button.setImageResource(R.drawable.peer_friend_requested);
+                    button.setBackgroundResource(R.drawable.shape_friend_card_add_selected_bg);
+                    button.setTextColor(getResources().getColor(R.color.text_color_gray2));
+                    button.setEnabled(false);
                     //除了更新朋友选项卡信息中的按钮状态外，还要更新外部对应的朋友列表item的按钮状态；
                     if (friendItemView != null) {
                         Button freiendIcon = (Button) friendItemView.findViewById(R.id.af_btn_accept2);
