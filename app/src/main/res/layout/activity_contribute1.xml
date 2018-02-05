@@ -1,147 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.yeejay.yplay.customview.MyLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.yeejay.yplay.contribute.ActivityContribute1"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="bottom"
-    android:fillViewport="true"
-    android:background="@color/white" >
-<LinearLayout
+    android:id="@+id/my_ll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    >
+    android:background="@color/white" >
 
-    <RelativeLayout
-        android:id="@+id/layout_title_rl"
+    <ScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:background="@color/white">
-
-        <ImageButton
-            android:id="@+id/layout_title_back2"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/play_back"
-            android:layout_marginLeft="20dp"
-            android:scaleType="fitXY"
-            />
-        <TextView
-            android:id="@+id/layout_title2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/contribute_title"
-            android:maxEms="6"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:layout_centerInParent="true"
-            style="@style/friend_title_style"
-            />
-
-        <ImageView
-            android:id="@+id/contribute_new"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/contribute_history"
-            android:layout_centerVertical="true"
-            android:src="@drawable/contribute_new"
-            android:visibility="gone"
-            />
-        <ImageButton
-            android:id="@+id/contribute_history"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/contribute_history"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp"
-            android:layout_centerVertical="true"
-            />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/con_img"
-        android:layout_width="186dp"
-        android:layout_height="103dp"
-        android:orientation="vertical"
-        android:layout_marginTop="60dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/shape_con1_backround">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="37.6dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/contribute_light"
-            android:layout_gravity="center_horizontal" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_horizontal"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/contribute_selecte_img"
-            android:textSize="16sp"
-            android:textColor="@color/white"/>
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/con_selected_img"
-        android:layout_width="186dp"
-        android:layout_height="186dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:scaleType="fitXY"
-        android:background="@android:color/transparent"
-        android:visibility="gone"
-        />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:gravity="center"
-        android:text="@string/contribute_note"
-        android:textSize="14sp"
-        android:textColor="@color/feeds_hight_gray"
-        android:layout_gravity="center_horizontal"
-        />
-
-    <FrameLayout
-        android:id="@+id/rl_edittext"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/shape_con1_edit_background" >
-        <TextView
-            android:id="@+id/con_text_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_gravity="bottom|right"
-            android:gravity="bottom|right"
-            android:text="@string/contribute_commit_text_count_hint"
-            android:textColor="#9A9FA7"
-            android:textSize="14sp" />
-        <EditText
-            android:id="@+id/con_edit"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:background="@color/white" >
+        <LinearLayout
+            android:id="@+id/scroll_inner_view"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:padding="10dp"
-            android:gravity="top"
-            android:hint="@string/contribute_commit_hint"
-            android:textColorHint="#9A9FA7"
-            android:textSize="16sp"
-            android:maxLength="30"
-            android:lines="2"
-            android:cursorVisible="false"
-            android:background="@null"/>
-    </FrameLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <RelativeLayout
+                android:id="@+id/layout_title_rl"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@color/white">
+
+                <ImageButton
+                    android:id="@+id/layout_title_back2"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/play_back"
+                    android:layout_marginLeft="20dp"
+                    android:scaleType="fitXY"
+                    />
+                <TextView
+                    android:id="@+id/layout_title2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/contribute_title"
+                    android:maxEms="6"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:layout_centerInParent="true"
+                    style="@style/friend_title_style"
+                    />
+
+                <ImageView
+                    android:id="@+id/contribute_new"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/contribute_history"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/contribute_new"
+                    android:visibility="gone"
+                    />
+                <ImageButton
+                    android:id="@+id/contribute_history"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/contribute_history"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="20dp"
+                    android:layout_centerVertical="true"
+                    />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/con_img"
+                android:layout_width="186dp"
+                android:layout_height="103dp"
+                android:orientation="vertical"
+                android:layout_marginTop="60dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/shape_con1_backround">
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="37.6dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/contribute_light"
+                    android:layout_gravity="center_horizontal" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/contribute_selecte_img"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/con_selected_img"
+                android:layout_width="186dp"
+                android:layout_height="186dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:scaleType="fitXY"
+                android:background="@android:color/transparent"
+                android:visibility="gone"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:text="@string/contribute_note"
+                android:textSize="14sp"
+                android:textColor="@color/feeds_hight_gray"
+                android:layout_gravity="center_horizontal"
+                />
+
+            <FrameLayout
+                android:id="@+id/rl_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/shape_con1_edit_background" >
+                <TextView
+                    android:id="@+id/con_text_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_gravity="bottom|right"
+                    android:gravity="bottom|right"
+                    android:text="@string/contribute_commit_text_count_hint"
+                    android:textColor="#9A9FA7"
+                    android:textSize="14sp" />
+                <EditText
+                    android:id="@+id/con_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:padding="10dp"
+                    android:gravity="top"
+                    android:hint="@string/contribute_commit_hint"
+                    android:textColorHint="#9A9FA7"
+                    android:textSize="16sp"
+                    android:maxLength="30"
+                    android:lines="2"
+                    android:cursorVisible="false"
+                    android:background="@null"/>
+            </FrameLayout>
+            <View
+                android:id="@+id/fill_view"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@null" />
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/con_apply_ll"
@@ -157,41 +173,9 @@
             android:textColor="@color/text_color_gray2"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"
+            android:layout_marginBottom="50dp"
             android:background="@drawable/shape_gray_btn_backround"
             android:textSize="16sp"
             />
     </LinearLayout>
-
-    <!--
-    <LinearLayout
-        android:id="@+id/con_complete_ll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:text="匿名投稿成功，审核中(*^__^*)"
-            android:textSize="14sp"
-            android:textColor="@color/feeds_hight_gray"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="19.8dp"
-            />
-        <Button
-            android:id="@+id/con_complet_button"
-            android:layout_width="197dp"
-            android:layout_height="44dp"
-            android:text="完成"
-            android:textColor="@color/white"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/shape_purple_btn_backround"
-            android:textSize="16sp"
-
-            />
-    </LinearLayout>
--->
-</LinearLayout>
-</ScrollView>
+</com.yeejay.yplay.customview.MyLinearLayout>
