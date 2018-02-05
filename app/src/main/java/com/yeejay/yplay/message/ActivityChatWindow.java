@@ -134,14 +134,12 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     @BindView(R.id.acw_pull_refresh)
     PullToRefreshLayout acwRefreshView;
     private LinearLayoutManager linearLayoutManager;
-    private ImMsg selfImageMsg;
-    private ImSession imSessionImage;
-    private long imageMsgTs;
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
         Intent intent = new Intent();
         intent.putExtra("update_sessionID", sessionId);
+        intent.putExtra("has_new_mesg", mHasNewMsg);
         setResult(RESULT_CODE_FRIEND_CHAT_REPLY, intent);
         finish();
     }
@@ -163,6 +161,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
         sendTextMessage();
     }
 
+    //发送文本消息
     private void sendTextMessage() {
 
         //点击之后立马变为不可点状态
@@ -313,6 +312,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             @Override
             public void onError(int code, String desc) {//发送消息失败
+                mHasNewMsg = false;
+
                 //错误码code和错误描述desc，可用于定位请求失败原因
                 //错误码code含义请参见错误码表
 
@@ -356,6 +357,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             @Override
             public void onSuccess(TIMMessage msg) {//发送消息成功
+                mHasNewMsg = true;
+
                 long tmsgId = msg.getMsgUniqueId();
                 long tmsgTs = msg.getMsg().time();
 
@@ -594,6 +597,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             @Override
             public void onError(int code, String desc) {//发送消息失败
+                mHasNewMsg = false;
+
                 //错误码code和错误描述desc，可用于定位请求失败原因
                 //错误码code含义请参见错误码表
 
@@ -635,6 +640,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
             @Override
             public void onSuccess(TIMMessage msg) {//发送消息成功
+                mHasNewMsg = true;
+
                 long tmsgId = msg.getMsgUniqueId();
                 long tmsgTs = msg.getMsg().time();
 
@@ -704,6 +711,8 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     HeadRefreshView headRefreshView;
     NoDataView noDataView;
     DbHelper mDbHelper;
+
+    private boolean mHasNewMsg = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1131,6 +1140,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
 
     @Override
     public void onMessageUpdate(ImMsg imMsg) {
+        mHasNewMsg = true;
 
         String content = imMsg.getMsgContent();
         String tempSessionId = imMsg.getSessionId();
@@ -1603,6 +1613,7 @@ public class ActivityChatWindow extends BaseActivity implements MessageUpdateUti
     public void onBackPressed(){
         Intent intent = new Intent();
         intent.putExtra("update_sessionID", sessionId);
+        intent.putExtra("has_new_mesg", mHasNewMsg);
         setResult(RESULT_CODE_FRIEND_CHAT_REPLY, intent);
 
         super.onBackPressed();

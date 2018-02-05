@@ -261,7 +261,8 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
         } else if (requestCode == REQ_CODE_NONMITY_REPLY && resultCode == RESULT_CODE_FRIEND_CHAT_REPLY) {
             if (data != null) {
                 String sessionID = data.getStringExtra("update_sessionID");
-                LogUtils.getInstance().debug("sessionID = {}", sessionID);
+                boolean hasNewMsg = data.getBooleanExtra("has_new_mesg", false);
+                LogUtils.getInstance().error("sessionID = {}, hasNewMsg = {}", sessionID, hasNewMsg);
 
                 if (!TextUtils.isEmpty(sessionID)) {
                     ImSession imSession = imSessionDao.queryBuilder()
@@ -271,7 +272,9 @@ public class FragmentMessage extends BaseFragment implements MessageUpdateUtil.S
                     imSession.setUnreadMsgNum(0);
                     imSessionDao.update(imSession);
 
-                    onSessionUpdate(imSession);
+                    if (hasNewMsg) {
+                        onSessionUpdate(imSession);
+                    }
                 }
             }
         }
