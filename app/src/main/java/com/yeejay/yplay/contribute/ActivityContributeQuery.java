@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.adapter.FragmentAdapter;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.model.SubmitQueryListRespond;
 import com.yeejay.yplay.utils.LogUtils;
 import com.yeejay.yplay.utils.StatuBarUtil;
 
@@ -188,6 +189,9 @@ public class ActivityContributeQuery extends BaseActivity {
                     //nothing to do;
                 } else if (i == 1) {
                     contributeNew.setVisibility(View.INVISIBLE);
+
+                    //将已上线列表中的item的高亮背景去掉;
+                    removeHighLightBackgroundOfOnlineList();
                 }
             }
 
@@ -198,6 +202,21 @@ public class ActivityContributeQuery extends BaseActivity {
 
         //目的是为了进入该页面时，指示器图片的初始位置可以处在正确的位置;
         viewPager.setCurrentItem(0);
+    }
+
+    private void removeHighLightBackgroundOfOnlineList() {
+        if (fragOnline.mReviewedList != null) {
+            SubmitQueryListRespond.PayloadBean.ContributesBean bean;
+            for(int i = 0; i < fragOnline.mReviewedList.size(); i++) {
+                bean = fragOnline.mReviewedList.get(i);
+                if(bean != null && bean.getFlag() == 1) {
+                    bean.setFlag(-1);
+                    if (fragOnline.reviewedAdapter != null) {
+                        fragOnline.reviewedAdapter.notifyItemChanged(i);
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -60,10 +60,10 @@ public class FragmentConOnline extends BaseFragment implements
     private int mPageNum = 1;
     private int mPageSize = 10;
     //已上线的投稿列表
-    private List<SubmitQueryListRespond.PayloadBean.ContributesBean> mReviewedList =  new ArrayList<>();
+    public List<SubmitQueryListRespond.PayloadBean.ContributesBean> mReviewedList =  new ArrayList<>();
     //已上线的投稿列表item中扩展部分展示的详情列表;
     private List<SubmitQueryDetailRespond.PayloadBean.InfosBean> mQueryDetailList =  new ArrayList<>();
-    private ContributeOnlineAdapter reviewedAdapter;
+    public ContributeOnlineAdapter reviewedAdapter;
     private MyLinearLayoutManager reviewedLtManager;
     private HeadRefreshView headRefreshView;
     private Context mContext;

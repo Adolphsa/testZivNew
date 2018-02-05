@@ -58,6 +58,8 @@ public class ContributeOnlineAdapter extends
         //如果是最新的投稿，则背景高亮；
         if(mDataList.get(position).getFlag() == 1) {
             holder.ll.setBackgroundResource(R.drawable.item_contribute_list_light_background);
+        } else {
+            holder.ll.setBackgroundResource(R.drawable.item_contribute_list_big_background);
         }
 
         //item头部图片
@@ -83,6 +85,7 @@ public class ContributeOnlineAdapter extends
                 View parentView = (View) v.getParent();
                 if (mDataList.get(position).getFlag() == 1) {
                     if (parentView != null) {
+                        mDataList.get(position).setFlag(-1);
                         parentView.setBackgroundResource(R.drawable.item_contribute_list_big_background);
                     }
                 }

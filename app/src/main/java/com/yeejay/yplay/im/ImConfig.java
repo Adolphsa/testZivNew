@@ -99,7 +99,7 @@ public class ImConfig {
                             System.out.println("错误码为6208，重新登录");
                             getImSignature();
                         } else {
-                            DialogUtils.repeatLoginDialog(AppManager.getAppManager().currentActivity(), "您的账号已在其他地方登录");
+                            DialogUtils.repeatLoginDialog(YplayApplication.getContext(), "您的账号已在其他地方登录");
                         }
 
                         Log.i(tag, "onForceOffline");
