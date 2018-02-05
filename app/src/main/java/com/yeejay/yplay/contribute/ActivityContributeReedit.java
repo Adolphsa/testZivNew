@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.yeejay.yplay.R;
 import com.yeejay.yplay.base.BaseActivity;
+import com.yeejay.yplay.customview.MyLinearLayout;
 import com.yeejay.yplay.model.BaseRespond;
 import com.yeejay.yplay.utils.GsonUtil;
 import com.yeejay.yplay.utils.LogUtils;
@@ -41,7 +44,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ActivityContributeReedit extends BaseActivity {
+public class ActivityContributeReedit extends BaseActivity implements MyLinearLayout.OnSizeChangedListener{
     @BindView(R.id.layout_title2)
     TextView titleView;
     @BindView(R.id.layout_title_back2)
@@ -62,24 +65,18 @@ public class ActivityContributeReedit extends BaseActivity {
     LinearLayout conApplyLl;
     @BindView(R.id.rl_edittext)
     FrameLayout rlEditText;
+    @BindView(R.id.scroll_view)
+    ScrollView scrollView;
+    @BindView(R.id.scroll_inner_view)
+    LinearLayout scrollInnerView;
+    @BindView(R.id.my_ll)
+    MyLinearLayout myLl;
 
     private static final String TAG = "ContributeReedit";
     private static final String EMOJI_URL = "http://yplay-1253229355.image.myqcloud.com/qicon/";
 
     private String mQiconUrl;
     private int mPosition;
-
-    @OnClick(R.id.con_edit)
-    public void clickEdit() {
-        rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
-        conEdit.setCursorVisible(true);
-    }
-
-    @OnClick(R.id.rl_edittext)
-    public void clickRlEdittext() {
-        rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
-        conEdit.setCursorVisible(true);
-    }
 
     @OnClick(R.id.layout_title_back2)
     public void back() {
@@ -126,6 +123,8 @@ public class ActivityContributeReedit extends BaseActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.white));
         StatuBarUtil.setMiuiStatusBarDarkMode(ActivityContributeReedit.this, true);
+
+        myLl.setOnSizeChangedListener(this);
 
         conApplyButton.setEnabled(false);
 
@@ -185,6 +184,92 @@ public class ActivityContributeReedit extends BaseActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+    }
+
+    private boolean hideInputMethod(Context context, View v) {
+        InputMethodManager imm = (InputMethodManager) context
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            return imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+
+        return false;
+    }
+
+    /*
+    * 用于监听输入法软键盘是否弹出;
+    */
+    public void onSizeChange(int width, int height, int oldWidth, int oldHeight){
+        if (height < oldHeight) {//软键盘弹出;
+            rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_selected_background);
+            conEdit.setCursorVisible(true);
+
+            //scrollView滚动到底部;
+            scrollToBottom(scrollView, scrollInnerView);
+        } else if (height > oldHeight) {//软键盘收起：
+            rlEditText.setBackgroundResource(R.drawable.shape_con1_edit_background);
+            conEdit.setCursorVisible(false);
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (isShouldHideInput(v, ev)) {
+                if(hideInputMethod(this, v)) {
+                    //return true; //隐藏键盘时，其他控件不响应点击事件
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    /*
+    * 通过计算点击区域来判断是否点击了edittext以外的区域；
+    */
+    private boolean isShouldHideInput(View v, MotionEvent event) {
+        if (v != null && (v instanceof EditText)) {
+            int[] leftTop = { 0, 0 };
+            v.getLocationInWindow(leftTop);
+            int left = leftTop[0], top = leftTop[1], bottom = top + v.getHeight(), right = left
+                    + v.getWidth();
+            if (event.getX() > left && event.getX() < right
+                    && event.getY() > top && event.getY() < bottom) {// 点击了edittext
+                return false;
+            } else {//点击了editext以外的区域;
+                //判断是否点击了“提交”按钮区域，若是，则返回false使得按键事件继续传递
+                conApplyButton.getLocationInWindow(leftTop);
+                int left1 = leftTop[0], top1 = leftTop[1], bottom1 = top + v.getHeight(), right1 = left
+                        + v.getWidth();
+                if (event.getX() > left1 && event.getX() < right1
+                        && event.getY() > top1 && event.getY() < bottom1) {// 点击了"提交"按钮
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+    * scrollview滚动到底部;
+    */
+    private void scrollToBottom(final View scroll, final View inner) {
+        scrollView.post(new Runnable() {
+            public void run() {
+                if (scroll == null || inner == null) {
+                    return;
+                }
+                int offset = inner.getMeasuredHeight() - scroll.getHeight();
+                if (offset < 0) {
+                    offset = 0;
+                }
+
+                scroll.scrollTo(0, offset);
             }
         });
     }
