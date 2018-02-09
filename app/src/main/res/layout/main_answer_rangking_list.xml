@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="70dp"
+    android:background="@drawable/shape_rank_list_bg"
+    >
+
+    <TextView
+        android:id="@+id/marl_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="37dp"
+        android:drawablePadding="8dp"
+        android:text="@string/marl_titil"
+        android:textColor="@color/my_item_font_color"
+        android:textSize="14sp" />
+
+    <com.yeejay.yplay.customview.RankViewPager
+        android:id="@+id/marl_viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingTop="33dp"
+        android:paddingBottom="30dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp"
+        />
+</LinearLayout>

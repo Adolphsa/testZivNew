@@ -36,60 +36,14 @@
             android:background="@drawable/shape_classmates_filter_backgound"
             android:gravity="center_vertical|left"
             android:text="@string/filter_all"
-            android:textColor="@color/play_color2"
+            android:textColor="@color/first_name"
             android:drawableRight="@drawable/spinner_normal"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
-            android:visibility="invisible"
+            android:visibility="visible"
             />
     </RelativeLayout>
 
-    <!--
-    <LinearLayout
-        android:id="@+id/lsm_ll_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/white"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:visibility="gone"
-        >
-        <ImageButton
-            android:id="@+id/lsm_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/school_all_unselect"
-            android:background="@android:color/transparent"
-            android:layout_marginLeft="36dp"
-            />
-        <ImageButton
-            android:id="@+id/lsm_class"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/school_same_grade_unselect"
-            android:background="@android:color/transparent"
-            android:layout_marginLeft="14dp"
-            />
-        <ImageButton
-            android:id="@+id/lsm_boy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/school_boy_unselect"
-            android:background="@android:color/transparent"
-            android:layout_marginLeft="20dp"
-            />
-        <ImageButton
-            android:id="@+id/lsm_girl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/school_girl_unselect"
-            android:background="@android:color/transparent"
-            android:layout_marginLeft="20dp"
-            />
-    </LinearLayout>
-    -->
-    
     <View
         android:layout_width="match_parent"
         android:layout_height="0.3dp"

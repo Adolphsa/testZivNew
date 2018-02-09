@@ -24,6 +24,7 @@ public class YPlayConstant {
     public static final String YPLAY_SCHOOL_TYPE = "yplay_school_type";
     public static final String YPLAY_SCHOOL_GRADE = "yplay_school_grade";
     public static final String YPLAY_HEADER_IMG = "yplay_header_img";
+    public static final String YPLAY_MYSELF_IMG_URL = "yplay_myself_img_url";
 
     public static final String TEMP_NICK_NAME = "temp_nick_name";
     public static final String TEMP_HEAD_IMAGE_URL = "temp_head_image_url";
@@ -102,6 +103,11 @@ public class YPlayConstant {
     //退出登录
     public static final String API_LOGIN_OUT_URL = "/api/account/logout";
 
+    //周排行榜
+    public static final String API_WEEK_LIST_URL = "/api/vote/getstarinlastweek";
+
+    //题目排行榜
+    public static final String API_QUESTION_LIST_URL = "/api/vote/queryrankinglist";
 
 
     //---------------------------------------------------------------------

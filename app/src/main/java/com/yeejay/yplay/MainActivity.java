@@ -61,6 +61,7 @@ import com.yeejay.yplay.model.FriendsListRespond;
 import com.yeejay.yplay.model.ImSignatureRespond;
 import com.yeejay.yplay.model.PushNotifyRespond;
 import com.yeejay.yplay.model.UpdateContactsRespond;
+import com.yeejay.yplay.model.UserInfoResponde;
 import com.yeejay.yplay.service.ContactsService;
 import com.yeejay.yplay.utils.BaseUtils;
 import com.yeejay.yplay.utils.GsonUtil;
@@ -252,6 +253,9 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
 
         IntentFilter filter = new IntentFilter("messageService");
         registerReceiver(messageBr, filter);
+
+        //获取我自己的资料
+        getMyInfo();
 
         //获取签名
         getImSignature();
@@ -682,6 +686,53 @@ public class MainActivity extends BaseActivity implements HuaweiApiClient.Connec
             getMyFriendsList();
         }
     }
+
+    //获取自己的资料
+    private void getMyInfo() {
+
+        String url = YPlayConstant.YPLAY_API_BASE + YPlayConstant.API_MY_INFO_URL;
+        Map<String, Object> myInfoMap = new HashMap<>();
+        myInfoMap.put("uin", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_UIN, 0));
+        myInfoMap.put("token", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_TOKEN, "yplay"));
+        myInfoMap.put("ver", SharePreferenceUtil.get(MainActivity.this, YPlayConstant.YPLAY_VER, 0));
+
+        WnsAsyncHttp.wnsRequest(url, myInfoMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 我的资料---" + result);
+                UserInfoResponde userInfoResponde = GsonUtil.GsonToBean(result, UserInfoResponde.class);
+                if (userInfoResponde.getCode() == 0){
+                    SharePreferenceUtil.put(MainActivity.this,
+                            YPlayConstant.YPLAY_MYSELF_IMG_URL, userInfoResponde.getPayload().getInfo().getHeadImgUrl());
+
+                }
+
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
+    }
+
+
 
     @Override
     public void onConnected() {

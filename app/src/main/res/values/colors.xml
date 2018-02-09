@@ -153,4 +153,9 @@
     <color name="diamond_item_index_color">#7C62D1</color>
     <color name="adf_fri_status_color">#3023AE </color>
 
+    <color name="main_card_friend_list_start">#FF5252</color>
+    <color name="main_card_friend_list_end">#AE32DA </color>
+
+    <color name="grade_list_title">#8B572A</color>
+
 </resources>

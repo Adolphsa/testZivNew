@@ -1,14 +1,20 @@
 package com.yeejay.yplay.answer;
 
+import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,10 +29,15 @@ import com.yeejay.yplay.YplayApplication;
 import com.yeejay.yplay.base.BaseFragment;
 import com.yeejay.yplay.contribute.ActivityContribute1;
 import com.yeejay.yplay.customview.ProgressButton;
+import com.yeejay.yplay.customview.RankViewPager;
 import com.yeejay.yplay.greendao.MyInfo;
 import com.yeejay.yplay.greendao.MyInfoDao;
+import com.yeejay.yplay.greendao.RankInfo;
+import com.yeejay.yplay.greendao.RankInfoDao;
 import com.yeejay.yplay.model.BaseRespond;
+import com.yeejay.yplay.model.FriendRankRespond;
 import com.yeejay.yplay.model.QuestionCandidateRespond;
+import com.yeejay.yplay.model.QuestionRankRespond;
 import com.yeejay.yplay.model.QuestionRespond;
 import com.yeejay.yplay.model.VoteOptionsBean;
 import com.yeejay.yplay.model.VoteRespond;
@@ -38,6 +49,8 @@ import com.yeejay.yplay.utils.SharePreferenceUtil;
 import com.yeejay.yplay.utils.YPlayConstant;
 import com.yeejay.yplay.wns.WnsAsyncHttp;
 import com.yeejay.yplay.wns.WnsRequestListener;
+
+import org.greenrobot.greendao.query.DeleteQuery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,9 +116,17 @@ public class FragmentAnswer extends BaseFragment {
     @BindView(R.id.frg_edit)
     ImageButton frgEdit;
     @BindView(R.id.frgans_linear_layout)
-    LinearLayout frgansLinlearLayout;
+    RelativeLayout frgansLinlearLayout;
     @BindView(R.id.frans_progress)
     GifImageView frandProgress;
+
+    //排行榜相关
+    @BindView(R.id.fa_rank_list)
+    LinearLayout mainLinearLayout;
+    @BindView(R.id.marl_title)
+    TextView marlTitle;
+    @BindView(R.id.marl_viewPager)
+    RankViewPager marlViewPager;
 
     int questionNum = 1;
     int questionTotal;
@@ -115,11 +136,20 @@ public class FragmentAnswer extends BaseFragment {
     int changeCount = 0;    //换一换的次数
     boolean isFreeze;
 
+    protected static final float FLIP_DISTANCE = 50;
+    GestureDetector mDetector;
+    boolean upDownStatus = true;
+    ObjectAnimator topPullAnimation;
+    ObjectAnimator topUpAnimation;
+    float rlTopShareHeight;
+    RankInfoDao rankInfoDao;
+    List<RankInfo> questionRankList;
+
     int backgroundColor[] = {R.drawable.shape_answer_play1,
             R.drawable.shape_answer_play2,
             R.drawable.shape_answer_play3,
             R.drawable.shape_answer_play4
-            };
+    };
 
     int backgroundStartColor[] = {
             R.color.play_gradient_1_start,
@@ -139,13 +169,13 @@ public class FragmentAnswer extends BaseFragment {
             R.drawable.shape_play_button_background2,
             R.drawable.shape_play_button_background3,
             R.drawable.shape_play_button_background4
-            };
+    };
 
     int selectButtonColor[] = {R.color.button_selector_color_1,
             R.color.button_selector_color_2,
             R.color.button_selector_color_3,
             R.color.button_selector_color_4
-            };
+    };
 
     QuestionRespond.PayloadBean.QuestionBean questionBean;
     List<VoteOptionsBean> voteOptionsBeanList;
@@ -168,6 +198,8 @@ public class FragmentAnswer extends BaseFragment {
                     voteOptionsBeanList.get(0).getUin(),
                     GsonUtil.GsonString(voteOptionsBeanList));
             hideNextQuestion();
+
+            Log.i(TAG, "btn1: qid----" + questionBean.getQid());
 
             frgansBtn1.setEnabled(false);
             frgansBtn2.setEnabled(false);
@@ -403,7 +435,6 @@ public class FragmentAnswer extends BaseFragment {
             LogUtils.getInstance().debug("当前跳过的编号, {} ; qid = {}", questionNum,
                     questionBean.getQid());
 
-
         } else {
             LogUtils.getInstance().debug("返回异常");
             //frandProgress.setVisibility(View.VISIBLE);
@@ -450,6 +481,8 @@ public class FragmentAnswer extends BaseFragment {
         getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
         fransPlayroot.setBackgroundResource(backgroundColor[questionNum % colorCount]);
         baseTitleRl.setBackgroundColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
+        rankInfoDao = YplayApplication.getInstance().getDaoSession().getRankInfoDao();
+
 
         voteOptionsBeanList = new ArrayList<>();
 
@@ -462,6 +495,9 @@ public class FragmentAnswer extends BaseFragment {
                 startActivity(new Intent(getActivity(), ActivityMyInfo.class));
             }
         });
+
+        questionRankList = new ArrayList<>();
+
         getQuestion();
         frgansCountDownView.setOnCountdownEndListener(new CountdownView.OnCountdownEndListener() {
             @Override
@@ -470,6 +506,99 @@ public class FragmentAnswer extends BaseFragment {
                 relieve();
             }
         });
+
+
+        mDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                Log.i(TAG, "onSingleTapUp: viewPager被点击了");
+
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+                if (e1.getY() - e2.getY() > FLIP_DISTANCE) {
+                    Log.i(TAG, "向上滑...");
+                    if (mainLinearLayout.isShown()) {
+                        upDownStatus = true;
+                        disappearRankList();
+                        getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
+                        return true;
+                    }
+
+                }
+
+                if (e2.getY() - e1.getY() > FLIP_DISTANCE) {
+                    Log.i(TAG, "向下滑...");
+                    if (upDownStatus) {
+                        upDownStatus = false;
+                        showRankList();
+                        getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.white));
+                        return true;
+                    }
+
+                }
+
+//                if (e1.getX() - e2.getX() > FLIP_DISTANCE){
+//                    Log.i(TAG, "onFling: 左滑");
+//
+//                }
+//
+//                if (e2.getX() - e1.getX() > FLIP_DISTANCE){
+//                    Log.i(TAG, "onFling: 右滑");
+//
+//
+//                }
+                return false;
+            }
+        });
+
+        frgansLinlearLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mDetector.onTouchEvent(event);
+            }
+        });
+
+        marlViewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mDetector.onTouchEvent(event);
+            }
+        });
+
+        //解决在onCreate中不能获取高度的问题
+        mainLinearLayout.post(new Runnable() {
+            @Override
+            public void run() {
+
+                rlTopShareHeight = mainLinearLayout.getHeight();
+                initAnimation();
+            }
+        });
+
     }
 
 
@@ -492,7 +621,7 @@ public class FragmentAnswer extends BaseFragment {
 
             if (isFreeze) {  //如果是冷却状态就去拉一把问题
                 getQuestion();
-            }else {
+            } else {
                 //getActivity().getWindow().setStatusBarColor(getResources().getColor(backgroundStartColor[questionNum % colorCount]));
             }
         }
@@ -583,7 +712,8 @@ public class FragmentAnswer extends BaseFragment {
     //拉取问题
     private void getQuestion() {
         Map<String, Object> questionsListMap = new HashMap<>();
-        questionsListMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        final int uin = (int)SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0);
+        questionsListMap.put("uin", uin);
         questionsListMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
         questionsListMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
@@ -602,7 +732,7 @@ public class FragmentAnswer extends BaseFragment {
 
                     @Override
                     public void onComplete(String result) {
-                        handleGetQuestionResponse(result);
+                        handleGetQuestionResponse(result,uin);
                         frandProgress.setVisibility(View.INVISIBLE);
                     }
 
@@ -618,9 +748,11 @@ public class FragmentAnswer extends BaseFragment {
                 });
     }
 
-    private void handleGetQuestionResponse(String result) {
+    private void handleGetQuestionResponse(String result,int uin) {
         QuestionRespond questionRespond = GsonUtil.GsonToBean(result, QuestionRespond.class);
         LogUtils.getInstance().debug("onNext: 拉取问题, {}", questionRespond.toString());
+        Log.i(TAG, "handleGetQuestionResponse: 拉取问题---" + questionRespond.toString());
+
         if (questionRespond.getCode() == 0) {
 
             QuestionRespond.PayloadBean payloadBean = questionRespond.getPayload();
@@ -637,6 +769,30 @@ public class FragmentAnswer extends BaseFragment {
                 questionNum = questionRespond.getPayload().getIndex();
                 questionTotal = questionRespond.getPayload().getTotal();
 
+                //如果是第一题   则删掉该uin下所有记录
+                if (questionNum == 1){
+
+                    DeleteQuery deleteQuery =  rankInfoDao.queryBuilder()
+                            .where(RankInfoDao.Properties.Uin.eq(uin))
+                            .buildDelete();
+                    deleteQuery.executeDeleteWithoutDetachingEntities();
+
+                }
+
+                //将题目内容插入到result字段中
+                RankInfo rankInfo = rankInfoDao.queryBuilder()
+                        .where(RankInfoDao.Properties.Uin.eq(uin))
+                        .where(RankInfoDao.Properties.QuestionNumber.eq(questionNum))
+                        .build().unique();
+                if (rankInfo == null){
+                    rankInfo = new RankInfo(null,uin,questionNum,questionBean.getQtext(),null);
+                    rankInfoDao.insert(rankInfo);
+
+                }else {
+                    rankInfo.setQuestionNumber(questionNum);
+                    rankInfo.setQuestionText(questionBean.getQtext());
+                    rankInfoDao.update(rankInfo);
+                }
                 if (voteOptionsBeanList.size() > 0) {
                     voteOptionsBeanList.clear();
                 }
@@ -678,14 +834,14 @@ public class FragmentAnswer extends BaseFragment {
 
     //某个问题的候选人
     private void getQuestionsCandidate(int qid, int index) {
-        Map<String, Object> questionsCandidateMap  = new HashMap<>();
-        questionsCandidateMap .put("qid", qid);
-        questionsCandidateMap .put("index", index);
-        questionsCandidateMap .put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
-        questionsCandidateMap .put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
-        questionsCandidateMap .put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        Map<String, Object> questionsCandidateMap = new HashMap<>();
+        questionsCandidateMap.put("qid", qid);
+        questionsCandidateMap.put("index", index);
+        questionsCandidateMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        questionsCandidateMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionsCandidateMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
 
-        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETOPTIONS, questionsCandidateMap ,
+        WnsAsyncHttp.wnsRequest(YPlayConstant.BASE_URL + YPlayConstant.API_GETOPTIONS, questionsCandidateMap,
                 new WnsRequestListener() {
 
                     @Override
@@ -778,6 +934,9 @@ public class FragmentAnswer extends BaseFragment {
                         VoteRespond voteRespond = GsonUtil.GsonToBean(result, VoteRespond.class);
                         LogUtils.getInstance().debug("投票返回, {}", voteRespond.toString());
                         frandProgress.setVisibility(View.INVISIBLE);
+
+                        //在投票的过程中去拉取问题排行榜并插入至数据库中
+                        getQuestionRankList(questionBean.getQid());
                     }
 
                     @Override
@@ -863,9 +1022,201 @@ public class FragmentAnswer extends BaseFragment {
         }
     }
 
+    //向下滑动 显示排行榜
+    private void showRankList() {
+
+        Log.i(TAG, "showRankList: rlTopShareHeight---" + rlTopShareHeight);
+        if (!topPullAnimation.isRunning()) {
+            Log.i(TAG, "showRankList: 运行动画");
+            topPullAnimation.start();
+        }
+        marlTitle.setText("(" + questionNum + "/" + questionNum + ")");
+        getFriendList();
+
+    }
+
+
+    //向上滑动  排行榜消失
+    private void disappearRankList() {
+        topUpAnimation = ObjectAnimator.ofFloat(
+                mainLinearLayout, "translationY", -rlTopShareHeight);
+        topPullAnimation.setDuration(800);
+        topUpAnimation.start();
+    }
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unregisterBr();
     }
+
+    /**
+     * 初始化Animation
+     */
+    private void initAnimation() {
+        Log.i(TAG, "initAnimation: rlTopShareHeight  " + rlTopShareHeight);
+        //打开动画
+        topPullAnimation = ObjectAnimator.ofFloat(
+                mainLinearLayout, "translationY", 0);
+        topPullAnimation.setDuration(800);
+        topPullAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+//        //关闭动画
+        topUpAnimation = ObjectAnimator.ofFloat(
+                mainLinearLayout, "translationY", -rlTopShareHeight);
+        topUpAnimation.start();
+
+    }
+
+
+    //好友排行榜
+    private void getFriendList(){
+
+        String url = YPlayConstant.BASE_URL + YPlayConstant.API_WEEK_LIST_URL;
+
+        Map<String, Object> friendRankMap = new HashMap<>();
+        friendRankMap.put("uin", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+        friendRankMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        friendRankMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        friendRankMap.put("uid", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0));
+
+        WnsAsyncHttp.wnsRequest(url, friendRankMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+                Log.i(TAG, "onComplete: 好友排行榜---" + result);
+                handleFriendRankResponse(result);
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+    }
+
+    //处理好友排行榜返回
+    private void handleFriendRankResponse(String result){
+
+        FriendRankRespond friendRankRespond = GsonUtil.GsonToBean(result,FriendRankRespond.class);
+        int uin = (int)SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0);
+        if (friendRankRespond.getCode() == 0){
+
+            questionRankList = rankInfoDao.queryBuilder()
+                    .where(RankInfoDao.Properties.Uin.eq(uin))
+                    .orderAsc(RankInfoDao.Properties.Id)
+                    .list();
+
+            Log.i(TAG, "handleFriendRankResponse: 从数据库查询到的问题列表大小---" + questionRankList.size());
+
+            CardPagerAdapter cardPagerAdapter = new CardPagerAdapter(getContext(),questionRankList.size(),friendRankRespond,questionRankList);
+            cardPagerAdapter.addItemPagerListener(new CardPagerAdapter.ItemPagerListener() {
+                @Override
+                public void onItemPagerClick(View v, int position) {
+                    Log.i(TAG, "onItemPagerClick: 被点击了---" + position);
+                }
+            });
+            marlViewPager.setAdapter(cardPagerAdapter);
+            marlViewPager.setCurrentItem(questionRankList.size()-1);
+            marlViewPager.setPageMargin((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    48, getResources().getDisplayMetrics()));
+            marlViewPager.setPageTransformer(false, new ScaleTransformer(getContext()));
+
+            marlViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if (position < questionNum){
+                        marlTitle.setText("(" + (position+1) + "/" + questionNum + ")");
+                    }else {
+                        marlTitle.setText("上周话题明星");
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+
+        }
+
+    }
+
+    //问题排行榜
+    private void getQuestionRankList(int qid){
+
+        String url = YPlayConstant.BASE_URL + YPlayConstant.API_QUESTION_LIST_URL;
+        final int uin = (int)SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_UIN, 0);
+
+        final Map<String, Object> questionRankMap = new HashMap<>();
+        questionRankMap.put("uin", uin);
+        questionRankMap.put("token", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_TOKEN, "yplay"));
+        questionRankMap.put("ver", SharePreferenceUtil.get(getActivity(), YPlayConstant.YPLAY_VER, 0));
+        questionRankMap.put("qid", qid);
+
+        WnsAsyncHttp.wnsRequest(url, questionRankMap, new WnsRequestListener() {
+            @Override
+            public void onNoInternet() {
+
+            }
+
+            @Override
+            public void onStartLoad(int value) {
+
+            }
+
+            @Override
+            public void onComplete(String result) {
+
+                QuestionRankRespond questionRankRespond = GsonUtil.GsonToBean(result,QuestionRankRespond.class);
+                if (questionRankRespond.getCode() == 0){
+
+                    //查找数据库中uin和questionNum是否存在
+                    RankInfo rankInfo = rankInfoDao.queryBuilder()
+                            .where(RankInfoDao.Properties.Uin.eq(uin))
+                            .where(RankInfoDao.Properties.QuestionNumber.eq(questionNum))
+                            .build().unique();
+                    if (rankInfo == null){
+                        rankInfoDao.insert(new RankInfo(null,uin,questionNum,questionBean.getQtext(),result));
+                    }else {
+                        //更新result字段中的数据
+                        rankInfo.setResult(result);
+                        rankInfoDao.update(rankInfo);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onTimeOut() {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
+    }
+
 }

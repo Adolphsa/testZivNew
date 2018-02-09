@@ -74,7 +74,7 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
         token = (String) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_TOKEN, (String) "");
         ver = (int) SharePreferenceUtil.get(LoadingActivity.this, YPlayConstant.YPLAY_VER, (int) 0);
 
-        Log.i(TAG, "init: token---" + token);
+        Log.i(TAG, "init---" + token);
 
         if (uin == 0 || TextUtils.isEmpty(token) || ver == 0) {
             handler.sendEmptyMessageDelayed(LOGIN_CODE, 500);
@@ -133,6 +133,8 @@ public class LoadingActivity extends BaseActivity implements TIMCallBack {
                     YPlayConstant.YPLAY_USER_NAME, userInfoResponde.getPayload().getInfo().getUserName());
             SharePreferenceUtil.put(LoadingActivity.this,
                     YPlayConstant.YPLAY_NICK_NAME, userInfoResponde.getPayload().getInfo().getNickName());
+
+
 
             if (infoBean.getAge() == 0 ||
                     infoBean.getGrade() == 0 ||

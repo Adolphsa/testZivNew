@@ -10,7 +10,7 @@
         android:id="@+id/spinner_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/play_color2"
+        android:textColor="@color/first_name"
         android:textSize="14sp"
         android:layout_centerVertical="true"
         />

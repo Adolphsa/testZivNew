@@ -677,7 +677,7 @@ public class AddFriends extends BaseActivity implements AdapterView.OnItemClickL
                                 Context.MODE_PRIVATE);
                         SharedPreferences.Editor editorsettings = sharedFilterItem.edit();
                         editorsettings.putInt("position", position);
-                        editorsettings.commit();
+                        editorsettings.apply();
 
                         filterText.setText(typeList.get(position));
                         switch (position) {
